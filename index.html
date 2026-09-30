@@ -832,6 +832,35 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 @keyframes bell { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
 @media (prefers-reduced-motion: reduce) { .sec-banner, .sec-bell, .egg-poke { animation: none; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.split-how { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--r-sm); background: var(--olive-soft); }
+.split-how .aw-ico { flex: none; }
+
+/* v0.5.9 · Mensajes de secretos legibles, al momento y que se cierran con un toque */
+button, a, [data-act], [data-egg] { touch-action: manipulation; }
+.egg-msg { pointer-events: auto; cursor: pointer; }
+.egg-msg .inner { width: min(400px, 100%); display: grid; gap: 8px; justify-items: center; padding: 22px 20px 16px; border-radius: 24px; background: rgba(20, 14, 16, .88); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 24px 70px rgba(0, 0, 0, .45); }
+.egg-msg h2 { font-size: clamp(1.9rem, 8.5vw, 2.6rem) !important; line-height: 1.05; color: #fff; text-shadow: none; }
+.egg-msg p { color: #F1E9E4; font-weight: 600; font-size: 1.02rem; line-height: 1.4; text-shadow: none; margin: 0; max-width: 34ch; }
+.egg-msg .eleven { font-size: min(34vw, 170px) !important; }
+.egg-msg .trophy { margin-bottom: 2px; }
+.egg-badge { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--gold, #E8B64A); color: #1C1614; font-weight: 800; font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+.egg-hush { color: #BFB3AD; font-size: .8rem; }
+.egg-tap { color: #8F827C; font-size: .72rem; margin-top: 2px; }
+
+/* v0.6 · La finca */
+.finca-card { gap: 12px; }
+.wifi { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: inherit; padding: 12px; border-radius: var(--r-sm); border: 1px dashed var(--glass-line); background: var(--surface-2); min-height: 56px; }
+.wifi small { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+.wifi b { font-size: 1.02rem; }
+.wifi-pass { text-align: right; }
+.reg { display: grid; gap: 8px; }
+.reg-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.reg-p[aria-pressed="true"] { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, var(--glass)); }
+.reg-p span.small { color: var(--muted); }
+.finca-ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.finca-ul li { line-height: 1.45; }
+.shop { text-decoration: none; color: inherit; padding: 8px 0; min-height: 48px; border-bottom: 1px dashed var(--glass-line); }
+a.fact { color: inherit; text-decoration: none; }
 
 </style>
 </head>
@@ -916,7 +945,9 @@ var L = (function () {
   }
   /* devuelve { familyId: fracción 0..1 } */
   function shares(S) {
-    var mode = (S.split && S.split.mode) || 'ponderado';
+    /* v0.5.9: el reparto es SIEMPRE proporcional por persona y comida (adultos y niños 1, bebé 0).
+       Se ignora cualquier otro criterio guardado para que nadie lo cambie por error. */
+    var mode = 'ponderado';
     var units = {};
     S.families.forEach(function (f) { units[f.id] = 0; });
     if (mode === 'familia') {
@@ -1839,6 +1870,7 @@ VIEWS.inicio = function () {
 
   /* Confirmación por día */
   h += manualCardHome();
+  if (typeof fincaHomeCard === 'function') h += fincaHomeCard();
   h += confirmCard();
   h += presenceCard();
   h += compCard();
@@ -2261,7 +2293,7 @@ VIEWS.cuentas = function () {
   h += '<section class="card wood"><div class="card-head"><span class="eyebrow">La casa · fuera del reparto</span><span class="pill olive">Invitan ' + esc(fam(house.payer).name) + '</span></div>' +
     '<div class="row"><span class="big">' + L.money(house.total) + '</span><span class="grow small muted">' + S.tax.nights + ' noches · pagado ' + L.money(paidH) + '</span></div>' +
     house.payments.map(function (p) {
-      return '<div class="pay"><span class="when">' + L.ddmm(p.paid ? (p.date || p.due) : p.due) + '</span><span class="grow">' + esc(p.label) + ' · <b class="num">' + L.money(p.amount) + '</b></span>' + (p.paid ? '<span class="pill ok">Pagado</span>' : '<span class="pill warn">Vence ' + L.ddmm(p.due) + '</span>') + '</div>';
+      return '<div class="pay"><span class="when">' + L.ddmm(p.paid ? (p.date || p.due) : p.due) + '</span><span class="grow">' + esc(p.label) + ' · <b class="num">' + L.money(p.amount) + '</b>' + (p.note && !p.paid ? '<small class="muted" style="display:block;user-select:all">' + esc(p.note) + '</small>' : '') + '</span>' + (p.paid ? '<span class="pill ok">Pagado</span>' : '<span class="pill warn">Vence ' + L.ddmm(p.due) + '</span>') + '</div>';
     }).join('') +
     '<details><summary>Política de cancelación</summary><ul class="small">' + house.cancel.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></details></section>';
 
@@ -2270,7 +2302,7 @@ VIEWS.cuentas = function () {
   h += '<section class="card"><div class="card-head"><h3>Tasa turística</h3>' + (S.tax.payer ? '<span class="pill olive">Invitan ' + esc(fam(S.tax.payer).name) + '</span>' : '<span class="pill pend">Quién paga: PENDIENTE</span>') + '</div>' +
     '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">' + tx.stays + ' noches-persona × ' + L.money(S.tax.perNight) + ' · ' + tx.adults + ' pagan</span></div>' +
     '<div class="tax-list">' + tx.rows.filter(function (r) { return r.pays; }).map(function (r) { return '<span class="online-chip">' + av(r.id, 'xs') + pname(r.id) + ' <small class="muted">' + r.nights + (r.nights === 1 ? ' noche' : ' noches') + '</small></span>'; }).join('') + '</div>' +
-    (exNames.length ? '<p class="small"><b>Exentos por edad (16 o menos):</b> ' + exNames.join(', ') + '</p>' : '') +
+    (exNames.length ? '<p class="small"><b>Exentos por edad (menores de ' + (S.tax.minAge || 16) + '):</b> ' + exNames.join(', ') + '</p>' : '') +
     '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
 
   /* Reparto */
@@ -2281,13 +2313,7 @@ VIEWS.cuentas = function () {
   var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
   h += '<section class="card"><div class="card-head"><h3>Reparto entre hermanos y compañía</h3></div>' +
     (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
-    '<div class="field"><span class="lbl">Criterio' + (mode === 'ponderado' ? ' (por defecto)' : '') + '</span><div class="seg" role="group" aria-label="Criterio de reparto"><button data-act="mode" data-v="ponderado" aria-pressed="' + (mode === 'ponderado') + '">Ponderado</button><button data-act="mode" data-v="persona" aria-pressed="' + (mode === 'persona') + '">Por persona</button><button data-act="mode" data-v="familia" aria-pressed="' + (mode === 'familia') + '">Por familia</button></div></div>' +
-    '<p class="small muted">' + modeText(mode) + '</p>';
-  if (mode === 'ponderado') {
-    h += '<div class="grid2" style="grid-template-columns:repeat(3,1fr)">' + ['adulto', 'menor', 'bebe'].map(function (k) {
-      return '<div class="field"><label for="w-' + k + '">' + KIND[k] + (k === 'bebe' ? ' (' + esc(babyName()) + ')' : '') + '</label><input id="w-' + k + '" inputmode="decimal" value="' + L.n(S.split.w[k]) + '" data-change="weight" data-k="' + k + '"' + (can('edit') ? '' : ' disabled') + '></div>';
-    }).join('') + '</div>';
-  }
+    '<div class="split-how"><span class="aw-ico sm">' + icon('users') + '</span><p class="small"><b>Cómo se reparte:</b> a proporción de <b>quién viene y a cuántas comidas</b>. Adultos y peques cuentan igual (comen como un adulto, y lo sabemos); ' + esc(babyName()) + ', que aún come poco, no cuenta. Así, una familia de 5 paga más que una de 3, y quien viene menos días paga menos.</p></div>';
   var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
   h += '<p class="small muted">Aquí solo cuentan los productos de la compra <b>con precio real</b> (o que vienen de casa) y los gastos de abajo.</p>' +
     (noP.length ? '<div class="card alert" style="padding:10px 12px;gap:6px"><p class="small"><b>' + noP.length + ' productos pedidos aún sin precio</b> (≈ ' + L.money(noP.reduce(function (a, i) { return a + (i.est || 0); }, 0)) + '): ' +
@@ -2295,7 +2321,7 @@ VIEWS.cuentas = function () {
   h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Familia</th><th>Ha puesto</th><th>Le toca</th><th>Saldo</th></tr></thead><tbody>' +
     rowsR.map(function (r) {
       var f = fam(r.id);
-      return '<tr><td><span class="row" style="gap:6px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</span><span class="small muted">' + Math.round(r.share * 100) + ' %</span>' + (r.gift ? '<span class="small" style="display:block;color:var(--olive)">incluye aportación de ' + L.money(r.gift) + '</span>' : '') + '</td><td>' + L.money(r.paid) + '</td><td>' + L.money(r.owe) + '</td><td class="' + (r.bal > 0.004 ? 'pos' : r.bal < -0.004 ? 'neg' : '') + '">' + (r.bal > 0 ? '+' : '') + L.money(r.bal) + '</td></tr>';
+      return '<tr><td><span class="row" style="gap:6px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</span><span class="small muted">' + famHeads(r.id) + ' · ' + Math.round(r.share * 100) + ' %</span>' + (r.gift ? '<span class="small" style="display:block;color:var(--olive)">incluye aportación de ' + L.money(r.gift) + '</span>' : '') + '</td><td>' + L.money(r.paid) + '</td><td>' + L.money(r.owe) + '</td><td class="' + (r.bal > 0.004 ? 'pos' : r.bal < -0.004 ? 'neg' : '') + '">' + (r.bal > 0 ? '+' : '') + L.money(r.bal) + '</td></tr>';
     }).join('') + '</tbody></table></div>' +
     '<div class="pot"><div class="row"><span class="grow">Gasto total con precio real</span><b class="num">' + L.money(lg.total) + '</b></div>' +
     (lg.gifts ? '<div class="row olive-t"><span class="grow">Invitaciones' + (exF.length ? ' (abuelos y regalos)' : '') + '</span><b class="num">− ' + L.money(lg.gifts) + '</b></div>' : '') +
@@ -2372,6 +2398,11 @@ function abuCard(lg, tx) {
       '<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Abuelos, os echamos de menos en el Abuelómetro de la app de ' + (S.trip.short || 'la casa rural') + '. Ni una presión, eh. Bueno, un poco. ' + location.origin + location.pathname + ' ') + '">' + icon('megaphone') + 'Mandar una indirecta a los abuelos</a>';
   }
   return h + '</section>';
+}
+function famHeads(fid) {
+  var ps = S.people.filter(function (p) { return p.family === fid && L.mealsAttended(S, p.id) > 0 && (S.split.w[p.kind] == null ? 1 : S.split.w[p.kind]) > 0; });
+  var full = ps.filter(function (p) { return L.mealsAttended(S, p.id) === S.meals.length; }).length;
+  return ps.length + (ps.length === 1 ? ' persona' : ' personas') + (full < ps.length ? ' (' + (ps.length - full) + ' no todos los días)' : '');
 }
 function modeText(m) {
   if (m === 'familia') return 'Cada familia que asiste paga lo mismo, venga quien venga.';
@@ -2600,7 +2631,7 @@ function menuSheet() {
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="finca">' + icon('house') + 'La finca: Wi-Fi, normas y compras</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -2656,8 +2687,12 @@ function fxLayer(veil) {
   return { el: l, ctx: ctx, W: window.innerWidth, H: window.innerHeight, done: function () { l.remove(); if (l._veil) l._veil.remove(); } };
 }
 function message(html, ms) {
-  var m = document.createElement('div'); m.className = 'egg-msg'; m.innerHTML = '<div class="inner">' + html + '</div>';
-  document.body.appendChild(m); setTimeout(function () { m.style.transition = 'opacity .5s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 500); }, ms || 3200);
+  document.querySelectorAll('.egg-msg').forEach(function (x) { x.remove(); });
+  var m = document.createElement('div'); m.className = 'egg-msg'; m.setAttribute('role', 'status');
+  m.innerHTML = '<div class="inner">' + html + '<span class="egg-tap">Toca para cerrar</span></div>';
+  var gone = false, close = function () { if (gone) return; gone = true; m.style.transition = 'opacity .35s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 350); };
+  m.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+  document.body.appendChild(m); setTimeout(close, ms || 4200);
 }
 function confetti(ms) {
   var fx = fxLayer(false), cols = ['#C4112F', '#1C1614', '#FFFFFF', '#E8B64A', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()];
@@ -2669,12 +2704,39 @@ function confetti(ms) {
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
 }
+/* Fuegos artificiales: cohetes que suben con estela y estallan en palmeras de colores */
+function fireworks(ms, rockets) {
+  var fx = fxLayer(false), W = fx.W, H = fx.H, ctx = fx.ctx, D = ms || 4200, t0 = performance.now();
+  var cols = ['#FF3B5C', '#FFD166', '#06D6A0', '#4CC9F0', '#F72585', '#7B2FF7', '#FF9F1C', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C4112F'];
+  var R = [], P = [], n = rockets || 6;
+  for (var i = 0; i < n; i++) R.push({ at: t0 + i * (D * .55 / n) + Math.random() * 120, x: W * (.15 + Math.random() * .7), y: H + 10, tx: W * (.12 + Math.random() * .76), ty: H * (.12 + Math.random() * .32), c: cols[i % cols.length], launched: false, done: false, trail: [] });
+  function boom(r) {
+    var k = 70 + Math.floor(Math.random() * 40), c2 = cols[Math.floor(Math.random() * cols.length)];
+    for (var j = 0; j < k; j++) { var a = Math.PI * 2 * j / k, sp = 2.6 + Math.random() * 4.4; P.push({ x: r.x, y: r.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, c: j % 3 ? r.c : c2, s: 2.4 + Math.random() * 2.4 }); }
+    pop();
+  }
+  function pop() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); var len = actx.sampleRate * .35, b = actx.createBuffer(1, len, actx.sampleRate), d = b.getChannelData(0); for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); var src = actx.createBufferSource(), g = actx.createGain(); src.buffer = b; g.gain.value = .12; src.connect(g); g.connect(actx.destination); src.start(); } catch (e) {} }
+  (function f(t) {
+    ctx.globalCompositeOperation = 'source-over'; ctx.clearRect(0, 0, W, H);
+    R.forEach(function (r) {
+      if (r.done || t < r.at) return;
+      var k = Math.min(1, (t - r.at) / 650), e = 1 - Math.pow(1 - k, 3);
+      var x = r.x + (r.tx - r.x) * e, y = H + 10 + (r.ty - H - 10) * e;
+      r.trail.push([x, y]); if (r.trail.length > 12) r.trail.shift();
+      r.trail.forEach(function (p, i) { ctx.globalAlpha = i / r.trail.length; ctx.fillStyle = '#FF9F1C'; ctx.beginPath(); ctx.arc(p[0] + (Math.random() - .5) * 1.5, p[1], 1.6 + i / 6, 0, Math.PI * 2); ctx.fill(); });
+      if (k >= 1) { r.done = true; r.x = x; r.y = y; boom(r); }
+    });
+    P.forEach(function (p) { p.vx *= .985; p.vy = p.vy * .985 + .045; p.x += p.vx; p.y += p.vy; p.life -= .012; if (p.life <= 0) return; ctx.globalAlpha = Math.max(0, p.life) * (Math.random() < .12 ? .4 : 1); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill(); });
+    P = P.filter(function (p) { return p.life > 0; });
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    if (t - t0 < D || P.length) requestAnimationFrame(f); else fx.done();
+  })(t0);
+}
 function bdayParty() {
   if (fxBusy) return; fxBusy = true; setTimeout(function () { fxBusy = false; }, 4200);
   confetti(4200);
   var e = S.trip.eggs || {};
-  message('<div class="eleven">' + (e.bdayAge || '') + '</div><h2 style="font-size:clamp(1.8rem,8vw,3rem)">¡Felicidades, ' + esc(bdayName()) + '!</h2><p>' + (e.bdayAge || '') + ' años y un finde entero para celebrarlo.</p>', 3800);
-  egg('bday');
+  eggCard('bday', '¡Felicidades, ' + esc(bdayName()) + '!', (e.bdayAge ? e.bdayAge + ' años' : 'Un año más') + ' y un finde entero para celebrarlo. Por cierto: tanto toque ya cuenta como abrazo.', '<div class="eleven">' + (e.bdayAge || '') + '</div>', 4200);
 }
 function fumata() {
   var fx = fxLayer(true);
@@ -2686,8 +2748,7 @@ function fumata() {
     puffs = puffs.filter(function (p) { return p.y + p.r > -40 && p.a > .02; });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  setTimeout(function () { message('<h2>HABEMUS<br>COMPRA</h2><p>Fumata blanca: la lista está completa. La familia puede comer en paz.</p>', 3600); }, 900);
-  egg('fumata');
+  setTimeout(function () { eggCard('fumata', '¡Lista completa!', 'Todos los productos de la compra tienen dueño. Fumata blanca: esta familia no pasará hambre.'); }, 700);
 }
 function checkFumata() {
   var c = L.coverage(S.ingredients);
@@ -2696,12 +2757,12 @@ function checkFumata() {
 }
 function checkClaras() {
   var lg = L.ledger(S, false);
-  if (lg.total > 0 && !lg.tx.length) { if (egg('claras')) setTimeout(function () { message('<h2 style="font-size:clamp(2rem,10vw,3.4rem)">Cuentas claras,<br>familia unida</h2>', 2800); }, 300); }
+  if (lg.total > 0 && !lg.tx.length) { if (!hasEgg('claras')) setTimeout(function () { eggCard('claras', 'Cuentas claras', 'Nadie le debe nada a nadie. Haz captura, que esto no vuelve a pasar.'); }, 300); }
 }
 var marcOn = false, popped = 0;
 function marcMode() {
-  if (marcOn) return; marcOn = true; popped = 0; egg('baby');
-  toast('Modo ' + esc(babyName()) + ': ¡explota las burbujas!');
+  if (marcOn) return; marcOn = true; popped = 0;
+  eggToast('baby', 'Modo ' + esc(babyName()) + ': ¡explota las burbujas antes de que se escapen! (Hay premio si llegas a 15)');
   var end = Date.now() + 14000;
   var iv = setInterval(function () {
     if (Date.now() > end) { clearInterval(iv); marcOn = false; return; }
@@ -2709,7 +2770,7 @@ function marcMode() {
     var s = 34 + Math.random() * 60; b.style.width = b.style.height = s + 'px';
     b.style.left = Math.random() * (window.innerWidth - s) + 'px'; b.style.top = window.innerHeight + 'px';
     b.style.setProperty('--dx', (Math.random() - .5) * 120 + 'px'); b.style.animationDuration = (6 + Math.random() * 5) + 's';
-    b.onclick = function (e) { e.stopPropagation(); b.classList.add('popped'); plop(); popped++; if (popped === 15) { egg('pop'); toast('¡15 burbujas! ' + esc(babyName()) + ' estaría orgulloso'); } setTimeout(function () { b.remove(); }, 260); };
+    b.onclick = function (e) { e.stopPropagation(); b.classList.add('popped'); plop(); popped++; if (popped === 15) { eggToast('pop', '¡15 burbujas! ' + esc(babyName()) + ' te ficha como canguro oficial'); } setTimeout(function () { b.remove(); }, 260); };
     b.addEventListener('animationend', function (ev) { if (ev.animationName === 'rise') b.remove(); });
     document.body.appendChild(b);
   }, 420);
@@ -2727,11 +2788,10 @@ function plop() {
 function trophy(pid) {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
   confetti(3600);
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(2rem,10vw,3.6rem)">' + esc(person(pid).name) + '</h2><p>Campeón: ' + esc(S.tournament.name) + '</p>', 3600);
-  setTimeout(function () { v.remove(); }, 3700);
-  egg('trophy');
+  eggCard('trophy', esc(person(pid).name), 'Campeón de la ' + esc(S.tournament.name) + '. Ya puede presumir hasta el año que viene.', '<div class="trophy">' + icon('trophy') + '</div>');
+  setTimeout(function () { v.remove(); }, 4400);
 }
-function cheers(name) {
+function cheers(name, viaSearch) {
   var fx = fxLayer(false), P = [], t0 = performance.now(), D = 3200;
   for (var i = 0; i < 90; i++) P.push({ x: Math.random() * fx.W, y: fx.H + Math.random() * 200, r: 3 + Math.random() * 9, v: 2 + Math.random() * 4, w: Math.random() * 6 });
   (function f(t) {
@@ -2739,45 +2799,42 @@ function cheers(name) {
     P.forEach(function (p) { p.y -= p.v; p.x += Math.sin((t / 300) + p.w) * .8; fx.ctx.globalAlpha = Math.max(0, 1 - (t - t0) / D); fx.ctx.fillStyle = 'rgba(232,182,74,.75)'; fx.ctx.strokeStyle = 'rgba(255,255,255,.8)'; fx.ctx.beginPath(); fx.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); fx.ctx.fill(); fx.ctx.stroke(); });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  message('<h2 style="font-size:clamp(2.4rem,12vw,4rem)">¡Salud!</h2><p>' + esc(name) + ' ya está en el carro. Que no falte para brindar por ' + esc(bdayName()) + '.</p>', 2600);
-  egg('salud');
+  eggCard('salud', '¡Salud!', viaSearch ? 'Has dicho la palabra mágica. Chin chin por ' + esc(bdayName()) + ' y por quien friegue los vasos.' : esc(name) + ' ya tiene dueño. Que no falte para brindar por ' + esc(bdayName()) + '.');
 }
 function sunDance() {
   var v = document.createElement('div'); v.className = 'sun-overlay'; v.innerHTML = '<div class="sun-core">' + icon('sun') + '</div>'; document.body.appendChild(v);
-  message('<h2 style="font-size:clamp(2rem,10vw,3.4rem)">Invocando al sol…</h2><p>Petición enviada al cielo de ' + esc(S.trip.town || 'la finca') + '. No garantizamos resultados.</p>', 3000);
-  setTimeout(function () { v.remove(); }, 3200); egg('sol');
+  eggCard('sol', 'Invocando al sol…', 'Petición enviada al cielo. Si aun así llueve, la culpa es del hombre del tiempo, no nuestra.');
+  setTimeout(function () { v.remove(); }, 3200);
 }
 function wish1111() {
   confetti(3000);
-  message('<div class="eleven" style="font-size:min(40vw,220px)">11:11</div><h2 style="font-size:clamp(1.6rem,7vw,2.6rem)">¡Pide un deseo!</h2><p>Hora oficial de ' + esc(bdayName()) + '.</p>', 3400);
-  egg('deseo');
+  eggCard('deseo', '¡Pide un deseo!', 'Son las 11:11, la hora de ' + esc(bdayName()) + ' (cumple 11). Que no sea «que no llueva», que ya lo ha pedido todo el mundo.', '<div class="eleven" style="font-size:min(34vw,180px)">11:11</div>');
 }
 function habemusQuorum(n) {
-  if (!egg('quorum')) { toast(n + ' personas conectadas a la vez. ¡Esto es una reunión familiar!'); return; }
-  fumataRaw('HABEMUS<br>QUÓRUM', n + ' personas de la familia conectadas a la vez. La familia está reunida.');
+  if (hasEgg('quorum')) { toast(n + ' personas conectadas a la vez. ¡Reunión familiar!'); return; }
+  fumataRaw('¡Reunión familiar!', n + ' personas de la familia con la app abierta a la vez. Ya se puede votar hasta el color de las servilletas.', 'quorum');
 }
 function habemusPapam() {
-  if (!egg('papa')) return;
-  fumataRaw('HABEMUS<br>PAPAM', 'Bueno… en realidad lo que tenemos es una lista de la compra. Pero casi.');
+  if (hasEgg('papa')) return;
+  fumataRaw('¡Fumata blanca!', '«Habemus papam» es lo que se dice cuando hay Papa nuevo. Aquí no hay Papa, pero hay lista de la compra. Casi lo mismo.', 'papa');
 }
 function himno() {
   fanfare(); confetti(2600);
   var top = G.ranking(S).filter(function (r) { return r.pos === 1 && r.pts > 0; });
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">' + (top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante') + '</h2><p>Que suene el himno de la casa. Todos en pie.</p>', 3200);
-  egg('himno');
+  eggCard('himno', top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante', top.length ? 'Va primero en el ranking y le has puesto el himno. Todos en pie… o por lo menos dejad el móvil.' : 'Aún no manda nadie en el ranking. Plaza libre para quien la quiera.', '<div class="trophy">' + icon('trophy') + '</div>');
 }
 var discoOn = false;
 function discoMode() {
-  if (discoOn) return; discoOn = true; egg('disco');
+  if (discoOn) return; discoOn = true;
   document.documentElement.classList.add('disco');
   var fx = document.createElement('div'); fx.className = 'disco-fx'; fx.setAttribute('aria-hidden', 'true');
   fx.innerHTML = '<div class="beams"></div><div class="beams b2"></div><div class="ball"></div>';
   document.body.appendChild(fx);
   if (navigator.vibrate) try { navigator.vibrate([60, 60, 60, 60, 120]); } catch (e) {}
-  toast('¡Que empiece la fiesta! Modo discoteca 9 segundos');
+  eggToast('disco', '¡Modo discoteca! 9 segundos de fiesta. Si alguien te mira raro, di que es la app.');
   setTimeout(function () { document.documentElement.classList.remove('disco'); fx.classList.add('out'); setTimeout(function () { fx.remove(); }, 500); discoOn = false; }, 9000);
 }
-function fumataRaw(title, text) {
+function fumataRaw(title, text, k) {
   var fx = fxLayer(true), puffs = [], t0 = performance.now(), D = 5000;
   (function f(t) {
     if (t - t0 < D - 1200) for (var k = 0; k < 3; k++) puffs.push({ x: fx.W / 2 + (Math.random() - .5) * 40, y: fx.H + 20, r: 18 + Math.random() * 16, vx: (Math.random() - .5) * 1.4, vy: -2.2 - Math.random() * 1.8, a: .6 });
@@ -2786,18 +2843,16 @@ function fumataRaw(title, text) {
     puffs = puffs.filter(function (p) { return p.y + p.r > -40 && p.a > .02; });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  setTimeout(function () { message('<h2>' + title + '</h2><p>' + text + '</p>', 3400); }, 800);
+  setTimeout(function () { if (k) eggCard(k, title, text); else message('<h2>' + title + '</h2><p>' + text + '</p>', 4200); }, 600);
 }
 function extraOmnes() {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
-  message('<h2>EXTRA<br>OMNES</h2><p>Que salgan todos… a la nave. A la piscina no, que hace frío.</p>', 3400);
-  setTimeout(function () { v.remove(); }, 3500);
-  egg('omnes');
+  eggCard('omnes', 'Toc, toc…', 'Has llamado 5 veces a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
+  setTimeout(function () { v.remove(); }, 4400);
 }
 function abueloMode() {
   ui.prefs.size = ui.prefs.size === 'xl' ? 'm' : 'xl'; savePrefs(); applyPrefs(); render(true);
-  toast(ui.prefs.size === 'xl' ? 'Letra de abuelo activada. Así sí.' : 'Letra normal. Gafas, ¿dónde estáis?');
-  egg('abuelo');
+  eggToast('abuelo', ui.prefs.size === 'xl' ? 'Letra de abuelo: todo en grande, sin gafas. Toca 3 veces otra vez para volver.' : 'Letra normal. ¿Alguien ha visto mis gafas?');
 }
 var tapCount = {}, tapTimer = {};
 var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 5, sun: 5, disco: 3, podio: 3, abumeter: 3 };
@@ -3179,7 +3234,7 @@ function bindEvents() {
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
-    if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('El brindis');
+    if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
     if (t.dataset.input === 'glass') { ui.prefs.glass = t.value / 100; savePrefs(); applyPrefs(); }
   });
@@ -3198,7 +3253,7 @@ function startApp() {
   document.title = S.trip.name; CATS.marc = 'Menú ' + babyName();
   buildEggs(); applyPrefs(); render(); navInit();
   refreshWeather(false);
-  var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (egg('buho')) toast('¿Todavía despiertos? La casa rural recomienda dormir'); }, 1500);
+  var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (!hasEgg('buho')) eggToast('buho', '¿Despierto a estas horas? Mañana hay hockey. A dormir, búho.'); }, 1500);
   var today = new Date().toISOString().slice(0, 10);
   var bd = S.trip.eggs && S.trip.eggs.bdayDate;
   if (bd && today === bd && ui.bdaySeen !== today) { ui.bdaySeen = today; saveUi(); setTimeout(bdayParty, 900); }
@@ -3209,7 +3264,7 @@ function startApp() {
 function boot() {
   var u = loadUi();
   ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
-  if (['personas', 'tiempo', 'asistencia', 'manual'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
+  if (['personas', 'tiempo', 'asistencia', 'manual', 'finca'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();
   if (typeof SEED !== 'undefined') { S = load(); startApp(); }
@@ -3626,15 +3681,14 @@ function afterResult(g, before) {
 function gTrophy(id, title) {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
   confetti(3600); fanfare();
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(2rem,10vw,3.6rem)">' + esc(eText(id)) + '</h2><p>Campeón: ' + esc(title) + '</p>', 3600);
-  setTimeout(function () { v.remove(); }, 3700);
-  egg('trophy');
+  eggCard('trophy', esc(eText(id)), 'Campeón de «' + esc(title) + '». Aplausos, fotos y, si quiere, una vuelta de honor por la nave.', '<div class="trophy">' + icon('trophy') + '</div>');
+  setTimeout(function () { v.remove(); }, 4400);
 }
 function checkAllGames() {
   var gs = S.games || []; if (!gs.length || ui.allDoneShown) return;
   if (gs.every(function (g) { return G.isDone(S, g); })) {
     ui.allDoneShown = true; var r = G.ranking(S).filter(function (x) { return x.pos === 1; });
-    setTimeout(function () { fumataRaw('HABEMUS<br>CAMPEÓN', r.map(function (x) { return esc(eText(x.id)); }).join(' y ') + ' gana el ' + esc(S.trip.name) + '. Ya podéis preparar la gala.'); egg('habemus'); }, 1200);
+    setTimeout(function () { fumataRaw('¡Tenemos campeón!', r.map(function (x) { return esc(eText(x.id)); }).join(' y ') + ' gana el finde. Que vaya preparando el discurso para la gala (máximo 30 segundos).', 'habemus'); }, 1200);
   }
 }
 function champOf(g) { var sd = G.standings(S, g); return sd.champion || (sd.complete ? 'done' : null); }
@@ -3980,6 +4034,7 @@ VIEWS.manual = function () {
     ['Entra', 'Con <b>tu email</b> (los peques, con su <b>usuario</b>) y el <b>código de la familia</b> que te ha llegado por WhatsApp. Justo después <b>eliges tu propio código</b> de 6 cifras: ya solo entrarás con ese.'],
     ['Revisa tus días', 'Ya están apuntados. Si <b>cambia algo</b>, en <b>Inicio → «Vuestros días»</b> toca el día: <b>✓</b> viene · <b>✕</b> no viene. Los padres lo cambian por toda su familia.'],
     ['Pídete la compra', 'En <b>Compra → «Sin dueño»</b> toca <b>«Me lo pido»</b>: queda a vuestro cargo. ¿Error? En «Lo nuestro», <b>Soltar</b>.'],
+    ['Regístrate en la finca', 'Obligatorio por ley desde los 14 años: en <b>Inicio → La finca</b>, «Rellenar el formulario de la finca» (uno por persona) y luego <b>marca tu nombre</b>. Los padres marcan a su familia.'],
     ['Apunta lo que cuesta', 'Cuando lo compréis, en <b>Compra → «Lo nuestro»</b> escribe el <b>precio real</b> en la casilla de cada producto. <b>Sin precio real no cuenta en Cuentas.</b>']
   ];
   var cards = [
@@ -3988,7 +4043,8 @@ VIEWS.manual = function () {
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
-    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
+    ['house', 'La finca', 'En <b>Inicio → La finca</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y dónde comprar en el pueblo (el domingo solo abre uno).'],
+    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía <b>a proporción de personas y comidas</b> (los peques cuentan como un adulto; ' + esc(babyN) + ', no) y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
   ];
   var h = '<div class="view-head"><div><h2>Manual de uso</h2><p class="muted small">Todo lo que hay que saber de la ' + esc(T.name || 'app') + '</p></div></div>';
   h += '<section class="card manual-dl"><div class="row" style="align-items:flex-start"><span class="aw-ico">' + icon('copy') + '</span><div class="grow"><b>El manual en PDF</b><p class="small muted">Para guardarlo en el móvil o reenviarlo por WhatsApp.</p></div></div>' +
@@ -4041,6 +4097,7 @@ function buildEggs() {
     { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'El primer secreto es saber que hay secretos', more: 'Ya lo tienes: abrir esta lista' },
     { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'Quien lee las instrucciones hasta el final…', more: 'Inicio → Manual de uso, y baja hasta abajo del todo' },
     { k: 'dias', name: 'Presente', how: 'Tocar un día en «Vuestros días» o en Asistencia', hint: 'Pasar lista', more: 'En Inicio, toca un día de tu fila en «Vuestros días»' },
+    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Inicio → La finca → toca el Wi-Fi' },
     { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Mira al cielo… desde la app', more: 'Inicio → El tiempo en la finca → Detalle' },
     { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'Apaga la luz', more: 'Toca tu nombre arriba a la derecha y busca el tema' },
     { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'Los planes también se quieren', more: 'En Planes, el corazón de cualquier actividad' },
@@ -4087,17 +4144,27 @@ function hasEgg(k) { return !!foundMap()[k]; }
 function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
 /* Lo que cuenta para el ranking: lo descubierto antes del cierre */
 function rankedCount() { var f = foundMap(), c = secretsClose().getTime(); return EGGS.filter(function (e) { return f[e.k] && new Date(f[e.k]).getTime() < c; }).length; }
-function egg(k) {
+function egg(k, quiet) {
   var f = foundMap(); if (f[k]) return false;
   var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
   f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
   var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
-  setTimeout(function () {
-    if (all && !late) message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">Guardián de los Secretos</h2><p>Los ' + EGGS.length + ' secretos de la casa. Trofeo asegurado en la gala… y ni una palabra a nadie.</p>', 4200);
-    else toast('Secreto descubierto: <b>' + esc(e.name) + '</b> · ' + n + '/' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet);
-  }, k === 'curioso' ? 500 : 2600);
+  if (all && !late) setTimeout(function () { fireworks(7000, 14); message('<div class="trophy">' + icon('trophy') + '</div><span class="egg-badge">Los ' + EGGS.length + ' de ' + EGGS.length + '</span><h2>Guardián de los Secretos</h2><p>Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.</p>', 5200); }, quiet ? 4800 : 300);
+  else if (!quiet) setTimeout(function () { fireworks(3000, 3); toast('<b>¡Secreto desbloqueado!</b> «' + esc(e.name) + '» · ' + n + ' de ' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet); }, 250);
   try { if (window.CLOUD && CLOUD.pingNow) CLOUD.pingNow(); } catch (x) {}
   return true;
+}
+/* Un secreto con efecto: una sola tarjeta, al momento, que se entiende */
+function eggBadge(isNew) { return isNew ? '<span class="egg-badge">Secreto desbloqueado · ' + foundCount() + ' de ' + EGGS.length + '</span>' : ''; }
+function eggCard(k, title, text, top, ms) {
+  var isNew = egg(k, true);
+  if (isNew) fireworks(4200, 6);
+  message((top || '') + eggBadge(isNew) + '<h2>' + title + '</h2><p>' + text + '</p>' + (isNew ? '<small class="egg-hush">Chitón: que cada uno encuentre los suyos</small>' : ''), ms || 4600);
+}
+function eggToast(k, text) {
+  var isNew = egg(k, true);
+  if (isNew) fireworks(3000, 3);
+  toast((isNew ? '<b>¡Secreto ' + foundCount() + ' de ' + EGGS.length + '!</b> ' : '') + text, isNew ? 'Ver' : null, isNew ? secretsSheet : null);
 }
 
 /* ----- Pistas extra: 3 por persona en total ----- */
@@ -4166,8 +4233,7 @@ function manualEndCheck() {
 window.addEventListener('scroll', function () { if (ui && ui.tab === 'manual') manualEndCheck(); }, { passive: true });
 function abuMeterFx() {
   confetti(1800);
-  message('<h2 style="font-size:clamp(1.8rem,9vw,3rem)">Abuelómetro<br>al rojo vivo</h2><p>Aviso: el medidor no acepta sobornos. Bueno, un vermut sí.</p>', 3000);
-  egg('abumetro');
+  eggCard('abumetro', 'Abuelómetro al rojo vivo', 'Lo has tocado tanto que se ha calentado. Aviso: el medidor no acepta sobornos. Bueno, un vermut sí.');
 }
 
 /* ----- Alarma del cierre: 2 horas antes, para todos los que estén en la app ----- */
@@ -4196,7 +4262,7 @@ function secretsAlarm(ms) {
 }
 function secretsClosedFx() {
   var rk = secretsRanking(), top = rk.filter(function (r) { return r.pos === 1 && r.n > 0; });
-  fumataRaw('RANKING<br>CERRADO', top.length ? 'Mejor cazasecretos: ' + top.map(function (r) { return esc(pname(r.id)); }).join(' y ') + ' (' + top[0].n + '/' + EGGS.length + '). Desde ahora, los secretos ya no suman.' : 'El ranking de secretos se ha cerrado.');
+  fumataRaw('¡Ranking cerrado!', top.length ? 'Mejor cazasecretos: ' + top.map(function (r) { return esc(pname(r.id)); }).join(' y ') + ' (' + top[0].n + '/' + EGGS.length + '). Desde ahora, los secretos ya no suman.' : 'El ranking de secretos se ha cerrado.');
 }
 function alarmBeep() {
   try {
@@ -4211,6 +4277,66 @@ function secretsHomeBanner() {
   return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
 }
 
+/* ===================== La finca: todo lo práctico =====================
+   El contenido (Wi-Fi, normas, tiendas…) vive en los datos (S.finca, en la BD), nunca en el código público.
+   Registro de huéspedes: cada persona de 14 años o más marca que ya ha rellenado el formulario (S.guestReg). */
+function fincaMd(t) { return esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+function regPeople() {
+  var F = S.finca || {}, min = (F.register && F.register.minAge) || 14;
+  return S.people.filter(function (p) { return (p.age != null ? p.age >= min : p.kind === 'adulto') && L.mealsAttended(S, p.id) > 0; });
+}
+function regDone(pid) { return !!(S.guestReg && S.guestReg[pid]); }
+function fincaHomeCard() {
+  var F = S.finca; if (!F) return '';
+  var rp = regPeople(), done = rp.filter(function (p) { return regDone(p.id); }).length;
+  var mine = rp.filter(function (p) { return canAttendFor(p.id) && (p.family === me().family || p.id === me().id); });
+  var h = '<section class="card finca-card"><div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca">Todo lo práctico ' + icon('arrow') + '</button></div>';
+  if (F.wifi) h += '<button class="wifi" data-act="wifiCopy"><span class="aw-ico sm">' + icon('bolt') + '</span><span class="grow"><small class="muted">Wi-Fi</small><b>' + esc(F.wifi.net) + '</b></span><span class="wifi-pass"><small class="muted">Contraseña</small><b>' + esc(F.wifi.pass) + '</b></span>' + icon('copy') + '</button>';
+  if (F.register && rp.length) {
+    h += '<div class="reg"><div class="row"><span class="grow small"><b>Registro de huéspedes</b> · obligatorio por ley desde ' + F.register.minAge + ' años</span><span class="pill ' + (done === rp.length ? 'ok' : 'warn') + '">' + done + '/' + rp.length + '</span></div>' +
+      (mine.length ? '<div class="reg-list">' + mine.map(function (p) {
+        var ok = regDone(p.id);
+        return '<button class="toggle-p reg-p" data-act="greg" data-id="' + p.id + '" aria-pressed="' + ok + '">' + av(p.id, 'sm') + esc(p.name) + '<span class="small">' + (ok ? '✓ Hecho' : 'Pendiente') + '</span></button>';
+      }).join('') + '</div>' : '') +
+      '<a class="btn block" href="' + esc(F.register.url) + '" target="_blank" rel="noopener">' + icon('edit') + 'Rellenar el formulario de la finca</a><p class="small muted">Uno por persona. Cuando lo hagas, marca tu nombre aquí arriba.</p></div>';
+  }
+  return h + '</section>';
+}
+VIEWS.finca = function () {
+  var F = S.finca || {}, T = S.trip || {};
+  var h = '<div class="view-head"><div><h2>La finca</h2><p class="muted small">' + esc(T.place || '') + ' · todo lo práctico, de la guía de ' + esc(F.host || 'la finca') + '</p></div></div>';
+  if (!S.finca) return h + '<div class="empty">' + icon('house') + '<b>Aún no hay información de la finca</b></div>';
+  if (can('access') && F.todo && F.todo.length) h += '<section class="card alert"><div class="card-head"><h3>Pendiente con la finca</h3><span class="pill">Solo lo ves tú</span></div><ul class="small finca-ul">' + F.todo.map(function (t) { return '<li>' + fincaMd(t) + '</li>'; }).join('') + '</ul></section>';
+  h += fincaHomeCard().replace('<div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca">Todo lo práctico ' + icon('arrow') + '</button></div>', '<div class="card-head"><h3>Wi-Fi y registro</h3></div>');
+  h += '<section class="card wood"><div class="facts">' +
+    '<span class="fact">' + icon('clock') + 'Llegada desde las ' + esc(F.checkin || T.arrival) + '</span>' +
+    '<span class="fact">' + icon('arrow') + 'Salida antes de las ' + esc(F.checkout || T.departure) + '</span>' +
+    (F.phone ? '<a class="fact" href="tel:' + esc(F.phone.replace(/\s/g, '')) + '">' + icon('phone') + esc(F.contact || '') + ' · ' + esc(F.phone) + '</a>' : '') + '</div>' +
+    (F.booking ? '<p class="small">' + fincaMd(F.booking) + '</p>' : '') +
+    '<div class="row wrap">' + (T.maps ? '<a class="btn" href="' + esc(T.maps) + '" target="_blank" rel="noopener">' + icon('pin') + 'Cómo llegar</a>' : '') + (F.phone ? '<a class="btn ghost" href="https://wa.me/' + esc(F.phone.replace(/[^\d]/g, '')) + '" target="_blank" rel="noopener">' + icon('phone') + 'WhatsApp a ' + esc(F.contact || 'la finca') + '</a>' : '') + '</div></section>';
+  (F.sections || []).forEach(function (sec) {
+    h += '<section class="card"><div class="row" style="gap:10px"><span class="aw-ico sm">' + icon(sec.icon || 'house') + '</span><h3 class="grow">' + esc(sec.title) + '</h3></div><ul class="finca-ul">' + sec.items.map(function (t) { return '<li>' + fincaMd(t) + '</li>'; }).join('') + '</ul></section>';
+  });
+  if (F.shops && F.shops.length) h += '<section class="card"><div class="row" style="gap:10px"><span class="aw-ico sm">' + icon('cart') + '</span><h3 class="grow">Comprar en ' + esc(T.town || 'el pueblo') + '</h3></div><div class="stack" style="gap:2px">' + F.shops.map(function (x) {
+    return '<a class="row shop" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="grow"><b>' + esc(x.name) + '</b><small class="muted" style="display:block">' + esc(x.note || '') + '</small></span>' + icon('pin') + '</a>';
+  }).join('') + '</div>' + (F.near ? '<p class="small muted">' + fincaMd(F.near) + '</p>' : '') + '</section>';
+  return h;
+};
+Object.assign(A, {
+  greg: function (el) {
+    var pid = el.dataset.id; if (!guard('attend', pid)) return;
+    S.guestReg = S.guestReg || {}; if (S.guestReg[pid]) delete S.guestReg[pid]; else S.guestReg[pid] = true;
+    save(); render(true);
+    var rp = regPeople(), done = rp.filter(function (p) { return regDone(p.id); }).length;
+    toast(S.guestReg[pid] ? (done === rp.length ? '¡Registro completo! La finca y la ley, contentas' : esc(person(pid).name) + ' registrado. Quedan ' + (rp.length - done)) : 'Desmarcado');
+  },
+  wifiCopy: function () {
+    var F = S.finca || {}; if (!F.wifi) return;
+    try { navigator.clipboard.writeText(F.wifi.pass).then(function () { toast('Contraseña copiada. Red: ' + esc(F.wifi.net)); }, function () { toast('Contraseña: ' + esc(F.wifi.pass)); }); } catch (e) { toast('Contraseña: ' + esc(F.wifi.pass)); }
+    if (typeof egg === 'function') setTimeout(function () { egg('wifi'); }, 900);
+  }
+});
+
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
    Estrategia: la app trabaja sobre el mismo objeto S que la demo. Cada save() programa una sincronización que
@@ -4222,16 +4348,16 @@ var CLOUD = (function () {
   var sb = null, last = null, timer = null, busy = false, dirty = false, reloadT = null;
   var api = { siteUrl: cfg.siteUrl || location.href.split('#')[0].split('?')[0] };
   var SLOTS = [{ k: 'des', name: 'Desayuno' }, { k: 'com', name: 'Comida' }, { k: 'mer', name: 'Merienda' }, { k: 'cen', name: 'Cena' }];
-  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes'];
+  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes', 'guest_registrations'];
   /* tablas que la app escribe, en orden de dependencias, con su clave primaria */
   var SYNC = [
     ['settings', ['id']], ['app_config', ['key']], ['people', ['id']], ['meals', ['id']], ['ingredients', ['id']], ['activities', ['id']],
     ['expenses', ['id']], ['house_payments', ['id']], ['matches', ['tournament_id', 'round', 'slot']],
     ['ingredient_meals', ['ingredient_id', 'meal_id']], ['meal_attendance', ['meal_id', 'person_id']], ['day_confirmations', ['person_id', 'day']], ['activity_votes', ['activity_id', 'person_id']],
-    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']]
+    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']], ['guest_registrations', ['person_id']]
   ];
   /* lo que un lector puede escribir (RLS): el resto ni se intenta subir */
-  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1 };
+  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1, guest_registrations: 1 };
   function client() {
     return sb || (sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } }));
   }
@@ -4266,7 +4392,8 @@ var CLOUD = (function () {
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
-      comp: kv.comp || { duos: [] },
+      comp: kv.comp || { duos: [] }, finca: kv.finca || null,
+      guestReg: (function () { var o = {}; (d.guest_registrations || []).forEach(function (r) { if (r.done) o[r.person_id] = true; }); return o; })(),
       games: (d.games || []).slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return Object.assign({ id: r.id, sort: r.sort }, r.data); }),
       awardData: (function () { var o = {}; (d.awards || []).forEach(function (r) { o[r.id] = r.data; }); return o; })(),
       awardVotes: (function () { var o = {}; (d.award_votes || []).forEach(function (r) { (o[r.award_id] = o[r.award_id] || {})[r.voter_id] = r.nominee; }); return o; })(),
@@ -4295,6 +4422,7 @@ var CLOUD = (function () {
     out.ingredient_meals = []; S.ingredients.forEach(function (i) { i.meals.forEach(function (m) { out.ingredient_meals.push({ ingredient_id: i.id, meal_id: m }); }); });
     out.meal_attendance = []; Object.keys(S.attendance || {}).forEach(function (m) { Object.keys(S.attendance[m]).forEach(function (p) { out.meal_attendance.push({ meal_id: m, person_id: p, attends: !!S.attendance[m][p] }); }); });
     out.day_confirmations = []; Object.keys(S.dayConfirm || {}).forEach(function (p) { Object.keys(S.dayConfirm[p]).forEach(function (d) { out.day_confirmations.push({ person_id: p, day: d, status: S.dayConfirm[p][d] }); }); });
+    out.guest_registrations = Object.keys(S.guestReg || {}).filter(function (k) { return S.guestReg[k]; }).map(function (k) { return { person_id: k, done: true }; });
     out.activity_votes = []; Object.keys(S.votes || {}).forEach(function (a) { (S.votes[a] || []).forEach(function (p) { out.activity_votes.push({ activity_id: a, person_id: p }); }); });
     return out;
   }
