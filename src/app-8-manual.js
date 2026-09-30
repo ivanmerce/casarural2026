@@ -22,6 +22,7 @@ VIEWS.manual = function () {
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
+    ['bed', '¿Dónde dormimos?', 'En Inicio, tu habitación. Toca «Ver el plano» para ver las tres casas: cada habitación con quién duerme y las camas libres. Los adultos colocan a su familia con un toque («Nos la quedamos»).'],
     ['house', 'La finca', 'En <b>Inicio → La finca</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y dónde comprar en el pueblo (el domingo solo abre uno).'],
     ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía <b>a proporción de personas y comidas</b> (los peques cuentan como un adulto; ' + esc(babyN) + ', no) y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
   ];

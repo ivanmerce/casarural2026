@@ -241,10 +241,6 @@ VIEWS.personas = function () {
     '<div class="row"><span class="pill role-pill admin">Admin</span><span class="grow">Todo, incluidos los accesos y los roles.</span></div>' +
     '<div class="row"><span class="pill role-pill editor">Editor</span><span class="grow">Edita ingredientes, asignaciones, costes, comidas y actividades.</span></div>' +
     '<div class="row"><span class="pill">Lector</span><span class="grow">Lo ve todo, marca su propia asistencia y vota planes.</span></div></div></section>';
-  h += '<section class="card"><div class="card-head"><h3>Las tres casas</h3><span class="pill pend">PROPUESTA</span></div>' +
-    S.homes.map(function (x) {
-      return '<div class="stack" style="gap:6px"><div class="row"><b class="grow">' + esc(x.name) + '</b><span class="beds">' + Array.from({ length: x.beds }, function (_, i) { return '<i' + (i >= x.beds - x.free ? ' class="free"' : '') + '></i>'; }).join('') + '</span><span class="small muted num">' + (x.beds - x.free) + '/' + x.beds + '</span></div>' +
-        '<div class="small muted">' + esc(x.rooms) + '</div><div class="avs">' + x.proposal.map(function (id) { return av(id, 'sm'); }).join('') + '</div><div class="small">' + esc(x.note) + '</div></div>';
-    }).join('<div class="divider"></div>') + '<p class="small muted">Quedan ' + S.homes.reduce(function (a, x) { return a + x.free; }, 0) + ' camas libres' + (function () { var pp = S.people.filter(function (p) { return p.pend; }).map(function (p) { return p.name; }); return pp.length ? ' para ' + esc(pp.join(' y ')) : ''; })() + '.</p></section>';
+  if (typeof myRoomCard === 'function' && S.rooms) h += myRoomCard();
   return h;
 };
