@@ -866,6 +866,50 @@ a.fact { color: inherit; text-decoration: none; }
 .reg-p[aria-pressed="false"] span.small { color: var(--warn); font-weight: 700; }
 .reg-p[aria-pressed="true"] span.small { color: var(--ok); font-weight: 700; }
 
+/* v0.6.3 · ¿Dónde dormimos? */
+.casas-card { gap: 10px; }
+.my-room { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; padding: 12px 14px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--hc) 14%, var(--glass)); border: 2px solid color-mix(in srgb, var(--hc) 55%, transparent); }
+.my-room-house { grid-column: 1; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--hc); }
+.my-room b { grid-column: 1; font-family: var(--font-display); font-size: 1.35rem; line-height: 1.1; }
+.my-room .small { grid-column: 1; }
+.my-room .avs { grid-column: 2; grid-row: 1 / span 3; display: flex; }
+.my-room .avs .av + .av { margin-left: -8px; box-shadow: 0 0 0 2px var(--bg); }
+.casas-pend { display: flex; gap: 6px; align-items: flex-start; color: var(--warn); }
+.casas-pend .ico { flex: none; margin-top: 2px; }
+.chip.mini { min-height: 34px; padding: 0 10px; font-size: .82rem; margin: 2px 2px 0 0; }
+.plan-wrap { overflow-x: auto; margin: 0 -16px; padding: 4px 16px 8px; }
+.plan { position: relative; width: 100%; min-width: 340px; border-radius: 18px; background: repeating-linear-gradient(45deg, var(--surface-2) 0 6px, transparent 6px 12px), var(--glass); border: 1px solid var(--glass-line); }
+.plan-house { position: absolute; border: 3px solid var(--hc); border-radius: 10px; background: color-mix(in srgb, var(--hc) 7%, var(--bg)); }
+.plan-hname { position: absolute; left: 6px; bottom: -3px; transform: translateY(100%); font-family: var(--font-display); font-weight: 800; font-size: clamp(.62rem, 2.6vw, .9rem); color: var(--hc); white-space: nowrap; }
+.plan-room { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 2px; border-radius: 6px; font-size: clamp(.5rem, 2vw, .72rem); text-align: center; line-height: 1.05; color: var(--muted); border: 1px dashed color-mix(in srgb, var(--hc) 35%, var(--glass-line)); background: color-mix(in srgb, var(--hc) 5%, transparent); overflow: hidden; }
+.plan-room.k-kitchen, .plan-room.k-dining, .plan-room.k-living { background: color-mix(in srgb, var(--hc) 12%, transparent); font-weight: 700; }
+.plan-room.bed { cursor: pointer; font: inherit; color: var(--ink); background: var(--bg); border: 2px solid color-mix(in srgb, var(--hc) 70%, transparent); box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: transform .15s; }
+.plan-room.bed:active { transform: scale(.96); }
+.plan-room.bed.empty { border-style: dashed; background: color-mix(in srgb, var(--warn) 10%, var(--bg)); }
+.plan-room.bed.mine { outline: 3px solid var(--accent); outline-offset: 1px; box-shadow: 0 0 0 6px var(--accent-soft); }
+.plan-rname { font-weight: 800; font-size: clamp(.5rem, 2vw, .72rem); }
+.pdots { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
+.pdot .av.xs { width: clamp(14px, 4.4vw, 22px); height: clamp(14px, 4.4vw, 22px); font-size: .5rem; }
+.pdot.baby .av.xs { width: clamp(11px, 3.2vw, 16px); height: clamp(11px, 3.2vw, 16px); outline: 1.5px dashed var(--hc); }
+.pdot.free { width: clamp(14px, 4.4vw, 22px); height: clamp(14px, 4.4vw, 22px); border-radius: 50%; border: 2px dashed var(--warn); }
+.plan-note { position: absolute; left: 2%; bottom: 3%; width: 50%; font-size: clamp(.5rem, 1.9vw, .7rem); color: var(--muted); line-height: 1.25; }
+.plan-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); }
+.plan-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.plan-legend .ico { width: 16px; height: 16px; }
+.lg-free { width: 14px; height: 14px; border-radius: 50%; border: 2px dashed var(--warn); display: inline-block; }
+.lg-mine { width: 14px; height: 14px; border-radius: 4px; outline: 3px solid var(--accent); display: inline-block; }
+.casa-list { border-top: 4px solid var(--hc); }
+.casa-list .hdot { width: 12px; height: 12px; border-radius: 50%; background: var(--hc); display: inline-block; }
+.room-row { width: 100%; background: none; border: 0; border-bottom: 1px dashed var(--glass-line); text-align: left; font: inherit; color: inherit; padding: 10px 0; min-height: 52px; }
+.room-who { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
+.who { display: inline-flex; align-items: center; gap: 5px; font-size: .9rem; }
+.room-badge { padding: 4px 10px; border-radius: 999px; background: var(--hc); color: #fff; font-weight: 800; font-size: .78rem; }
+.room-occ { min-height: 48px; }
+.room-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.room-p { flex-direction: row; }
+.room-p small { font-size: .72rem; }
+.room-p[aria-pressed] { opacity: 1; text-decoration: none; }
+
 </style>
 </head>
 <body>
@@ -1874,6 +1918,7 @@ VIEWS.inicio = function () {
 
   /* Confirmación por día */
   h += manualCardHome();
+  if (typeof myRoomCard === 'function') h += myRoomCard();
   if (typeof fincaHomeCard === 'function') h += fincaHomeCard();
   h += confirmCard();
   h += presenceCard();
@@ -2460,11 +2505,7 @@ VIEWS.personas = function () {
     '<div class="row"><span class="pill role-pill admin">Admin</span><span class="grow">Todo, incluidos los accesos y los roles.</span></div>' +
     '<div class="row"><span class="pill role-pill editor">Editor</span><span class="grow">Edita ingredientes, asignaciones, costes, comidas y actividades.</span></div>' +
     '<div class="row"><span class="pill">Lector</span><span class="grow">Lo ve todo, marca su propia asistencia y vota planes.</span></div></div></section>';
-  h += '<section class="card"><div class="card-head"><h3>Las tres casas</h3><span class="pill pend">PROPUESTA</span></div>' +
-    S.homes.map(function (x) {
-      return '<div class="stack" style="gap:6px"><div class="row"><b class="grow">' + esc(x.name) + '</b><span class="beds">' + Array.from({ length: x.beds }, function (_, i) { return '<i' + (i >= x.beds - x.free ? ' class="free"' : '') + '></i>'; }).join('') + '</span><span class="small muted num">' + (x.beds - x.free) + '/' + x.beds + '</span></div>' +
-        '<div class="small muted">' + esc(x.rooms) + '</div><div class="avs">' + x.proposal.map(function (id) { return av(id, 'sm'); }).join('') + '</div><div class="small">' + esc(x.note) + '</div></div>';
-    }).join('<div class="divider"></div>') + '<p class="small muted">Quedan ' + S.homes.reduce(function (a, x) { return a + x.free; }, 0) + ' camas libres' + (function () { var pp = S.people.filter(function (p) { return p.pend; }).map(function (p) { return p.name; }); return pp.length ? ' para ' + esc(pp.join(' y ')) : ''; })() + '.</p></section>';
+  if (typeof myRoomCard === 'function' && S.rooms) h += myRoomCard();
   return h;
 };
 
@@ -2635,7 +2676,7 @@ function menuSheet() {
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="finca">' + icon('house') + 'La finca: Wi-Fi, normas y compras</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="casas">' + icon('bed') + '¿Dónde dormimos?</button><button class="btn block" data-act="goSheet" data-tab="finca">' + icon('house') + 'La finca: Wi-Fi, normas y compras</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -3268,7 +3309,7 @@ function startApp() {
 function boot() {
   var u = loadUi();
   ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
-  if (['personas', 'tiempo', 'asistencia', 'manual', 'finca'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
+  if (['personas', 'tiempo', 'asistencia', 'manual', 'finca', 'casas'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();
   if (typeof SEED !== 'undefined') { S = load(); startApp(); }
@@ -4047,6 +4088,7 @@ VIEWS.manual = function () {
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
+    ['bed', '¿Dónde dormimos?', 'En Inicio, tu habitación. Toca «Ver el plano» para ver las tres casas: cada habitación con quién duerme y las camas libres. Los adultos colocan a su familia con un toque («Nos la quedamos»).'],
     ['house', 'La finca', 'En <b>Inicio → La finca</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y dónde comprar en el pueblo (el domingo solo abre uno).'],
     ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía <b>a proporción de personas y comidas</b> (los peques cuentan como un adulto; ' + esc(babyN) + ', no) y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
   ];
@@ -4341,6 +4383,122 @@ Object.assign(A, {
   }
 });
 
+/* ===================== ¿Dónde dormimos? =====================
+   Plano esquemático de las casas (S.rooms, en los datos) y asignación por persona (S.roomAssign: persona → habitación).
+   Pueden asignar los editores y los adultos para su propia familia. Los bebés duermen en cuna: no ocupan cama. */
+var PW = 400, PH = 250;
+function roomsCfg() { return S.rooms || null; }
+function roomById(id) { var R = roomsCfg(); return R ? R.list.find(function (r) { return r.id === id; }) : null; }
+function houseById(id) { var R = roomsCfg(); return R ? R.houses.find(function (h) { return h.id === id; }) : null; }
+function roomOf(pid) { return (S.roomAssign || {})[pid] || null; }
+function roomPeople(rid) { return S.people.filter(function (p) { return roomOf(p.id) === rid; }); }
+function usesBed(p) { return p.kind !== 'bebe'; }
+function bedsUsed(rid) { return roomPeople(rid).filter(usesBed).length; }
+function sleepers() { return S.people.filter(function (p) { return L.mealsAttended(S, p.id) > 0 || p.attends; }); }
+function unassigned() { return sleepers().filter(function (p) { return !roomOf(p.id); }); }
+function canRoomFor(pid) { var m = me(), t = person(pid); if (!t) return false; if (m.role === 'admin' || m.role === 'editor') return true; return m.kind === 'adulto' && t.family === m.family; }
+function roomLabel(rid) { var r = roomById(rid), h = r && houseById(r.home); return r ? (h ? h.name + ' · ' : '') + r.name : ''; }
+function pct(v, tot) { return (v / tot * 100).toFixed(3) + '%'; }
+function freeRooms() { var R = roomsCfg(); return R ? R.list.filter(function (r) { return r.kind === 'bed' && bedsUsed(r.id) < r.beds; }) : []; }
+
+function myRoomCard(compact) {
+  var R = roomsCfg(); if (!R) return '';
+  var rid = roomOf(me().id), un = unassigned();
+  var h = '<section class="card casas-card"><div class="card-head"><h3>' + (compact ? 'Tu habitación' : '¿Dónde dormimos?') + '</h3>' + (compact ? '' : '<button class="link" data-act="tab" data-tab="casas">Ver el plano ' + icon('arrow') + '</button>') + '</div>';
+  if (rid) {
+    var r = roomById(rid), hs = houseById(r.home), mates = roomPeople(rid).filter(function (p) { return p.id !== me().id; });
+    h += '<div class="my-room" style="--hc:' + hs.color + '"><span class="my-room-house">' + esc(hs.name) + '</span><b>' + esc(r.name) + '</b><span class="small">' + (mates.length ? 'Con ' + mates.map(function (p) { return esc(p.name); }).join(', ').replace(/, ([^,]*)$/, ' y $1') : 'Para ti solo') + '</span><span class="avs">' + roomPeople(rid).map(function (p) { return av(p.id, 'sm'); }).join('') + '</span></div>';
+  } else h += '<p class="small"><b>Aún no tienes habitación.</b> Mira el plano y elige una libre' + (canRoomFor(me().id) ? '' : ' (o pídeselo a tus padres)') + '.</p>';
+  if (un.length) h += '<p class="small casas-pend">' + icon('clock') + '<span><b>Por elegir:</b> ' + famGroups(un) + '</span></p>';
+  return h + '</section>';
+}
+function famGroups(list) {
+  var by = {}; list.forEach(function (p) { (by[p.family] = by[p.family] || []).push(p.name); });
+  return Object.keys(by).map(function (f) { return esc(by[f].join(' y ')); }).join(' · ');
+}
+
+VIEWS.casas = function () {
+  var R = roomsCfg();
+  var h = '<div class="view-head"><div><h2>¿Dónde dormimos?</h2><p class="muted small">Toca una habitación para ver quién duerme y, si puedes, cambiarlo</p></div></div>';
+  if (!R) return h + '<div class="empty">' + icon('house') + '<b>Aún no hay plano</b></div>';
+  h += myRoomCard(true);
+  var un = unassigned(), fr = freeRooms();
+  if (un.length) h += '<section class="card alert casas-choose"><h3>Falta por decidir</h3><p class="small"><b>' + famGroups(un) + '</b> ' + (un.length === 1 ? 'aún no tiene' : 'aún no tienen') + ' habitación.</p>' +
+    (fr.length ? '<p class="small">Libres: ' + fr.map(function (r) { return '<button class="chip mini" data-act="roomOpen" data-id="' + r.id + '">' + esc(roomLabel(r.id)) + ' · ' + (r.beds - bedsUsed(r.id)) + (r.beds - bedsUsed(r.id) === 1 ? ' cama' : ' camas') + '</button>'; }).join(' ') + '</p>' : '') +
+    '<p class="small muted">Se elige por orden de llegada al móvil: toca la habitación y «Nos la quedamos».</p></section>';
+  /* plano */
+  h += '<div class="plan-wrap"><div class="plan" style="aspect-ratio:' + PW + '/' + PH + '">';
+  R.houses.forEach(function (hs) {
+    h += '<div class="plan-house" style="left:' + pct(hs.x, PW) + ';top:' + pct(hs.y, PH) + ';width:' + pct(hs.w, PW) + ';height:' + pct(hs.h, PH) + ';--hc:' + hs.color + '"><span class="plan-hname">' + esc(hs.name) + '</span></div>';
+  });
+  R.list.forEach(function (r) {
+    var style = 'left:' + pct(r.x, PW) + ';top:' + pct(r.y, PH) + ';width:' + pct(r.w, PW) + ';height:' + pct(r.h, PH) + ';--hc:' + houseById(r.home).color;
+    if (r.kind !== 'bed') { h += '<div class="plan-room k-' + r.kind + '" style="' + style + '"><span>' + esc(r.name) + '</span></div>'; return; }
+    var ps = roomPeople(r.id), used = ps.filter(usesBed).length, mine = roomOf(me().id) === r.id, crib = ps.some(function (p) { return !usesBed(p); });
+    var dots = ps.map(function (p) { return '<span class="pdot' + (usesBed(p) ? '' : ' baby') + '">' + av(p.id, 'xs') + '</span>'; }).join('');
+    for (var i = used; i < r.beds; i++) dots += '<span class="pdot free" aria-hidden="true"></span>';
+    h += '<button class="plan-room bed' + (mine ? ' mine' : '') + (used >= r.beds ? ' full' : used ? '' : ' empty') + '" style="' + style + '" data-act="roomOpen" data-id="' + r.id + '" aria-label="' + esc(roomLabel(r.id)) + ': ' + used + ' de ' + r.beds + ' camas">' +
+      '<span class="plan-rname">' + esc(r.name) + (crib ? ' · cuna' : '') + '</span><span class="pdots">' + dots + '</span></button>';
+  });
+  h += '<span class="plan-note">' + esc(R.note || '') + '</span></div></div>';
+  h += '<div class="plan-legend small"><span><i class="lg-free"></i>Cama libre</span><span><i class="lg-mine"></i>Tu habitación</span><span>' + icon('baby') + 'Cuna: no ocupa cama</span></div>';
+  /* listado por casa */
+  R.houses.forEach(function (hs) {
+    var rs = R.list.filter(function (r) { return r.home === hs.id && r.kind === 'bed'; });
+    h += '<section class="card casa-list" style="--hc:' + hs.color + '"><div class="card-head"><h3 class="row" style="gap:8px"><i class="hdot"></i>' + esc(hs.name) + '</h3><span class="small muted">' + esc(hs.text || '') + '</span></div>' +
+      rs.map(function (r) {
+        var ps = roomPeople(r.id), used = ps.filter(usesBed).length;
+        return '<button class="row room-row" data-act="roomOpen" data-id="' + r.id + '"><span class="grow"><b>' + esc(r.name) + '</b><small class="muted"> · ' + r.beds + (r.beds === 1 ? ' cama' : ' camas') + '</small><span class="room-who">' +
+          (ps.length ? ps.map(function (p) { return '<span class="who">' + av(p.id, 'xs') + esc(p.name) + (usesBed(p) ? '' : ' <small class="muted">(cuna)</small>') + '</span>'; }).join('') : '<span class="muted small">Libre</span>') + '</span></span>' +
+          '<span class="pill ' + (used >= r.beds ? 'ok' : used ? 'warn' : '') + '">' + used + '/' + r.beds + '</span></button>';
+      }).join('') + '</section>';
+  });
+  return h;
+};
+
+function roomSheet(rid) {
+  var r = roomById(rid); if (!r) return;
+  var hs = houseById(r.home), ps = roomPeople(rid), used = ps.filter(usesBed).length, left = r.beds - used;
+  var h = '<div class="row" style="gap:10px"><span class="room-badge" style="--hc:' + hs.color + '">' + esc(hs.name) + '</span><h2 class="grow" style="margin:0">' + esc(r.name) + '</h2></div>' +
+    '<p class="small muted">' + r.beds + (r.beds === 1 ? ' cama' : ' camas') + ' · ' + (left > 0 ? left + (left === 1 ? ' libre' : ' libres') : 'completa') + '</p>';
+  h += '<div class="stack" style="gap:6px">' + (ps.length ? ps.map(function (p) {
+    return '<div class="row room-occ">' + av(p.id, 'sm') + '<span class="grow"><b>' + esc(p.name) + '</b>' + (usesBed(p) ? '' : ' <small class="muted">en cuna</small>') + '</span>' +
+      (canRoomFor(p.id) ? '<button class="btn ghost" data-act="roomOut" data-p="' + p.id + '" data-r="' + rid + '">' + icon('x') + 'Quitar</button>' : '') + '</div>';
+  }).join('') : '<p class="small muted">Nadie todavía.</p>') + '</div>';
+  /* elegir: primero las familias completas que quepan, después personas sueltas */
+  var cand = sleepers().filter(function (p) { return roomOf(p.id) !== rid && canRoomFor(p.id); });
+  if (cand.length) {
+    var byFam = {}; cand.forEach(function (p) { (byFam[p.family] = byFam[p.family] || []).push(p); });
+    var groups = Object.keys(byFam).map(function (f) { return byFam[f].filter(function (p) { return p.kind === 'adulto' && !roomOf(p.id); }); }).filter(function (g) { return g.length === 2 && left >= 2; });
+    h += '<p class="eyebrow">Poner aquí</p>';
+    if (groups.length) h += '<div class="row wrap">' + groups.map(function (g) { return '<button class="btn primary" data-act="roomIn" data-r="' + rid + '" data-p="' + g.map(function (p) { return p.id; }).join(',') + '">' + icon('check') + 'Nos la quedamos: ' + esc(g[0].name) + ' y ' + esc(g[1].name) + '</button>'; }).join('') + '</div>';
+    h += '<div class="room-pick">' + cand.map(function (p) {
+      var cur = roomOf(p.id);
+      return '<button class="toggle-p room-p" data-act="roomIn" data-r="' + rid + '" data-p="' + p.id + '">' + av(p.id, 'sm') + esc(p.name) + '<small class="muted">' + (cur ? esc(roomLabel(cur)) : 'sin habitación') + '</small></button>';
+    }).join('') + '</div>';
+  } else if (!canRoomFor(me().id)) h += '<p class="small muted">Para cambiar habitaciones, pídeselo a un adulto de tu familia o al organizador.</p>';
+  h += '<button class="btn block" data-act="close">Cerrar</button>';
+  openSheet(h);
+}
+Object.assign(A, {
+  roomOpen: function (el) { roomSheet(el.dataset.id); },
+  roomIn: function (el) {
+    var rid = el.dataset.r, r = roomById(rid), ids = el.dataset.p.split(','), ok = ids.filter(canRoomFor);
+    if (!ok.length) { toast('Esto lo cambia un adulto de la familia o el organizador'); return; }
+    var need = ok.filter(function (id) { return usesBed(person(id)); }).length, left = r.beds - bedsUsed(rid);
+    if (need > left) { toast(left ? 'Solo queda ' + left + (left === 1 ? ' cama' : ' camas') + ' aquí' : 'Está completa: primero quita a alguien'); return; }
+    S.roomAssign = S.roomAssign || {}; ok.forEach(function (id) { S.roomAssign[id] = rid; });
+    save(); closeSheet(); render(true);
+    toast(ok.map(function (id) { return esc(person(id).name); }).join(' y ') + ' → ' + esc(roomLabel(rid)) + (unassigned().length ? '' : '. ¡Todos colocados!'));
+    if (!unassigned().length) confetti(1600);
+  },
+  roomOut: function (el) {
+    var pid = el.dataset.p; if (!canRoomFor(pid)) return;
+    delete S.roomAssign[pid]; save(); closeSheet(); render(true);
+    toast(esc(person(pid).name) + ' sin habitación', 'Deshacer', function () { S.roomAssign[pid] = el.dataset.r; save(); render(true); });
+  }
+});
+
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
    Estrategia: la app trabaja sobre el mismo objeto S que la demo. Cada save() programa una sincronización que
@@ -4352,16 +4510,16 @@ var CLOUD = (function () {
   var sb = null, last = null, timer = null, busy = false, dirty = false, reloadT = null;
   var api = { siteUrl: cfg.siteUrl || location.href.split('#')[0].split('?')[0] };
   var SLOTS = [{ k: 'des', name: 'Desayuno' }, { k: 'com', name: 'Comida' }, { k: 'mer', name: 'Merienda' }, { k: 'cen', name: 'Cena' }];
-  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes', 'guest_registrations'];
+  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes', 'guest_registrations', 'room_assignments'];
   /* tablas que la app escribe, en orden de dependencias, con su clave primaria */
   var SYNC = [
     ['settings', ['id']], ['app_config', ['key']], ['people', ['id']], ['meals', ['id']], ['ingredients', ['id']], ['activities', ['id']],
     ['expenses', ['id']], ['house_payments', ['id']], ['matches', ['tournament_id', 'round', 'slot']],
     ['ingredient_meals', ['ingredient_id', 'meal_id']], ['meal_attendance', ['meal_id', 'person_id']], ['day_confirmations', ['person_id', 'day']], ['activity_votes', ['activity_id', 'person_id']],
-    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']], ['guest_registrations', ['person_id']]
+    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']], ['guest_registrations', ['person_id']], ['room_assignments', ['person_id']]
   ];
   /* lo que un lector puede escribir (RLS): el resto ni se intenta subir */
-  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1, guest_registrations: 1 };
+  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1, guest_registrations: 1, room_assignments: 1 };
   function client() {
     return sb || (sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } }));
   }
@@ -4396,7 +4554,8 @@ var CLOUD = (function () {
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
-      comp: kv.comp || { duos: [] }, finca: kv.finca || null,
+      comp: kv.comp || { duos: [] }, finca: kv.finca || null, rooms: kv.rooms || null,
+      roomAssign: (function () { var o = {}; (d.room_assignments || []).forEach(function (r) { o[r.person_id] = r.room_id; }); return o; })(),
       guestReg: (function () { var o = {}; (d.guest_registrations || []).forEach(function (r) { if (r.done) o[r.person_id] = true; }); return o; })(),
       games: (d.games || []).slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return Object.assign({ id: r.id, sort: r.sort }, r.data); }),
       awardData: (function () { var o = {}; (d.awards || []).forEach(function (r) { o[r.id] = r.data; }); return o; })(),
@@ -4426,6 +4585,7 @@ var CLOUD = (function () {
     out.ingredient_meals = []; S.ingredients.forEach(function (i) { i.meals.forEach(function (m) { out.ingredient_meals.push({ ingredient_id: i.id, meal_id: m }); }); });
     out.meal_attendance = []; Object.keys(S.attendance || {}).forEach(function (m) { Object.keys(S.attendance[m]).forEach(function (p) { out.meal_attendance.push({ meal_id: m, person_id: p, attends: !!S.attendance[m][p] }); }); });
     out.day_confirmations = []; Object.keys(S.dayConfirm || {}).forEach(function (p) { Object.keys(S.dayConfirm[p]).forEach(function (d) { out.day_confirmations.push({ person_id: p, day: d, status: S.dayConfirm[p][d] }); }); });
+    out.room_assignments = Object.keys(S.roomAssign || {}).filter(function (k) { return S.roomAssign[k]; }).map(function (k) { return { person_id: k, room_id: S.roomAssign[k] }; });
     out.guest_registrations = Object.keys(S.guestReg || {}).filter(function (k) { return S.guestReg[k]; }).map(function (k) { return { person_id: k, done: true }; });
     out.activity_votes = []; Object.keys(S.votes || {}).forEach(function (a) { (S.votes[a] || []).forEach(function (p) { out.activity_votes.push({ activity_id: a, person_id: p }); }); });
     return out;
