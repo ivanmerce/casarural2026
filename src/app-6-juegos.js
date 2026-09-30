@@ -511,7 +511,9 @@ Object.assign(A, {
     g.rounds = G.makeBracket(list); G.advance(g); g.closed = false; save(); render(true); toast('Cuadro sorteado. ¡Suerte!');
   },
   gClose: function (el) {
-    if (!gGuard()) return; var g = gById(el.dataset.id); g.closed = !g.closed; save(); render(true);
+    if (!gGuard()) return; var g = gById(el.dataset.id);
+    if (!g.closed && !G.standings(S, g).rows.some(function (r) { return r.pos; })) { toast('Apunta al menos un resultado antes de darlo por terminado'); return; }
+    g.closed = !g.closed; save(); render(true);
     toast(g.closed ? 'Juego terminado: sus puntos cuentan para el ranking' : 'Juego reabierto'); if (g.closed) checkAllGames();
   },
   gRow: function (el) {
