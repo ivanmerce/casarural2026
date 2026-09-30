@@ -3967,7 +3967,7 @@ var CLOUD = (function () {
       '<p>' + (first ? 'Has entrado con el código de la familia. Ahora <b>elige tu código personal</b> de 6 cifras: a partir de hoy entrarás con tu email y este código.' : 'Elige tu nuevo código personal de 6 cifras.') + '</p>' +
       codeInput('cs-1', 'Tu código nuevo', 'new-password') + codeInput('cs-2', 'Repítelo', 'new-password') +
       '<button class="btn primary block big-btn" data-act="cloudSetCode">Guardar y entrar</button>' +
-      '<p class="small muted">Consejo: que no sea 123456 ni tu año de nacimiento. Si un día lo olvidas, «He olvidado mi código» o pídele al organizador que te lo reinicie.</p></section>');
+      '<p class="small muted">Consejo: que no sea 123456 ni tu año de nacimiento. Si un día lo olvidas, «He olvidado mi código» o pídele al organizador que te lo reinicie.</p><button class="link" data-act="logout">¿No eres ' + esc(p ? p.name : '') + '? Salir</button></section>');
     api._afterCode = done;
     setTimeout(function () { var e = document.getElementById('cs-1'); if (e) e.focus(); }, 50);
   }
