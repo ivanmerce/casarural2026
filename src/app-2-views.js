@@ -122,10 +122,10 @@ function startHero() {
   var names = S ? S.people : Array.from({ length: 12 }, function (_, i) { return { kind: i % 4 ? 'adulto' : 'menor' }; });
   /* cada nodo es una persona de la familia: si hay foto, su cara */
   var withFaces = names.some(function (p) { return p.avatar; });
-  var X0 = withFaces ? 0.56 : 0.45;
+  var narrow = W < 520, X0 = withFaces ? (narrow ? 0.62 : 0.56) : 0.45, YMAX = withFaces ? (narrow ? 0.42 : 0.56) : 1, KR = narrow ? 0.78 : 1;
   var nodes = names.map(function (p, i) {
-    var n = { x: W * (X0 + (1 - X0) * Math.random()), y: H * (withFaces ? 0.08 + 0.46 * Math.random() : Math.random()), vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22, r: p.kind === 'bebe' ? 2.4 : p.kind === 'menor' ? 3 : 3.6 };
-    if (p.avatar) { n.img = new Image(); n.img.src = p.avatar; n.R = p.kind === 'bebe' ? 12 : p.kind === 'menor' ? 14 : 16; }
+    var n = { x: W * (X0 + (1 - X0) * Math.random()), y: H * (withFaces ? 0.06 + (YMAX - 0.1) * Math.random() : Math.random()), vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22, r: p.kind === 'bebe' ? 2.4 : p.kind === 'menor' ? 3 : 3.6 };
+    if (p.avatar) { n.img = new Image(); n.img.src = p.avatar; n.R = Math.round((p.kind === 'bebe' ? 12 : p.kind === 'menor' ? 14 : 16) * KR); }
     return n;
   });
   var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -134,7 +134,7 @@ function startHero() {
     ctx.globalAlpha = 1;
     for (var i = 0; i < nodes.length; i++) {
       var a = nodes[i];
-      if (!still) { var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy); if (sp > .3) { a.vx *= .3 / sp; a.vy *= .3 / sp; } a.x += a.vx; a.y += a.vy; var m = a.R || 0; if (a.x < W * (withFaces ? X0 : .3) || a.x > W - m) a.vx *= -1; if (a.y < m || a.y > (withFaces ? H * 0.56 : H) - m) a.vy *= -1; }
+      if (!still) { var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy); if (sp > .3) { a.vx *= .3 / sp; a.vy *= .3 / sp; } a.x += a.vx; a.y += a.vy; var m = a.R || 0; if (a.x < W * (withFaces ? X0 : .3) || a.x > W - m) a.vx *= -1; if (a.y < m || a.y > H * YMAX - m) a.vy *= -1; }
       for (var j = i + 1; j < nodes.length; j++) {
         var b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.sqrt(dx * dx + dy * dy);
         if (a.R && b.R && d > 0.1) { var gap = a.R + b.R + 6; if (d < gap) { var f = (gap - d) / d * 0.04; a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f; } }

@@ -9,16 +9,16 @@ var CLOUD = (function () {
   var sb = null, last = null, timer = null, busy = false, dirty = false, reloadT = null;
   var api = { siteUrl: cfg.siteUrl || location.href.split('#')[0].split('?')[0] };
   var SLOTS = [{ k: 'des', name: 'Desayuno' }, { k: 'com', name: 'Comida' }, { k: 'mer', name: 'Merienda' }, { k: 'cen', name: 'Cena' }];
-  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes', 'guest_registrations', 'room_assignments'];
+  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes', 'guest_registrations', 'room_assignments', 'ideas', 'idea_likes'];
   /* tablas que la app escribe, en orden de dependencias, con su clave primaria */
   var SYNC = [
     ['settings', ['id']], ['app_config', ['key']], ['people', ['id']], ['meals', ['id']], ['ingredients', ['id']], ['activities', ['id']],
     ['expenses', ['id']], ['house_payments', ['id']], ['matches', ['tournament_id', 'round', 'slot']],
     ['ingredient_meals', ['ingredient_id', 'meal_id']], ['meal_attendance', ['meal_id', 'person_id']], ['day_confirmations', ['person_id', 'day']], ['activity_votes', ['activity_id', 'person_id']],
-    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']], ['guest_registrations', ['person_id']], ['room_assignments', ['person_id']]
+    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']], ['guest_registrations', ['person_id']], ['room_assignments', ['person_id']], ['ideas', ['id']], ['idea_likes', ['idea_id', 'person_id']]
   ];
   /* lo que un lector puede escribir (RLS): el resto ni se intenta subir */
-  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1, guest_registrations: 1, room_assignments: 1 };
+  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1, guest_registrations: 1, room_assignments: 1, ideas: 1, idea_likes: 1 };
   function client() {
     return sb || (sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } }));
   }
@@ -54,6 +54,8 @@ var CLOUD = (function () {
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
       comp: kv.comp || { duos: [] }, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
+      ideas: (d.ideas || []).map(function (r) { return { id: r.id, by: r.person_id, text: r.text, at: r.created_at, status: r.status || 'nueva' }; }),
+      ideaLikes: (function () { var o = {}; (d.idea_likes || []).forEach(function (r) { (o[r.idea_id] = o[r.idea_id] || []).push(r.person_id); }); return o; })(),
       roomAssign: (function () { var o = {}; (d.room_assignments || []).forEach(function (r) { o[r.person_id] = r.room_id; }); return o; })(),
       guestReg: (function () { var o = {}; (d.guest_registrations || []).forEach(function (r) { if (r.done) o[r.person_id] = true; }); return o; })(),
       games: (d.games || []).slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return Object.assign({ id: r.id, sort: r.sort }, r.data); }),
@@ -84,6 +86,8 @@ var CLOUD = (function () {
     out.ingredient_meals = []; S.ingredients.forEach(function (i) { i.meals.forEach(function (m) { out.ingredient_meals.push({ ingredient_id: i.id, meal_id: m }); }); });
     out.meal_attendance = []; Object.keys(S.attendance || {}).forEach(function (m) { Object.keys(S.attendance[m]).forEach(function (p) { out.meal_attendance.push({ meal_id: m, person_id: p, attends: !!S.attendance[m][p] }); }); });
     out.day_confirmations = []; Object.keys(S.dayConfirm || {}).forEach(function (p) { Object.keys(S.dayConfirm[p]).forEach(function (d) { out.day_confirmations.push({ person_id: p, day: d, status: S.dayConfirm[p][d] }); }); });
+    out.ideas = (S.ideas || []).map(function (x) { return { id: x.id, person_id: x.by, text: x.text, status: x.status || 'nueva', created_at: x.at }; });
+    out.idea_likes = []; Object.keys(S.ideaLikes || {}).forEach(function (k) { (S.ideaLikes[k] || []).forEach(function (p) { out.idea_likes.push({ idea_id: k, person_id: p }); }); });
     out.room_assignments = Object.keys(S.roomAssign || {}).filter(function (k) { return S.roomAssign[k]; }).map(function (k) { return { person_id: k, room_id: S.roomAssign[k] }; });
     out.guest_registrations = Object.keys(S.guestReg || {}).filter(function (k) { return S.guestReg[k]; }).map(function (k) { return { person_id: k, done: true }; });
     out.activity_votes = []; Object.keys(S.votes || {}).forEach(function (a) { (S.votes[a] || []).forEach(function (p) { out.activity_votes.push({ activity_id: a, person_id: p }); }); });

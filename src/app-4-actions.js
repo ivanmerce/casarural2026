@@ -406,8 +406,8 @@ function eggTap(k, el) {
 
 /* ---------- Acciones ---------- */
 var A = {
-  tab: function (el) { ui.mealFilter = null; if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
-  goSheet: function (el) { closeSheet(); if (el.dataset.fsub) ui.fsub = el.dataset.fsub; go(el.dataset.tab); },
+  tab: function (el) { ui.mealFilter = null; if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
+  goSheet: function (el) { closeSheet(); if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; go(el.dataset.tab); },
   logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); } },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
