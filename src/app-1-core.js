@@ -17,7 +17,7 @@ function load() {
       if (d && d.version === SEED.version) { if (typeof AVATARS !== 'undefined') d.people.forEach(function (p) { if (!p.avatar && AVATARS[p.id]) p.avatar = AVATARS[p.id]; }); return d; }
     }
   } catch (e) {}
-  var s = clone(SEED); s.attendance = {};
+  var s = clone(SEED); s.attendance = s.attendance || {};
   s.ingredients.forEach(function (i) { if (!i.status) i.status = 'pendiente'; if (!i.split) i.split = 'comun'; if (i.cost === undefined) i.cost = null; });
   return s;
 }

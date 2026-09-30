@@ -15,23 +15,21 @@ function pendingConfirmations() {
   var n = 0; S.people.forEach(function (p) { S.days.forEach(function (d) { if (L.dayStatus(S, p.id, d.k) === 'pend') n++; }); }); return n;
 }
 function confirmCard() {
-  var p = me(), pend = pendingConfirmations(), ids = famAttendIds(), f = fam(p.family);
-  var h = '<section class="card" id="confirmCard"><div class="card-head"><h3>¿Venís? Confirma por día</h3><button class="link" data-act="tab" data-tab="asistencia">Todos ' + icon('arrow') + '</button></div>';
-  if (ids.length > 1) {
-    h += '<p class="small muted">' + pname(p.id) + ', rellena la de toda tu familia: toca cada día (✓ va · ✕ no va · ? sin confirmar). Con esto salen los comensales y las cantidades de la compra.</p>' +
-      '<div class="conf-grid head"><span></span>' + S.days.map(function (d) { return '<small>' + esc(d.short) + '</small>'; }).join('') + '</div>' +
-      ids.map(function (id) { return '<div class="conf-grid"><span class="row" style="gap:8px;min-width:0">' + av(id, 'sm') + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + pname(id) + (id === p.id ? ' <small class="muted">(tú)</small>' : '') + '</span></span>' + S.days.map(function (d) { return confBtn(id, d.k, true); }).join('') + '</div>'; }).join('') +
-      '<button class="btn block" data-act="confFam" data-fam="' + p.family + '">' + icon('check') + (f ? esc(f.name) + ': ' : '') + 'todos, los ' + S.days.length + ' días</button>';
+  var p = me(), pend = pendingConfirmations(), ids = famAttendIds(), f = fam(p.family), many = ids.length > 1;
+  var h = '<section class="card" id="confirmCard"><div class="card-head"><h3>' + (many ? 'Vuestros días' : 'Tus días') + '</h3><button class="link" data-act="tab" data-tab="asistencia">Todos ' + icon('arrow') + '</button></div>' +
+    '<p class="small muted">Estos son los días que tenemos apuntados. <b>¿Cambia algo?</b> Toca el día para cambiarlo: <b>✓</b> viene · <b>✕</b> no viene. Las comidas y las cantidades de la compra se recalculan solas.</p>';
+  if (many) {
+    h += '<div class="conf-grid head"><span></span>' + S.days.map(function (d) { return '<small>' + esc(d.short) + '</small>'; }).join('') + '</div>' +
+      ids.map(function (id) { return '<div class="conf-grid"><span class="row" style="gap:8px;min-width:0">' + av(id, 'sm') + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + pname(id) + (id === p.id ? ' <small class="muted">(tú)</small>' : '') + '</span></span>' + S.days.map(function (d) { return confBtn(id, d.k, true); }).join('') + '</div>'; }).join('');
   } else {
-    h += '<p class="small muted">' + pname(p.id) + ', toca cada día hasta que quede como es. Con esto salen los comensales y las cantidades de la compra.</p>' +
-      '<div class="conf-row">' + S.days.map(function (d) { return confBtn(p.id, d.k); }).join('') + '</div>';
+    h += '<div class="conf-row">' + S.days.map(function (d) { return confBtn(p.id, d.k); }).join('') + '</div>';
   }
   return h + '<div class="divider"></div><span class="eyebrow">Previstos por día</span>' + daySummary() +
-    (pend ? '<p class="small"><span class="pill warn">' + pend + ' confirmaciones pendientes</span> Mientras tanto contamos a los habituales.</p>' : '<p class="small"><span class="pill ok">Todo confirmado</span> Planning y cantidades cerrados.</p>') +
+    (pend ? '<p class="small"><span class="pill warn">' + pend + ' días sin confirmar</span> Mientras tanto contamos a los habituales.</p>' : '<p class="small"><span class="pill ok">Todo apuntado</span> Si alguien cambia de planes, se toca aquí y listo.</p>') +
     '</section>';
 }
 VIEWS.asistencia = function () {
-  var h = '<div class="view-head"><div><h2>Asistencia por día</h2><p class="muted small">Quién viene cada día. Manda sobre los comensales de cada comida y las cantidades de la compra.</p></div></div>';
+  var h = '<div class="view-head"><div><h2>Asistencia por día</h2><p class="muted small">Lo que tenemos apuntado. Si alguien cambia de planes, toca su día. Manda sobre los comensales de cada comida y las cantidades de la compra.</p></div></div>';
   h += '<section class="card"><span class="eyebrow">Previstos · confirmados · pendientes · no vienen</span>' + daySummary() +
     '<div class="stack small">' + S.days.map(function (d) {
       var ms = S.meals.filter(function (m) { return m.day === d.k && m.mode === 'comun'; });

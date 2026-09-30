@@ -22,8 +22,8 @@ function itemSheet(id) {
     '<div class="grid2"><div class="field"><label for="f-qty">Cantidad</label><input id="f-qty" inputmode="decimal" value="' + L.n(i.qty) + '"' + dis + '></div><div class="field"><label for="f-unit">Unidad</label><input id="f-unit" value="' + esc(i.unit) + '"' + dis + '></div></div>' +
     '<div class="grid2"><div class="field"><label for="f-cat">Categoría</label><select id="f-cat"' + dis + '>' + Object.keys(CATS).map(function (c) { return '<option value="' + c + '"' + (i.cat === c ? ' selected' : '') + '>' + CATS[c] + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label for="f-fam">Lo compra</label><select id="f-fam"' + dis + '>' + famOptions(i.family, true) + '</select></div></div>' +
-    '<div class="field"><span class="lbl">Estado</span>' + segHtml('status', [['pendiente', 'Pendiente'], ['comprado', 'Comprado'], ['casa', 'De casa']], draft.status, !can('edit')) + '</div>' +
-    '<div class="grid2"><div class="field"><label for="f-cost">Coste real (€)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
+    '<div class="field"><span class="lbl">¿Lo traéis de casa?</span>' + segHtml('status', [['pendiente', 'No, se compra'], ['casa', 'Sí, de casa (0 €)']], draft.status === 'casa' ? 'casa' : 'pendiente', !can('edit')) + '</div>' +
+    '<div class="grid2"><div class="field"><label for="f-cost">Precio real (opcional)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
     '<div class="field"><span class="lbl">Reparto</span>' + segHtml('split', [['comun', 'Común'], ['propio', 'Propio']], draft.split, !can('edit')) + '</div></div>' +
     '<div class="field"><span class="lbl">Para qué comidas</span><div class="att-fam">' + S.meals.map(function (m) {
       return '<button type="button" class="chip" data-act="dmeal" data-id="' + m.id + '" aria-pressed="' + (draft.meals.indexOf(m.id) >= 0) + '"' + dis + '>' + esc(dayOf(m.day).short) + ' · ' + slotName(m.slot) + '</button>';
@@ -465,9 +465,18 @@ var A = {
     i.family = f.id; save();
     var row = document.getElementById('it-' + i.id); if (row) { row.classList.add('claimed'); }
     if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
-    toast(esc(i.name) + ' → ' + esc(f.name), 'Deshacer', function () { i.family = null; save(); render(true); });
+    toast(esc(i.name) + ' → ' + esc(f.name) + (i.est != null ? ' · ≈ ' + L.money(i.est) : ''), 'Deshacer', function () { i.family = null; save(); render(true); });
+    checkFumata();
     setTimeout(function () { if (!document.getElementById('scrim')) render(true); }, 380);
     if (!L.unassigned(S).length) setTimeout(function () { confetti(2200); toast('¡Todo repartido! Ahora, al súper'); }, 500);
+  },
+  unclaim: function (el) {
+    if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
+    var prev = { family: i.family, status: i.status, cost: i.cost };
+    i.family = null; i.status = 'pendiente'; i.cost = null; save();
+    var row = document.getElementById('it-' + i.id); if (row) row.classList.add('claimed');
+    toast(esc(i.name) + ' vuelve a «Sin dueño»', 'Deshacer', function () { i.family = prev.family; i.status = prev.status; i.cost = prev.cost; save(); render(true); });
+    setTimeout(function () { if (!document.getElementById('scrim')) render(true); }, 380); checkFumata();
   },
   claimMeal: function (el) {
     if (!guard('edit')) return; var f = fam(me().family); if (!f) return;
@@ -478,7 +487,7 @@ var A = {
   owner: function (el) {
     var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
     var cur = fam(i.family);
-    openSheet('<h2>' + esc(i.name) + '</h2><p class="small muted">Ahora lo compra <b>' + (cur ? esc(cur.name) : 'nadie') + '</b>' + (i.status !== 'pendiente' ? ' · ya está ' + (i.status === 'casa' ? 'marcado como «viene de casa»' : 'comprado') : '') + '.</p>' +
+    openSheet('<h2>' + esc(i.name) + '</h2><p class="small muted">Ahora lo compra <b>' + (cur ? esc(cur.name) : 'nadie') + '</b>' + (i.status === 'casa' ? ' · viene de casa' : '') + '.</p>' +
       (can('edit') ? '<div class="stack">' + S.families.map(function (x) { return '<button class="btn block' + (x.id === i.family ? ' primary' : '') + '" data-act="setOwner" data-id="' + i.id + '" data-fam="' + x.id + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + (x.id === me().family ? ' (nosotros)' : '') + '</button>'; }).join('') +
         '<button class="btn ghost block" data-act="setOwner" data-id="' + i.id + '" data-fam="">Soltar: que vuelva a «Sin dueño»</button></div>' : '<p class="small">Solo los editores cambian quién compra cada cosa.</p>') +
       '<button class="btn block" data-act="close">Cerrar</button>');

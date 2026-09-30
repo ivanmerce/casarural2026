@@ -85,17 +85,15 @@ var L = (function () {
     return { share: out, units: units };
   }
 
-  /* gastos comunes por familia. useEst: simulación con precios ESTIMADOS */
-  function paidBy(S, useEst) {
+  /* gastos comunes por familia. Un producto que una familia se pide cuenta ya a su cargo:
+     con el precio real si lo ha apuntado y, si no, con el estimado. «Viene de casa» = 0 €. */
+  function itemCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : (i.est || 0); }
+  function paidBy(S) {
     var paid = {};
     S.families.forEach(function (f) { paid[f.id] = 0; });
     S.ingredients.forEach(function (i) {
-      if ((i.split || 'comun') !== 'comun') return;
-      if (i.status === 'casa') return;
-      var v = null;
-      if (useEst) v = (i.cost != null ? i.cost : i.est);
-      else if (i.status === 'comprado') v = i.cost;
-      if (v && i.family) paid[i.family] += v;
+      if ((i.split || 'comun') !== 'comun' || !i.family || paid[i.family] == null) return;
+      paid[i.family] += itemCost(i);
     });
     (S.expenses || []).forEach(function (e) {
       if ((e.split || 'comun') !== 'comun' || e.kind === 'aportacion') return;
@@ -182,7 +180,7 @@ var L = (function () {
   }
   function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family; }); }
   function coverage(items) {
-    var tot = items.length, done = items.filter(function (i) { return i.status && i.status !== 'pendiente'; }).length;
+    var tot = items.length, done = items.filter(function (i) { return !!i.family; }).length;
     return { tot: tot, done: done, pct: tot ? Math.round(done / tot * 100) : 0 };
   }
 
@@ -247,6 +245,6 @@ var L = (function () {
     return f.w ? f[f.w] : null;
   }
 
-  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, itemCost: itemCost, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;

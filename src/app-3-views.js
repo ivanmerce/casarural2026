@@ -78,8 +78,7 @@ function costeView() {
 
 /* ---------- CUENTAS ---------- */
 VIEWS.cuentas = function () {
-  var useEst = ui.costView === 'est';
-  var lg = L.ledger(S, useEst);
+  var lg = L.ledger(S, false);
   var mode = S.split.mode;
   var tx = L.tax(S);
   var house = S.house;
@@ -104,7 +103,6 @@ VIEWS.cuentas = function () {
 
   /* Reparto */
   h += '<section class="card"><div class="card-head"><h3>Reparto entre familias</h3></div>' +
-    '<div class="seg" role="group" aria-label="Datos"><button data-act="costView" data-v="real" aria-pressed="' + !useEst + '">Real</button><button data-act="costView" data-v="est" aria-pressed="' + useEst + '">Previsión estimada</button></div>' +
     '<div class="field"><span class="lbl">Criterio' + (mode === 'ponderado' ? ' (por defecto)' : '') + '</span><div class="seg" role="group" aria-label="Criterio de reparto"><button data-act="mode" data-v="ponderado" aria-pressed="' + (mode === 'ponderado') + '">Ponderado</button><button data-act="mode" data-v="persona" aria-pressed="' + (mode === 'persona') + '">Por persona</button><button data-act="mode" data-v="familia" aria-pressed="' + (mode === 'familia') + '">Por familia</button></div></div>' +
     '<p class="small muted">' + modeText(mode) + '</p>';
   if (mode === 'ponderado') {
@@ -112,7 +110,7 @@ VIEWS.cuentas = function () {
       return '<div class="field"><label for="w-' + k + '">' + KIND[k] + (k === 'bebe' ? ' (' + esc(babyName()) + ')' : '') + '</label><input id="w-' + k + '" inputmode="decimal" value="' + L.n(S.split.w[k]) + '" data-change="weight" data-k="' + k + '"' + (can('edit') ? '' : ' disabled') + '></div>';
     }).join('') + '</div>';
   }
-  if (useEst) h += '<p class="small"><span class="pill est">ESTIMADO</span> Simulación: cada familia compra lo que tiene asignado a precio estimado.</p>';
+  h += '<p class="small muted">Lo que cada familia se ha pedido de la compra cuenta con su precio real si lo habéis apuntado y, si no, con el estimado <span class="pill est">ESTIMADO</span>. Más los gastos de abajo.</p>';
   h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Familia</th><th>Ha puesto</th><th>Le toca</th><th>Saldo</th></tr></thead><tbody>' +
     lg.rows.map(function (r) {
       var f = fam(r.id);
@@ -121,7 +119,7 @@ VIEWS.cuentas = function () {
     (lg.gifts ? '<p class="small"><span class="pill olive">Aportaciones</span> ' + L.money(lg.gifts) + ' puestos de regalo: se reparten ' + L.money(lg.toShare) + ' en vez de ' + L.money(lg.total) + '.</p>' : '');
 
   if (lg.total === 0) {
-    h += '<div class="empty" style="padding:12px">' + icon('coins') + '<b>Todavía no hay gastos</b><span>Cuando marquéis ingredientes como comprados con su precio o añadáis gastos, aparecerá aquí quién paga a quién. Mientras, mira la previsión estimada.</span></div>';
+    h += '<div class="empty" style="padding:12px">' + icon('coins') + '<b>Todavía no hay nada a cargo de nadie</b><span>Cuando las familias se pidan productos de la compra o añadáis gastos, aparecerá aquí quién paga a quién.</span></div>';
   } else if (!lg.tx.length) {
     h += '<span class="stamp">Cuentas claras, familia unida</span>';
   } else {
@@ -132,9 +130,9 @@ VIEWS.cuentas = function () {
   h += '</section>';
 
   /* Gastos extra */
-  var ingPaid = S.ingredients.filter(function (i) { return i.status === 'comprado' && i.cost; });
+  var ingPaid = S.ingredients.filter(function (i) { return i.family && (i.split || 'comun') === 'comun'; });
   h += '<section class="card"><div class="card-head"><h3>Gastos</h3>' + (can('edit') ? '<button class="btn primary" data-act="newExp">' + icon('plus') + 'Añadir</button>' : '') + '</div>' +
-    '<div class="row small"><span class="grow">Ingredientes comprados con precio (' + ingPaid.length + ')</span><b class="num">' + L.money(ingPaid.reduce(function (a, i) { return a + i.cost; }, 0)) + '</b></div><div class="divider"></div>' +
+    '<div class="row small"><span class="grow">Productos de la compra con dueño (' + ingPaid.length + ')</span><b class="num">≈ ' + L.money(ingPaid.reduce(function (a, i) { return a + L.itemCost(i); }, 0)) + '</b></div><div class="divider"></div>' +
     (S.expenses.length ? S.expenses.map(function (e) {
       return '<button class="row" data-act="editExp" data-id="' + e.id + '" style="background:none;border:0;text-align:left;font:inherit;color:inherit;padding:6px 0;min-height:44px"><i class="fam-dot ' + fam(e.payer).color + '"></i><span class="grow"><b>' + esc(e.concept) + '</b><span class="small muted"> · ' + esc(fam(e.payer).name) + (e.kind === 'aportacion' ? ' · aportación de regalo' : e.split === 'propio' ? ' · propio' : '') + '</span></span><b class="num">' + L.money(e.amount) + '</b></button>';
     }).join('') : '<p class="small muted">Carbón, gasolina, tarta, decoración, regalos… Todo lo que no sea un ingrediente va aquí, con quién lo pagó. Si alguien quiere poner algo extra de regalo para el bote, apúntalo como aportación.</p>') +

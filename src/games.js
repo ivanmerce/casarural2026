@@ -269,8 +269,8 @@ var G = (function () {
     /* --- La casa: todo lo que pasa en la plataforma --- */
     { id: 'derroche', group: 'casa', icon: 'coins', name: 'Los Más Derrochadores', desc: 'Quienes pagan la casa rural (y la tasa turística).',
       auto: function (S) { var p = S.house && S.house.payer; if (!p) return null; var t = typeof L !== 'undefined' ? L.tax(S).withExemption : 0; return { winners: [F(p)], why: 'La casa (' + money(S.house.total) + ')' + (S.tax && S.tax.payer === p && t ? ' y la tasa (' + money(t) + ')' : '') }; } },
-    { id: 'carrito', group: 'casa', icon: 'cart', name: 'Reyes del Carrito', desc: 'La familia que más ingredientes ha comprado de la lista.',
-      auto: function (S) { var arr = famIds(S).map(function (f) { return { f: f, n: S.ingredients.filter(function (i) { return i.family === f && i.status === 'comprado'; }).length }; }); var w = topBy(arr, 'n'); return w.length ? { winners: w.map(function (x) { return F(x.f); }), why: w[0].n + ' ingredientes comprados' } : null; } },
+    { id: 'carrito', group: 'casa', icon: 'cart', name: 'Reyes del Carrito', desc: 'La familia que más productos se ha pedido de la lista de la compra.',
+      auto: function (S) { var arr = famIds(S).map(function (f) { return { f: f, n: S.ingredients.filter(function (i) { return i.family === f; }).length }; }); var w = topBy(arr, 'n'); return w.length ? { winners: w.map(function (x) { return F(x.f); }), why: w[0].n + ' productos a su cargo' } : null; } },
     { id: 'tarjeta', group: 'casa', icon: 'card', name: 'Tarjeta Echando Humo', desc: 'La familia que más dinero ha adelantado para el bote común.',
       auto: function (S) { if (typeof L === 'undefined') return null; var lg = L.ledger(S, false); var arr = lg.rows.map(function (r) { return { f: r.id, n: r.paid }; }); var w = topBy(arr, 'n', 0.01); return w.length ? { winners: w.map(function (x) { return F(x.f); }), why: money(w[0].n) + ' adelantados' } : null; } },
     { id: 'despensa', group: 'casa', icon: 'basket', name: 'Despensa Infinita', desc: 'La familia que más cosas trae de casa.',

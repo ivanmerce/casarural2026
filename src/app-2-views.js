@@ -20,7 +20,7 @@ function countdownParts() {
 VIEWS.inicio = function () {
   var c = countdownParts();
   var cov = L.coverage(S.ingredients);
-  var lgR = L.ledger(S, false), lgE = L.ledger(S, true);
+  var lgR = L.ledger(S, false);
   var pend = S.house.payments.filter(function (p) { return !p.paid; });
   var att = S.people.filter(function (p) { return L.mealsAttended(S, p.id) > 0; });
   var maybe = S.people.filter(function (p) { return L.mealsAttended(S, p.id) === 0; });
@@ -73,9 +73,9 @@ VIEWS.inicio = function () {
   /* Compra + costes */
   h += '<div class="grid2">' +
     '<button class="card" data-act="tab" data-tab="compra" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' cubiertos' + (L.unassigned(S).length ? '<br><b style="color:var(--accent)">' + L.unassigned(S).length + ' sin dueño</b>' : '') + '</span></button>' +
+      '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' con dueño' + (L.unassigned(S).length ? '<br><b style="color:var(--accent)">' + L.unassigned(S).length + ' sin dueño</b>' : '') + '</span></button>' +
     '<button class="card" data-act="tab" data-tab="cuentas" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(lgR.total) + '</span><span class="small muted">gastado de momento<br>Previsión a repartir ≈ ' + L.money(L.estCommon(S)) + ' <span class="pill est">ESTIMADO</span></span></button>' +
+      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(L.estCommon(S)) + '</span><span class="small muted">previsto para el bote común<br>' + L.money(lgR.total) + ' ya a cargo de alguna familia <span class="pill est">ESTIMADO</span></span></button>' +
     '</div>';
 
   /* Familia */
@@ -184,7 +184,7 @@ VIEWS.comidas = function () {
       (m.notes ? '<p class="small muted">' + esc(m.notes) + '</p>' : '') +
       (function () { var k = ings.filter(function (i) { return i.status === 'pendiente' && L.suggestQty(S, i); }).length; return k ? '<button class="card alert" data-act="mealItems" data-id="' + m.id + '" style="padding:10px 12px;text-align:left;font:inherit;color:inherit"><span class="small">Cantidades de la hoja pensadas para 14 y ahora sois <b>' + din.length + '</b>: ' + k + (k === 1 ? ' ingrediente' : ' ingredientes') + ' con ajuste sugerido ' + icon('arrow') + '</span></button>' : ''; })() +
       '<div class="meal-foot"><button class="diners chip" data-act="attendance" data-id="' + m.id + '" aria-label="Cambiar asistencia">' + icon('users') + din.length + ' comensales</button>' +
-      (ings.length ? '<button class="chip" data-act="mealItems" data-id="' + m.id + '">' + icon('basket') + cov.done + '/' + cov.tot + ' ingredientes</button>' : '') +
+      (ings.length ? '<button class="chip" data-act="mealItems" data-id="' + m.id + '">' + icon('basket') + cov.done + '/' + cov.tot + ' con dueño</button>' : '') +
       '<span class="grow"></span>' + (can('edit') ? '<button class="icon-btn" data-act="editMeal" data-id="' + m.id + '" aria-label="Editar comida">' + icon('edit') + '</button>' : '') + '</div>' +
       '</article>';
   });
@@ -196,82 +196,72 @@ VIEWS.comidas = function () {
 VIEWS.compra = function () {
   var myF = me().family, free = L.unassigned(S);
   if (!ui.fam) ui.fam = free.length ? 'libre' : myF;
-  var f = ui.fam, st = ui.st || 'pendiente', q = (ui.q || '').toLowerCase();
+  var f = ui.fam, q = (ui.q || '').toLowerCase();
   var all = S.ingredients;
   function inFam(i) { return f === 'all' || (f === 'libre' ? !i.family : i.family === f); }
   var list = all.filter(function (i) {
     if (!inFam(i)) return false;
     if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
-    if (f !== 'libre' && st === 'pendiente' && i.status !== 'pendiente') return false;
-    if (f !== 'libre' && st === 'hecho' && i.status === 'pendiente') return false;
     if (q && i.name.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-  var scope = all.filter(function (i) { return inFam(i) && (!ui.mealFilter || i.meals.indexOf(ui.mealFilter) >= 0); });
-  var cov = L.coverage(all), real = all.reduce(function (a, i) { return a + (i.status === 'comprado' && i.cost ? i.cost : 0); }, 0);
   var assigned = all.length - free.length, pctA = all.length ? Math.round(assigned / all.length * 100) : 0;
+  var mine = all.filter(function (i) { return i.family === myF; }), mineCost = mine.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
 
-  var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div>' +
-    '<button class="chip" data-act="superMode" aria-pressed="' + !!ui.superMode + '">' + icon('cart') + 'Modo súper</button></div>';
-  /* cómo funciona: 3 pasos, siempre a mano */
-  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">3 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
-    '<li><span><b>Mira lo que falta.</b> En «Sin dueño» está todo lo que nadie se ha pedido todavía.</span></li>' +
-    '<li><span><b>Pídetelo.</b> Toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span> en lo que vaya a comprar (o traer de casa) tu familia. Si vienes desde Comidas, puedes pedirte la comida entera.</span></li>' +
-    '<li><span><b>En el súper, márcalo.</b> En «' + esc(fam(myF) ? fam(myF).name : 'Lo nuestro') + '» toca el círculo al meterlo en el carro y apunta el precio: las cuentas salen solas.</span></li></ol>') + '</section>';
-  /* reparto: quién se ha pedido qué */
+  var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div></div>';
+  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">2 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
+    '<li><span><b>Pídete lo que vayáis a comprar.</b> En «Sin dueño», toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span>. Ya queda a cargo de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + ' con su precio estimado. Desde Comidas puedes pedirte una comida entera.</span></li>' +
+    '<li><span><b>¿Te has equivocado?</b> En «Lo nuestro», toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si queréis, tocando un producto podéis poner el precio real o marcar que lo traéis de casa (0 €). Las cuentas se hacen solas.</p>') + '</section>';
   h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + all.length + ' con dueño</span></div>' +
     '<div class="progress split" role="progressbar" aria-valuenow="' + pctA + '" aria-valuemin="0" aria-valuemax="100">' + S.families.map(function (x) { var n = all.filter(function (i) { return i.family === x.id; }).length; return n ? '<i class="fb ' + x.color + '" style="width:' + (n / all.length * 100) + '%"></i>' : ''; }).join('') + '</div>' +
     '<div class="fam-bars">' + S.families.map(function (x) {
-      var its = all.filter(function (i) { return i.family === x.id; }), e = its.reduce(function (a, i) { return a + (i.status === 'casa' ? 0 : (i.cost != null ? i.cost : (i.est || 0))); }, 0);
+      var its = all.filter(function (i) { return i.family === x.id; }), e = its.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
       return '<button class="fam-bar" data-act="fam" data-fam="' + x.id + '"><i class="fam-dot ' + x.color + '"></i><b>' + esc(x.short || x.name) + '</b><span class="num">' + its.length + '</span><small class="muted num">≈ ' + L.money(e) + '</small></button>';
     }).join('') + '<button class="fam-bar libre" data-act="fam" data-fam="libre"><i class="fam-dot none"></i><b>Sin dueño</b><span class="num">' + free.length + '</span></button></div>' +
-    '<div class="row small"><span class="grow">Comprado: <b class="num">' + cov.done + '/' + cov.tot + '</b> · gastado <b class="num">' + L.money(real) + '</b></span><span>Previsión ≈ <b class="num">' + L.money(L.estCommon(S)) + '</b> <span class="pill est">ESTIMADO</span></span></div></section>';
+    '<p class="small muted">Total previsto ≈ <b class="num">' + L.money(L.estCommon(S)) + '</b> <span class="pill est">ESTIMADO</span></p></section>';
 
-  var nSug = S.ingredients.filter(function (i) { return i.status === 'pendiente' && L.suggestQty(S, i); }).length;
+  var nSug = S.ingredients.filter(function (i) { return L.suggestQty(S, i); }).length;
   if (nSug) h += '<section class="card alert" style="gap:8px"><p class="small"><b>' + nSug + ' cantidades</b> vienen de la hoja (pensadas para 14) y no cuadran con los comensales previstos según la asistencia.</p><div class="row wrap">' + (can('edit') ? '<button class="btn" data-act="applyAllQty">Ajustar todas</button>' : '') + '<button class="btn ghost" data-act="tab" data-tab="asistencia">Ver asistencia</button></div></section>';
   h += '<div class="chips" role="group" aria-label="Qué lista ver">' +
     '<button class="chip" data-act="fam" data-fam="libre" aria-pressed="' + (f === 'libre') + '">' + icon('basket') + 'Sin dueño <b class="num">' + free.length + '</b></button>' +
-    (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro</button>' : '') +
+    (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro <b class="num">' + mine.length + '</b></button>' : '') +
     '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo</button>' +
     S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + '</button>'; }).join('') + '</div>';
-  if (f !== 'libre') h += '<div class="seg" role="group" aria-label="Estado"><button data-act="st" data-st="pendiente" aria-pressed="' + (st === 'pendiente') + '">Por comprar</button><button data-act="st" data-st="hecho" aria-pressed="' + (st === 'hecho') + '">Hecho</button><button data-act="st" data-st="todo" aria-pressed="' + (st === 'todo') + '">Todo</button></div>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';
   if (ui.mealFilter) {
     var mf = meal(ui.mealFilter), freeM = all.filter(function (i) { return !i.family && i.meals.indexOf(ui.mealFilter) >= 0; }).length;
     h += '<section class="card wood" style="gap:8px"><div class="row"><span class="grow"><span class="eyebrow">Solo esta comida</span><b style="display:block">' + esc(mf.title) + '</b><small class="muted">' + esc(dayOf(mf.day).long) + ' · ' + slotName(mf.slot) + '</small></span><button class="link" data-act="clearMeal">Quitar filtro ' + icon('x') + '</button></div>' +
       (freeM && can('edit') && fam(myF) ? '<button class="btn primary block" data-act="claimMeal" data-id="' + mf.id + '">' + icon('plus') + 'Nos pedimos esta comida (' + freeM + ' sin dueño)</button>' : '') + '</section>';
   }
-  if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a la lista de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '. Te lo puedes quitar después.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
+  if (f === myF && mine.length) h += '<section class="card mine-sum"><div class="row"><span class="grow"><span class="eyebrow">A cargo de ' + esc(fam(myF).name) + '</span><b class="big num">≈ ' + L.money(mineCost) + '</b></span><span class="small muted">' + mine.length + (mine.length === 1 ? ' producto' : ' productos') + '</span></div><p class="small muted">Esta es vuestra lista para el súper. ¿Algo que no vais a comprar? Tócale «Soltar».</p></section>';
+  if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a «Lo nuestro» de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
 
   if (!list.length) {
-    h += '<div class="empty">' + icon('basket') + (f === 'libre' ? '<b>¡Todo tiene dueño!</b><span>No queda nada sin repartir. Ahora, a por ello al súper.</span>' : f === myF && !scope.length ? '<b>Tu lista está vacía</b><span>Pásate por «Sin dueño» y pídete algo. Los demás te lo agradecerán.</span><button class="btn primary" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : fam(f) && !scope.length ? '<b>' + esc(fam(f).name) + ' aún no se ha pedido nada</b><span>Cuando se pidan productos, aparecerán aquí.</span><button class="btn" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : st === 'pendiente' && scope.length ? '<b>Nada por comprar aquí</b><span>Esta familia es una máquina. Mira en «Hecho» o echa una mano a otra.</span>' : '<b>La lista está vacía</b><span>Añade el primer ingrediente con el botón +</span>') + '</div>';
+    h += '<div class="empty">' + icon('basket') + (f === 'libre' ? '<b>¡Todo tiene dueño!</b><span>No queda nada sin repartir. Ahora, a por ello al súper.</span>' : f === myF ? '<b>Aún no os habéis pedido nada</b><span>Pásate por «Sin dueño» y pídete algo. Los demás os lo agradecerán.</span><button class="btn primary" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : fam(f) ? '<b>' + esc(fam(f).name) + ' aún no se ha pedido nada</b><span>Cuando se pidan productos, aparecerán aquí.</span><button class="btn" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : '<b>No hay nada con ese nombre</b><span>Prueba con otra palabra o añádelo con el botón +</span>') + '</div>';
   } else {
     var groups = {};
     list.forEach(function (i) { (groups[i.cat] = groups[i.cat] || []).push(i); });
     Object.keys(CATS).forEach(function (c) {
       if (!groups[c]) return;
-      var gAll = scope.filter(function (i) { return i.cat === c; }), gc = L.coverage(gAll);
-      h += '<div class="cat-head"><span class="eyebrow">' + CATS[c] + '</span><span class="small muted num">' + (f === 'libre' ? groups[c].length : gc.done + '/' + gc.tot) + '</span></div>';
-      h += '<div class="items' + (ui.superMode ? ' super' : '') + '">' + groups[c].map(itemRow).join('') + '</div>';
+      h += '<div class="cat-head"><span class="eyebrow">' + CATS[c] + '</span><span class="small muted num">' + groups[c].length + '</span></div>';
+      h += '<div class="items">' + groups[c].map(itemRow).join('') + '</div>';
     });
   }
   if (can('edit')) h += '<button class="fab" data-act="newItem" aria-label="Añadir ingrediente">' + icon('plus') + '</button>';
   return h;
 };
 function itemRow(i) {
-  var f = fam(i.family), mine = i.family && i.family === me().family;
-  var cls = (i.status === 'comprado' ? ' done' : i.status === 'casa' ? ' casa' : '') + (f ? '' : ' free');
-  var chk = i.status === 'comprado' ? ' on' : i.status === 'casa' ? ' home' : '';
+  var f = fam(i.family), mine = i.family && i.family === me().family, ed = can('edit');
   var mealNames = i.meals.map(function (id) { var m = meal(id); return m ? dayOf(m.day).short + ' ' + slotName(m.slot).toLowerCase() : ''; }).filter(Boolean);
   var price = i.status === 'casa' ? '<span class="muted">0 €</span><small>DE CASA</small>' : i.cost != null ? L.money(i.cost) : (i.est != null ? '<span class="muted">≈ ' + L.money(i.est) + '</span><small>ESTIMADO</small>' : '');
-  var left = f ? '<button class="check' + chk + '" data-act="tick" data-id="' + i.id + '" aria-label="' + (i.status === 'pendiente' ? 'Marcar comprado: ' : 'Marcar pendiente: ') + esc(i.name) + '"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>'
-    : '<span class="check free-dot" aria-hidden="true">?</span>';
-  var owner = f ? '<button class="owner ' + f.color + (mine ? ' mine' : '') + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '. Cambiar">' + (mine ? 'Nuestro' : esc(f.short || f.name)) + '</button>'
-    : (can('edit') && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>');
-  return '<div class="item' + cls + '" id="it-' + i.id + '">' + left +
+  var act = !f ? (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>')
+    : mine ? (ed ? '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>' : '<span class="owner ' + f.color + ' mine">Nuestro</span>')
+    : '<button class="owner ' + f.color + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + esc(f.short || f.name) + '</button>';
+  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + '" id="it-' + i.id + '">' +
+    (f ? '<i class="own-bar ' + f.color + '" aria-hidden="true"></i>' : '') +
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
       (i.split === 'propio' ? '<span class="pill olive">propio</span>' : '') + (i.sug ? '<span class="pill">sugerido</span>' : '') +
-      (function () { var sg = i.status === 'pendiente' && L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
-    '<div class="price">' + price + owner + '</div></div>';
+      (function () { var sg = L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
+    '<div class="price">' + price + act + '</div></div>';
 }
