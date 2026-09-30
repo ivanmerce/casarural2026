@@ -17,6 +17,7 @@ function buildEggs() {
     { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'El primer secreto es saber que hay secretos', more: 'Ya lo tienes: abrir esta lista' },
     { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'Quien lee las instrucciones hasta el final…', more: 'Inicio → Manual de uso, y baja hasta abajo del todo' },
     { k: 'dias', name: 'Presente', how: 'Tocar un día en «Vuestros días» o en Asistencia', hint: 'Pasar lista', more: 'En Inicio, toca un día de tu fila en «Vuestros días»' },
+    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Inicio → La finca → toca el Wi-Fi' },
     { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Mira al cielo… desde la app', more: 'Inicio → El tiempo en la finca → Detalle' },
     { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'Apaga la luz', more: 'Toca tu nombre arriba a la derecha y busca el tema' },
     { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'Los planes también se quieren', more: 'En Planes, el corazón de cualquier actividad' },
@@ -63,17 +64,27 @@ function hasEgg(k) { return !!foundMap()[k]; }
 function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
 /* Lo que cuenta para el ranking: lo descubierto antes del cierre */
 function rankedCount() { var f = foundMap(), c = secretsClose().getTime(); return EGGS.filter(function (e) { return f[e.k] && new Date(f[e.k]).getTime() < c; }).length; }
-function egg(k) {
+function egg(k, quiet) {
   var f = foundMap(); if (f[k]) return false;
   var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
   f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
   var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
-  setTimeout(function () {
-    if (all && !late) message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">Guardián de los Secretos</h2><p>Los ' + EGGS.length + ' secretos de la casa. Trofeo asegurado en la gala… y ni una palabra a nadie.</p>', 4200);
-    else toast('Secreto descubierto: <b>' + esc(e.name) + '</b> · ' + n + '/' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet);
-  }, k === 'curioso' ? 500 : 2600);
+  if (all && !late) setTimeout(function () { fireworks(7000, 14); message('<div class="trophy">' + icon('trophy') + '</div><span class="egg-badge">Los ' + EGGS.length + ' de ' + EGGS.length + '</span><h2>Guardián de los Secretos</h2><p>Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.</p>', 5200); }, quiet ? 4800 : 300);
+  else if (!quiet) setTimeout(function () { fireworks(3000, 3); toast('<b>¡Secreto desbloqueado!</b> «' + esc(e.name) + '» · ' + n + ' de ' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet); }, 250);
   try { if (window.CLOUD && CLOUD.pingNow) CLOUD.pingNow(); } catch (x) {}
   return true;
+}
+/* Un secreto con efecto: una sola tarjeta, al momento, que se entiende */
+function eggBadge(isNew) { return isNew ? '<span class="egg-badge">Secreto desbloqueado · ' + foundCount() + ' de ' + EGGS.length + '</span>' : ''; }
+function eggCard(k, title, text, top, ms) {
+  var isNew = egg(k, true);
+  if (isNew) fireworks(4200, 6);
+  message((top || '') + eggBadge(isNew) + '<h2>' + title + '</h2><p>' + text + '</p>' + (isNew ? '<small class="egg-hush">Chitón: que cada uno encuentre los suyos</small>' : ''), ms || 4600);
+}
+function eggToast(k, text) {
+  var isNew = egg(k, true);
+  if (isNew) fireworks(3000, 3);
+  toast((isNew ? '<b>¡Secreto ' + foundCount() + ' de ' + EGGS.length + '!</b> ' : '') + text, isNew ? 'Ver' : null, isNew ? secretsSheet : null);
 }
 
 /* ----- Pistas extra: 3 por persona en total ----- */
@@ -142,8 +153,7 @@ function manualEndCheck() {
 window.addEventListener('scroll', function () { if (ui && ui.tab === 'manual') manualEndCheck(); }, { passive: true });
 function abuMeterFx() {
   confetti(1800);
-  message('<h2 style="font-size:clamp(1.8rem,9vw,3rem)">Abuelómetro<br>al rojo vivo</h2><p>Aviso: el medidor no acepta sobornos. Bueno, un vermut sí.</p>', 3000);
-  egg('abumetro');
+  eggCard('abumetro', 'Abuelómetro al rojo vivo', 'Lo has tocado tanto que se ha calentado. Aviso: el medidor no acepta sobornos. Bueno, un vermut sí.');
 }
 
 /* ----- Alarma del cierre: 2 horas antes, para todos los que estén en la app ----- */
@@ -172,7 +182,7 @@ function secretsAlarm(ms) {
 }
 function secretsClosedFx() {
   var rk = secretsRanking(), top = rk.filter(function (r) { return r.pos === 1 && r.n > 0; });
-  fumataRaw('RANKING<br>CERRADO', top.length ? 'Mejor cazasecretos: ' + top.map(function (r) { return esc(pname(r.id)); }).join(' y ') + ' (' + top[0].n + '/' + EGGS.length + '). Desde ahora, los secretos ya no suman.' : 'El ranking de secretos se ha cerrado.');
+  fumataRaw('¡Ranking cerrado!', top.length ? 'Mejor cazasecretos: ' + top.map(function (r) { return esc(pname(r.id)); }).join(' y ') + ' (' + top[0].n + '/' + EGGS.length + '). Desde ahora, los secretos ya no suman.' : 'El ranking de secretos se ha cerrado.');
 }
 function alarmBeep() {
   try {

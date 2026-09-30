@@ -407,15 +407,14 @@ function afterResult(g, before) {
 function gTrophy(id, title) {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
   confetti(3600); fanfare();
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(2rem,10vw,3.6rem)">' + esc(eText(id)) + '</h2><p>Campeón: ' + esc(title) + '</p>', 3600);
-  setTimeout(function () { v.remove(); }, 3700);
-  egg('trophy');
+  eggCard('trophy', esc(eText(id)), 'Campeón de «' + esc(title) + '». Aplausos, fotos y, si quiere, una vuelta de honor por la nave.', '<div class="trophy">' + icon('trophy') + '</div>');
+  setTimeout(function () { v.remove(); }, 4400);
 }
 function checkAllGames() {
   var gs = S.games || []; if (!gs.length || ui.allDoneShown) return;
   if (gs.every(function (g) { return G.isDone(S, g); })) {
     ui.allDoneShown = true; var r = G.ranking(S).filter(function (x) { return x.pos === 1; });
-    setTimeout(function () { fumataRaw('HABEMUS<br>CAMPEÓN', r.map(function (x) { return esc(eText(x.id)); }).join(' y ') + ' gana el ' + esc(S.trip.name) + '. Ya podéis preparar la gala.'); egg('habemus'); }, 1200);
+    setTimeout(function () { fumataRaw('¡Tenemos campeón!', r.map(function (x) { return esc(eText(x.id)); }).join(' y ') + ' gana el finde. Que vaya preparando el discurso para la gala (máximo 30 segundos).', 'habemus'); }, 1200);
   }
 }
 function champOf(g) { var sd = G.standings(S, g); return sd.champion || (sd.complete ? 'done' : null); }

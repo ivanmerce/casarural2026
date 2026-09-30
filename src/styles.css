@@ -816,3 +816,32 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 @keyframes bell { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
 @media (prefers-reduced-motion: reduce) { .sec-banner, .sec-bell, .egg-poke { animation: none; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.split-how { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--r-sm); background: var(--olive-soft); }
+.split-how .aw-ico { flex: none; }
+
+/* v0.5.9 · Mensajes de secretos legibles, al momento y que se cierran con un toque */
+button, a, [data-act], [data-egg] { touch-action: manipulation; }
+.egg-msg { pointer-events: auto; cursor: pointer; }
+.egg-msg .inner { width: min(400px, 100%); display: grid; gap: 8px; justify-items: center; padding: 22px 20px 16px; border-radius: 24px; background: rgba(20, 14, 16, .88); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, .14); box-shadow: 0 24px 70px rgba(0, 0, 0, .45); }
+.egg-msg h2 { font-size: clamp(1.9rem, 8.5vw, 2.6rem) !important; line-height: 1.05; color: #fff; text-shadow: none; }
+.egg-msg p { color: #F1E9E4; font-weight: 600; font-size: 1.02rem; line-height: 1.4; text-shadow: none; margin: 0; max-width: 34ch; }
+.egg-msg .eleven { font-size: min(34vw, 170px) !important; }
+.egg-msg .trophy { margin-bottom: 2px; }
+.egg-badge { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--gold, #E8B64A); color: #1C1614; font-weight: 800; font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+.egg-hush { color: #BFB3AD; font-size: .8rem; }
+.egg-tap { color: #8F827C; font-size: .72rem; margin-top: 2px; }
+
+/* v0.6 · La finca */
+.finca-card { gap: 12px; }
+.wifi { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: inherit; padding: 12px; border-radius: var(--r-sm); border: 1px dashed var(--glass-line); background: var(--surface-2); min-height: 56px; }
+.wifi small { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+.wifi b { font-size: 1.02rem; }
+.wifi-pass { text-align: right; }
+.reg { display: grid; gap: 8px; }
+.reg-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.reg-p[aria-pressed="true"] { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, var(--glass)); }
+.reg-p span.small { color: var(--muted); }
+.finca-ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.finca-ul li { line-height: 1.45; }
+.shop { text-decoration: none; color: inherit; padding: 8px 0; min-height: 48px; border-bottom: 1px dashed var(--glass-line); }
+a.fact { color: inherit; text-decoration: none; }

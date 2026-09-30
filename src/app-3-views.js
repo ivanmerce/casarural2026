@@ -78,7 +78,7 @@ VIEWS.cuentas = function () {
   h += '<section class="card wood"><div class="card-head"><span class="eyebrow">La casa · fuera del reparto</span><span class="pill olive">Invitan ' + esc(fam(house.payer).name) + '</span></div>' +
     '<div class="row"><span class="big">' + L.money(house.total) + '</span><span class="grow small muted">' + S.tax.nights + ' noches · pagado ' + L.money(paidH) + '</span></div>' +
     house.payments.map(function (p) {
-      return '<div class="pay"><span class="when">' + L.ddmm(p.paid ? (p.date || p.due) : p.due) + '</span><span class="grow">' + esc(p.label) + ' · <b class="num">' + L.money(p.amount) + '</b></span>' + (p.paid ? '<span class="pill ok">Pagado</span>' : '<span class="pill warn">Vence ' + L.ddmm(p.due) + '</span>') + '</div>';
+      return '<div class="pay"><span class="when">' + L.ddmm(p.paid ? (p.date || p.due) : p.due) + '</span><span class="grow">' + esc(p.label) + ' · <b class="num">' + L.money(p.amount) + '</b>' + (p.note && !p.paid ? '<small class="muted" style="display:block;user-select:all">' + esc(p.note) + '</small>' : '') + '</span>' + (p.paid ? '<span class="pill ok">Pagado</span>' : '<span class="pill warn">Vence ' + L.ddmm(p.due) + '</span>') + '</div>';
     }).join('') +
     '<details><summary>Política de cancelación</summary><ul class="small">' + house.cancel.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></details></section>';
 
@@ -87,7 +87,7 @@ VIEWS.cuentas = function () {
   h += '<section class="card"><div class="card-head"><h3>Tasa turística</h3>' + (S.tax.payer ? '<span class="pill olive">Invitan ' + esc(fam(S.tax.payer).name) + '</span>' : '<span class="pill pend">Quién paga: PENDIENTE</span>') + '</div>' +
     '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">' + tx.stays + ' noches-persona × ' + L.money(S.tax.perNight) + ' · ' + tx.adults + ' pagan</span></div>' +
     '<div class="tax-list">' + tx.rows.filter(function (r) { return r.pays; }).map(function (r) { return '<span class="online-chip">' + av(r.id, 'xs') + pname(r.id) + ' <small class="muted">' + r.nights + (r.nights === 1 ? ' noche' : ' noches') + '</small></span>'; }).join('') + '</div>' +
-    (exNames.length ? '<p class="small"><b>Exentos por edad (16 o menos):</b> ' + exNames.join(', ') + '</p>' : '') +
+    (exNames.length ? '<p class="small"><b>Exentos por edad (menores de ' + (S.tax.minAge || 16) + '):</b> ' + exNames.join(', ') + '</p>' : '') +
     '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
 
   /* Reparto */
@@ -98,13 +98,7 @@ VIEWS.cuentas = function () {
   var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
   h += '<section class="card"><div class="card-head"><h3>Reparto entre hermanos y compañía</h3></div>' +
     (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
-    '<div class="field"><span class="lbl">Criterio' + (mode === 'ponderado' ? ' (por defecto)' : '') + '</span><div class="seg" role="group" aria-label="Criterio de reparto"><button data-act="mode" data-v="ponderado" aria-pressed="' + (mode === 'ponderado') + '">Ponderado</button><button data-act="mode" data-v="persona" aria-pressed="' + (mode === 'persona') + '">Por persona</button><button data-act="mode" data-v="familia" aria-pressed="' + (mode === 'familia') + '">Por familia</button></div></div>' +
-    '<p class="small muted">' + modeText(mode) + '</p>';
-  if (mode === 'ponderado') {
-    h += '<div class="grid2" style="grid-template-columns:repeat(3,1fr)">' + ['adulto', 'menor', 'bebe'].map(function (k) {
-      return '<div class="field"><label for="w-' + k + '">' + KIND[k] + (k === 'bebe' ? ' (' + esc(babyName()) + ')' : '') + '</label><input id="w-' + k + '" inputmode="decimal" value="' + L.n(S.split.w[k]) + '" data-change="weight" data-k="' + k + '"' + (can('edit') ? '' : ' disabled') + '></div>';
-    }).join('') + '</div>';
-  }
+    '<div class="split-how"><span class="aw-ico sm">' + icon('users') + '</span><p class="small"><b>Cómo se reparte:</b> a proporción de <b>quién viene y a cuántas comidas</b>. Adultos y peques cuentan igual (comen como un adulto, y lo sabemos); ' + esc(babyName()) + ', que aún come poco, no cuenta. Así, una familia de 5 paga más que una de 3, y quien viene menos días paga menos.</p></div>';
   var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
   h += '<p class="small muted">Aquí solo cuentan los productos de la compra <b>con precio real</b> (o que vienen de casa) y los gastos de abajo.</p>' +
     (noP.length ? '<div class="card alert" style="padding:10px 12px;gap:6px"><p class="small"><b>' + noP.length + ' productos pedidos aún sin precio</b> (≈ ' + L.money(noP.reduce(function (a, i) { return a + (i.est || 0); }, 0)) + '): ' +
@@ -112,7 +106,7 @@ VIEWS.cuentas = function () {
   h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Familia</th><th>Ha puesto</th><th>Le toca</th><th>Saldo</th></tr></thead><tbody>' +
     rowsR.map(function (r) {
       var f = fam(r.id);
-      return '<tr><td><span class="row" style="gap:6px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</span><span class="small muted">' + Math.round(r.share * 100) + ' %</span>' + (r.gift ? '<span class="small" style="display:block;color:var(--olive)">incluye aportación de ' + L.money(r.gift) + '</span>' : '') + '</td><td>' + L.money(r.paid) + '</td><td>' + L.money(r.owe) + '</td><td class="' + (r.bal > 0.004 ? 'pos' : r.bal < -0.004 ? 'neg' : '') + '">' + (r.bal > 0 ? '+' : '') + L.money(r.bal) + '</td></tr>';
+      return '<tr><td><span class="row" style="gap:6px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</span><span class="small muted">' + famHeads(r.id) + ' · ' + Math.round(r.share * 100) + ' %</span>' + (r.gift ? '<span class="small" style="display:block;color:var(--olive)">incluye aportación de ' + L.money(r.gift) + '</span>' : '') + '</td><td>' + L.money(r.paid) + '</td><td>' + L.money(r.owe) + '</td><td class="' + (r.bal > 0.004 ? 'pos' : r.bal < -0.004 ? 'neg' : '') + '">' + (r.bal > 0 ? '+' : '') + L.money(r.bal) + '</td></tr>';
     }).join('') + '</tbody></table></div>' +
     '<div class="pot"><div class="row"><span class="grow">Gasto total con precio real</span><b class="num">' + L.money(lg.total) + '</b></div>' +
     (lg.gifts ? '<div class="row olive-t"><span class="grow">Invitaciones' + (exF.length ? ' (abuelos y regalos)' : '') + '</span><b class="num">− ' + L.money(lg.gifts) + '</b></div>' : '') +
@@ -189,6 +183,11 @@ function abuCard(lg, tx) {
       '<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Abuelos, os echamos de menos en el Abuelómetro de la app de ' + (S.trip.short || 'la casa rural') + '. Ni una presión, eh. Bueno, un poco. ' + location.origin + location.pathname + ' ') + '">' + icon('megaphone') + 'Mandar una indirecta a los abuelos</a>';
   }
   return h + '</section>';
+}
+function famHeads(fid) {
+  var ps = S.people.filter(function (p) { return p.family === fid && L.mealsAttended(S, p.id) > 0 && (S.split.w[p.kind] == null ? 1 : S.split.w[p.kind]) > 0; });
+  var full = ps.filter(function (p) { return L.mealsAttended(S, p.id) === S.meals.length; }).length;
+  return ps.length + (ps.length === 1 ? ' persona' : ' personas') + (full < ps.length ? ' (' + (ps.length - full) + ' no todos los días)' : '');
 }
 function modeText(m) {
   if (m === 'familia') return 'Cada familia que asiste paga lo mismo, venga quien venga.';

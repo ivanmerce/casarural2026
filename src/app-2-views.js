@@ -53,6 +53,7 @@ VIEWS.inicio = function () {
 
   /* Confirmación por día */
   h += manualCardHome();
+  if (typeof fincaHomeCard === 'function') h += fincaHomeCard();
   h += confirmCard();
   h += presenceCard();
   h += compCard();

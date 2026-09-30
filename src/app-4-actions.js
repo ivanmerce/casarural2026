@@ -165,7 +165,7 @@ function menuSheet() {
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="finca">' + icon('house') + 'La finca: Wi-Fi, normas y compras</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -221,8 +221,12 @@ function fxLayer(veil) {
   return { el: l, ctx: ctx, W: window.innerWidth, H: window.innerHeight, done: function () { l.remove(); if (l._veil) l._veil.remove(); } };
 }
 function message(html, ms) {
-  var m = document.createElement('div'); m.className = 'egg-msg'; m.innerHTML = '<div class="inner">' + html + '</div>';
-  document.body.appendChild(m); setTimeout(function () { m.style.transition = 'opacity .5s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 500); }, ms || 3200);
+  document.querySelectorAll('.egg-msg').forEach(function (x) { x.remove(); });
+  var m = document.createElement('div'); m.className = 'egg-msg'; m.setAttribute('role', 'status');
+  m.innerHTML = '<div class="inner">' + html + '<span class="egg-tap">Toca para cerrar</span></div>';
+  var gone = false, close = function () { if (gone) return; gone = true; m.style.transition = 'opacity .35s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 350); };
+  m.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+  document.body.appendChild(m); setTimeout(close, ms || 4200);
 }
 function confetti(ms) {
   var fx = fxLayer(false), cols = ['#C4112F', '#1C1614', '#FFFFFF', '#E8B64A', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()];
@@ -234,12 +238,39 @@ function confetti(ms) {
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
 }
+/* Fuegos artificiales: cohetes que suben con estela y estallan en palmeras de colores */
+function fireworks(ms, rockets) {
+  var fx = fxLayer(false), W = fx.W, H = fx.H, ctx = fx.ctx, D = ms || 4200, t0 = performance.now();
+  var cols = ['#FF3B5C', '#FFD166', '#06D6A0', '#4CC9F0', '#F72585', '#7B2FF7', '#FF9F1C', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C4112F'];
+  var R = [], P = [], n = rockets || 6;
+  for (var i = 0; i < n; i++) R.push({ at: t0 + i * (D * .55 / n) + Math.random() * 120, x: W * (.15 + Math.random() * .7), y: H + 10, tx: W * (.12 + Math.random() * .76), ty: H * (.12 + Math.random() * .32), c: cols[i % cols.length], launched: false, done: false, trail: [] });
+  function boom(r) {
+    var k = 70 + Math.floor(Math.random() * 40), c2 = cols[Math.floor(Math.random() * cols.length)];
+    for (var j = 0; j < k; j++) { var a = Math.PI * 2 * j / k, sp = 2.6 + Math.random() * 4.4; P.push({ x: r.x, y: r.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, c: j % 3 ? r.c : c2, s: 2.4 + Math.random() * 2.4 }); }
+    pop();
+  }
+  function pop() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); var len = actx.sampleRate * .35, b = actx.createBuffer(1, len, actx.sampleRate), d = b.getChannelData(0); for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); var src = actx.createBufferSource(), g = actx.createGain(); src.buffer = b; g.gain.value = .12; src.connect(g); g.connect(actx.destination); src.start(); } catch (e) {} }
+  (function f(t) {
+    ctx.globalCompositeOperation = 'source-over'; ctx.clearRect(0, 0, W, H);
+    R.forEach(function (r) {
+      if (r.done || t < r.at) return;
+      var k = Math.min(1, (t - r.at) / 650), e = 1 - Math.pow(1 - k, 3);
+      var x = r.x + (r.tx - r.x) * e, y = H + 10 + (r.ty - H - 10) * e;
+      r.trail.push([x, y]); if (r.trail.length > 12) r.trail.shift();
+      r.trail.forEach(function (p, i) { ctx.globalAlpha = i / r.trail.length; ctx.fillStyle = '#FF9F1C'; ctx.beginPath(); ctx.arc(p[0] + (Math.random() - .5) * 1.5, p[1], 1.6 + i / 6, 0, Math.PI * 2); ctx.fill(); });
+      if (k >= 1) { r.done = true; r.x = x; r.y = y; boom(r); }
+    });
+    P.forEach(function (p) { p.vx *= .985; p.vy = p.vy * .985 + .045; p.x += p.vx; p.y += p.vy; p.life -= .012; if (p.life <= 0) return; ctx.globalAlpha = Math.max(0, p.life) * (Math.random() < .12 ? .4 : 1); ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill(); });
+    P = P.filter(function (p) { return p.life > 0; });
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    if (t - t0 < D || P.length) requestAnimationFrame(f); else fx.done();
+  })(t0);
+}
 function bdayParty() {
   if (fxBusy) return; fxBusy = true; setTimeout(function () { fxBusy = false; }, 4200);
   confetti(4200);
   var e = S.trip.eggs || {};
-  message('<div class="eleven">' + (e.bdayAge || '') + '</div><h2 style="font-size:clamp(1.8rem,8vw,3rem)">¡Felicidades, ' + esc(bdayName()) + '!</h2><p>' + (e.bdayAge || '') + ' años y un finde entero para celebrarlo.</p>', 3800);
-  egg('bday');
+  eggCard('bday', '¡Felicidades, ' + esc(bdayName()) + '!', (e.bdayAge ? e.bdayAge + ' años' : 'Un año más') + ' y un finde entero para celebrarlo. Por cierto: tanto toque ya cuenta como abrazo.', '<div class="eleven">' + (e.bdayAge || '') + '</div>', 4200);
 }
 function fumata() {
   var fx = fxLayer(true);
@@ -251,8 +282,7 @@ function fumata() {
     puffs = puffs.filter(function (p) { return p.y + p.r > -40 && p.a > .02; });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  setTimeout(function () { message('<h2>HABEMUS<br>COMPRA</h2><p>Fumata blanca: la lista está completa. La familia puede comer en paz.</p>', 3600); }, 900);
-  egg('fumata');
+  setTimeout(function () { eggCard('fumata', '¡Lista completa!', 'Todos los productos de la compra tienen dueño. Fumata blanca: esta familia no pasará hambre.'); }, 700);
 }
 function checkFumata() {
   var c = L.coverage(S.ingredients);
@@ -261,12 +291,12 @@ function checkFumata() {
 }
 function checkClaras() {
   var lg = L.ledger(S, false);
-  if (lg.total > 0 && !lg.tx.length) { if (egg('claras')) setTimeout(function () { message('<h2 style="font-size:clamp(2rem,10vw,3.4rem)">Cuentas claras,<br>familia unida</h2>', 2800); }, 300); }
+  if (lg.total > 0 && !lg.tx.length) { if (!hasEgg('claras')) setTimeout(function () { eggCard('claras', 'Cuentas claras', 'Nadie le debe nada a nadie. Haz captura, que esto no vuelve a pasar.'); }, 300); }
 }
 var marcOn = false, popped = 0;
 function marcMode() {
-  if (marcOn) return; marcOn = true; popped = 0; egg('baby');
-  toast('Modo ' + esc(babyName()) + ': ¡explota las burbujas!');
+  if (marcOn) return; marcOn = true; popped = 0;
+  eggToast('baby', 'Modo ' + esc(babyName()) + ': ¡explota las burbujas antes de que se escapen! (Hay premio si llegas a 15)');
   var end = Date.now() + 14000;
   var iv = setInterval(function () {
     if (Date.now() > end) { clearInterval(iv); marcOn = false; return; }
@@ -274,7 +304,7 @@ function marcMode() {
     var s = 34 + Math.random() * 60; b.style.width = b.style.height = s + 'px';
     b.style.left = Math.random() * (window.innerWidth - s) + 'px'; b.style.top = window.innerHeight + 'px';
     b.style.setProperty('--dx', (Math.random() - .5) * 120 + 'px'); b.style.animationDuration = (6 + Math.random() * 5) + 's';
-    b.onclick = function (e) { e.stopPropagation(); b.classList.add('popped'); plop(); popped++; if (popped === 15) { egg('pop'); toast('¡15 burbujas! ' + esc(babyName()) + ' estaría orgulloso'); } setTimeout(function () { b.remove(); }, 260); };
+    b.onclick = function (e) { e.stopPropagation(); b.classList.add('popped'); plop(); popped++; if (popped === 15) { eggToast('pop', '¡15 burbujas! ' + esc(babyName()) + ' te ficha como canguro oficial'); } setTimeout(function () { b.remove(); }, 260); };
     b.addEventListener('animationend', function (ev) { if (ev.animationName === 'rise') b.remove(); });
     document.body.appendChild(b);
   }, 420);
@@ -292,11 +322,10 @@ function plop() {
 function trophy(pid) {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
   confetti(3600);
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(2rem,10vw,3.6rem)">' + esc(person(pid).name) + '</h2><p>Campeón: ' + esc(S.tournament.name) + '</p>', 3600);
-  setTimeout(function () { v.remove(); }, 3700);
-  egg('trophy');
+  eggCard('trophy', esc(person(pid).name), 'Campeón de la ' + esc(S.tournament.name) + '. Ya puede presumir hasta el año que viene.', '<div class="trophy">' + icon('trophy') + '</div>');
+  setTimeout(function () { v.remove(); }, 4400);
 }
-function cheers(name) {
+function cheers(name, viaSearch) {
   var fx = fxLayer(false), P = [], t0 = performance.now(), D = 3200;
   for (var i = 0; i < 90; i++) P.push({ x: Math.random() * fx.W, y: fx.H + Math.random() * 200, r: 3 + Math.random() * 9, v: 2 + Math.random() * 4, w: Math.random() * 6 });
   (function f(t) {
@@ -304,45 +333,42 @@ function cheers(name) {
     P.forEach(function (p) { p.y -= p.v; p.x += Math.sin((t / 300) + p.w) * .8; fx.ctx.globalAlpha = Math.max(0, 1 - (t - t0) / D); fx.ctx.fillStyle = 'rgba(232,182,74,.75)'; fx.ctx.strokeStyle = 'rgba(255,255,255,.8)'; fx.ctx.beginPath(); fx.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); fx.ctx.fill(); fx.ctx.stroke(); });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  message('<h2 style="font-size:clamp(2.4rem,12vw,4rem)">¡Salud!</h2><p>' + esc(name) + ' ya está en el carro. Que no falte para brindar por ' + esc(bdayName()) + '.</p>', 2600);
-  egg('salud');
+  eggCard('salud', '¡Salud!', viaSearch ? 'Has dicho la palabra mágica. Chin chin por ' + esc(bdayName()) + ' y por quien friegue los vasos.' : esc(name) + ' ya tiene dueño. Que no falte para brindar por ' + esc(bdayName()) + '.');
 }
 function sunDance() {
   var v = document.createElement('div'); v.className = 'sun-overlay'; v.innerHTML = '<div class="sun-core">' + icon('sun') + '</div>'; document.body.appendChild(v);
-  message('<h2 style="font-size:clamp(2rem,10vw,3.4rem)">Invocando al sol…</h2><p>Petición enviada al cielo de ' + esc(S.trip.town || 'la finca') + '. No garantizamos resultados.</p>', 3000);
-  setTimeout(function () { v.remove(); }, 3200); egg('sol');
+  eggCard('sol', 'Invocando al sol…', 'Petición enviada al cielo. Si aun así llueve, la culpa es del hombre del tiempo, no nuestra.');
+  setTimeout(function () { v.remove(); }, 3200);
 }
 function wish1111() {
   confetti(3000);
-  message('<div class="eleven" style="font-size:min(40vw,220px)">11:11</div><h2 style="font-size:clamp(1.6rem,7vw,2.6rem)">¡Pide un deseo!</h2><p>Hora oficial de ' + esc(bdayName()) + '.</p>', 3400);
-  egg('deseo');
+  eggCard('deseo', '¡Pide un deseo!', 'Son las 11:11, la hora de ' + esc(bdayName()) + ' (cumple 11). Que no sea «que no llueva», que ya lo ha pedido todo el mundo.', '<div class="eleven" style="font-size:min(34vw,180px)">11:11</div>');
 }
 function habemusQuorum(n) {
-  if (!egg('quorum')) { toast(n + ' personas conectadas a la vez. ¡Esto es una reunión familiar!'); return; }
-  fumataRaw('HABEMUS<br>QUÓRUM', n + ' personas de la familia conectadas a la vez. La familia está reunida.');
+  if (hasEgg('quorum')) { toast(n + ' personas conectadas a la vez. ¡Reunión familiar!'); return; }
+  fumataRaw('¡Reunión familiar!', n + ' personas de la familia con la app abierta a la vez. Ya se puede votar hasta el color de las servilletas.', 'quorum');
 }
 function habemusPapam() {
-  if (!egg('papa')) return;
-  fumataRaw('HABEMUS<br>PAPAM', 'Bueno… en realidad lo que tenemos es una lista de la compra. Pero casi.');
+  if (hasEgg('papa')) return;
+  fumataRaw('¡Fumata blanca!', '«Habemus papam» es lo que se dice cuando hay Papa nuevo. Aquí no hay Papa, pero hay lista de la compra. Casi lo mismo.', 'papa');
 }
 function himno() {
   fanfare(); confetti(2600);
   var top = G.ranking(S).filter(function (r) { return r.pos === 1 && r.pts > 0; });
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">' + (top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante') + '</h2><p>Que suene el himno de la casa. Todos en pie.</p>', 3200);
-  egg('himno');
+  eggCard('himno', top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante', top.length ? 'Va primero en el ranking y le has puesto el himno. Todos en pie… o por lo menos dejad el móvil.' : 'Aún no manda nadie en el ranking. Plaza libre para quien la quiera.', '<div class="trophy">' + icon('trophy') + '</div>');
 }
 var discoOn = false;
 function discoMode() {
-  if (discoOn) return; discoOn = true; egg('disco');
+  if (discoOn) return; discoOn = true;
   document.documentElement.classList.add('disco');
   var fx = document.createElement('div'); fx.className = 'disco-fx'; fx.setAttribute('aria-hidden', 'true');
   fx.innerHTML = '<div class="beams"></div><div class="beams b2"></div><div class="ball"></div>';
   document.body.appendChild(fx);
   if (navigator.vibrate) try { navigator.vibrate([60, 60, 60, 60, 120]); } catch (e) {}
-  toast('¡Que empiece la fiesta! Modo discoteca 9 segundos');
+  eggToast('disco', '¡Modo discoteca! 9 segundos de fiesta. Si alguien te mira raro, di que es la app.');
   setTimeout(function () { document.documentElement.classList.remove('disco'); fx.classList.add('out'); setTimeout(function () { fx.remove(); }, 500); discoOn = false; }, 9000);
 }
-function fumataRaw(title, text) {
+function fumataRaw(title, text, k) {
   var fx = fxLayer(true), puffs = [], t0 = performance.now(), D = 5000;
   (function f(t) {
     if (t - t0 < D - 1200) for (var k = 0; k < 3; k++) puffs.push({ x: fx.W / 2 + (Math.random() - .5) * 40, y: fx.H + 20, r: 18 + Math.random() * 16, vx: (Math.random() - .5) * 1.4, vy: -2.2 - Math.random() * 1.8, a: .6 });
@@ -351,18 +377,16 @@ function fumataRaw(title, text) {
     puffs = puffs.filter(function (p) { return p.y + p.r > -40 && p.a > .02; });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  setTimeout(function () { message('<h2>' + title + '</h2><p>' + text + '</p>', 3400); }, 800);
+  setTimeout(function () { if (k) eggCard(k, title, text); else message('<h2>' + title + '</h2><p>' + text + '</p>', 4200); }, 600);
 }
 function extraOmnes() {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
-  message('<h2>EXTRA<br>OMNES</h2><p>Que salgan todos… a la nave. A la piscina no, que hace frío.</p>', 3400);
-  setTimeout(function () { v.remove(); }, 3500);
-  egg('omnes');
+  eggCard('omnes', 'Toc, toc…', 'Has llamado 5 veces a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
+  setTimeout(function () { v.remove(); }, 4400);
 }
 function abueloMode() {
   ui.prefs.size = ui.prefs.size === 'xl' ? 'm' : 'xl'; savePrefs(); applyPrefs(); render(true);
-  toast(ui.prefs.size === 'xl' ? 'Letra de abuelo activada. Así sí.' : 'Letra normal. Gafas, ¿dónde estáis?');
-  egg('abuelo');
+  eggToast('abuelo', ui.prefs.size === 'xl' ? 'Letra de abuelo: todo en grande, sin gafas. Toca 3 veces otra vez para volver.' : 'Letra normal. ¿Alguien ha visto mis gafas?');
 }
 var tapCount = {}, tapTimer = {};
 var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 5, sun: 5, disco: 3, podio: 3, abumeter: 3 };
@@ -744,7 +768,7 @@ function bindEvents() {
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
-    if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('El brindis');
+    if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
     if (t.dataset.input === 'glass') { ui.prefs.glass = t.value / 100; savePrefs(); applyPrefs(); }
   });
@@ -763,7 +787,7 @@ function startApp() {
   document.title = S.trip.name; CATS.marc = 'Menú ' + babyName();
   buildEggs(); applyPrefs(); render(); navInit();
   refreshWeather(false);
-  var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (egg('buho')) toast('¿Todavía despiertos? La casa rural recomienda dormir'); }, 1500);
+  var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (!hasEgg('buho')) eggToast('buho', '¿Despierto a estas horas? Mañana hay hockey. A dormir, búho.'); }, 1500);
   var today = new Date().toISOString().slice(0, 10);
   var bd = S.trip.eggs && S.trip.eggs.bdayDate;
   if (bd && today === bd && ui.bdaySeen !== today) { ui.bdaySeen = today; saveUi(); setTimeout(bdayParty, 900); }
@@ -774,7 +798,7 @@ function startApp() {
 function boot() {
   var u = loadUi();
   ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
-  if (['personas', 'tiempo', 'asistencia', 'manual'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
+  if (['personas', 'tiempo', 'asistencia', 'manual', 'finca'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();
   if (typeof SEED !== 'undefined') { S = load(); startApp(); }

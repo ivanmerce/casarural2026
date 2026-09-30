@@ -70,7 +70,9 @@ var L = (function () {
   }
   /* devuelve { familyId: fracción 0..1 } */
   function shares(S) {
-    var mode = (S.split && S.split.mode) || 'ponderado';
+    /* v0.5.9: el reparto es SIEMPRE proporcional por persona y comida (adultos y niños 1, bebé 0).
+       Se ignora cualquier otro criterio guardado para que nadie lo cambie por error. */
+    var mode = 'ponderado';
     var units = {};
     S.families.forEach(function (f) { units[f.id] = 0; });
     if (mode === 'familia') {
