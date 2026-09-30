@@ -748,6 +748,31 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .sheet-x .ico { width: 18px; height: 18px; }
 .sheet > h2:first-of-type { padding-right: 48px; }
 
+/* ===================== Manual ===================== */
+.manual-cta { display: flex; flex-direction: row; align-items: center; gap: 12px; text-align: left; font: inherit; color: inherit; width: 100%; padding: 12px 14px; }
+.manual-cta b { display: block; } .manual-cta small { display: block; font-size: .8rem; }
+.manual-cta > .grow, .man-step > .grow, .manual-dl .grow { flex: 1; min-width: 0; }
+.man-steps { gap: 10px; }
+.man-step { flex-direction: row; align-items: flex-start; gap: 12px; }
+.man-n { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; }
+.man-step h3, .man-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.man-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.man-card { gap: 6px; }
+.man-dark { background: #1C1614; color: #F3ECE8; border-color: rgba(255, 255, 255, .08); }
+.man-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.man-tips b { font-family: var(--font-display); } .man-tips .gold { color: #F6CD62; } .man-tips p { color: #D9CAC1; margin-top: 4px; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  .ambient, .topbar, .nav, .fab, .toast, .manual-dl, #onlineSlot, .scrim { display: none !important; }
+  .app { max-width: none; padding: 0; }
+  .card { box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: #fff !important; border: 1px solid #ddd !important; break-inside: avoid; }
+  .man-dark { background: #1C1614 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .man-n { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .view { animation: none !important; gap: 10px; }
+  .man-grid { grid-template-columns: 1fr 1fr; }
+}
+
 </style>
 </head>
 <body>
@@ -1735,6 +1760,7 @@ VIEWS.inicio = function () {
   });
 
   /* Confirmación por día */
+  h += manualCardHome();
   h += confirmCard();
   h += presenceCard();
   h += compCard();
@@ -2431,7 +2457,7 @@ function menuSheet() {
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -3046,7 +3072,7 @@ function startApp() {
 function boot() {
   var u = loadUi();
   ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
-  if (['personas', 'tiempo', 'asistencia'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
+  if (['personas', 'tiempo', 'asistencia', 'manual'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();
   if (typeof SEED !== 'undefined') { S = load(); startApp(); }
@@ -3801,6 +3827,61 @@ Object.assign(C, {
 });
 document.addEventListener('keydown', function (e) { if (!viewer) return; if (e.key === 'ArrowRight') A.vwNext(); else if (e.key === 'ArrowLeft') A.vwPrev(); else if (e.key === 'Escape') viewerClose(); });
 
+/* ===================== Manual de uso (dentro de la app) =====================
+   Siempre al día: el texto vive en el mismo código que la app. Los datos (horarios, finca…) salen de S.
+   «Descargar PDF» abre el manual en PDF diseñado (bucket privado «docs» en la nube); si no está, se imprime esta vista. */
+var MANUAL = {
+  pdf: function () { return Promise.resolve(null); }   /* la nube lo sustituye */
+};
+function manualCardHome() {
+  return '<button class="card manual-cta" data-act="tab" data-tab="manual"><span class="aw-ico">' + icon('bulb') + '</span><span class="grow"><b>Manual de uso</b><small class="muted">Todo lo que hay que saber en 2 minutos. Y en PDF para descargar</small></span>' + icon('arrow') + '</button>';
+}
+VIEWS.manual = function () {
+  var T = S.trip || {}, myF = fam(me().family), babyN = babyName(), payer = S.house && fam(S.house.payer);
+  var steps = [
+    ['Entra', 'Con <b>tu email</b> (los peques, con su <b>usuario</b>) y el <b>código de la familia</b> que te ha llegado por WhatsApp. Justo después <b>eliges tu propio código</b> de 6 cifras: ya solo entrarás con ese.'],
+    ['Revisa tus días', 'Ya están apuntados. Si <b>cambia algo</b>, en <b>Inicio → «Vuestros días»</b> toca el día: <b>✓</b> viene · <b>✕</b> no viene. Los padres lo cambian por toda su familia.'],
+    ['Pídete la compra', 'En <b>Compra → «Sin dueño»</b> toca <b>«Me lo pido»</b>: queda a vuestro cargo con su precio estimado. ¿Error? En «Lo nuestro», <b>Soltar</b>.']
+  ];
+  var cards = [
+    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con el total estimado. Tocando un producto podéis poner el <b>precio real</b> o marcar que lo traéis <b>de casa</b> (0 €).'],
+    ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Toca los comensales si alguien no come ese día: las cantidades se ajustan solas.'],
+    ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
+    ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
+    ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
+    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>. ' : '') + 'El resto se reparte y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
+  ];
+  var h = '<div class="view-head"><div><h2>Manual de uso</h2><p class="muted small">Todo lo que hay que saber de la ' + esc(T.name || 'app') + '</p></div></div>';
+  h += '<section class="card manual-dl"><div class="row" style="align-items:flex-start"><span class="aw-ico">' + icon('copy') + '</span><div class="grow"><b>El manual en PDF</b><p class="small muted">Para guardarlo en el móvil o reenviarlo por WhatsApp.</p></div></div>' +
+    '<div class="row wrap"><button class="btn primary" data-act="manualPdf">' + icon('arrow') + 'Descargar PDF</button><button class="btn ghost" data-act="manualPrint">Imprimir esta página</button></div></section>';
+  h += '<p class="eyebrow">Lo primero</p><div class="stack man-steps">' + steps.map(function (s, i) {
+    return '<article class="card man-step"><span class="man-n">' + (i + 1) + '</span><div class="grow"><h3>' + s[0] + '</h3><p class="small">' + s[1] + '</p></div></article>';
+  }).join('') + '</div>';
+  h += '<p class="eyebrow">Durante el finde</p><div class="man-grid">' + cards.map(function (c) {
+    return '<article class="card man-card"><span class="aw-ico sm">' + icon(c[0]) + '</span><h3>' + c[1] + '</h3><p class="small">' + c[2] + '</p></article>';
+  }).join('') + '</div>';
+  h += '<section class="card man-dark"><div class="man-tips">' +
+    '<div><b>Como una app</b><p class="small">iPhone: <b>Compartir → Añadir a pantalla de inicio</b>. Android: menú (los tres puntos) → <b>Añadir a pantalla de inicio</b>.</p></div>' +
+    '<div><b>Quién puede qué</b><p class="small">Todos lo ven todo, se apuntan a planes, votan y suben fotos. Los <b>editores</b> apuntan compras, precios y resultados. Los adultos confirman a su familia.</p></div>' +
+    '<div><b class="gold">Secretos</b><p class="small">Hay <b>easter eggs escondidos</b>: toques repetidos, horas raras, palabras mágicas… Arriba se ve quién está conectado.</p></div></div></section>';
+  h += '<section class="card wood small"><p><b>Llegada:</b> ' + esc(dayOf(S.days[0].k).long) + ' a las ' + esc(T.arrival || '—') + ' · <b>Salida:</b> ' + esc(dayOf(S.days[S.days.length - 1].k).long) + ' a las ' + esc(T.departure || '—') + '</p>' +
+    (T.address ? '<p>' + esc(T.place || '') + ' · ' + esc(T.address) + '</p>' : '') + (T.phone ? '<p>Teléfono de la finca: <b>' + esc(T.phone) + '</b></p>' : '') +
+    '<p class="muted">¿Dudas? Pregúntale al organizador.</p></section>';
+  return h;
+};
+Object.assign(A, {
+  manualPrint: function () { try { window.print(); } catch (e) { toast('Usa «Compartir → Imprimir» del navegador'); } },
+  manualPdf: function (el) {
+    var win = null; try { win = window.open('', '_blank'); } catch (e) {}
+    el.disabled = true; var t = el.innerHTML; el.textContent = 'Preparando…';
+    MANUAL.pdf().then(function (url) {
+      el.disabled = false; el.innerHTML = t;
+      if (!url) { if (win) win.close(); toast('El PDF aún no está subido: te abro la versión para imprimir'); setTimeout(function () { A.manualPrint(); }, 600); return; }
+      if (win) win.location.href = url; else location.href = url;
+    }, function () { if (win) win.close(); el.disabled = false; el.innerHTML = t; toast('No he podido abrir el PDF. Prueba otra vez'); });
+  }
+});
+
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
    Estrategia: la app trabaja sobre el mismo objeto S que la demo. Cada save() programa una sincronización que
@@ -4101,6 +4182,14 @@ var CLOUD = (function () {
   api.otp = function () {
     var em = (val('lg-email') || '').trim().toLowerCase(), tk = (val('lg-otp') || '').trim();
     client().auth.verifyOtp({ email: em, token: tk, type: 'email' }).then(check).then(go2).catch(function () { toast('Código incorrecto o caducado'); });
+  };
+  /* el PDF más reciente del bucket privado «docs»: para actualizar el manual basta con subir uno nuevo */
+  MANUAL.pdf = function () {
+    var b = client().storage.from('docs');
+    return b.list('', { limit: 20, sortBy: { column: 'created_at', order: 'desc' } }).then(function (r) {
+      var f = (r && r.data || []).filter(function (x) { return /\.pdf$/i.test(x.name); })[0]; if (!f) return null;
+      return b.createSignedUrl(f.name, 900).then(function (s) { return s && s.data && (s.data.signedUrl || s.data.signedURL) || null; });
+    });
   };
   /* ---------- Admin: código de la familia y códigos personales (nunca se ven, solo si existen) ---------- */
   api.status = function () { return client().rpc('admin_code_status').then(check).then(function (r) { var o = {}; (r.data || []).forEach(function (x) { o[x.person_id] = { has: x.has_code, at: x.updated_at }; }); return o; }); };
