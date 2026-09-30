@@ -19,7 +19,7 @@ function freeRooms() { var R = roomsCfg(); return R ? R.list.filter(function (r)
 function myRoomCard(compact) {
   var R = roomsCfg(); if (!R) return '';
   var rid = roomOf(me().id), un = unassigned();
-  var h = '<section class="card casas-card"><div class="card-head"><h3>' + (compact ? 'Tu habitación' : '¿Dónde dormimos?') + '</h3>' + (compact ? '' : '<button class="link" data-act="tab" data-tab="casas">Ver el plano ' + icon('arrow') + '</button>') + '</div>';
+  var h = '<section class="card casas-card"><div class="card-head"><h3>' + (compact ? 'Tu habitación' : '¿Dónde dormimos?') + '</h3>' + (compact ? '' : '<button class="link" data-act="tab" data-tab="finca" data-fsub="dormir">Ver el plano ' + icon('arrow') + '</button>') + '</div>';
   if (rid) {
     var r = roomById(rid), hs = houseById(r.home), mates = roomPeople(rid).filter(function (p) { return p.id !== me().id; });
     h += '<div class="my-room" style="--hc:' + hs.color + '"><span class="my-room-house">' + esc(hs.name) + '</span><b>' + esc(r.name) + '</b><span class="small">' + (mates.length ? 'Con ' + mates.map(function (p) { return esc(p.name); }).join(', ').replace(/, ([^,]*)$/, ' y $1') : 'Para ti solo') + '</span><span class="avs">' + roomPeople(rid).map(function (p) { return av(p.id, 'sm'); }).join('') + '</span></div>';
@@ -32,9 +32,9 @@ function famGroups(list) {
   return Object.keys(by).map(function (f) { return esc(by[f].join(' y ')); }).join(' · ');
 }
 
-VIEWS.casas = function () {
+function casasHtml() {
   var R = roomsCfg();
-  var h = '<div class="view-head"><div><h2>¿Dónde dormimos?</h2><p class="muted small">Toca una habitación para ver quién duerme y, si puedes, cambiarlo</p></div></div>';
+  var h = '';
   if (!R) return h + '<div class="empty">' + icon('house') + '<b>Aún no hay plano</b></div>';
   h += myRoomCard(true);
   var un = unassigned(), fr = freeRooms();

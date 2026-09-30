@@ -11,7 +11,7 @@ function fincaHomeCard() {
   var F = S.finca; if (!F) return '';
   var rp = regPeople(), done = rp.filter(function (p) { return regDone(p.id); }).length;
   var mine = rp.filter(function (p) { return canAttendFor(p.id) && (p.family === me().family || p.id === me().id); });
-  var h = '<section class="card finca-card"><div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca">Todo lo práctico ' + icon('arrow') + '</button></div>';
+  var h = '<section class="card finca-card"><div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca" data-fsub="info">Todo lo práctico ' + icon('arrow') + '</button></div>';
   if (F.wifi) h += '<button class="wifi" data-act="wifiCopy"><span class="aw-ico sm">' + icon('bolt') + '</span><span class="grow"><small class="muted">Wi-Fi</small><b>' + esc(F.wifi.net) + '</b></span><span class="wifi-pass"><small class="muted">Contraseña</small><b>' + esc(F.wifi.pass) + '</b></span>' + icon('copy') + '</button>';
   if (F.register && rp.length) {
     h += '<div class="reg"><div class="row"><span class="grow small"><b>Registro de huéspedes</b> · obligatorio por ley desde ' + F.register.minAge + ' años</span><span class="pill ' + (done === rp.length ? 'ok' : 'warn') + '">' + done + '/' + rp.length + '</span></div>' +
@@ -23,10 +23,11 @@ function fincaHomeCard() {
   }
   return h + '</section>';
 }
-VIEWS.finca = function () {
+function fincaInfo(part) {
   var F = S.finca || {}, T = S.trip || {};
-  var h = '<div class="view-head"><div><h2>La finca</h2><p class="muted small">' + esc(T.place || '') + ' · todo lo práctico, de la guía de ' + esc(F.host || 'la finca') + '</p></div></div>';
+  var h = '';
   if (!S.finca) return h + '<div class="empty">' + icon('house') + '<b>Aún no hay información de la finca</b></div>';
+  if (part === 'pueblo') return fincaShops();
   if (can('access') && F.todo && F.todo.length) h += '<section class="card alert"><div class="card-head"><h3>Pendiente con la finca</h3><span class="pill">Solo lo ves tú</span></div><ul class="small finca-ul">' + F.todo.map(function (t) { return '<li>' + fincaMd(t) + '</li>'; }).join('') + '</ul></section>';
   h += fincaHomeCard().replace('<div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca">Todo lo práctico ' + icon('arrow') + '</button></div>', '<div class="card-head"><h3>Wi-Fi y registro</h3></div>');
   h += '<section class="card wood"><div class="facts">' +
@@ -38,6 +39,10 @@ VIEWS.finca = function () {
   (F.sections || []).forEach(function (sec) {
     h += '<section class="card"><div class="row" style="gap:10px"><span class="aw-ico sm">' + icon(sec.icon || 'house') + '</span><h3 class="grow">' + esc(sec.title) + '</h3></div><ul class="finca-ul">' + sec.items.map(function (t) { return '<li>' + fincaMd(t) + '</li>'; }).join('') + '</ul></section>';
   });
+  return h;
+};
+function fincaShops() {
+  var F = S.finca || {}, T = S.trip || {}, h = '';
   if (F.shops && F.shops.length) h += '<section class="card"><div class="row" style="gap:10px"><span class="aw-ico sm">' + icon('cart') + '</span><h3 class="grow">Comprar en ' + esc(T.town || 'el pueblo') + '</h3></div><div class="stack" style="gap:2px">' + F.shops.map(function (x) {
     return '<a class="row shop" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="grow"><b>' + esc(x.name) + '</b><small class="muted" style="display:block">' + esc(x.note || '') + '</small></span>' + icon('pin') + '</a>';
   }).join('') + '</div>' + (F.near ? '<p class="small muted">' + fincaMd(F.near) + '</p>' : '') + '</section>';

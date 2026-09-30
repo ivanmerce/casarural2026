@@ -13,7 +13,7 @@ VIEWS.manual = function () {
     ['Entra', 'Con <b>tu email</b> (los peques, con su <b>usuario</b>) y el <b>código de la familia</b> que te ha llegado por WhatsApp. Justo después <b>eliges tu propio código</b> de 6 cifras: ya solo entrarás con ese.'],
     ['Revisa tus días', 'Ya están apuntados. Si <b>cambia algo</b>, en <b>Inicio → «Vuestros días»</b> toca el día: <b>✓</b> viene · <b>✕</b> no viene. Los padres lo cambian por toda su familia.'],
     ['Pídete la compra', 'En <b>Compra → «Sin dueño»</b> toca <b>«Me lo pido»</b>: queda a vuestro cargo. ¿Error? En «Lo nuestro», <b>Soltar</b>.'],
-    ['Regístrate en la finca', 'Obligatorio por ley desde los 14 años: en <b>Inicio → La finca</b>, «Rellenar el formulario de la finca» (uno por persona) y luego <b>marca tu nombre</b>. Los padres marcan a su familia.'],
+    ['Regístrate en la finca', 'Obligatorio por ley desde los 14 años: en la pestaña <b>La Finca → Práctico</b>, «Rellenar el formulario de la finca» (uno por persona) y luego <b>marca tu nombre</b>. Los padres marcan a su familia.'],
     ['Apunta lo que cuesta', 'Cuando lo compréis, en <b>Compra → «Lo nuestro»</b> escribe el <b>precio real</b> en la casilla de cada producto. <b>Sin precio real no cuenta en Cuentas.</b>']
   ];
   var cards = [
@@ -22,8 +22,8 @@ VIEWS.manual = function () {
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
-    ['bed', '¿Dónde dormimos?', 'En Inicio, tu habitación. Toca «Ver el plano» para ver las tres casas: cada habitación con quién duerme y las camas libres. Los adultos colocan a su familia con un toque («Nos la quedamos»).'],
-    ['house', 'La finca', 'En <b>Inicio → La finca</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y dónde comprar en el pueblo (el domingo solo abre uno).'],
+    ['bed', '¿Dónde dormimos?', 'Pestaña <b>La Finca → Dormir</b> (y tu habitación, también en Inicio): el plano de las tres casas, cada habitación con quién duerme y las camas libres. Los adultos colocan a su familia con un toque («Nos la quedamos»).'],
+    ['house', 'La Finca', 'Pestaña <b>La Finca → Práctico</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y y en <b>Compras</b>, dónde comprar en el pueblo (el domingo solo abre uno).'],
     ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía <b>a proporción de personas y comidas</b> (los peques cuentan como un adulto; ' + esc(babyN) + ', no) y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
   ];
   var h = '<div class="view-head"><div><h2>Manual de uso</h2><p class="muted small">Todo lo que hay que saber de la ' + esc(T.name || 'app') + '</p></div></div>';

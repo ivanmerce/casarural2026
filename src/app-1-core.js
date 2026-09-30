@@ -233,6 +233,7 @@ function numVal(id) { var v = val(id).replace(',', '.').trim(); if (v === '') re
 /* ---------- Shell ---------- */
 var TABS = [
   { k: 'inicio', t: 'Inicio', i: 'home' },
+  { k: 'finca', t: 'La Finca', i: 'house' },
   { k: 'comidas', t: 'Comidas', i: 'meals' },
   { k: 'compra', t: 'Compra', i: 'cart' },
   { k: 'planes', t: 'Planes', i: 'plans' },

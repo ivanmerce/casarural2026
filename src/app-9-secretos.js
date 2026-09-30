@@ -17,7 +17,7 @@ function buildEggs() {
     { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'El primer secreto es saber que hay secretos', more: 'Ya lo tienes: abrir esta lista' },
     { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'Quien lee las instrucciones hasta el final…', more: 'Inicio → Manual de uso, y baja hasta abajo del todo' },
     { k: 'dias', name: 'Presente', how: 'Tocar un día en «Vuestros días» o en Asistencia', hint: 'Pasar lista', more: 'En Inicio, toca un día de tu fila en «Vuestros días»' },
-    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Inicio → La finca → toca el Wi-Fi' },
+    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Pestaña La Finca → Práctico → toca el Wi-Fi' },
     { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Mira al cielo… desde la app', more: 'Inicio → El tiempo en la finca → Detalle' },
     { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'Apaga la luz', more: 'Toca tu nombre arriba a la derecha y busca el tema' },
     { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'Los planes también se quieren', more: 'En Planes, el corazón de cualquier actividad' },
