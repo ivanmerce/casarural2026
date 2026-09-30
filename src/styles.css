@@ -706,8 +706,18 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .login-mark .mk-bg { fill: var(--accent); }
 .login-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 9vw, 2.6rem); line-height: 1.02; letter-spacing: -.03em; }
 .login-title i { font-style: normal; color: var(--accent); }
-.code-in { font-family: var(--font-display); font-size: 1.7rem !important; font-weight: 800; letter-spacing: .5em; text-align: center; }
-.code-in::placeholder { letter-spacing: .4em; color: color-mix(in srgb, var(--muted) 55%, transparent); }
+.pin { position: relative; }
+.pin-in { position: absolute; inset: 0; width: 100% !important; height: 100% !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: transparent !important; -webkit-text-fill-color: transparent; caret-color: transparent; font-size: 16px !important; letter-spacing: 0; z-index: 1; outline: none; }
+.pin-in::selection { background: transparent; }
+.pin-cells { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding-right: 50px; pointer-events: none; }
+.pin-cells span { height: 58px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--glass-strong); display: grid; place-items: center; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.pin-cells span.on::after { content: ''; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); animation: pinIn .18s ease; }
+.pin[data-show] .pin-cells span.on::after { content: attr(data-d); width: auto; height: auto; border-radius: 0; background: none; font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--ink); }
+.pin:focus-within .pin-cells span.cur { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+@keyframes pinIn { from { transform: scale(.3); opacity: 0; } }
+.pin-eye { position: absolute; right: 0; top: 50%; margin-top: -21px; width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--glass-strong); display: grid; place-items: center; color: var(--muted); z-index: 2; }
+.pin[data-show] .pin-eye { color: var(--accent); border-color: var(--accent); }
+@media (max-width: 360px) { .pin-cells { gap: 5px; } .pin-cells span { height: 50px; } }
 .first-time { padding: 10px 12px; border-radius: 12px; background: var(--accent-soft); }
 .login-msg { color: var(--accent); font-weight: 700; }
 .code-st { padding: 10px 12px; border-radius: 12px; background: var(--surface-2); align-items: center; }

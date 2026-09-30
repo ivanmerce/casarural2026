@@ -186,13 +186,18 @@ var CLOUD = (function () {
     $nav.innerHTML = '';
     $main.innerHTML = '<div class="view">' + inner + '</div>';
   }
-  function codeInput(id, label, auto) {
-    return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" class="code-in" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="' + (auto || 'off') + '" placeholder="••••••"></div>';
+  /* Código de 6 cifras en 6 casillas. Es un campo de texto normal (no de contraseña): así iOS no salta
+     con «Guardar contraseña» ni «Contraseña segura» en cada número. Las cifras se ven como puntos. */
+  function codeInput(id, label) {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><div class="pin" data-pin="' + id + '">' +
+      '<input id="' + id + '" class="pin-in" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="pin-' + id + '-' + Math.random().toString(36).slice(2, 7) + '" data-lpignore="true" data-1p-ignore="true">' +
+      '<div class="pin-cells" aria-hidden="true">' + '<span></span>'.repeat(6) + '</div>' +
+      '<button type="button" class="pin-eye" data-act="pinEye" data-id="' + id + '" aria-label="Ver u ocultar las cifras">' + icon('eye') + '</button></div></div>';
   }
   function loginView(msg) {
     shell('<section class="card login-card"><span class="login-mark">' + logoMark() + '</span><h1 class="login-title">Casa Rural <i>2026</i></h1><p class="muted">Entra con tu email y tu código de 6 cifras.</p>' +
-      '<div class="field"><label for="lg-email">Tu email (o tu usuario)</label><input id="lg-email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" placeholder="nombre@correo.com"></div>' +
-      codeInput('lg-code', 'Código de 6 cifras', 'current-password') +
+      '<div class="field"><label for="lg-email">Tu email (o tu usuario)</label><input id="lg-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="nombre@correo.com"></div>' +
+      codeInput('lg-code', 'Código de 6 cifras') +
       '<button class="btn primary block big-btn" data-act="cloudLogin">Entrar</button>' +
       '<p class="small first-time"><b>¿Es la primera vez?</b> Usa el código de la familia que te ha llegado por WhatsApp. Justo después elegirás el tuyo.</p>' +
       (msg ? '<p class="small login-msg">' + msg + '</p>' : '') + '</section>' +
@@ -201,23 +206,23 @@ var CLOUD = (function () {
       '<p class="small muted">¿Sin email? Pídele al organizador un usuario y escríbelo en lugar del email.</p></section>');
     setTimeout(function () { var e = document.getElementById('lg-email'); if (e) e.focus(); }, 50);
   }
-  function codeSetupView(first, done) {
-    var p = person(ui.me);
-    shell('<section class="card login-card"><span class="login-mark">' + logoMark() + '</span><h1 class="login-title">Hola, <i>' + esc(p ? p.name : '') + '</i></h1>' +
-      '<p>' + (first ? 'Has entrado con el código de la familia. Ahora <b>elige tu código personal</b> de 6 cifras: a partir de hoy entrarás con tu email y este código.' : 'Elige tu nuevo código personal de 6 cifras.') + '</p>' +
-      codeInput('cs-1', 'Tu código nuevo', 'new-password') + codeInput('cs-2', 'Repítelo', 'new-password') +
+  function codeSetupView(first, done, name) {
+    shell('<section class="card login-card"><span class="login-mark">' + logoMark() + '</span><h1 class="login-title">Hola' + (name ? ', <i>' + esc(name) + '</i>' : '') + '</h1>' +
+      '<p>' + (first ? 'Último paso: <b>elige tu código personal</b> de 6 cifras. A partir de hoy entrarás con tu email y este código.' : 'Elige tu <b>código personal</b> de 6 cifras. Con tu email y este código entrarás siempre.') + '</p>' +
+      codeInput('cs-1', 'Tu código nuevo') + codeInput('cs-2', 'Repítelo para confirmar') +
       '<button class="btn primary block big-btn" data-act="cloudSetCode">Guardar y entrar</button>' +
-      '<p class="small muted">Consejo: que no sea 123456 ni tu año de nacimiento. Si un día lo olvidas, «He olvidado mi código» o pídele al organizador que te lo reinicie.</p></section>');
+      '<p class="small muted">Que no sea 123456 ni 000000. Si un día lo olvidas: «He olvidado mi código» o pídele al organizador que te lo reinicie.</p><button class="link" data-act="logout">¿No eres ' + esc(name || 'tú') + '? Salir</button></section>');
     api._afterCode = done;
-    setTimeout(function () { var e = document.getElementById('cs-1'); if (e) e.focus(); }, 50);
+    setTimeout(function () { var e = document.getElementById('cs-1'); if (e) e.focus(); }, 80);
   }
   function bootPending() {
     $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
     $top.innerHTML = '<span class="wordmark">' + wordmarkHtml(APP_NAME, 'Plataforma familiar') + '</span>';
     $main.innerHTML = '<div class="view"><section class="card login-card"><h1 class="login-title">Casi <i>listo</i></h1><p class="muted">Falta conectar la base de datos. En cuanto esté, aquí podréis entrar todos.</p></section></div>';
   }
-  var mustChange = false;
+  var mustChange = false, fromLink = /[?&#](code|access_token|token_hash)=/.test(location.href);
   function enterApp() { return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); startApp(); subscribe(); startPresence(); }); }
+  /* Sin código propio la base de datos no enseña nada (RLS), así que primero se comprueba y, si falta, se pide */
   function afterSession() {
     return client().rpc('claim_person').then(check).then(function (r) {
       var pid = r.data;
@@ -230,12 +235,11 @@ var CLOUD = (function () {
         });
       }
       ui.me = pid;
-      return loadAll().then(function (d) {
-        S = fromDb(d); last = snapshot(S);
-        return client().rpc('my_code_status').then(function (st) {
-          if (mustChange || (st && st.data === false)) { var first = mustChange; mustChange = false; codeSetupView(first, function () { startApp(); subscribe(); startPresence(); }); return; }
-          startApp(); subscribe(); startPresence();
-        });
+      return Promise.all([client().rpc('my_code_status'), client().rpc('my_first_name')]).then(function (x) {
+        var has = x[0] && !x[0].error && x[0].data === true, name = x[1] && x[1].data;
+        var first = mustChange, forced = fromLink; mustChange = false; fromLink = false;
+        if (!has || first || forced) { codeSetupView(first, function () { enterApp(); }, name); return; }
+        return enterApp();
       });
     }).catch(function (e) { started = false; loginView('No he podido entrar: ' + esc(e.message || 'error de conexión')); });
   }
@@ -260,24 +264,24 @@ var CLOUD = (function () {
         codeFlow = false;
         if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
         var d = r.data;
-        if (!d || d.error) { toast(d && d.error ? 'Demasiados intentos. Espera un rato o pregunta al organizador' : 'El email o el código no coinciden. Revísalos'); var c = document.getElementById('lg-code'); if (c) { c.value = ''; c.focus(); } return; }
+        if (!d || d.error) { toast(d && d.error ? 'Demasiados intentos. Espera un rato o pregunta al organizador' : 'El email o el código no coinciden. Revísalos'); clearPin('lg-code', true); return; }
         mustChange = !!d.must_change; started = false; go2();
       }).catch(function () { codeFlow = false; if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } toast('No he podido entrar. Revisa la conexión'); });
   };
   api.setCode = function () {
     var a = (val('cs-1') || '').replace(/\D/g, ''), b = (val('cs-2') || '').replace(/\D/g, '');
     if (a.length !== 6) { toast('Tiene que tener 6 cifras'); return; }
-    if (a !== b) { toast('Los dos códigos no coinciden'); return; }
+    if (a !== b) { toast('Los dos códigos no coinciden. Repítelo'); clearPin('cs-2', true); return; }
     client().rpc('set_my_code', { p_code: a }).then(check).then(function (r) {
       var m = { formato: 'Tiene que tener 6 cifras', igual_familia: 'Ese es el código de la familia: elige otro', facil: 'Demasiado fácil de adivinar: elige otro', sin_sesion: 'Tu sesión ha caducado. Vuelve a entrar' };
-      if (r.data !== 'ok') { toast(m[r.data] || 'No he podido guardarlo'); return; }
+      if (r.data !== 'ok') { toast(m[r.data] || 'No he podido guardarlo'); clearPin('cs-2'); clearPin('cs-1', true); return; }
       var done = api._afterCode; api._afterCode = null;
       toast('¡Listo! Tu código está guardado. La próxima vez: tu email y ese código');
-      if (done) done(); else { closeSheet(); }
+      if (done) { shell('<section class="card login-card"><h1 class="login-title">Entrando<i>…</i></h1></section>'); done(); } else { closeSheet(); }
     }).catch(function () { toast('No he podido guardarlo. Revisa la conexión'); });
   };
   api.changeCodeSheet = function () {
-    openSheet('<h2>Cambiar mi código</h2><p class="small muted">Tu código personal de 6 cifras para entrar con tu email.</p>' + codeInput('cs-1', 'Código nuevo', 'new-password') + codeInput('cs-2', 'Repítelo', 'new-password') +
+    openSheet('<h2>Cambiar mi código</h2><p class="small muted">Tu código personal de 6 cifras para entrar con tu email.</p>' + codeInput('cs-1', 'Código nuevo') + codeInput('cs-2', 'Repítelo') +
       '<div class="sheet-actions"><button class="btn primary" data-act="cloudSetCode">Guardar</button><button class="btn" data-act="close">Cancelar</button></div>');
   };
   api.email = function () {
@@ -342,6 +346,25 @@ A.cloudForgot = function () { var f = document.getElementById('lg-forgot'); if (
 A.myCode = function () { closeSheet(); CLOUD.changeCodeSheet(); };
 A.logout = function () { CLOUD.logout(); };
 if (CLOUD.status) { ACCESS.status = CLOUD.status; ACCESS.reset = CLOUD.reset; ACCESS.getShared = CLOUD.getShared; ACCESS.setShared = CLOUD.setShared; ACCESS.cloud = true; }
+/* Casillas del código: pintar, avanzar solas y entrar al completar las 6 cifras */
+function paintPin(inp) {
+  var box = inp.closest('.pin'); if (!box) return;
+  var v = inp.value, cells = box.querySelectorAll('.pin-cells span');
+  cells.forEach(function (c, i) { c.classList.toggle('on', i < v.length); c.classList.toggle('cur', i === Math.min(v.length, 5)); c.setAttribute('data-d', v[i] || ''); });
+}
+function clearPin(id, focus) { var i = document.getElementById(id); if (!i) return; i.value = ''; paintPin(i); if (focus) setTimeout(function () { i.focus(); }, 30); }
+document.addEventListener('input', function (e) {
+  var t = e.target; if (!t || !t.classList || !t.classList.contains('pin-in')) return;
+  var v = t.value.replace(/\D/g, '').slice(0, 6); if (v !== t.value) t.value = v; paintPin(t);
+  if (v.length < 6) return;
+  if (t.id === 'lg-code') { if ((val('lg-email') || '').trim()) { t.blur(); A.cloudLogin(); } else { var em = document.getElementById('lg-email'); if (em) em.focus(); toast('Escribe también tu email'); } }
+  else if (t.id === 'cs-1') { var n = document.getElementById('cs-2'); if (n) n.focus(); }
+  else if (t.id === 'cs-2') { t.blur(); A.cloudSetCode(); }
+});
+document.addEventListener('focusin', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('pin-in')) paintPin(t); });
+A.pinEye = function (el) { var b = el.closest('.pin'); if (b) b.toggleAttribute('data-show'); var i = document.getElementById(el.dataset.id); if (i) i.focus(); };
+/* Volver atrás en iOS/Safari puede resucitar una página antigua desde la caché: se recarga para pasar por el acceso */
+window.addEventListener('pageshow', function (e) { if (e.persisted) location.reload(); });
 /* Intro en el campo de código = Entrar */
 document.addEventListener('keydown', function (e) { if (e.key !== 'Enter') return; var t = e.target; if (t && t.id === 'lg-code') A.cloudLogin(); else if (t && t.id === 'lg-email') { var c = document.getElementById('lg-code'); if (c) c.focus(); } else if (t && t.id === 'cs-2') A.cloudSetCode(); });
 window.CLOUD = CLOUD;

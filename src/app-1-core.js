@@ -161,6 +161,7 @@ var IC = {
   shuffle: '<path d="M3 7h3.5c4 0 5.5 10 10 10H21M3 17h3.5c1.6 0 2.8-1.6 3.8-3.5M14 10.5C15 8.6 16.2 7 17.8 7H21"/><path d="m18 4 3 3-3 3M18 14l3 3-3 3"/>',
   undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
   camera: '<path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 18v-8A1.5 1.5 0 0 1 4 8.5Z"/><circle cx="12" cy="13.5" r="3.6"/>',
+  eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>',
   podium: '<path d="M9 21V9h6v12M3 21v-7h6M15 21v-9h6v9M2 21h20"/>'
 };
 function icon(n, cls) { return '<svg class="' + (cls || 'ico') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (IC[n] || '') + '</svg>'; }

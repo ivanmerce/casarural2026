@@ -689,7 +689,7 @@ function fillFamilyAccess() {
   var el = document.getElementById('accessCard'); if (!el) return;
   Promise.all([ACCESS.status(), ACCESS.getShared()]).then(function (r) {
     var st = r[0], code = r[1], n = S.people.filter(function (p) { return st[p.id] && st[p.id].has; }).length;
-    var noId = S.people.filter(function (p) { return !loginOf(p); });
+    var noId = S.people.filter(function (p) { return !loginOf(p) && p.kind !== 'bebe'; });
     el.innerHTML = '<div class="card-head"><h3>Acceso de la familia</h3><span class="pill red">Solo tú</span></div>' +
       '<p class="small">Todos entran con <b>su email</b> y este <b>código de la familia</b>. Nada más entrar, cada uno elige el suyo.</p>' +
       '<div class="row shared-code"><b class="big num" style="letter-spacing:.14em">' + (code ? esc(code) : '——————') + '</b><span class="grow"></span><button class="btn" data-act="sharedCode">' + icon('edit') + (code ? 'Cambiar' : 'Crear') + '</button></div>' +
