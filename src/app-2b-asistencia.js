@@ -2,7 +2,7 @@
 var CONF = { si: ['✓', 'Voy'], no: ['✕', 'No voy'], pend: ['?', 'Sin confirmar'] };
 function confBtn(pid, day, sm) {
   var st = L.dayStatus(S, pid, day), d = dayOf(day);
-  return '<button class="conf ' + st + (sm ? ' sm' : '') + '" data-act="conf" data-p="' + pid + '" data-day="' + day + '" aria-label="' + esc(person(pid).name) + ', ' + esc(d.long) + ': ' + CONF[st][1] + '">' +
+  return '<button class="conf ' + st + (sm ? ' sm' : '') + '" data-act="conf" data-p="' + pid + '" data-day="' + day + '" aria-label="' + esc(person(pid).name) + ', ' + esc(d.long) + ': ' + CONF[st][1] + '"' + (canAttendFor(pid) ? '' : ' disabled') + '>' +
     (sm ? '' : '<small>' + esc(d.short) + '</small>') + '<b>' + CONF[st][0] + '</b>' + (sm ? '' : '<span>' + CONF[st][1] + '</span>') + '</button>';
 }
 function daySummary() {
@@ -15,11 +15,18 @@ function pendingConfirmations() {
   var n = 0; S.people.forEach(function (p) { S.days.forEach(function (d) { if (L.dayStatus(S, p.id, d.k) === 'pend') n++; }); }); return n;
 }
 function confirmCard() {
-  var p = me(), pend = pendingConfirmations();
-  return '<section class="card" id="confirmCard"><div class="card-head"><h3>¿Vienes? Confirma por día</h3><button class="link" data-act="tab" data-tab="asistencia">Todos ' + icon('arrow') + '</button></div>' +
-    '<p class="small muted">' + pname(p.id) + ', toca cada día hasta que quede como es. Con esto salen los comensales y las cantidades de la compra.</p>' +
-    '<div class="conf-row">' + S.days.map(function (d) { return confBtn(p.id, d.k); }).join('') + '</div>' +
-    '<div class="divider"></div><span class="eyebrow">Previstos por día</span>' + daySummary() +
+  var p = me(), pend = pendingConfirmations(), ids = famAttendIds(), f = fam(p.family);
+  var h = '<section class="card" id="confirmCard"><div class="card-head"><h3>¿Venís? Confirma por día</h3><button class="link" data-act="tab" data-tab="asistencia">Todos ' + icon('arrow') + '</button></div>';
+  if (ids.length > 1) {
+    h += '<p class="small muted">' + pname(p.id) + ', rellena la de toda tu familia: toca cada día (✓ va · ✕ no va · ? sin confirmar). Con esto salen los comensales y las cantidades de la compra.</p>' +
+      '<div class="conf-grid head"><span></span>' + S.days.map(function (d) { return '<small>' + esc(d.short) + '</small>'; }).join('') + '</div>' +
+      ids.map(function (id) { return '<div class="conf-grid"><span class="row" style="gap:8px;min-width:0">' + av(id, 'sm') + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + pname(id) + (id === p.id ? ' <small class="muted">(tú)</small>' : '') + '</span></span>' + S.days.map(function (d) { return confBtn(id, d.k, true); }).join('') + '</div>'; }).join('') +
+      '<button class="btn block" data-act="confFam" data-fam="' + p.family + '">' + icon('check') + (f ? esc(f.name) + ': ' : '') + 'todos, los ' + S.days.length + ' días</button>';
+  } else {
+    h += '<p class="small muted">' + pname(p.id) + ', toca cada día hasta que quede como es. Con esto salen los comensales y las cantidades de la compra.</p>' +
+      '<div class="conf-row">' + S.days.map(function (d) { return confBtn(p.id, d.k); }).join('') + '</div>';
+  }
+  return h + '<div class="divider"></div><span class="eyebrow">Previstos por día</span>' + daySummary() +
     (pend ? '<p class="small"><span class="pill warn">' + pend + ' confirmaciones pendientes</span> Mientras tanto contamos a los habituales.</p>' : '<p class="small"><span class="pill ok">Todo confirmado</span> Planning y cantidades cerrados.</p>') +
     '</section>';
 }
@@ -35,14 +42,14 @@ VIEWS.asistencia = function () {
   S.families.forEach(function (f) {
     var ps = S.people.filter(function (p) { return p.family === f.id; });
     h += '<section class="card" style="gap:6px"><div class="card-head"><h3 class="row" style="gap:8px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</h3>' +
-      (can('edit') ? '<button class="link" data-act="confFam" data-fam="' + f.id + '">Todos, los 4 días ✓</button>' : '') + '</div>' +
+      (ps.every(function (p) { return canAttendFor(p.id); }) ? '<button class="link" data-act="confFam" data-fam="' + f.id + '">Todos, los ' + S.days.length + ' días ✓</button>' : '') + '</div>' +
       '<div class="conf-grid head"><span></span>' + S.days.map(function (d) { return '<small>' + esc(d.short) + '</small>'; }).join('') + '</div>' +
       ps.map(function (p) {
         return '<div class="conf-grid"><span class="row" style="gap:8px;min-width:0">' + av(p.id, 'sm') + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + pname(p.id) + '</span></span>' +
           S.days.map(function (d) { return confBtn(p.id, d.k, true); }).join('') + '</div>';
       }).join('') + '</section>';
   });
-  h += '<p class="small muted">Si alguien viene un día pero no a una comida concreta, cámbialo en Comidas tocando los comensales de esa comida.' + (can('edit') ? '' : ' Como lector solo puedes confirmar lo tuyo.') + '</p>';
+  h += '<p class="small muted">Si alguien viene un día pero no a una comida concreta, cámbialo en Comidas tocando los comensales de esa comida.' + (can('edit') ? '' : me().kind === 'adulto' ? ' Puedes confirmar la de toda tu familia.' : ' Puedes confirmar la tuya; la de tu familia la rellenan tus padres.') + '</p>';
   return h;
 };
 function applySuggestion(i) {

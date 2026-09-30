@@ -218,7 +218,7 @@ function buildEggs() {
     { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + bdayName() + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años' },
     { k: 'baby', name: 'Modo ' + babyName(), how: 'Tocar 3 veces a ' + babyName(), hint: 'El más pequeño esconde algo' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + babyName(), hint: 'Ploc, ploc, ploc' },
-    { k: 'trophy', name: 'Campeón', how: 'Coronar al campeón del ping-pong', hint: 'Solo puede quedar uno' },
+    { k: 'trophy', name: 'Campeón', how: 'Coronar al campeón de una eliminatoria o una liguilla', hint: 'Solo puede quedar uno' },
     { k: 'omnes', name: 'Extra omnes', how: 'Tocar 7 veces el logo', hint: 'El logo guarda un secreto de cónclave' },
     { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Los abuelos ven de maravilla… con ayuda' },
     { k: 'claras', name: 'Cuentas claras', how: 'Dejar la liquidación a cero con gastos apuntados', hint: 'Nadie debe nada a nadie' },
@@ -229,7 +229,11 @@ function buildEggs() {
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números del cumpleañero' },
     { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuanta más familia, mejor' },
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Una palabra en latín, en el buscador' },
-    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar' }
+    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar' },
+    { k: 'himno', name: 'Himno del Cónclave', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música' },
+    { k: 'habemus', name: 'Habemus campeón', how: 'Terminar todos los juegos del Cónclave', hint: 'Cuando no quede ni un juego por jugar' },
+    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando' },
+    { k: 'album', name: 'Paparazzi en serie', how: 'Llegar a 50 fotos en el álbum', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún' }
   ];
 }
 function foundMap() { try { return JSON.parse(localStorage.getItem(KEY + '-eggs')) || {}; } catch (e) { return ui._eggs || {}; } }
@@ -366,6 +370,12 @@ function habemusPapam() {
   if (!egg('papa')) return;
   fumataRaw('HABEMUS<br>PAPAM', 'Bueno… en realidad lo que tenemos es una lista de la compra. Pero casi.');
 }
+function himno() {
+  fanfare(); confetti(2600);
+  var top = G.ranking(S).filter(function (r) { return r.pos === 1 && r.pts > 0; });
+  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">' + (top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante') + '</h2><p>Que suene el himno del Cónclave. Todos en pie.</p>', 3200);
+  egg('himno');
+}
 var discoOn = false;
 function discoMode() {
   if (discoOn) return; discoOn = true; egg('disco');
@@ -403,10 +413,10 @@ var tapCount = {}, tapTimer = {};
 function eggTap(k) {
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
   tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2200);
-  var need = { bday: 5, baby: 3, grand: 3, logo: 7, sun: 5, disco: 3 }[k];
+  var need = { bday: 5, baby: 3, grand: 3, logo: 7, sun: 5, disco: 3, podio: 3 }[k];
   if (tapCount[k] >= need) {
     tapCount[k] = 0;
-    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else abueloMode();
+    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else abueloMode();
     return true;
   }
   return false;
@@ -429,6 +439,7 @@ var A = {
   tick: function (el) {
     if (!guard('edit')) return;
     var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; });
+    if (!i.family && fam(me().family)) i.family = me().family;
     var was = i.status;
     i.status = was === 'pendiente' ? 'comprado' : 'pendiente';
     if (i.status === 'pendiente') i.cost = null;
@@ -448,6 +459,36 @@ var A = {
     checkFumata();
   },
   editItem: function (el) { itemSheet(el.dataset.id); },
+  claim: function (el) {
+    if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }), f = fam(me().family); if (!i || !f) return;
+    if (i.family) { toast('Ya se lo ha pedido ' + esc(fam(i.family).name)); render(true); return; }
+    i.family = f.id; save();
+    var row = document.getElementById('it-' + i.id); if (row) { row.classList.add('claimed'); }
+    if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
+    toast(esc(i.name) + ' → ' + esc(f.name), 'Deshacer', function () { i.family = null; save(); render(true); });
+    setTimeout(function () { if (!document.getElementById('scrim')) render(true); }, 380);
+    if (!L.unassigned(S).length) setTimeout(function () { confetti(2200); toast('¡Todo repartido! Ahora, al súper'); }, 500);
+  },
+  claimMeal: function (el) {
+    if (!guard('edit')) return; var f = fam(me().family); if (!f) return;
+    var its = S.ingredients.filter(function (i) { return !i.family && i.meals.indexOf(el.dataset.id) >= 0; });
+    its.forEach(function (i) { i.family = f.id; }); save(); render(true);
+    toast(its.length + ' ingredientes para ' + esc(f.name), 'Deshacer', function () { its.forEach(function (i) { i.family = null; }); save(); render(true); });
+  },
+  owner: function (el) {
+    var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
+    var cur = fam(i.family);
+    openSheet('<h2>' + esc(i.name) + '</h2><p class="small muted">Ahora lo compra <b>' + (cur ? esc(cur.name) : 'nadie') + '</b>' + (i.status !== 'pendiente' ? ' · ya está ' + (i.status === 'casa' ? 'marcado como «viene de casa»' : 'comprado') : '') + '.</p>' +
+      (can('edit') ? '<div class="stack">' + S.families.map(function (x) { return '<button class="btn block' + (x.id === i.family ? ' primary' : '') + '" data-act="setOwner" data-id="' + i.id + '" data-fam="' + x.id + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + (x.id === me().family ? ' (nosotros)' : '') + '</button>'; }).join('') +
+        '<button class="btn ghost block" data-act="setOwner" data-id="' + i.id + '" data-fam="">Soltar: que vuelva a «Sin dueño»</button></div>' : '<p class="small">Solo los editores cambian quién compra cada cosa.</p>') +
+      '<button class="btn block" data-act="close">Cerrar</button>');
+  },
+  setOwner: function (el) {
+    if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
+    i.family = el.dataset.fam || null; if (!i.family && i.status !== 'pendiente') { i.status = 'pendiente'; i.cost = null; }
+    save(); closeSheet(); render(true); toast(i.family ? esc(i.name) + ' → ' + esc(fam(i.family).name) : esc(i.name) + ' vuelve a «Sin dueño»');
+  },
+  howToggle: function () { ui.howClosed = !ui.howClosed; saveUi(); render(true); },
   newItem: function () { if (guard('edit')) itemSheet(null); },
   saveItem: saveItem,
   dupItem: function (el) {
@@ -482,7 +523,8 @@ var A = {
     if (!pendingConfirmations()) setTimeout(function () { confetti(2400); toast('¡Asistencia cerrada! Planning y cantidades listos'); }, 250);
   },
   confFam: function (el) {
-    if (!guard('edit')) return;
+    var fp = S.people.filter(function (p) { return p.family === el.dataset.fam; });
+    if (!fp.every(function (p) { return canAttendFor(p.id); })) { toast('Solo puedes confirmar a tu familia'); return; }
     S.people.filter(function (p) { return p.family === el.dataset.fam; }).forEach(function (p) {
       S.dayConfirm[p.id] = {}; S.days.forEach(function (d) { S.dayConfirm[p.id][d.k] = 'si'; });
       S.meals.forEach(function (m) { if (S.attendance[m.id]) delete S.attendance[m.id][p.id]; });
@@ -684,7 +726,7 @@ function startApp() {
 }
 function boot() {
   var u = loadUi();
-  ui = { tab: u.tab || 'inicio', me: u.me || null, fam: u.fam || 'all', st: 'pendiente', superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
+  ui = { tab: u.tab || 'inicio', me: u.me || null, fam: u.fam || null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
   if (['personas', 'tiempo', 'asistencia'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();

@@ -4,8 +4,8 @@ VIEWS.planes = function () {
   if (!ui.day) ui.day = tripDayDefault();
   var sub = ui.sub || 'plan';
   var h = '<div class="view-head"><div><h2>Planes</h2><p class="muted small">Sencillos y sin gastos extra</p></div></div>' +
-    '<div class="seg" role="group" aria-label="Sección"><button data-act="sub" data-sub="plan" aria-pressed="' + (sub === 'plan') + '">Planning</button><button data-act="sub" data-sub="torneo" aria-pressed="' + (sub === 'torneo') + '">Torneo</button><button data-act="sub" data-sub="coste" aria-pressed="' + (sub === 'coste') + '">Con coste</button></div>';
-  if (sub === 'torneo') return h + torneoView();
+    '<div class="seg" role="group" aria-label="Sección"><button data-act="sub" data-sub="plan" aria-pressed="' + (sub === 'plan') + '">Planning</button><button data-act="sub" data-sub="coste" aria-pressed="' + (sub === 'coste') + '">Con coste</button></div>';
+  if (sub === 'torneo') { ui.sub = 'plan'; sub = 'plan'; }
   if (sub === 'coste') return h + costeView();
 
   h += daySelector('day');
@@ -36,7 +36,7 @@ function actCard(a) {
         '<span class="fact" style="color:var(--ok)">0 €</span></div>' +
       (a.planB ? '<p class="planb">' + icon('umbrella') + '<span><b>Plan B:</b> ' + esc(a.planB) + '</span></p>' : '') +
       '<div class="row"><span class="small muted grow">Responsable: <b style="color:var(--ink)">' + (a.owner && person(a.owner) ? pname(a.owner) : esc(ownerLabel(a.owner))) + '</b></span>' +
-        (a.tournament ? '<button class="link" data-act="sub" data-sub="torneo">Cuadro ' + icon('arrow') + '</button>' : '') +
+        (function () { var gm = (S.games || []).find(function (g) { return g.act === a.id; }) || (a.tournament ? (S.games || []).find(function (g) { return g.format === 'bracket'; }) : null); return gm ? '<button class="link" data-act="gOpen" data-id="' + gm.id + '">Marcador ' + icon('arrow') + '</button>' : ''; })() +
         '<button class="vote" data-act="vote" data-id="' + a.id + '" aria-pressed="' + mine + '" aria-label="Me apunto">' + icon('heart') + '<span class="num">' + votes.length + '</span></button></div>' +
     '</article></div>';
 }
@@ -95,9 +95,12 @@ VIEWS.cuentas = function () {
     '<details><summary>Política de cancelación</summary><ul class="small">' + house.cancel.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul></details></section>';
 
   /* Tasa turística */
-  h += '<section class="card"><div class="card-head"><h3>Tasa turística</h3>' + (S.tax.payer ? '<span class="pill olive">La pagan ' + esc(fam(S.tax.payer).name) + '</span>' : '<span class="pill pend">Quién paga: PENDIENTE</span>') + '</div>' +
-    '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">' + tx.adults + ' adultos × ' + S.tax.nights + ' noches × ' + L.money(S.tax.perNight) + '</span></div>' +
-    '<p class="small muted">' + esc(S.tax.note) + '. Si pagaran todos (' + tx.all + ' personas): ' + L.money(tx.withoutExemption) + '. No entra en el reparto.</p></section>';
+  var exNames = tx.rows.filter(function (r) { return !r.pays; }).map(function (r) { return pname(r.id); });
+  h += '<section class="card"><div class="card-head"><h3>Tasa turística</h3>' + (S.tax.payer ? '<span class="pill olive">Invitan ' + esc(fam(S.tax.payer).name) + '</span>' : '<span class="pill pend">Quién paga: PENDIENTE</span>') + '</div>' +
+    '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">' + tx.stays + ' noches-persona × ' + L.money(S.tax.perNight) + ' · ' + tx.adults + ' pagan</span></div>' +
+    '<div class="tax-list">' + tx.rows.filter(function (r) { return r.pays; }).map(function (r) { return '<span class="online-chip">' + av(r.id, 'xs') + pname(r.id) + ' <small class="muted">' + r.nights + (r.nights === 1 ? ' noche' : ' noches') + '</small></span>'; }).join('') + '</div>' +
+    (exNames.length ? '<p class="small"><b>Exentos por edad (16 o menos):</b> ' + exNames.join(', ') + '</p>' : '') +
+    '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
 
   /* Reparto */
   h += '<section class="card"><div class="card-head"><h3>Reparto entre familias</h3></div>' +

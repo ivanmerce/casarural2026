@@ -9,13 +9,16 @@ var CLOUD = (function () {
   var sb = null, last = null, timer = null, busy = false, dirty = false, reloadT = null;
   var api = { siteUrl: cfg.siteUrl || location.href.split('#')[0].split('?')[0] };
   var SLOTS = [{ k: 'des', name: 'Desayuno' }, { k: 'com', name: 'Comida' }, { k: 'mer', name: 'Merienda' }, { k: 'cen', name: 'Cena' }];
-  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config'];
+  var TABLES = ['families', 'people', 'homes', 'meals', 'meal_attendance', 'day_confirmations', 'ingredients', 'ingredient_meals', 'expenses', 'activities', 'activity_votes', 'matches', 'house_payments', 'settings', 'app_config', 'games', 'awards', 'award_votes', 'photos', 'photo_likes'];
   /* tablas que la app escribe, en orden de dependencias, con su clave primaria */
   var SYNC = [
     ['settings', ['id']], ['app_config', ['key']], ['people', ['id']], ['meals', ['id']], ['ingredients', ['id']], ['activities', ['id']],
     ['expenses', ['id']], ['house_payments', ['id']], ['matches', ['tournament_id', 'round', 'slot']],
-    ['ingredient_meals', ['ingredient_id', 'meal_id']], ['meal_attendance', ['meal_id', 'person_id']], ['day_confirmations', ['person_id', 'day']], ['activity_votes', ['activity_id', 'person_id']]
+    ['ingredient_meals', ['ingredient_id', 'meal_id']], ['meal_attendance', ['meal_id', 'person_id']], ['day_confirmations', ['person_id', 'day']], ['activity_votes', ['activity_id', 'person_id']],
+    ['games', ['id']], ['awards', ['id']], ['award_votes', ['award_id', 'voter_id']]
   ];
+  /* lo que un lector puede escribir (RLS): el resto ni se intenta subir */
+  var READER_OK = { day_confirmations: 1, meal_attendance: 1, activity_votes: 1, award_votes: 1 };
   function client() {
     return sb || (sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } }));
   }
@@ -49,7 +52,14 @@ var CLOUD = (function () {
       paidOptions: kv.paidOptions || [],
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
-      attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown
+      attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
+      comp: kv.comp || { duos: [] },
+      games: (d.games || []).slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return Object.assign({ id: r.id, sort: r.sort }, r.data); }),
+      awardData: (function () { var o = {}; (d.awards || []).forEach(function (r) { o[r.id] = r.data; }); return o; })(),
+      awardVotes: (function () { var o = {}; (d.award_votes || []).forEach(function (r) { (o[r.award_id] = o[r.award_id] || {})[r.voter_id] = r.nominee; }); return o; })(),
+      stats: old.stats || {},
+      photos: (d.photos || []).map(function (r) { return { id: r.id, path: r.path, thumb: r.thumb, by: r.person_id, day: r.day, caption: r.caption || '', w: r.w, h: r.h, at: r.created_at }; }),
+      photoLikes: (function () { var o = {}; (d.photo_likes || []).forEach(function (r) { (o[r.photo_id] = o[r.photo_id] || []).push(r.person_id); }); return o; })()
     };
   }
 
@@ -57,7 +67,10 @@ var CLOUD = (function () {
   function rows(S) {
     var out = {};
     out.settings = [{ id: 1, house_total: S.house.total, house_payer_family_id: S.house.payer, split_mode: S.split.mode, w_adulto: S.split.w.adulto, w_menor: S.split.w.menor, w_bebe: S.split.w.bebe, tax_per_night: S.tax.perNight, tax_nights: S.tax.nights, tax_min_age: S.tax.minAge, tax_payer_family_id: S.tax.payer }];
-    out.app_config = [{ key: 'trip', value: S.trip }];
+    out.app_config = [{ key: 'trip', value: S.trip }, { key: 'comp', value: S.comp || { duos: [] } }];
+    out.games = (S.games || []).map(function (g, i) { var d = {}; Object.keys(g).forEach(function (k) { if (k !== 'id' && k !== 'sort' && g[k] !== undefined) d[k] = g[k]; }); return { id: g.id, data: d, sort: g.sort != null ? g.sort : i }; });
+    out.awards = Object.keys(S.awardData || {}).map(function (k) { return { id: k, data: S.awardData[k] }; });
+    out.award_votes = []; Object.keys(S.awardVotes || {}).forEach(function (a) { Object.keys(S.awardVotes[a] || {}).forEach(function (v) { if (S.awardVotes[a][v]) out.award_votes.push({ award_id: a, voter_id: v, nominee: S.awardVotes[a][v] }); }); });
     out.people = S.people.map(function (p, i) { return { id: p.id, family_id: p.family, name: p.name, age: p.age, age_approx: !!p.approx, kind: p.kind, role: p.role, email: p.email || null, attends_default: !!p.attends, pending: !!p.pend, note: p.note || null, avatar: p.avatar || null, sort: p.sort != null ? p.sort : i }; });
     out.meals = S.meals.map(function (m) { return { id: m.id, day: m.day, slot: m.slot, time_override: m.time || null, mode: m.mode, title: m.title, dishes: m.dishes, cook_family_id: m.cook || null, marc_menu: m.marc || null, notes: m.notes || null, star: !!m.star }; });
     out.ingredients = S.ingredients.map(function (i, k) { return { id: i.id, name: i.name, category: i.cat, qty: i.qty, unit: i.unit, qty_estimated: !!i.qtyEst, family_id: i.family || null, status: i.status, split: i.split || 'comun', cost: i.cost, est_cost: i.est, per_diners: i.per || null, suggested: !!i.sug, note: i.note || null, sort: i.sort != null ? i.sort : 1000 + k }; });
@@ -88,9 +101,10 @@ var CLOUD = (function () {
     if (busy) { timer = setTimeout(sync, 300); return; }
     if (!last) return;
     busy = true; dirty = false;
-    var cur = snapshot(S), ops = [];
+    var cur = snapshot(S), ops = [], reader = person(ui.me) && person(ui.me).role === 'lector';
     SYNC.forEach(function (t) {
       var name = t[0], pk = t[1], a = last[name] || {}, b = cur[name] || {};
+      if (reader && !READER_OK[name]) { cur[name] = a; return; }
       var ins = Object.keys(b).filter(function (k) { return !a[k]; }).map(function (k) { return b[k].row; });
       var upd = Object.keys(b).filter(function (k) { return a[k] && a[k].json !== b[k].json; }).map(function (k) { return b[k].row; });
       var del = Object.keys(a).filter(function (k) { return !b[k]; }).map(function (k) { return a[k].row; });
@@ -99,7 +113,7 @@ var CLOUD = (function () {
       if (del.length) ops.push({ name: name, pk: pk, del: del });
     });
     /* primero borrados de tablas puente, luego altas/cambios en orden de dependencias, y al final borrados de entidades */
-    var joins = { ingredient_meals: 1, meal_attendance: 1, day_confirmations: 1, activity_votes: 1 };
+    var joins = { ingredient_meals: 1, meal_attendance: 1, day_confirmations: 1, activity_votes: 1, award_votes: 1 };
     function w(o) { return o.del ? (joins[o.name] ? 0 : 3) : (joins[o.name] ? 2 : 1); }
     ops = ops.map(function (o, i) { o.i = i; return o; }).sort(function (x, y) { return (w(x) - w(y)) || (x.i - y.i); });
     function pkObj(o, row) { var m = {}; o.pk.forEach(function (k) { m[k] = row[k]; }); return m; }
@@ -149,9 +163,16 @@ var CLOUD = (function () {
     document.addEventListener('visibilitychange', function () { if (!document.hidden) { ping(); ch.track({ pid: ui.me, at: new Date().toISOString() }); } });
   }
   function ping() {
-    client().rpc('ping').then(function () {
-      return client().from('presence').select('person_id,last_seen');
-    }).then(function (r) { if (r && r.data) { r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; }); onPresence(); } }).catch(function () {});
+    var eg = 0; try { eg = foundCount(); } catch (e) {}
+    client().rpc('ping', { p_eggs: eg }).then(function () {
+      return client().from('presence').select('person_id,last_seen,visits,minutes,eggs');
+    }).then(function (r) {
+      if (r && r.data) {
+        var st = {};
+        r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs }; });
+        if (S) S.stats = st; onPresence();
+      }
+    }).catch(function () {});
   }
   function subscribe() {
     client().channel('conclave').on('postgres_changes', { event: '*', schema: 'public' }, function () { clearTimeout(reloadT); reloadT = setTimeout(reload, 600); }).subscribe();
@@ -159,7 +180,7 @@ var CLOUD = (function () {
 
   /* ---------- Acceso ---------- */
   function shell(inner) {
-    $top.innerHTML = '<span class="wordmark"><b>Cónclave</b></span><span class="sp"></span>';
+    $top.innerHTML = '<span class="wordmark">' + wordmarkHtml('Cónclave') + '</span><span class="sp"></span>';
     $nav.innerHTML = '';
     $main.innerHTML = '<div class="view"><section class="hero glass" style="margin-top:28px"><canvas id="heroNet" aria-hidden="true"></canvas><div class="kicker">Plataforma familiar</div><h1>Cónclave</h1></section>' + inner + '</div>';
     startHero();
@@ -176,7 +197,7 @@ var CLOUD = (function () {
   }
   function bootPending() {
     $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
-    $top.innerHTML = '<span class="wordmark"><b>Cónclave</b></span>';
+    $top.innerHTML = '<span class="wordmark">' + wordmarkHtml('Cónclave') + '</span>';
     $main.innerHTML = '<div class="view"><section class="hero glass" style="margin-top:28px"><div class="kicker">Casi listo</div><h1>Cónclave</h1><p class="place">Falta conectar la base de datos. En cuanto esté, aquí podréis entrar todos.</p></section></div>';
   }
   function afterSession() {
@@ -229,6 +250,37 @@ var CLOUD = (function () {
       started = false; go2();
     }).catch(function () { codeFlow = false; toast('No he podido entrar con el código'); });
   };
+  /* ---------- Álbum: Storage privado con enlaces firmados (1 h) ---------- */
+  var phCache = {}, phPending = {}, phT = null;
+  function bucket() { return client().storage.from('photos'); }
+  PHOTOS.demo = false;
+  PHOTOS.url = function (p) { var c = phCache[p]; return c && c.exp > Date.now() ? c.url : null; };
+  PHOTOS.ensure = function (paths) {
+    var need = (paths || []).filter(function (p) { return p && !PHOTOS.url(p) && !phPending[p]; });
+    if (!need.length) return Promise.resolve(false);
+    need.forEach(function (p) { phPending[p] = 1; });
+    return bucket().createSignedUrls(need, 3600).then(function (r) {
+      need.forEach(function (p) { delete phPending[p]; });
+      (r.data || []).forEach(function (x) { var u = x.signedUrl || x.signedURL; if (u && x.path) phCache[x.path] = { url: u, exp: Date.now() + 3500000 }; });
+      clearTimeout(phT); phT = setTimeout(function () { if (ui.tab === 'album' || ui.tab === 'inicio') render(true); }, 80);
+      return true;
+    }, function () { need.forEach(function (p) { delete phPending[p]; }); return false; });
+  };
+  PHOTOS.add = function (full, thumb, meta) {
+    var id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : null, name = ui.me + '/' + (id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)));
+    var opt = { contentType: 'image/jpeg', upsert: false, cacheControl: '3600' };
+    return bucket().upload(name + '.jpg', full.blob, opt).then(check)
+      .then(function () { return bucket().upload(name + '_t.jpg', thumb.blob, opt).then(check); })
+      .then(function () { var row = { path: name + '.jpg', thumb: name + '_t.jpg', person_id: ui.me, day: meta.day, w: full.w, h: full.h }; if (id) row.id = id; return client().from('photos').insert(row).select().single().then(check); })
+      .then(function (r) {
+        var x = r.data; phCache[x.thumb] = { url: URL.createObjectURL(thumb.blob), exp: Infinity }; phCache[x.path] = { url: URL.createObjectURL(full.blob), exp: Infinity };
+        S.photos = S.photos || []; S.photos.push({ id: x.id, path: x.path, thumb: x.thumb, by: x.person_id, day: x.day, caption: '', w: x.w, h: x.h, at: x.created_at });
+      });
+  };
+  PHOTOS.remove = function (ph) { return client().from('photos').delete().match({ id: ph.id }).then(check).then(function () { return bucket().remove([ph.path, ph.thumb]); }); };
+  PHOTOS.like = function (ph, on) { var q = client().from('photo_likes'); return (on ? q.insert({ photo_id: ph.id, person_id: ui.me }) : q.delete().match({ photo_id: ph.id, person_id: ui.me })).then(check); };
+  PHOTOS.caption = function (ph, txt) { return client().from('photos').update({ caption: txt || null }).match({ id: ph.id }).then(check); };
+
   /* códigos personales: solo el admin puede leerlos o cambiarlos (RLS) */
   api.getCode = function (pid) { return client().from('access_codes').select('code').eq('person_id', pid).maybeSingle().then(function (r) { return r.data ? r.data.code : null; }); };
   api.setCode = function (pid, code) { return client().from('access_codes').upsert({ person_id: pid, code: code }, { onConflict: 'person_id' }).then(check); };

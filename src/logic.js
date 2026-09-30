@@ -173,24 +173,45 @@ var L = (function () {
   }
 
   /* ---- Compra ---- */
+  /* previsión del gasto común total, lo compre quien lo compre (lo que aún no tiene dueño también cuenta) */
+  function estCommon(S) {
+    var t = 0;
+    S.ingredients.forEach(function (i) { if ((i.split || 'comun') !== 'comun' || i.status === 'casa') return; var v = i.cost != null ? i.cost : i.est; if (v) t += v; });
+    (S.expenses || []).forEach(function (e) { if ((e.split || 'comun') === 'comun' && e.kind !== 'aportacion' && e.amount) t += e.amount; });
+    return r2(t);
+  }
+  function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family; }); }
   function coverage(items) {
     var tot = items.length, done = items.filter(function (i) { return i.status && i.status !== 'pendiente'; }).length;
     return { tot: tot, done: done, pct: tot ? Math.round(done / tot * 100) : 0 };
   }
 
   /* ---- Tasa turística ---- */
+  /* Tasa turística (Llei 5/2017 mod. Llei 2/2026): por persona y noche; exentas las personas de 16 años o menos.
+     Noches reales de cada uno según la confirmación por día (o su asistencia por defecto si aún no ha confirmado). */
+  function sleeps(S, p, day) {
+    var st = dayStatus(S, p.id, day);
+    return st === 'si' || (st === 'pend' && !!p.attends);
+  }
+  function taxPays(S, p) {
+    var t = S.tax || {}, maxEx = t.maxExemptAge != null ? t.maxExemptAge : (t.minAge != null ? t.minAge - 1 : 16);
+    if (p.age != null) return p.age > maxEx;
+    return p.kind === 'adulto';
+  }
   function tax(S) {
-    var t = S.tax || { perNight: 1.1, nights: 3, minAge: 17 };
-    var payers = S.people.filter(function (p) {
-      if (mealsAttended(S, p.id) === 0) return false;
-      if (p.kind === 'adulto') return true;
-      return p.age != null && p.age >= t.minAge;
-    });
-    var all = S.people.filter(function (p) { return mealsAttended(S, p.id) > 0; });
+    var t = S.tax || { perNight: 1.1, nights: 3 };
+    var nightDays = (S.days || []).slice(0, t.nights || Math.max(0, (S.days || []).length - 1)).map(function (d) { return d.k; });
+    var rows = S.people.map(function (p) {
+      var n = nightDays.filter(function (d) { return sleeps(S, p, d); }).length;
+      var pays = taxPays(S, p);
+      return { id: p.id, nights: n, pays: pays, amount: pays ? r2(n * t.perNight) : 0 };
+    }).filter(function (r) { return r.nights > 0; });
+    var payers = rows.filter(function (r) { return r.pays; });
+    var stays = payers.reduce(function (a, r) { return a + r.nights; }, 0);
+    var allStays = rows.reduce(function (a, r) { return a + r.nights; }, 0);
     return {
-      adults: payers.length, all: all.length,
-      withExemption: r2(payers.length * t.nights * t.perNight),
-      withoutExemption: r2(all.length * t.nights * t.perNight)
+      rows: rows, adults: payers.length, exempt: rows.length - payers.length, all: rows.length, stays: stays,
+      withExemption: r2(stays * t.perNight), withoutExemption: r2(allStays * t.perNight)
     };
   }
 
@@ -226,6 +247,6 @@ var L = (function () {
     return f.w ? f[f.w] : null;
   }
 
-  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, tax: tax, wmo: wmo, advice: advice, advance: advance };
+  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;
