@@ -846,17 +846,15 @@ var L = (function () {
     return { share: out, units: units };
   }
 
-  /* gastos comunes por familia. useEst: simulación con precios ESTIMADOS */
-  function paidBy(S, useEst) {
+  /* gastos comunes por familia. Un producto que una familia se pide cuenta ya a su cargo:
+     con el precio real si lo ha apuntado y, si no, con el estimado. «Viene de casa» = 0 €. */
+  function itemCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : (i.est || 0); }
+  function paidBy(S) {
     var paid = {};
     S.families.forEach(function (f) { paid[f.id] = 0; });
     S.ingredients.forEach(function (i) {
-      if ((i.split || 'comun') !== 'comun') return;
-      if (i.status === 'casa') return;
-      var v = null;
-      if (useEst) v = (i.cost != null ? i.cost : i.est);
-      else if (i.status === 'comprado') v = i.cost;
-      if (v && i.family) paid[i.family] += v;
+      if ((i.split || 'comun') !== 'comun' || !i.family || paid[i.family] == null) return;
+      paid[i.family] += itemCost(i);
     });
     (S.expenses || []).forEach(function (e) {
       if ((e.split || 'comun') !== 'comun' || e.kind === 'aportacion') return;
@@ -943,7 +941,7 @@ var L = (function () {
   }
   function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family; }); }
   function coverage(items) {
-    var tot = items.length, done = items.filter(function (i) { return i.status && i.status !== 'pendiente'; }).length;
+    var tot = items.length, done = items.filter(function (i) { return !!i.family; }).length;
     return { tot: tot, done: done, pct: tot ? Math.round(done / tot * 100) : 0 };
   }
 
@@ -1008,7 +1006,7 @@ var L = (function () {
     return f.w ? f[f.w] : null;
   }
 
-  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, itemCost: itemCost, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;
 
@@ -1283,8 +1281,8 @@ var G = (function () {
     /* --- La casa: todo lo que pasa en la plataforma --- */
     { id: 'derroche', group: 'casa', icon: 'coins', name: 'Los Más Derrochadores', desc: 'Quienes pagan la casa rural (y la tasa turística).',
       auto: function (S) { var p = S.house && S.house.payer; if (!p) return null; var t = typeof L !== 'undefined' ? L.tax(S).withExemption : 0; return { winners: [F(p)], why: 'La casa (' + money(S.house.total) + ')' + (S.tax && S.tax.payer === p && t ? ' y la tasa (' + money(t) + ')' : '') }; } },
-    { id: 'carrito', group: 'casa', icon: 'cart', name: 'Reyes del Carrito', desc: 'La familia que más ingredientes ha comprado de la lista.',
-      auto: function (S) { var arr = famIds(S).map(function (f) { return { f: f, n: S.ingredients.filter(function (i) { return i.family === f && i.status === 'comprado'; }).length }; }); var w = topBy(arr, 'n'); return w.length ? { winners: w.map(function (x) { return F(x.f); }), why: w[0].n + ' ingredientes comprados' } : null; } },
+    { id: 'carrito', group: 'casa', icon: 'cart', name: 'Reyes del Carrito', desc: 'La familia que más productos se ha pedido de la lista de la compra.',
+      auto: function (S) { var arr = famIds(S).map(function (f) { return { f: f, n: S.ingredients.filter(function (i) { return i.family === f; }).length }; }); var w = topBy(arr, 'n'); return w.length ? { winners: w.map(function (x) { return F(x.f); }), why: w[0].n + ' productos a su cargo' } : null; } },
     { id: 'tarjeta', group: 'casa', icon: 'card', name: 'Tarjeta Echando Humo', desc: 'La familia que más dinero ha adelantado para el bote común.',
       auto: function (S) { if (typeof L === 'undefined') return null; var lg = L.ledger(S, false); var arr = lg.rows.map(function (r) { return { f: r.id, n: r.paid }; }); var w = topBy(arr, 'n', 0.01); return w.length ? { winners: w.map(function (x) { return F(x.f); }), why: money(w[0].n) + ' adelantados' } : null; } },
     { id: 'despensa', group: 'casa', icon: 'basket', name: 'Despensa Infinita', desc: 'La familia que más cosas trae de casa.',
@@ -1406,7 +1404,7 @@ function load() {
       if (d && d.version === SEED.version) { if (typeof AVATARS !== 'undefined') d.people.forEach(function (p) { if (!p.avatar && AVATARS[p.id]) p.avatar = AVATARS[p.id]; }); return d; }
     }
   } catch (e) {}
-  var s = clone(SEED); s.attendance = {};
+  var s = clone(SEED); s.attendance = s.attendance || {};
   s.ingredients.forEach(function (i) { if (!i.status) i.status = 'pendiente'; if (!i.split) i.split = 'comun'; if (i.cost === undefined) i.cost = null; });
   return s;
 }
@@ -1705,7 +1703,7 @@ function countdownParts() {
 VIEWS.inicio = function () {
   var c = countdownParts();
   var cov = L.coverage(S.ingredients);
-  var lgR = L.ledger(S, false), lgE = L.ledger(S, true);
+  var lgR = L.ledger(S, false);
   var pend = S.house.payments.filter(function (p) { return !p.paid; });
   var att = S.people.filter(function (p) { return L.mealsAttended(S, p.id) > 0; });
   var maybe = S.people.filter(function (p) { return L.mealsAttended(S, p.id) === 0; });
@@ -1758,9 +1756,9 @@ VIEWS.inicio = function () {
   /* Compra + costes */
   h += '<div class="grid2">' +
     '<button class="card" data-act="tab" data-tab="compra" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' cubiertos' + (L.unassigned(S).length ? '<br><b style="color:var(--accent)">' + L.unassigned(S).length + ' sin dueño</b>' : '') + '</span></button>' +
+      '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' con dueño' + (L.unassigned(S).length ? '<br><b style="color:var(--accent)">' + L.unassigned(S).length + ' sin dueño</b>' : '') + '</span></button>' +
     '<button class="card" data-act="tab" data-tab="cuentas" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(lgR.total) + '</span><span class="small muted">gastado de momento<br>Previsión a repartir ≈ ' + L.money(L.estCommon(S)) + ' <span class="pill est">ESTIMADO</span></span></button>' +
+      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(L.estCommon(S)) + '</span><span class="small muted">previsto para el bote común<br>' + L.money(lgR.total) + ' ya a cargo de alguna familia <span class="pill est">ESTIMADO</span></span></button>' +
     '</div>';
 
   /* Familia */
@@ -1869,7 +1867,7 @@ VIEWS.comidas = function () {
       (m.notes ? '<p class="small muted">' + esc(m.notes) + '</p>' : '') +
       (function () { var k = ings.filter(function (i) { return i.status === 'pendiente' && L.suggestQty(S, i); }).length; return k ? '<button class="card alert" data-act="mealItems" data-id="' + m.id + '" style="padding:10px 12px;text-align:left;font:inherit;color:inherit"><span class="small">Cantidades de la hoja pensadas para 14 y ahora sois <b>' + din.length + '</b>: ' + k + (k === 1 ? ' ingrediente' : ' ingredientes') + ' con ajuste sugerido ' + icon('arrow') + '</span></button>' : ''; })() +
       '<div class="meal-foot"><button class="diners chip" data-act="attendance" data-id="' + m.id + '" aria-label="Cambiar asistencia">' + icon('users') + din.length + ' comensales</button>' +
-      (ings.length ? '<button class="chip" data-act="mealItems" data-id="' + m.id + '">' + icon('basket') + cov.done + '/' + cov.tot + ' ingredientes</button>' : '') +
+      (ings.length ? '<button class="chip" data-act="mealItems" data-id="' + m.id + '">' + icon('basket') + cov.done + '/' + cov.tot + ' con dueño</button>' : '') +
       '<span class="grow"></span>' + (can('edit') ? '<button class="icon-btn" data-act="editMeal" data-id="' + m.id + '" aria-label="Editar comida">' + icon('edit') + '</button>' : '') + '</div>' +
       '</article>';
   });
@@ -1881,84 +1879,74 @@ VIEWS.comidas = function () {
 VIEWS.compra = function () {
   var myF = me().family, free = L.unassigned(S);
   if (!ui.fam) ui.fam = free.length ? 'libre' : myF;
-  var f = ui.fam, st = ui.st || 'pendiente', q = (ui.q || '').toLowerCase();
+  var f = ui.fam, q = (ui.q || '').toLowerCase();
   var all = S.ingredients;
   function inFam(i) { return f === 'all' || (f === 'libre' ? !i.family : i.family === f); }
   var list = all.filter(function (i) {
     if (!inFam(i)) return false;
     if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
-    if (f !== 'libre' && st === 'pendiente' && i.status !== 'pendiente') return false;
-    if (f !== 'libre' && st === 'hecho' && i.status === 'pendiente') return false;
     if (q && i.name.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-  var scope = all.filter(function (i) { return inFam(i) && (!ui.mealFilter || i.meals.indexOf(ui.mealFilter) >= 0); });
-  var cov = L.coverage(all), real = all.reduce(function (a, i) { return a + (i.status === 'comprado' && i.cost ? i.cost : 0); }, 0);
   var assigned = all.length - free.length, pctA = all.length ? Math.round(assigned / all.length * 100) : 0;
+  var mine = all.filter(function (i) { return i.family === myF; }), mineCost = mine.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
 
-  var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div>' +
-    '<button class="chip" data-act="superMode" aria-pressed="' + !!ui.superMode + '">' + icon('cart') + 'Modo súper</button></div>';
-  /* cómo funciona: 3 pasos, siempre a mano */
-  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">3 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
-    '<li><span><b>Mira lo que falta.</b> En «Sin dueño» está todo lo que nadie se ha pedido todavía.</span></li>' +
-    '<li><span><b>Pídetelo.</b> Toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span> en lo que vaya a comprar (o traer de casa) tu familia. Si vienes desde Comidas, puedes pedirte la comida entera.</span></li>' +
-    '<li><span><b>En el súper, márcalo.</b> En «' + esc(fam(myF) ? fam(myF).name : 'Lo nuestro') + '» toca el círculo al meterlo en el carro y apunta el precio: las cuentas salen solas.</span></li></ol>') + '</section>';
-  /* reparto: quién se ha pedido qué */
+  var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div></div>';
+  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">2 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
+    '<li><span><b>Pídete lo que vayáis a comprar.</b> En «Sin dueño», toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span>. Ya queda a cargo de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + ' con su precio estimado. Desde Comidas puedes pedirte una comida entera.</span></li>' +
+    '<li><span><b>¿Te has equivocado?</b> En «Lo nuestro», toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si queréis, tocando un producto podéis poner el precio real o marcar que lo traéis de casa (0 €). Las cuentas se hacen solas.</p>') + '</section>';
   h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + all.length + ' con dueño</span></div>' +
     '<div class="progress split" role="progressbar" aria-valuenow="' + pctA + '" aria-valuemin="0" aria-valuemax="100">' + S.families.map(function (x) { var n = all.filter(function (i) { return i.family === x.id; }).length; return n ? '<i class="fb ' + x.color + '" style="width:' + (n / all.length * 100) + '%"></i>' : ''; }).join('') + '</div>' +
     '<div class="fam-bars">' + S.families.map(function (x) {
-      var its = all.filter(function (i) { return i.family === x.id; }), e = its.reduce(function (a, i) { return a + (i.status === 'casa' ? 0 : (i.cost != null ? i.cost : (i.est || 0))); }, 0);
+      var its = all.filter(function (i) { return i.family === x.id; }), e = its.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
       return '<button class="fam-bar" data-act="fam" data-fam="' + x.id + '"><i class="fam-dot ' + x.color + '"></i><b>' + esc(x.short || x.name) + '</b><span class="num">' + its.length + '</span><small class="muted num">≈ ' + L.money(e) + '</small></button>';
     }).join('') + '<button class="fam-bar libre" data-act="fam" data-fam="libre"><i class="fam-dot none"></i><b>Sin dueño</b><span class="num">' + free.length + '</span></button></div>' +
-    '<div class="row small"><span class="grow">Comprado: <b class="num">' + cov.done + '/' + cov.tot + '</b> · gastado <b class="num">' + L.money(real) + '</b></span><span>Previsión ≈ <b class="num">' + L.money(L.estCommon(S)) + '</b> <span class="pill est">ESTIMADO</span></span></div></section>';
+    '<p class="small muted">Total previsto ≈ <b class="num">' + L.money(L.estCommon(S)) + '</b> <span class="pill est">ESTIMADO</span></p></section>';
 
-  var nSug = S.ingredients.filter(function (i) { return i.status === 'pendiente' && L.suggestQty(S, i); }).length;
+  var nSug = S.ingredients.filter(function (i) { return L.suggestQty(S, i); }).length;
   if (nSug) h += '<section class="card alert" style="gap:8px"><p class="small"><b>' + nSug + ' cantidades</b> vienen de la hoja (pensadas para 14) y no cuadran con los comensales previstos según la asistencia.</p><div class="row wrap">' + (can('edit') ? '<button class="btn" data-act="applyAllQty">Ajustar todas</button>' : '') + '<button class="btn ghost" data-act="tab" data-tab="asistencia">Ver asistencia</button></div></section>';
   h += '<div class="chips" role="group" aria-label="Qué lista ver">' +
     '<button class="chip" data-act="fam" data-fam="libre" aria-pressed="' + (f === 'libre') + '">' + icon('basket') + 'Sin dueño <b class="num">' + free.length + '</b></button>' +
-    (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro</button>' : '') +
+    (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro <b class="num">' + mine.length + '</b></button>' : '') +
     '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo</button>' +
     S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + '</button>'; }).join('') + '</div>';
-  if (f !== 'libre') h += '<div class="seg" role="group" aria-label="Estado"><button data-act="st" data-st="pendiente" aria-pressed="' + (st === 'pendiente') + '">Por comprar</button><button data-act="st" data-st="hecho" aria-pressed="' + (st === 'hecho') + '">Hecho</button><button data-act="st" data-st="todo" aria-pressed="' + (st === 'todo') + '">Todo</button></div>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';
   if (ui.mealFilter) {
     var mf = meal(ui.mealFilter), freeM = all.filter(function (i) { return !i.family && i.meals.indexOf(ui.mealFilter) >= 0; }).length;
     h += '<section class="card wood" style="gap:8px"><div class="row"><span class="grow"><span class="eyebrow">Solo esta comida</span><b style="display:block">' + esc(mf.title) + '</b><small class="muted">' + esc(dayOf(mf.day).long) + ' · ' + slotName(mf.slot) + '</small></span><button class="link" data-act="clearMeal">Quitar filtro ' + icon('x') + '</button></div>' +
       (freeM && can('edit') && fam(myF) ? '<button class="btn primary block" data-act="claimMeal" data-id="' + mf.id + '">' + icon('plus') + 'Nos pedimos esta comida (' + freeM + ' sin dueño)</button>' : '') + '</section>';
   }
-  if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a la lista de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '. Te lo puedes quitar después.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
+  if (f === myF && mine.length) h += '<section class="card mine-sum"><div class="row"><span class="grow"><span class="eyebrow">A cargo de ' + esc(fam(myF).name) + '</span><b class="big num">≈ ' + L.money(mineCost) + '</b></span><span class="small muted">' + mine.length + (mine.length === 1 ? ' producto' : ' productos') + '</span></div><p class="small muted">Esta es vuestra lista para el súper. ¿Algo que no vais a comprar? Tócale «Soltar».</p></section>';
+  if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a «Lo nuestro» de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
 
   if (!list.length) {
-    h += '<div class="empty">' + icon('basket') + (f === 'libre' ? '<b>¡Todo tiene dueño!</b><span>No queda nada sin repartir. Ahora, a por ello al súper.</span>' : f === myF && !scope.length ? '<b>Tu lista está vacía</b><span>Pásate por «Sin dueño» y pídete algo. Los demás te lo agradecerán.</span><button class="btn primary" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : fam(f) && !scope.length ? '<b>' + esc(fam(f).name) + ' aún no se ha pedido nada</b><span>Cuando se pidan productos, aparecerán aquí.</span><button class="btn" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : st === 'pendiente' && scope.length ? '<b>Nada por comprar aquí</b><span>Esta familia es una máquina. Mira en «Hecho» o echa una mano a otra.</span>' : '<b>La lista está vacía</b><span>Añade el primer ingrediente con el botón +</span>') + '</div>';
+    h += '<div class="empty">' + icon('basket') + (f === 'libre' ? '<b>¡Todo tiene dueño!</b><span>No queda nada sin repartir. Ahora, a por ello al súper.</span>' : f === myF ? '<b>Aún no os habéis pedido nada</b><span>Pásate por «Sin dueño» y pídete algo. Los demás os lo agradecerán.</span><button class="btn primary" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : fam(f) ? '<b>' + esc(fam(f).name) + ' aún no se ha pedido nada</b><span>Cuando se pidan productos, aparecerán aquí.</span><button class="btn" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : '<b>No hay nada con ese nombre</b><span>Prueba con otra palabra o añádelo con el botón +</span>') + '</div>';
   } else {
     var groups = {};
     list.forEach(function (i) { (groups[i.cat] = groups[i.cat] || []).push(i); });
     Object.keys(CATS).forEach(function (c) {
       if (!groups[c]) return;
-      var gAll = scope.filter(function (i) { return i.cat === c; }), gc = L.coverage(gAll);
-      h += '<div class="cat-head"><span class="eyebrow">' + CATS[c] + '</span><span class="small muted num">' + (f === 'libre' ? groups[c].length : gc.done + '/' + gc.tot) + '</span></div>';
-      h += '<div class="items' + (ui.superMode ? ' super' : '') + '">' + groups[c].map(itemRow).join('') + '</div>';
+      h += '<div class="cat-head"><span class="eyebrow">' + CATS[c] + '</span><span class="small muted num">' + groups[c].length + '</span></div>';
+      h += '<div class="items">' + groups[c].map(itemRow).join('') + '</div>';
     });
   }
   if (can('edit')) h += '<button class="fab" data-act="newItem" aria-label="Añadir ingrediente">' + icon('plus') + '</button>';
   return h;
 };
 function itemRow(i) {
-  var f = fam(i.family), mine = i.family && i.family === me().family;
-  var cls = (i.status === 'comprado' ? ' done' : i.status === 'casa' ? ' casa' : '') + (f ? '' : ' free');
-  var chk = i.status === 'comprado' ? ' on' : i.status === 'casa' ? ' home' : '';
+  var f = fam(i.family), mine = i.family && i.family === me().family, ed = can('edit');
   var mealNames = i.meals.map(function (id) { var m = meal(id); return m ? dayOf(m.day).short + ' ' + slotName(m.slot).toLowerCase() : ''; }).filter(Boolean);
   var price = i.status === 'casa' ? '<span class="muted">0 €</span><small>DE CASA</small>' : i.cost != null ? L.money(i.cost) : (i.est != null ? '<span class="muted">≈ ' + L.money(i.est) + '</span><small>ESTIMADO</small>' : '');
-  var left = f ? '<button class="check' + chk + '" data-act="tick" data-id="' + i.id + '" aria-label="' + (i.status === 'pendiente' ? 'Marcar comprado: ' : 'Marcar pendiente: ') + esc(i.name) + '"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>'
-    : '<span class="check free-dot" aria-hidden="true">?</span>';
-  var owner = f ? '<button class="owner ' + f.color + (mine ? ' mine' : '') + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '. Cambiar">' + (mine ? 'Nuestro' : esc(f.short || f.name)) + '</button>'
-    : (can('edit') && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>');
-  return '<div class="item' + cls + '" id="it-' + i.id + '">' + left +
+  var act = !f ? (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>')
+    : mine ? (ed ? '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>' : '<span class="owner ' + f.color + ' mine">Nuestro</span>')
+    : '<button class="owner ' + f.color + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + esc(f.short || f.name) + '</button>';
+  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + '" id="it-' + i.id + '">' +
+    (f ? '<i class="own-bar ' + f.color + '" aria-hidden="true"></i>' : '') +
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
       (i.split === 'propio' ? '<span class="pill olive">propio</span>' : '') + (i.sug ? '<span class="pill">sugerido</span>' : '') +
-      (function () { var sg = i.status === 'pendiente' && L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
-    '<div class="price">' + price + owner + '</div></div>';
+      (function () { var sg = L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
+    '<div class="price">' + price + act + '</div></div>';
 }
 
 /* ===================== Confirmación de asistencia por día ===================== */
@@ -1978,23 +1966,21 @@ function pendingConfirmations() {
   var n = 0; S.people.forEach(function (p) { S.days.forEach(function (d) { if (L.dayStatus(S, p.id, d.k) === 'pend') n++; }); }); return n;
 }
 function confirmCard() {
-  var p = me(), pend = pendingConfirmations(), ids = famAttendIds(), f = fam(p.family);
-  var h = '<section class="card" id="confirmCard"><div class="card-head"><h3>¿Venís? Confirma por día</h3><button class="link" data-act="tab" data-tab="asistencia">Todos ' + icon('arrow') + '</button></div>';
-  if (ids.length > 1) {
-    h += '<p class="small muted">' + pname(p.id) + ', rellena la de toda tu familia: toca cada día (✓ va · ✕ no va · ? sin confirmar). Con esto salen los comensales y las cantidades de la compra.</p>' +
-      '<div class="conf-grid head"><span></span>' + S.days.map(function (d) { return '<small>' + esc(d.short) + '</small>'; }).join('') + '</div>' +
-      ids.map(function (id) { return '<div class="conf-grid"><span class="row" style="gap:8px;min-width:0">' + av(id, 'sm') + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + pname(id) + (id === p.id ? ' <small class="muted">(tú)</small>' : '') + '</span></span>' + S.days.map(function (d) { return confBtn(id, d.k, true); }).join('') + '</div>'; }).join('') +
-      '<button class="btn block" data-act="confFam" data-fam="' + p.family + '">' + icon('check') + (f ? esc(f.name) + ': ' : '') + 'todos, los ' + S.days.length + ' días</button>';
+  var p = me(), pend = pendingConfirmations(), ids = famAttendIds(), f = fam(p.family), many = ids.length > 1;
+  var h = '<section class="card" id="confirmCard"><div class="card-head"><h3>' + (many ? 'Vuestros días' : 'Tus días') + '</h3><button class="link" data-act="tab" data-tab="asistencia">Todos ' + icon('arrow') + '</button></div>' +
+    '<p class="small muted">Estos son los días que tenemos apuntados. <b>¿Cambia algo?</b> Toca el día para cambiarlo: <b>✓</b> viene · <b>✕</b> no viene. Las comidas y las cantidades de la compra se recalculan solas.</p>';
+  if (many) {
+    h += '<div class="conf-grid head"><span></span>' + S.days.map(function (d) { return '<small>' + esc(d.short) + '</small>'; }).join('') + '</div>' +
+      ids.map(function (id) { return '<div class="conf-grid"><span class="row" style="gap:8px;min-width:0">' + av(id, 'sm') + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + pname(id) + (id === p.id ? ' <small class="muted">(tú)</small>' : '') + '</span></span>' + S.days.map(function (d) { return confBtn(id, d.k, true); }).join('') + '</div>'; }).join('');
   } else {
-    h += '<p class="small muted">' + pname(p.id) + ', toca cada día hasta que quede como es. Con esto salen los comensales y las cantidades de la compra.</p>' +
-      '<div class="conf-row">' + S.days.map(function (d) { return confBtn(p.id, d.k); }).join('') + '</div>';
+    h += '<div class="conf-row">' + S.days.map(function (d) { return confBtn(p.id, d.k); }).join('') + '</div>';
   }
   return h + '<div class="divider"></div><span class="eyebrow">Previstos por día</span>' + daySummary() +
-    (pend ? '<p class="small"><span class="pill warn">' + pend + ' confirmaciones pendientes</span> Mientras tanto contamos a los habituales.</p>' : '<p class="small"><span class="pill ok">Todo confirmado</span> Planning y cantidades cerrados.</p>') +
+    (pend ? '<p class="small"><span class="pill warn">' + pend + ' días sin confirmar</span> Mientras tanto contamos a los habituales.</p>' : '<p class="small"><span class="pill ok">Todo apuntado</span> Si alguien cambia de planes, se toca aquí y listo.</p>') +
     '</section>';
 }
 VIEWS.asistencia = function () {
-  var h = '<div class="view-head"><div><h2>Asistencia por día</h2><p class="muted small">Quién viene cada día. Manda sobre los comensales de cada comida y las cantidades de la compra.</p></div></div>';
+  var h = '<div class="view-head"><div><h2>Asistencia por día</h2><p class="muted small">Lo que tenemos apuntado. Si alguien cambia de planes, toca su día. Manda sobre los comensales de cada comida y las cantidades de la compra.</p></div></div>';
   h += '<section class="card"><span class="eyebrow">Previstos · confirmados · pendientes · no vienen</span>' + daySummary() +
     '<div class="stack small">' + S.days.map(function (d) {
       var ms = S.meals.filter(function (m) { return m.day === d.k && m.mode === 'comun'; });
@@ -2157,8 +2143,7 @@ function costeView() {
 
 /* ---------- CUENTAS ---------- */
 VIEWS.cuentas = function () {
-  var useEst = ui.costView === 'est';
-  var lg = L.ledger(S, useEst);
+  var lg = L.ledger(S, false);
   var mode = S.split.mode;
   var tx = L.tax(S);
   var house = S.house;
@@ -2183,7 +2168,6 @@ VIEWS.cuentas = function () {
 
   /* Reparto */
   h += '<section class="card"><div class="card-head"><h3>Reparto entre familias</h3></div>' +
-    '<div class="seg" role="group" aria-label="Datos"><button data-act="costView" data-v="real" aria-pressed="' + !useEst + '">Real</button><button data-act="costView" data-v="est" aria-pressed="' + useEst + '">Previsión estimada</button></div>' +
     '<div class="field"><span class="lbl">Criterio' + (mode === 'ponderado' ? ' (por defecto)' : '') + '</span><div class="seg" role="group" aria-label="Criterio de reparto"><button data-act="mode" data-v="ponderado" aria-pressed="' + (mode === 'ponderado') + '">Ponderado</button><button data-act="mode" data-v="persona" aria-pressed="' + (mode === 'persona') + '">Por persona</button><button data-act="mode" data-v="familia" aria-pressed="' + (mode === 'familia') + '">Por familia</button></div></div>' +
     '<p class="small muted">' + modeText(mode) + '</p>';
   if (mode === 'ponderado') {
@@ -2191,7 +2175,7 @@ VIEWS.cuentas = function () {
       return '<div class="field"><label for="w-' + k + '">' + KIND[k] + (k === 'bebe' ? ' (' + esc(babyName()) + ')' : '') + '</label><input id="w-' + k + '" inputmode="decimal" value="' + L.n(S.split.w[k]) + '" data-change="weight" data-k="' + k + '"' + (can('edit') ? '' : ' disabled') + '></div>';
     }).join('') + '</div>';
   }
-  if (useEst) h += '<p class="small"><span class="pill est">ESTIMADO</span> Simulación: cada familia compra lo que tiene asignado a precio estimado.</p>';
+  h += '<p class="small muted">Lo que cada familia se ha pedido de la compra cuenta con su precio real si lo habéis apuntado y, si no, con el estimado <span class="pill est">ESTIMADO</span>. Más los gastos de abajo.</p>';
   h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Familia</th><th>Ha puesto</th><th>Le toca</th><th>Saldo</th></tr></thead><tbody>' +
     lg.rows.map(function (r) {
       var f = fam(r.id);
@@ -2200,7 +2184,7 @@ VIEWS.cuentas = function () {
     (lg.gifts ? '<p class="small"><span class="pill olive">Aportaciones</span> ' + L.money(lg.gifts) + ' puestos de regalo: se reparten ' + L.money(lg.toShare) + ' en vez de ' + L.money(lg.total) + '.</p>' : '');
 
   if (lg.total === 0) {
-    h += '<div class="empty" style="padding:12px">' + icon('coins') + '<b>Todavía no hay gastos</b><span>Cuando marquéis ingredientes como comprados con su precio o añadáis gastos, aparecerá aquí quién paga a quién. Mientras, mira la previsión estimada.</span></div>';
+    h += '<div class="empty" style="padding:12px">' + icon('coins') + '<b>Todavía no hay nada a cargo de nadie</b><span>Cuando las familias se pidan productos de la compra o añadáis gastos, aparecerá aquí quién paga a quién.</span></div>';
   } else if (!lg.tx.length) {
     h += '<span class="stamp">Cuentas claras, familia unida</span>';
   } else {
@@ -2211,9 +2195,9 @@ VIEWS.cuentas = function () {
   h += '</section>';
 
   /* Gastos extra */
-  var ingPaid = S.ingredients.filter(function (i) { return i.status === 'comprado' && i.cost; });
+  var ingPaid = S.ingredients.filter(function (i) { return i.family && (i.split || 'comun') === 'comun'; });
   h += '<section class="card"><div class="card-head"><h3>Gastos</h3>' + (can('edit') ? '<button class="btn primary" data-act="newExp">' + icon('plus') + 'Añadir</button>' : '') + '</div>' +
-    '<div class="row small"><span class="grow">Ingredientes comprados con precio (' + ingPaid.length + ')</span><b class="num">' + L.money(ingPaid.reduce(function (a, i) { return a + i.cost; }, 0)) + '</b></div><div class="divider"></div>' +
+    '<div class="row small"><span class="grow">Productos de la compra con dueño (' + ingPaid.length + ')</span><b class="num">≈ ' + L.money(ingPaid.reduce(function (a, i) { return a + L.itemCost(i); }, 0)) + '</b></div><div class="divider"></div>' +
     (S.expenses.length ? S.expenses.map(function (e) {
       return '<button class="row" data-act="editExp" data-id="' + e.id + '" style="background:none;border:0;text-align:left;font:inherit;color:inherit;padding:6px 0;min-height:44px"><i class="fam-dot ' + fam(e.payer).color + '"></i><span class="grow"><b>' + esc(e.concept) + '</b><span class="small muted"> · ' + esc(fam(e.payer).name) + (e.kind === 'aportacion' ? ' · aportación de regalo' : e.split === 'propio' ? ' · propio' : '') + '</span></span><b class="num">' + L.money(e.amount) + '</b></button>';
     }).join('') : '<p class="small muted">Carbón, gasolina, tarta, decoración, regalos… Todo lo que no sea un ingrediente va aquí, con quién lo pagó. Si alguien quiere poner algo extra de regalo para el bote, apúntalo como aportación.</p>') +
@@ -2304,8 +2288,8 @@ function itemSheet(id) {
     '<div class="grid2"><div class="field"><label for="f-qty">Cantidad</label><input id="f-qty" inputmode="decimal" value="' + L.n(i.qty) + '"' + dis + '></div><div class="field"><label for="f-unit">Unidad</label><input id="f-unit" value="' + esc(i.unit) + '"' + dis + '></div></div>' +
     '<div class="grid2"><div class="field"><label for="f-cat">Categoría</label><select id="f-cat"' + dis + '>' + Object.keys(CATS).map(function (c) { return '<option value="' + c + '"' + (i.cat === c ? ' selected' : '') + '>' + CATS[c] + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label for="f-fam">Lo compra</label><select id="f-fam"' + dis + '>' + famOptions(i.family, true) + '</select></div></div>' +
-    '<div class="field"><span class="lbl">Estado</span>' + segHtml('status', [['pendiente', 'Pendiente'], ['comprado', 'Comprado'], ['casa', 'De casa']], draft.status, !can('edit')) + '</div>' +
-    '<div class="grid2"><div class="field"><label for="f-cost">Coste real (€)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
+    '<div class="field"><span class="lbl">¿Lo traéis de casa?</span>' + segHtml('status', [['pendiente', 'No, se compra'], ['casa', 'Sí, de casa (0 €)']], draft.status === 'casa' ? 'casa' : 'pendiente', !can('edit')) + '</div>' +
+    '<div class="grid2"><div class="field"><label for="f-cost">Precio real (opcional)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
     '<div class="field"><span class="lbl">Reparto</span>' + segHtml('split', [['comun', 'Común'], ['propio', 'Propio']], draft.split, !can('edit')) + '</div></div>' +
     '<div class="field"><span class="lbl">Para qué comidas</span><div class="att-fam">' + S.meals.map(function (m) {
       return '<button type="button" class="chip" data-act="dmeal" data-id="' + m.id + '" aria-pressed="' + (draft.meals.indexOf(m.id) >= 0) + '"' + dis + '>' + esc(dayOf(m.day).short) + ' · ' + slotName(m.slot) + '</button>';
@@ -2747,9 +2731,18 @@ var A = {
     i.family = f.id; save();
     var row = document.getElementById('it-' + i.id); if (row) { row.classList.add('claimed'); }
     if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
-    toast(esc(i.name) + ' → ' + esc(f.name), 'Deshacer', function () { i.family = null; save(); render(true); });
+    toast(esc(i.name) + ' → ' + esc(f.name) + (i.est != null ? ' · ≈ ' + L.money(i.est) : ''), 'Deshacer', function () { i.family = null; save(); render(true); });
+    checkFumata();
     setTimeout(function () { if (!document.getElementById('scrim')) render(true); }, 380);
     if (!L.unassigned(S).length) setTimeout(function () { confetti(2200); toast('¡Todo repartido! Ahora, al súper'); }, 500);
+  },
+  unclaim: function (el) {
+    if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
+    var prev = { family: i.family, status: i.status, cost: i.cost };
+    i.family = null; i.status = 'pendiente'; i.cost = null; save();
+    var row = document.getElementById('it-' + i.id); if (row) row.classList.add('claimed');
+    toast(esc(i.name) + ' vuelve a «Sin dueño»', 'Deshacer', function () { i.family = prev.family; i.status = prev.status; i.cost = prev.cost; save(); render(true); });
+    setTimeout(function () { if (!document.getElementById('scrim')) render(true); }, 380); checkFumata();
   },
   claimMeal: function (el) {
     if (!guard('edit')) return; var f = fam(me().family); if (!f) return;
@@ -2760,7 +2753,7 @@ var A = {
   owner: function (el) {
     var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
     var cur = fam(i.family);
-    openSheet('<h2>' + esc(i.name) + '</h2><p class="small muted">Ahora lo compra <b>' + (cur ? esc(cur.name) : 'nadie') + '</b>' + (i.status !== 'pendiente' ? ' · ya está ' + (i.status === 'casa' ? 'marcado como «viene de casa»' : 'comprado') : '') + '.</p>' +
+    openSheet('<h2>' + esc(i.name) + '</h2><p class="small muted">Ahora lo compra <b>' + (cur ? esc(cur.name) : 'nadie') + '</b>' + (i.status === 'casa' ? ' · viene de casa' : '') + '.</p>' +
       (can('edit') ? '<div class="stack">' + S.families.map(function (x) { return '<button class="btn block' + (x.id === i.family ? ' primary' : '') + '" data-act="setOwner" data-id="' + i.id + '" data-fam="' + x.id + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + (x.id === me().family ? ' (nosotros)' : '') + '</button>'; }).join('') +
         '<button class="btn ghost block" data-act="setOwner" data-id="' + i.id + '" data-fam="">Soltar: que vuelva a «Sin dueño»</button></div>' : '<p class="small">Solo los editores cambian quién compra cada cosa.</p>') +
       '<button class="btn block" data-act="close">Cerrar</button>');
