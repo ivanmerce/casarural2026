@@ -398,3 +398,17 @@ begin
     execute format('create policy "propia_del" on public.%I for delete to authenticated using (public.can_attend_for(person_id))', t);
   end loop;
 end $$;
+
+-- ---------- v0.5: acceso con email (o usuario) + código ----------
+-- La primera vez se entra con el código de la familia; después, cada uno con el suyo (cifrado con bcrypt).
+alter table public.people add column if not exists login text;
+create unique index if not exists people_login_key on public.people (lower(login)) where login is not null;
+create table if not exists public.access_config (id int primary key default 1 check (id = 1), shared_code text check (shared_code ~ '^[0-9]{6}$'), updated_at timestamptz not null default now());
+alter table public.access_config enable row level security;
+revoke all on public.access_config from anon, authenticated;
+create table if not exists public.personal_codes (person_id text primary key references public.people(id) on delete cascade, code_hash text not null, updated_at timestamptz not null default now());
+alter table public.personal_codes enable row level security;
+revoke all on public.personal_codes from anon, authenticated;
+-- guard_people_update: además de rol y email, el usuario (login) solo lo cambia el admin
+-- Funciones: login_with_code(login, code) · set_my_code(code) · my_code_status() · admin_code_status() · admin_reset_code(person) · get_shared_code() · set_shared_code(code)
+-- (definición completa en la migración v05_acceso_email_codigo; el acceso solo por código queda retirado: revoke claim_with_code)
