@@ -99,7 +99,7 @@ VIEWS.cuentas = function () {
   var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
   h += '<section class="card"><div class="card-head"><h3>Reparto entre hermanos y compañía</h3></div>' +
     (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
-    '<div class="split-how"><span class="aw-ico sm">' + icon('users') + '</span><p class="small"><b>Cómo se reparte:</b> a proporción de <b>quién viene y a cuántas comidas</b>. Adultos y peques cuentan igual (comen como un adulto, y lo sabemos); ' + esc(babyName()) + ', que aún come poco, no cuenta. Así, una familia de 5 paga más que una de 3, y quien viene menos días paga menos.</p></div>';
+    '<div class="split-how"><span class="aw-ico sm">' + icon('users') + '</span><p class="small"><b>Cómo se reparte:</b> a proporción de <b>quién viene y a cuántas comidas</b>. Adultos y peques cuentan igual (comen como un adulto, y lo sabemos); ' + esc(babyName()) + ' no cuenta: su comida la traen sus padres de casa. Así, una familia de 5 paga más que una de 3, y quien viene menos días paga menos.</p></div>';
   var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
   h += '<p class="small muted">Aquí solo cuentan los productos de la compra <b>con precio real</b> (o que vienen de casa) y los gastos de abajo.</p>' +
     (noP.length ? '<div class="card alert" style="padding:10px 12px;gap:6px"><p class="small"><b>' + noP.length + ' productos pedidos aún sin precio</b> (≈ ' + L.money(noP.reduce(function (a, i) { return a + (i.est || 0); }, 0)) + '): ' +
