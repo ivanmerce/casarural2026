@@ -326,16 +326,75 @@ alter table public.presence enable row level security;
 revoke all on public.presence from anon;
 grant select on public.presence to authenticated;
 create policy "leer_miembros" on public.presence for select to authenticated using (public.is_member());
-create or replace function public.ping() returns timestamptz
+alter table public.presence add column if not exists minutes int not null default 0;
+alter table public.presence add column if not exists eggs int not null default 0;
+create or replace function public.ping(p_eggs int default null) returns timestamptz
 language plpgsql security definer set search_path = public as
 $$
 declare pid text := public.my_person_id();
 begin
   if pid is null then return null; end if;
-  insert into public.presence (person_id, last_seen) values (pid, now())
-    on conflict (person_id) do update set last_seen = now(),
-      visits = public.presence.visits + case when public.presence.last_seen < now() - interval '30 minutes' then 1 else 0 end;
+  insert into public.presence (person_id, last_seen, eggs) values (pid, now(), coalesce(least(greatest(p_eggs, 0), 99), 0))
+    on conflict (person_id) do update set
+      visits = public.presence.visits + case when public.presence.last_seen < now() - interval '30 minutes' then 1 else 0 end,
+      minutes = public.presence.minutes + case when public.presence.last_seen < now() - interval '50 seconds' and public.presence.last_seen > now() - interval '5 minutes' then 1 else 0 end,
+      eggs = greatest(public.presence.eggs, coalesce(least(greatest(p_eggs, 0), 99), 0)),
+      last_seen = now();
   return now();
 end $$;
-revoke all on function public.ping() from public, anon;
-grant execute on function public.ping() to authenticated;
+revoke all on function public.ping(int) from public, anon;
+grant execute on function public.ping(int) to authenticated;
+
+
+-- ---------- v0.4: juegos, competición y premios ----------
+create table public.games (id text primary key, data jsonb not null, sort int not null default 0, updated_at timestamptz not null default now());
+create table public.awards (id text primary key, data jsonb not null, updated_at timestamptz not null default now());
+create table public.award_votes (
+  award_id text not null, voter_id text not null references public.people(id) on delete cascade, nominee text not null,
+  created_at timestamptz not null default now(), primary key (award_id, voter_id)
+);
+create index on public.award_votes (voter_id);
+create trigger t_games before update on public.games for each row execute function public.touch();
+create trigger t_awards before update on public.awards for each row execute function public.touch();
+do $$
+declare t text;
+begin
+  foreach t in array array['games','awards','award_votes'] loop
+    execute format('alter table public.%I enable row level security', t);
+    execute format('revoke all on public.%I from anon', t);
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+    execute format('create policy "leer_miembros" on public.%I for select to authenticated using (public.is_member())', t);
+  end loop;
+  foreach t in array array['games','awards'] loop
+    execute format('create policy "editores_ins" on public.%I for insert to authenticated with check (public.is_editor())', t);
+    execute format('create policy "editores_upd" on public.%I for update to authenticated using (public.is_editor()) with check (public.is_editor())', t);
+    execute format('create policy "editores_del" on public.%I for delete to authenticated using (public.is_editor())', t);
+  end loop;
+end $$;
+create policy "voto_ins" on public.award_votes for insert to authenticated with check (voter_id = public.my_person_id());
+create policy "voto_upd" on public.award_votes for update to authenticated using (voter_id = public.my_person_id()) with check (voter_id = public.my_person_id());
+create policy "voto_del" on public.award_votes for delete to authenticated using (voter_id = public.my_person_id());
+alter publication supabase_realtime add table public.games, public.awards, public.award_votes;
+
+-- ---------- v0.4: los adultos confirman la asistencia de toda su familia ----------
+create or replace function public.can_attend_for(p_person text) returns boolean
+language sql stable security definer set search_path = public as
+$$
+  select public.is_editor() or p_person = public.my_person_id()
+      or exists (select 1 from public.people me join public.people t on t.family_id = me.family_id
+                 where me.id = public.my_person_id() and me.kind = 'adulto' and t.id = p_person);
+$$;
+revoke all on function public.can_attend_for(text) from public, anon;
+grant execute on function public.can_attend_for(text) to authenticated;
+do $$
+declare t text;
+begin
+  foreach t in array array['meal_attendance','day_confirmations'] loop
+    execute format('drop policy if exists "propia_ins" on public.%I', t);
+    execute format('drop policy if exists "propia_upd" on public.%I', t);
+    execute format('drop policy if exists "propia_del" on public.%I', t);
+    execute format('create policy "propia_ins" on public.%I for insert to authenticated with check (public.can_attend_for(person_id))', t);
+    execute format('create policy "propia_upd" on public.%I for update to authenticated using (public.can_attend_for(person_id)) with check (public.can_attend_for(person_id))', t);
+    execute format('create policy "propia_del" on public.%I for delete to authenticated using (public.can_attend_for(person_id))', t);
+  end loop;
+end $$;
