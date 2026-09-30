@@ -731,3 +731,28 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .sheet-x { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass-strong); display: grid; place-items: center; color: var(--muted); z-index: 2; }
 .sheet-x .ico { width: 18px; height: 18px; }
 .sheet > h2:first-of-type { padding-right: 48px; }
+
+/* ===================== Manual ===================== */
+.manual-cta { display: flex; flex-direction: row; align-items: center; gap: 12px; text-align: left; font: inherit; color: inherit; width: 100%; padding: 12px 14px; }
+.manual-cta b { display: block; } .manual-cta small { display: block; font-size: .8rem; }
+.manual-cta > .grow, .man-step > .grow, .manual-dl .grow { flex: 1; min-width: 0; }
+.man-steps { gap: 10px; }
+.man-step { flex-direction: row; align-items: flex-start; gap: 12px; }
+.man-n { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; }
+.man-step h3, .man-card h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.man-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.man-card { gap: 6px; }
+.man-dark { background: #1C1614; color: #F3ECE8; border-color: rgba(255, 255, 255, .08); }
+.man-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.man-tips b { font-family: var(--font-display); } .man-tips .gold { color: #F6CD62; } .man-tips p { color: #D9CAC1; margin-top: 4px; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  .ambient, .topbar, .nav, .fab, .toast, .manual-dl, #onlineSlot, .scrim { display: none !important; }
+  .app { max-width: none; padding: 0; }
+  .card { box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: #fff !important; border: 1px solid #ddd !important; break-inside: avoid; }
+  .man-dark { background: #1C1614 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .man-n { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .view { animation: none !important; gap: 10px; }
+  .man-grid { grid-template-columns: 1fr 1fr; }
+}

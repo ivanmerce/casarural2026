@@ -52,6 +52,7 @@ VIEWS.inicio = function () {
   });
 
   /* Confirmación por día */
+  h += manualCardHome();
   h += confirmCard();
   h += presenceCard();
   h += compCard();

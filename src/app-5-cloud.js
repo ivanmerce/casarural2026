@@ -299,6 +299,14 @@ var CLOUD = (function () {
     var em = (val('lg-email') || '').trim().toLowerCase(), tk = (val('lg-otp') || '').trim();
     client().auth.verifyOtp({ email: em, token: tk, type: 'email' }).then(check).then(go2).catch(function () { toast('Código incorrecto o caducado'); });
   };
+  /* el PDF más reciente del bucket privado «docs»: para actualizar el manual basta con subir uno nuevo */
+  MANUAL.pdf = function () {
+    var b = client().storage.from('docs');
+    return b.list('', { limit: 20, sortBy: { column: 'created_at', order: 'desc' } }).then(function (r) {
+      var f = (r && r.data || []).filter(function (x) { return /\.pdf$/i.test(x.name); })[0]; if (!f) return null;
+      return b.createSignedUrl(f.name, 900).then(function (s) { return s && s.data && (s.data.signedUrl || s.data.signedURL) || null; });
+    });
+  };
   /* ---------- Admin: código de la familia y códigos personales (nunca se ven, solo si existen) ---------- */
   api.status = function () { return client().rpc('admin_code_status').then(check).then(function (r) { var o = {}; (r.data || []).forEach(function (x) { o[x.person_id] = { has: x.has_code, at: x.updated_at }; }); return o; }); };
   api.reset = function (pid) { return client().rpc('admin_reset_code', { p_person: pid }).then(check); };

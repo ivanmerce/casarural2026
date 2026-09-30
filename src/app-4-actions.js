@@ -165,7 +165,7 @@ function menuSheet() {
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -780,7 +780,7 @@ function startApp() {
 function boot() {
   var u = loadUi();
   ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
-  if (['personas', 'tiempo', 'asistencia'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
+  if (['personas', 'tiempo', 'asistencia', 'manual'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();
   if (typeof SEED !== 'undefined') { S = load(); startApp(); }
