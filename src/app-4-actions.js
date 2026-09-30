@@ -54,7 +54,7 @@ function mealSheet(id) {
     '<div class="field"><span class="lbl">Tipo</span>' + segHtml('mode', [['comun', 'Comida común'], ['cada', 'Cada familia lo suyo']], m.mode) + '</div>' +
     '<div class="field"><label for="m-dishes">Platos (uno por línea)</label><textarea id="m-dishes">' + esc(m.dishes.join('\n')) + '</textarea></div>' +
     '<div class="field"><label for="m-time">Hora</label><input id="m-time" type="time" value="' + mealTime(m) + '"></div>' +
-    '<div class="field"><label for="m-cook">Cocina</label><select id="m-cook">' + famOptions(m.cook, true) + '</select></div>' +
+    '<div class="field"><label for="m-cook">Quién cocina (opcional, se decide sobre la marcha)</label><select id="m-cook">' + famOptions(m.cook, true) + '</select></div>' +
     '<div class="field"><label for="m-marc">Menú ' + esc(babyName()) + '</label><input id="m-marc" value="' + esc(m.marc || '') + '"></div>' +
     '<div class="field"><label for="m-notes">Notas</label><textarea id="m-notes">' + esc(m.notes || '') + '</textarea></div>' +
     '<div class="sheet-actions"><button class="btn primary" data-act="saveMeal">Guardar</button><button class="btn" data-act="close">Cancelar</button></div>');
@@ -430,7 +430,7 @@ var A = {
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
   day: function (el) { ui.day = el.dataset.day; render(true); },
-  sub: function (el) { ui.sub = el.dataset.sub; if (ui.tab !== 'planes') ui.tab = 'planes'; render(true); },
+  sub: function (el) { ui.sub = el.dataset.sub; if (ui.tab !== 'planes') ui.tab = 'planes'; render(true); navPush(); },
   fam: function (el) { ui.fam = el.dataset.fam; saveUi(); render(true); },
   st: function (el) { ui.st = el.dataset.st; render(true); },
   superMode: function () { ui.superMode = !ui.superMode; saveUi(); render(true); if (ui.superMode) { ui.st = 'pendiente'; ui.fam = me().family; render(true); toast('Modo súper: tu lista, letra grande y solo lo pendiente'); } },
@@ -759,7 +759,7 @@ function startApp() {
   S.dayConfirm = S.dayConfirm || {}; S.attendance = S.attendance || {}; S.expenses = S.expenses || [];
   if (!ui.me || !person(ui.me)) { var ad = S.people.find(function (p) { return p.role === 'admin'; }) || S.people[0]; ui.me = ad.id; }
   document.title = S.trip.name; CATS.marc = 'Menú ' + babyName();
-  buildEggs(); applyPrefs(); render();
+  buildEggs(); applyPrefs(); render(); navInit();
   refreshWeather(false);
   var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (egg('buho')) toast('¿Todavía despiertos? La casa rural recomienda dormir'); }, 1500);
   var today = new Date().toISOString().slice(0, 10);

@@ -725,3 +725,9 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .code-st .grow { color: var(--ink); font-size: .9rem; }
 .shared-code { padding: 8px 12px; border-radius: 14px; background: var(--glass-strong); border: 1px dashed var(--line); }
 .access-card { border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* botón de cerrar en todas las hojas */
+.sheet { position: relative; }
+.sheet-x { position: absolute; top: 10px; right: 12px; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass-strong); display: grid; place-items: center; color: var(--muted); z-index: 2; }
+.sheet-x .ico { width: 18px; height: 18px; }
+.sheet > h2:first-of-type { padding-right: 48px; }

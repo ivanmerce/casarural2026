@@ -176,7 +176,7 @@ VIEWS.comidas = function () {
     var cov = L.coverage(ings);
     var marcIn = L.attends(S, 'marc', m.id);
     h += '<article class="card meal' + (m.star ? ' star' : '') + '">' +
-      '<div class="slot"><span class="eyebrow">' + slotName(m.slot) + ' · ' + mealTime(m) + '</span>' + (m.mode === 'cada' ? '<span class="pill">Cada familia lo suyo</span>' : '<span class="pill olive">Cocina ' + esc(fam(m.cook) ? fam(m.cook).name : 'sin asignar') + '</span>') + '</div>' +
+      '<div class="slot"><span class="eyebrow">' + slotName(m.slot) + ' · ' + mealTime(m) + '</span>' + (m.mode === 'cada' ? '<span class="pill">Cada familia lo suyo</span>' : (fam(m.cook) ? '<span class="pill olive">Cocina ' + esc(fam(m.cook).name) + '</span>' : '')) + '</div>' +
       '<h3>' + (m.star ? '<span class="accent">' + icon('cake') + '</span> ' : '') + esc(m.title) + '</h3>' +
       '<ul class="dishes">' + m.dishes.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
       (marcIn ? '<div class="marc-line"><b data-egg="baby">Menú ' + esc(babyName()) + '</b><span>' + esc(m.marc || 'Lo mismo que los demás') + '</span></div>' : '') +

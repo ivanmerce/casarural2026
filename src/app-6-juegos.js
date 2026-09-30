@@ -321,10 +321,10 @@ function galaOpen() {
   gala = { slides: galaSlides(), i: 0, revealed: false };
   var el = document.createElement('div'); el.className = 'gala'; el.id = 'gala'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Gala de premios');
   el.innerHTML = '<div class="gala-spot" aria-hidden="true"></div><button class="gala-x icon-btn" data-act="galaExit" aria-label="Salir de la gala">' + icon('x') + '</button><div class="gala-in" data-act="galaNext" aria-live="polite"></div><div class="gala-ctl"><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
-  document.body.appendChild(el); document.body.style.overflow = 'hidden';
+  document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('gala');
   galaRender();
 }
-function galaClose() { var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; gala = null; }
+function galaClose(fromNav) { var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; gala = null; if (el && !fromNav) overlayDone(); }
 
 /* ---------- Hojas de edición ---------- */
 function gameSheet(id) {
@@ -422,9 +422,9 @@ function champOf(g) { var sd = G.standings(S, g); return sd.champion || (sd.comp
 function gGuard() { return guard('edit'); }
 
 Object.assign(A, {
-  jsub: function (el) { ui.jsub = el.dataset.v; ui.game = null; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); },
-  gOpen: function (el) { ui.game = el.dataset.id; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); },
-  gBack: function () { ui.game = null; render(); window.scrollTo(0, 0); },
+  jsub: function (el) { ui.jsub = el.dataset.v; ui.game = null; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
+  gOpen: function (el) { ui.game = el.dataset.id; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
+  gBack: function () { var st = history.state, g = ui.game; ui.game = null; render(); window.scrollTo(0, 0); if (st && st.app && st.v && st.v.game === g && history.length > 1) history.back(); else navPush(); },
   gNew: function () { if (gGuard()) newGameSheet(); },
   gCreate: function (el) { createGame(el.dataset.k); },
   gEdit: function (el) { if (gGuard()) gameSheet(el.dataset.id); },

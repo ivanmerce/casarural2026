@@ -69,7 +69,7 @@ function viewerOpen(id) {
   viewer = { list: list, i: i };
   var el = document.createElement('div'); el.className = 'viewer'; el.id = 'viewer'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Foto');
   el.innerHTML = '<div class="vw-top"><span class="vw-who"></span><button class="icon-btn" data-act="vwClose" aria-label="Cerrar">' + icon('x') + '</button></div><div class="vw-stage"><button class="vw-nav prev" data-act="vwPrev" aria-label="Anterior">' + icon('back') + '</button><div class="vw-img"></div><button class="vw-nav next" data-act="vwNext" aria-label="Siguiente">' + icon('arrow') + '</button></div><div class="vw-bot"></div>';
-  document.body.appendChild(el); document.body.style.overflow = 'hidden';
+  document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('viewer');
   var sx = null; el.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
   el.addEventListener('touchend', function (e) { if (sx == null) return; var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) { if (dx < 0) A.vwNext(); else A.vwPrev(); } sx = null; });
   viewerRender();
@@ -95,7 +95,7 @@ function viewerRender() {
   el.querySelector('.prev').disabled = viewer.i === 0; el.querySelector('.next').disabled = viewer.i >= viewer.list.length - 1;
   [viewer.list[viewer.i + 1], viewer.list[viewer.i - 1]].forEach(function (x) { if (x && !PHOTOS.url(x.path)) PHOTOS.ensure([x.path]); });
 }
-function viewerClose() { var el = document.getElementById('viewer'); if (el) el.remove(); document.body.style.overflow = ''; viewer = null; }
+function viewerClose(fromNav) { var el = document.getElementById('viewer'); if (el) el.remove(); document.body.style.overflow = ''; viewer = null; if (el && !fromNav) overlayDone(); }
 
 /* ---------- Reducir antes de subir ---------- */
 function shrink(file, max, q) {

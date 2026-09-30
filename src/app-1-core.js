@@ -184,16 +184,49 @@ function toast(msg, actLabel, actFn) {
   clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.remove(); }, actLabel ? 5200 : 2600);
 }
 function openSheet(html, onMount) {
-  closeSheet();
+  var had = !!document.getElementById('scrim');
+  removeSheet();
   var s = document.createElement('div'); s.className = 'scrim'; s.id = 'scrim';
-  s.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>' + html + '</div>';
+  s.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><button type="button" class="sheet-x" data-act="close" aria-label="Cerrar">' + icon('x') + '</button>' + html + '</div>';
   s.addEventListener('click', function (e) { if (e.target === s) closeSheet(); });
   document.body.appendChild(s);
   document.body.style.overflow = 'hidden';
+  if (!had) overlayPush('sheet');
   if (onMount) onMount(s.querySelector('.sheet'));
   var f = s.querySelector('input:not([disabled]),select:not([disabled]),button'); if (f && f.tagName !== 'BUTTON') setTimeout(function () { f.focus(); }, 60);
 }
-function closeSheet() { var s = document.getElementById('scrim'); if (s) s.remove(); document.body.style.overflow = ''; }
+function removeSheet() { var s = document.getElementById('scrim'); if (s) s.remove(); document.body.style.overflow = ''; }
+function closeSheet() { var had = !!document.getElementById('scrim'); removeSheet(); if (had) overlayDone(); }
+
+/* ---------- Historial: «atrás» (botón o gesto) cierra hojas y visores y vuelve a la vista anterior, sin salir de la app ---------- */
+function viewState() { return { tab: ui.tab, game: ui.game || null, jsub: ui.jsub || null, sub: ui.sub || null }; }
+function sameView(a, b) { return !!(a && b && a.tab === b.tab && (a.game || null) === (b.game || null) && (a.jsub || null) === (b.jsub || null) && (a.sub || null) === (b.sub || null)); }
+function navInit() { try { history.replaceState({ app: 1, v: viewState() }, ''); } catch (e) {} }
+function navPush() {
+  try { var st = history.state, v = viewState(); if (st && st.app && !st.overlay && !st.dup && sameView(st.v, v)) return; history.pushState({ app: 1, v: v }, ''); } catch (e) {}
+}
+function overlayPush(kind) { try { history.pushState({ app: 1, overlay: kind, v: viewState() }, ''); } catch (e) {} }
+/* al cerrar una hoja con sus botones, su entrada queda como «hueco» y se salta al ir atrás */
+function overlayDone() { try { var st = history.state; if (st && st.overlay) history.replaceState({ app: 1, dup: 1, v: st.v }, ''); } catch (e) {} }
+function closeOverlays() {
+  var any = false;
+  if (document.getElementById('viewer') && typeof viewerClose === 'function') { viewerClose(true); any = true; }
+  if (document.getElementById('gala') && typeof galaClose === 'function') { galaClose(true); any = true; }
+  if (document.getElementById('scrim')) { removeSheet(); any = true; }
+  return any;
+}
+var navSkips = 0;
+window.addEventListener('popstate', function (e) {
+  var st = e.state;
+  if (closeOverlays()) { navSkips = 0; return; }
+  if (!st || !st.app || !S || !ui) return;
+  if (st.dup && navSkips < 20) { navSkips++; history.back(); return; }
+  navSkips = 0;
+  if (st.v && !sameView(st.v, viewState())) {
+    ui.tab = st.v.tab || 'inicio'; ui.game = st.v.game || null; ui.jsub = st.v.jsub || null; ui.sub = st.v.sub || ui.sub;
+    saveUi(); render(); window.scrollTo(0, 0);
+  }
+});
 function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 function numVal(id) { var v = val(id).replace(',', '.').trim(); if (v === '') return null; var n = parseFloat(v); return isNaN(n) ? null : n; }
 
@@ -249,7 +282,7 @@ function render(keepScroll) {
   if (keepScroll) window.scrollTo(0, y);
 }
 function go(tab, opts) {
-  ui.tab = tab; Object.assign(ui, opts || {}); saveUi(); render(); window.scrollTo(0, 0);
+  ui.tab = tab; if (tab !== 'juegos') ui.game = null; Object.assign(ui, opts || {}); saveUi(); render(); window.scrollTo(0, 0); navPush();
 }
 function tripDayDefault() {
   var today = new Date().toISOString().slice(0, 10);
