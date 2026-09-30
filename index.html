@@ -1258,6 +1258,12 @@ var L = (function () {
     var payers = rows.filter(function (r) { return r.pays; });
     var stays = payers.reduce(function (a, r) { return a + r.nights; }, 0);
     var allStays = rows.reduce(function (a, r) { return a + r.nights; }, 0);
+    /* Si la finca fija el cálculo (p. ej. 12 adultos de la reserva × 3 noches), manda lo que dice la finca */
+    if (t.fixed && t.fixed.persons) {
+      var fs = t.fixed.persons * (t.fixed.nights || t.nights || 3);
+      return { rows: rows, adults: t.fixed.persons, exempt: 0, all: rows.length, stays: fs, fixed: true,
+        withExemption: r2(fs * t.perNight), withoutExemption: r2(fs * t.perNight) };
+    }
     return {
       rows: rows, adults: payers.length, exempt: rows.length - payers.length, all: rows.length, stays: stays,
       withExemption: r2(stays * t.perNight), withoutExemption: r2(allStays * t.perNight)
@@ -2472,10 +2478,11 @@ VIEWS.cuentas = function () {
   /* Tasa turística */
   var exNames = tx.rows.filter(function (r) { return !r.pays; }).map(function (r) { return pname(r.id); });
   h += '<section class="card"><div class="card-head"><h3>Tasa turística</h3>' + (S.tax.payer ? '<span class="pill olive">Invitan ' + esc(fam(S.tax.payer).name) + '</span>' : '<span class="pill pend">Quién paga: PENDIENTE</span>') + '</div>' +
+    (tx.fixed ? '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">Lo que dice la finca: ' + S.tax.fixed.persons + ' personas × ' + (S.tax.fixed.nights || S.tax.nights) + ' noches × ' + L.money(S.tax.perNight) + '</span></div><p class="small muted">' + esc(S.tax.note) + '. No entra en el reparto.</p></section>' :
     '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">' + tx.stays + ' noches-persona × ' + L.money(S.tax.perNight) + ' · ' + tx.adults + ' pagan</span></div>' +
     '<div class="tax-list">' + tx.rows.filter(function (r) { return r.pays; }).map(function (r) { return '<span class="online-chip">' + av(r.id, 'xs') + pname(r.id) + ' <small class="muted">' + r.nights + (r.nights === 1 ? ' noche' : ' noches') + '</small></span>'; }).join('') + '</div>' +
     (exNames.length ? '<p class="small"><b>Exentos por edad (menores de ' + (S.tax.minAge || 16) + '):</b> ' + exNames.join(', ') + '</p>' : '') +
-    '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
+    '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>');
 
   /* Reparto */
   /* El rincón de los abuelos (anfitriones: fuera del reparto) */
@@ -4859,7 +4866,7 @@ var CLOUD = (function () {
       ingredients: d.ingredients.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, cat: r.category, qty: num(r.qty), unit: r.unit, qtyEst: r.qty_estimated, family: r.family_id, status: r.status, split: r.split, cost: num(r.cost), est: num(r.est_cost), per: r.per_diners, sug: r.suggested, note: r.note, buy: r.buy_at || null, sort: r.sort, meals: im[r.id] || [] }; }),
       expenses: d.expenses.map(function (r) { return { id: r.id, concept: r.concept, amount: num(r.amount), payer: r.payer_family_id, split: r.split, kind: r.kind, date: r.spent_on }; }),
       house: { total: num(st.house_total), payer: st.house_payer_family_id, cancel: kv.cancel || [], payments: d.house_payments.slice().sort(function (a, b) { return a.id.localeCompare(b.id); }).map(function (r) { return { id: r.id, label: r.label, amount: num(r.amount), due: r.due_on, date: r.paid_on, paid: r.paid, note: r.note }; }) },
-      tax: { perNight: num(st.tax_per_night), nights: st.tax_nights, minAge: st.tax_min_age, payer: st.tax_payer_family_id, note: kv.taxNote || '' },
+      tax: { perNight: num(st.tax_per_night), nights: st.tax_nights, minAge: st.tax_min_age, payer: st.tax_payer_family_id, note: kv.taxNote || '', fixed: kv.taxFixed || null },
       split: { mode: st.split_mode, w: { adulto: num(st.w_adulto), menor: num(st.w_menor), bebe: num(st.w_bebe) } },
       activities: d.activities.map(function (r) { return { id: r.id, day: r.day, start: hm(r.start_time), dur: r.duration_min, title: r.title, place: r.place, where: r.where_text, travel: r.travel, age: r.age, marc: r.marc, owner: r.owner_person_id, planB: r.plan_b, desc: r.description, star: r.star, tournament: r.is_tournament }; }),
       paidOptions: kv.paidOptions || [],
