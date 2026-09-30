@@ -15,7 +15,7 @@ VIEWS.planes = function () {
     h += '<div class="card wood" style="padding:12px 14px"><div class="row">' + wxIcon(w.code) + '<span class="grow small"><b>' + L.wmo(w.code)[0] + ', ' + Math.round(w.tmin) + '–' + Math.round(w.tmax) + ' °C.</b> ' + esc(a.planB.t) + '.</span></div></div>';
   }
   var acts = S.activities.filter(function (x) { return x.day === ui.day; }).sort(function (a, b) { return a.start.localeCompare(b.start); });
-  if (!acts.length) h += '<div class="empty">' + icon('plans') + '<b>Día libre</b><span>Nada planeado. Siesta oficial del Cónclave.</span></div>';
+  if (!acts.length) h += '<div class="empty">' + icon('plans') + '<b>Día libre</b><span>Nada planeado. Siesta oficial de la casa rural.</span></div>';
   h += '<div class="tl">' + acts.map(actCard).join('') + '</div>';
   if (can('edit')) h += '<button class="fab" data-act="newAct" aria-label="Añadir actividad">' + icon('plus') + '</button>';
   return h;
@@ -60,10 +60,10 @@ function torneoView() {
         }).join('') + '</div>';
       }).join('') + '</div>';
     }).join('') + '</div></div>';
-  if (champ) h += '<div class="champ card" style="box-shadow:none">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón del Cónclave</span><h3>' + pname(champ) + '</h3></div><button class="btn" data-act="trophy">Ver trofeo</button></div>';
+  if (champ) h += '<div class="champ card" style="box-shadow:none">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón del finde</span><h3>' + pname(champ) + '</h3></div><button class="btn" data-act="trophy">Ver trofeo</button></div>';
   if (can('edit')) h += '<div class="row wrap"><button class="btn" data-act="editPlayers">' + icon('users') + 'Cambiar jugadores</button><button class="btn ghost" data-act="resetBracket">Reiniciar cuadro</button></div>';
   h += '</section>';
-  h += '<section class="card wood"><h3>Reglas de la casa</h3><ul class="small" style="margin:0;padding-left:18px"><li>Partidos a 11 puntos, cambio de saque cada 2.</li><li>La final, al mejor de 3.</li><li>Los abuelos son árbitros inapelables.</li><li>El campeón elige la película de la noche de cine del próximo Cónclave.</li></ul></section>';
+  h += '<section class="card wood"><h3>Reglas de la casa</h3><ul class="small" style="margin:0;padding-left:18px"><li>Partidos a 11 puntos, cambio de saque cada 2.</li><li>La final, al mejor de 3.</li><li>Los abuelos son árbitros inapelables.</li><li>El campeón elige la película de la noche de cine del próximo viaje.</li></ul></section>';
   return h;
 }
 
@@ -170,6 +170,7 @@ VIEWS.tiempo = function () {
 VIEWS.personas = function () {
   var adm = can('access');
   var h = '<div class="view-head"><div><h2>Personas y accesos</h2><p class="muted small">' + S.people.length + ' en la lista · ' + S.families.length + ' familias · ' + S.homes.reduce(function (a, x) { return a + x.beds; }, 0) + ' camas</p></div></div>';
+  if (adm) { h += familyAccessCard(); afterRender.push(fillFamilyAccess); }
   h += window.CLOUD ? '' : '<section class="card wood small"><p><b>Demo:</b> arriba a la derecha eliges quién eres para probar cómo se ve con cada rol. En la versión online cada uno entra con su email o con un código, y los permisos los aplica la base de datos.</p></section>';
   S.families.forEach(function (f) {
     var ps = S.people.filter(function (p) { return p.family === f.id; });
@@ -179,7 +180,7 @@ VIEWS.personas = function () {
         return '<div class="person">' + av(p.id, 'lg') + '<div class="grow"><b>' + pname(p.id) + '</b>' + (p.pend ? ' <span class="pill pend">por confirmar</span>' : '') +
           '<div class="small muted">' + (p.age != null ? (p.approx ? '≈' : '') + p.age + ' años · ' : '') + KIND[p.kind] + ' · ' + ma + '/' + S.meals.length + ' comidas</div>' +
           (p.note ? '<div class="small muted">' + esc(p.note) + '</div>' : '') +
-          (adm ? '<button class="link small" data-act="access" data-id="' + p.id + '" style="min-height:34px;padding:2px 0">' + (p.email ? esc(p.email) : 'Sin email · dar acceso') + '</button>' : '') + '</div>' +
+          (adm ? '<button class="link small" data-act="access" data-id="' + p.id + '" style="min-height:34px;padding:2px 0">' + (p.email ? esc(p.email) : p.login ? 'Usuario: ' + esc(p.login) : 'Sin email · dar acceso') + '</button>' : '') + '</div>' +
           (adm ? '<select aria-label="Rol de ' + esc(p.name) + '" data-change="role" data-id="' + p.id + '">' + Object.keys(ROLE).map(function (r) { return '<option value="' + r + '"' + (p.role === r ? ' selected' : '') + '>' + ROLE[r] + '</option>'; }).join('') + '</select>' : '<span class="pill role-pill ' + p.role + '">' + ROLE[p.role] + '</span>') +
           '</div>';
       }).join('') + '</div>' +

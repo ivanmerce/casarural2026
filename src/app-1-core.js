@@ -1,4 +1,4 @@
-/* ===================== Cónclave · núcleo ===================== */
+/* ===================== Casa Rural 2026 · núcleo ===================== */
 var KEY = 'conclave-app';
 var S, ui;
 var $main, $nav, $top;
@@ -207,23 +207,24 @@ var TABS = [
 ];
 function splitLast(t) { var i = t.lastIndexOf(' '); return i < 0 ? ['', t] : [t.slice(0, i), t.slice(i + 1)]; }
 function wordmarkText() { var p = splitLast(S.trip.short || S.trip.name); return esc(p[0]) + ' <i>' + esc(p[1]) + '</i>'; }
-/* Marca: cristal carmesí (sigue el color elegido) con una "M" hecha de red de nodos y la estrella de la fumata */
+/* Marca: casa rural hecha de red de nodos (la familia conectada) con la ventana encendida. Sigue el color elegido */
 function logoMark() {
-  return '<svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="mkGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>' +
+  return '<svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="mkGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".32"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient></defs>' +
     '<rect class="mk-bg" width="40" height="40" rx="12"/><rect width="40" height="40" rx="12" fill="url(#mkGloss)"/><rect x=".8" y=".8" width="38.4" height="38.4" rx="11.3" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="1.4"/>' +
-    '<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M13 12 27 12M10 29 20 22 30 29" stroke-width="1.2" stroke-opacity=".38"/><path d="M10 29 13 12 20 22 27 12 30 29" stroke-width="2"/></g>' +
-    '<g fill="#fff"><circle cx="10" cy="29" r="2.5"/><circle cx="13" cy="12" r="2.5"/><circle cx="20" cy="22" r="2.7"/><circle cx="27" cy="12" r="2.5"/><circle cx="30" cy="29" r="2.5"/></g>' +
-    '<circle class="mk-star" cx="20" cy="7.2" r="2" fill="#F6CD62"/></svg>';
+    '<g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9.5 11 30.5M20 9.5 29 30.5M11 20.5 29 20.5" stroke-width="1.1" stroke-opacity=".35"/><path d="M6.5 20.5 20 9.5 33.5 20.5M11 18v12.5h18V18" stroke-width="2.1"/><path d="M17.4 30.5v-5.2a2.6 2.6 0 0 1 5.2 0v5.2" stroke-width="1.8"/></g>' +
+    '<g fill="#fff"><circle cx="20" cy="9.5" r="2.6"/><circle cx="6.5" cy="20.5" r="2.3"/><circle cx="33.5" cy="20.5" r="2.3"/><circle cx="11" cy="30.5" r="2.3"/><circle cx="29" cy="30.5" r="2.3"/></g>' +
+    '<rect class="mk-star" x="18.2" y="15.4" width="3.6" height="3.6" rx=".9" fill="#F6CD62"/></svg>';
 }
-function wordmarkHtml(name, year) {
-  var n = String(name || 'Cónclave').trim(), i = n.indexOf(' '), top = i > 0 ? n.slice(0, i) : n, rest = i > 0 ? n.slice(i + 1) : '';
-  var r = splitLast(rest);
-  return logoMark() + '<span class="wm-txt"><small>' + esc(top) + (year ? ' · ' + esc(year) : '') + '</small>' + (rest ? '<b>' + (r[0] ? esc(r[0]) + ' ' : '') + '<i>' + esc(r[1]) + '</i></b>' : '') + '</span>';
+/* Nombre: "Casa Rural 2026" → «Casa Rural» + «2026» en color; encima, una línea pequeña (fechas, lugar…) */
+function wordmarkHtml(name, eyebrow) {
+  var r = splitLast(String(name || 'Casa Rural 2026').trim());
+  return logoMark() + '<span class="wm-txt">' + (eyebrow ? '<small>' + esc(eyebrow) + '</small>' : '') + '<b>' + (r[0] ? esc(r[0]) + ' ' : '') + '<i>' + esc(r[1]) + '</i></b></span>';
 }
+function tripEyebrow() { return String(S.trip.dateLabel || '').replace(/\s*\d{4}\s*$/, '') || 'Plataforma familiar'; }
 function renderTop() {
   var p = me();
   $top.innerHTML =
-    '<button class="wordmark" data-act="logo" aria-label="' + esc(S.trip.name) + ', ir a inicio">' + wordmarkHtml(S.trip.name, ((S.trip.dateLabel || '').match(/\d{4}/) || [''])[0]) + '</button>' +
+    '<button class="wordmark" data-act="logo" aria-label="' + esc(S.trip.name) + ', ir a inicio">' + wordmarkHtml(S.trip.name, tripEyebrow()) + '</button>' +
     '<span class="sp"></span>' +
     '<button class="icon-btn cam-btn" data-act="tab" data-tab="album" aria-label="Álbum de fotos"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '</button>' +
     '<span id="onlineSlot">' + presencePill() + '</span>' +

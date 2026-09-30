@@ -46,8 +46,8 @@ function compCard() {
     .filter(function (g) { return (g.day + ' ' + (g.time || '00:00')) >= now; })[0] || (S.games || []).filter(function (g) { return gStatus(g) === 'prox'; })[0];
   var done = G.doneGames(S).length, tot = (S.games || []).length;
   return '<section class="card comp-card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('trophy') + 'Competición</h3><button class="link" data-act="tab" data-tab="juegos">Juegos ' + icon('arrow') + '</button></div>' +
-    (leader.length ? '<button class="leader" data-act="jsub" data-v="ranking">' + eAv(leader[0].id, 'sm') + '<span class="grow"><span class="eyebrow">Líder del Cónclave</span><b>' + leader.map(function (l) { return eName(l.id); }).join(' y ') + '</b></span><span class="big num">' + leader[0].pts + '</span><small class="muted">pts</small></button>'
-      : '<p class="small muted">Nadie ha puntuado todavía. El trono del Cónclave está libre.</p>') +
+    (leader.length ? '<button class="leader" data-act="jsub" data-v="ranking">' + eAv(leader[0].id, 'sm') + '<span class="grow"><span class="eyebrow">Líder del finde</span><b>' + leader.map(function (l) { return eName(l.id); }).join(' y ') + '</b></span><span class="big num">' + leader[0].pts + '</span><small class="muted">pts</small></button>'
+      : '<p class="small muted">Nadie ha puntuado todavía. El trono está libre.</p>') +
     (live.length ? live.map(function (g) { return '<button class="game-mini" data-act="gOpen" data-id="' + g.id + '">' + gIcon(g) + '<span class="grow"><b>' + esc(g.name) + '</b><small class="muted">' + gWhen(g) + '</small></span><span class="pill red live">En juego</span></button>'; }).join('')
       : next ? '<button class="game-mini" data-act="gOpen" data-id="' + next.id + '">' + gIcon(next) + '<span class="grow"><b>' + esc(next.name) + '</b><small class="muted">Próximo · ' + gWhen(next) + '</small></span>' + icon('arrow') + '</button>' : '') +
     '<div class="progress" aria-label="Juegos terminados"><i style="width:' + (tot ? Math.round(done / tot * 100) : 0) + '%"></i></div><p class="small muted">' + done + ' de ' + tot + ' juegos terminados · ' + G.awards(S).filter(function (a) { return a.winners.length; }).length + ' premios en juego</p></section>';
@@ -57,7 +57,7 @@ function compCard() {
 VIEWS.juegos = function () {
   if (ui.game) { var g = gById(ui.game); if (g) return gameView(ensureGame(g)); ui.game = null; }
   var sub = ui.jsub || 'juegos';
-  var h = '<div class="view-head"><div><h2>Juegos</h2><p class="muted small">Competición, ranking y premios del Cónclave</p></div></div>' +
+  var h = '<div class="view-head"><div><h2>Juegos</h2><p class="muted small">Competición, ranking y premios del finde</p></div></div>' +
     '<div class="seg" role="group" aria-label="Sección"><button data-act="jsub" data-v="juegos" aria-pressed="' + (sub === 'juegos') + '">Juegos</button><button data-act="jsub" data-v="ranking" aria-pressed="' + (sub === 'ranking') + '">Ranking</button><button data-act="jsub" data-v="premios" aria-pressed="' + (sub === 'premios') + '">Premios</button></div>';
   if (sub === 'ranking') return h + rankingView();
   if (sub === 'premios') return h + premiosView();
@@ -230,7 +230,7 @@ function rankingView() {
 function premiosView() {
   var list = G.awards(S), withW = list.filter(function (a) { return a.winners.length; }), t = G.tally(S);
   var prized = S.people.filter(function (p) { return t[p.id].length; }), none = S.people.filter(function (p) { return !t[p.id].length && (p.attends || G.presentOn(S, G.entrantOf(S, p.id))); });
-  var h = '<section class="card gala-card"><span class="eyebrow">La noche de los premios</span><h3>Gala del Cónclave</h3><p class="small">' + withW.length + ' premios con ganador · ' + prized.length + ' de ' + S.people.length + ' personas premiadas.</p>' +
+  var h = '<section class="card gala-card"><span class="eyebrow">La noche de los premios</span><h3>Gala de premios</h3><p class="small">' + withW.length + ' premios con ganador · ' + prized.length + ' de ' + S.people.length + ' personas premiadas.</p>' +
     '<button class="btn primary block big-btn" data-act="galaStart"' + (withW.length ? '' : ' disabled') + '>' + icon('play') + 'Empezar la gala</button>' +
     (none.length ? '<p class="small muted">Aún sin premio: ' + none.map(function (p) { return esc(p.name); }).join(', ') + '. ' + (can('edit') ? 'Crea un premio especial para que nadie se quede sin estatuilla.' : '') + '</p>' : '<p class="small">Todo el mundo tiene al menos un premio. Así se hace.</p>') +
     (can('edit') ? '<button class="btn block" data-act="aNew">' + icon('plus') + 'Premio especial</button>' : '') + '</section>';
@@ -288,7 +288,7 @@ function galaRender() {
         : '<p class="gala-drum">Y el premio es para…</p><p class="small">Toca para desvelarlo</p>');
   } else {
     var t = G.tally(S), names = {}; G.awards(S).forEach(function (a) { names[a.id] = a.name; });
-    inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p) { return '<div class="ga">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (k) { return esc(names[k]); }).join(' · ') + '</small></div>'; }).join('') + '</div><p class="small">Nos vemos en el próximo Cónclave.</p>';
+    inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p) { return '<div class="ga">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (k) { return esc(names[k]); }).join(' · ') + '</small></div>'; }).join('') + '</div><p class="small">Nos vemos en la próxima escapada.</p>';
   }
   el.querySelector('.gala-in').innerHTML = inner;
   el.querySelector('.gala-count').textContent = (gala.i + 1) + ' / ' + gala.slides.length;

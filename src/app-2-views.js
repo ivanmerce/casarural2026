@@ -29,13 +29,13 @@ VIEWS.inicio = function () {
 
   var h = '<section class="hero glass" aria-label="Cuenta atrás"><canvas id="heroNet" aria-hidden="true"></canvas>' +
     '<div class="kicker">' + esc(S.trip.dateLabel || '') + '</div>' +
-    '<h1>' + (function () { var w = S.trip.name.split(' '); var last = w.pop(); return esc(w.shift() || '') + '<br>' + esc(w.join(' ')) + ' <span>' + esc(last) + '</span>'; })() + '</h1>' +
+    '<h1>' + (function () { var r = splitLast(S.trip.name); return esc(r[0]) + (r[0] ? '<br>' : '') + '<span>' + esc(r[1]) + '</span>'; })() + '</h1>' +
     '<p class="place">' + icon('pin') + esc(S.trip.place) + (S.trip.town ? ' · ' + esc(S.trip.town) : '') + '</p>';
   if (c.phase === 'before') {
     h += '<div class="count" id="count" data-egg="disco"><div><b id="cd-d">' + c.d + '</b><span>días</span></div><div><b id="cd-h">' + c.h + '</b><span>horas</span></div><div><b id="cd-m">' + c.m + '</b><span>min</span></div><div><b id="cd-s">' + c.s + '</b><span>seg</span></div></div>' +
       '<p class="small muted" style="margin-top:10px">Para la llegada del ' + esc(S.days[0].long.toLowerCase()) + ' a las ' + esc(S.trip.arrival) + '</p>';
   } else if (c.phase === 'during') {
-    h += '<p class="live">Habemus Cónclave. Estamos en la finca.</p>';
+    h += '<p class="live">¡Ya estamos en la finca!</p>';
   } else {
     h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   }
@@ -68,7 +68,7 @@ VIEWS.inicio = function () {
   h += '<section class="card"><div class="card-head"><h3>' + (c.phase === 'before' ? 'Así empieza' : 'Lo próximo') + '</h3><button class="link" data-act="tab" data-tab="planes">Planning ' + icon('arrow') + '</button></div><div class="stack">' +
     (ev.length ? ev.map(function (e) {
       return '<div class="row"><span class="pill ' + (e.star ? 'red' : '') + ' num">' + esc(dayOf(e.day).short) + ' · ' + e.time + '</span><span class="grow">' + esc(e.title) + '</span></div>';
-    }).join('') : '<p class="muted">Se acabó lo que se daba. Hasta el Cónclave 2027.</p>') + '</div></section>';
+    }).join('') : '<p class="muted">Se acabó lo que se daba. Hasta la próxima escapada.</p>') + '</div></section>';
 
   /* Compra + costes */
   h += '<div class="grid2">' +
@@ -92,7 +92,7 @@ VIEWS.inicio = function () {
       '<div class="row">' + icon('house') + '<span class="grow">Incluye ropa de cama, toallas, limpieza final, piscina, La Barbacoa (con horno de leña), nave deportiva, WiFi y aparcamiento</span></div>' +
     '</div><div class="row wrap"><a class="btn" href="' + S.trip.maps + '" target="_blank" rel="noopener">' + icon('pin') + 'Cómo llegar</a><a class="btn ghost" href="' + S.trip.web + '" target="_blank" rel="noopener">Web de la finca</a></div></section>';
 
-  h += '<button class="btn ghost block" data-act="secrets">' + icon('trophy') + 'Secretos del Cónclave · ' + foundCount() + '/' + EGGS.length + '</button>';
+  h += '<button class="btn ghost block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>';
   return h;
 };
 function ring(pct) {
@@ -106,7 +106,7 @@ function weatherSummary() {
   return 'Entre ' + Math.round(tmin) + ' y ' + Math.round(tmax) + ' °C. ' + (wet ? 'Hay riesgo de lluvia: planes B listos.' : 'Sin lluvia prevista de momento. Barbacoa sí, piscina no.') + ' Actualizado ' + L.ddmm(S.weather.fetched) + '.';
 }
 
-/* Red de nodos del hero: un nodo por persona del Cónclave */
+/* Red de nodos del hero: un nodo por persona de la familia */
 var heroRAF = null;
 function stopHero() { if (heroRAF) cancelAnimationFrame(heroRAF); heroRAF = null; }
 function startHero() {
@@ -117,7 +117,7 @@ function startHero() {
   size();
   var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C4112F';
   var names = S ? S.people : Array.from({ length: 12 }, function (_, i) { return { kind: i % 4 ? 'adulto' : 'menor' }; });
-  /* cada nodo es una persona del Cónclave: si hay foto, su cara */
+  /* cada nodo es una persona de la familia: si hay foto, su cara */
   var withFaces = names.some(function (p) { return p.avatar; });
   var X0 = withFaces ? 0.56 : 0.45;
   var nodes = names.map(function (p, i) {

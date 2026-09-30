@@ -1,4 +1,4 @@
-/* ===================== Álbum de fotos del Cónclave =====================
+/* ===================== Álbum de fotos =====================
    Todos (también los peques) suben fotos desde el móvil. Se reducen en el propio móvil antes de subir
    (1600 px y miniatura de 480 px) para que vaya rápido con la WiFi de la finca y quepa todo en el plan gratuito.
    Demo: las fotos se quedan en memoria. Nube: Supabase Storage (bucket privado) + tabla photos. */
@@ -32,7 +32,7 @@ function uploadBtn(cls, label) {
 function albumCard() {
   var ps = photoList();
   PHOTOS.ensure(ps.slice(0, 6).map(function (p) { return p.thumb; }));
-  return '<section class="card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('camera') + 'Álbum del Cónclave</h3><button class="link" data-act="tab" data-tab="album">' + (ps.length ? ps.length + (ps.length === 1 ? ' foto ' : ' fotos ') : 'Ver ') + icon('arrow') + '</button></div>' +
+  return '<section class="card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('camera') + 'Álbum de fotos</h3><button class="link" data-act="tab" data-tab="album">' + (ps.length ? ps.length + (ps.length === 1 ? ' foto ' : ' fotos ') : 'Ver ') + icon('arrow') + '</button></div>' +
     (ps.length ? '<div class="ph-strip">' + ps.slice(0, 6).map(function (p) { return '<button class="ph" data-act="phOpen" data-id="' + p.id + '">' + thumbImg(p) + '</button>'; }).join('') + '</div>'
       : '<p class="small muted">Todavía no hay fotos. La primera que suba alguien se lleva el título de fotógrafo oficial (de momento).</p>') +
     uploadBtn('ghost', 'Subir fotos') + '</section>';
@@ -49,7 +49,7 @@ VIEWS.album = function () {
   h += '<section class="card up-card"><div class="row"><span class="grow small">Sube las fotos del día desde el móvil. Se reducen solas para que suban rápido.</span></div>' + uploadBtn('primary', 'Subir fotos') + '<div id="ph-progress" class="small muted" aria-live="polite"></div>' +
     (PHOTOS.demo ? '<p class="small muted">En la demo las fotos solo viven mientras la tengas abierta. En la web de verdad se guardan para todos.</p>' : '') + '</section>';
   h += '<div class="chips" role="group" aria-label="Filtro"><button class="chip" data-act="phf" data-v="all" aria-pressed="' + (f === 'all') + '">Todas</button><button class="chip" data-act="phf" data-v="mine" aria-pressed="' + (f === 'mine') + '">Mis fotos</button><button class="chip" data-act="phf" data-v="fav" aria-pressed="' + (f === 'fav') + '">' + icon('heart') + 'Favoritas</button></div>';
-  if (!ps.length) return h + '<div class="empty">' + icon('camera') + '<b>' + (f === 'all' ? 'El álbum está en blanco' : 'Nada por aquí') + '</b><span>' + (f === 'all' ? 'Las mejores fotos del Cónclave empiezan aquí. Sin filtros, que salimos todos guapísimos.' : 'Cambia el filtro o sube alguna.') + '</span></div>';
+  if (!ps.length) return h + '<div class="empty">' + icon('camera') + '<b>' + (f === 'all' ? 'El álbum está en blanco' : 'Nada por aquí') + '</b><span>' + (f === 'all' ? 'Las mejores fotos del finde empiezan aquí. Sin filtros, que salimos todos guapísimos.' : 'Cambia el filtro o sube alguna.') + '</span></div>';
   var groups = {}, order = [];
   ps.forEach(function (p) { var k = f === 'fav' ? 'fav' : (p.day || 'x'); if (!groups[k]) { groups[k] = []; order.push(k); } groups[k].push(p); });
   if (f !== 'fav') order.sort(function (a, b) { return a === 'x' ? 1 : b === 'x' ? -1 : b.localeCompare(a); });

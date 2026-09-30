@@ -26,7 +26,7 @@ function presencePill() {
 }
 function presenceCard() {
   var ids = onlineIds(), pd = presenceData();
-  return '<section class="card" id="presenceCard"><div class="card-head"><h3 class="row" style="gap:8px"><span class="live-dot" aria-hidden="true"></span>Ahora en el Cónclave</h3><button class="link" data-act="whoOnline">Todos ' + icon('arrow') + '</button></div>' +
+  return '<section class="card" id="presenceCard"><div class="card-head"><h3 class="row" style="gap:8px"><span class="live-dot" aria-hidden="true"></span>Ahora en la app</h3><button class="link" data-act="whoOnline">Todos ' + icon('arrow') + '</button></div>' +
     (ids.length ? '<div class="online-list">' + ids.map(function (id) { return '<span class="online-chip">' + av(id, 'sm') + pname(id) + (id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</span>'; }).join('') + '</div>' : '<p class="small muted">Nadie más por aquí ahora mismo.</p>') +
     (pd.demo ? '<p class="small muted">En la demo solo te ves a ti. En la web de verdad aparece quién tiene la app abierta en cada momento.</p>' : '') + '</section>';
 }

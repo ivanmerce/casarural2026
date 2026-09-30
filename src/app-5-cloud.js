@@ -39,7 +39,7 @@ var CLOUD = (function () {
     return {
       version: 'cloud', trip: kv.trip || {}, days: kv.days || [], slots: SLOTS,
       families: d.families.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, short: r.short, color: r.color, note: r.note }; }),
-      people: d.people.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, family: r.family_id, age: r.age, approx: r.age_approx, kind: r.kind, role: r.role, email: r.email, attends: r.attends_default, pend: r.pending, note: r.note, sort: r.sort, avatar: r.avatar }; }),
+      people: d.people.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, family: r.family_id, age: r.age, approx: r.age_approx, kind: r.kind, role: r.role, email: r.email, login: r.login || null, attends: r.attends_default, pend: r.pending, note: r.note, sort: r.sort, avatar: r.avatar }; }),
       pendingPeople: [],
       homes: d.homes.map(function (r) { return { id: r.id, name: r.name, beds: r.beds, free: r.free, rooms: r.rooms, note: r.note, proposal: r.proposal || [] }; }),
       meals: d.meals.map(function (r) { return { id: r.id, day: r.day, slot: r.slot, time: hm(r.time_override), mode: r.mode, title: r.title, dishes: r.dishes || [], cook: r.cook_family_id, marc: r.marc_menu, notes: r.notes, star: r.star }; }),
@@ -71,7 +71,7 @@ var CLOUD = (function () {
     out.games = (S.games || []).map(function (g, i) { var d = {}; Object.keys(g).forEach(function (k) { if (k !== 'id' && k !== 'sort' && g[k] !== undefined) d[k] = g[k]; }); return { id: g.id, data: d, sort: g.sort != null ? g.sort : i }; });
     out.awards = Object.keys(S.awardData || {}).map(function (k) { return { id: k, data: S.awardData[k] }; });
     out.award_votes = []; Object.keys(S.awardVotes || {}).forEach(function (a) { Object.keys(S.awardVotes[a] || {}).forEach(function (v) { if (S.awardVotes[a][v]) out.award_votes.push({ award_id: a, voter_id: v, nominee: S.awardVotes[a][v] }); }); });
-    out.people = S.people.map(function (p, i) { return { id: p.id, family_id: p.family, name: p.name, age: p.age, age_approx: !!p.approx, kind: p.kind, role: p.role, email: p.email || null, attends_default: !!p.attends, pending: !!p.pend, note: p.note || null, avatar: p.avatar || null, sort: p.sort != null ? p.sort : i }; });
+    out.people = S.people.map(function (p, i) { return { id: p.id, family_id: p.family, name: p.name, age: p.age, age_approx: !!p.approx, kind: p.kind, role: p.role, email: p.email || null, login: p.login || null, attends_default: !!p.attends, pending: !!p.pend, note: p.note || null, avatar: p.avatar || null, sort: p.sort != null ? p.sort : i }; });
     out.meals = S.meals.map(function (m) { return { id: m.id, day: m.day, slot: m.slot, time_override: m.time || null, mode: m.mode, title: m.title, dishes: m.dishes, cook_family_id: m.cook || null, marc_menu: m.marc || null, notes: m.notes || null, star: !!m.star }; });
     out.ingredients = S.ingredients.map(function (i, k) { return { id: i.id, name: i.name, category: i.cat, qty: i.qty, unit: i.unit, qty_estimated: !!i.qtyEst, family_id: i.family || null, status: i.status, split: i.split || 'comun', cost: i.cost, est_cost: i.est, per_diners: i.per || null, suggested: !!i.sug, note: i.note || null, sort: i.sort != null ? i.sort : 1000 + k }; });
     out.activities = S.activities.map(function (a) { return { id: a.id, day: a.day, start_time: a.start, duration_min: a.dur, title: a.title, place: a.place || 'finca', where_text: a.where || null, travel: a.travel || null, age: a.age || null, marc: a.marc, owner_person_id: a.owner || null, plan_b: a.planB || null, description: a.desc || null, star: !!a.star, is_tournament: !!a.tournament }; });
@@ -178,28 +178,46 @@ var CLOUD = (function () {
     client().channel('conclave').on('postgres_changes', { event: '*', schema: 'public' }, function () { clearTimeout(reloadT); reloadT = setTimeout(reload, 600); }).subscribe();
   }
 
-  /* ---------- Acceso ---------- */
+  /* ---------- Acceso: email (o usuario) + código de 6 cifras ----------
+     La primera vez, el código de la familia que reparte el organizador. Nada más entrar, cada uno elige el suyo. */
+  var APP_NAME = 'Casa Rural 2026';
   function shell(inner) {
-    $top.innerHTML = '<span class="wordmark">' + wordmarkHtml('Cónclave') + '</span><span class="sp"></span>';
+    $top.innerHTML = '<span class="wordmark">' + wordmarkHtml(APP_NAME, 'Plataforma familiar') + '</span><span class="sp"></span>';
     $nav.innerHTML = '';
-    $main.innerHTML = '<div class="view"><section class="hero glass" style="margin-top:28px"><canvas id="heroNet" aria-hidden="true"></canvas><div class="kicker">Plataforma familiar</div><h1>Cónclave</h1></section>' + inner + '</div>';
-    startHero();
+    $main.innerHTML = '<div class="view">' + inner + '</div>';
+  }
+  function codeInput(id, label, auto) {
+    return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" class="code-in" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="' + (auto || 'off') + '" placeholder="••••••"></div>';
   }
   function loginView(msg) {
-    shell('<section class="card"><h3>Entra con tu email</h3><p class="small muted">Te llega un enlace al correo. Ábrelo en este mismo móvil y listo.</p>' +
-      '<div class="field"><label for="lg-email">Tu email</label><input id="lg-email" type="email" inputmode="email" autocomplete="email" placeholder="nombre@correo.com"></div>' +
-      '<button class="btn primary block" data-act="cloudEmail">Enviarme el enlace</button>' +
-      '<div class="field" id="lg-otp-box" hidden><label for="lg-otp">¿El email trae un código de 6 cifras? Escríbelo aquí</label><input id="lg-otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code"><button class="btn block" data-act="cloudOtp">Entrar con ese código</button></div></section>' +
-      '<section class="card"><h3>Tengo un código personal</h3><p class="small muted">El organizador te lo ha pasado por WhatsApp.</p>' +
-      '<div class="field"><label for="lg-code">Código de 6 cifras</label><input id="lg-code" inputmode="numeric" maxlength="6" autocomplete="off" style="font-size:1.6rem;letter-spacing:.2em;font-weight:800"></div>' +
-      '<button class="btn primary block" data-act="cloudCode">Entrar</button></section>' +
-      (msg ? '<section class="card alert"><p>' + msg + '</p></section>' : ''));
+    shell('<section class="card login-card"><span class="login-mark">' + logoMark() + '</span><h1 class="login-title">Casa Rural <i>2026</i></h1><p class="muted">Entra con tu email y tu código de 6 cifras.</p>' +
+      '<div class="field"><label for="lg-email">Tu email (o tu usuario)</label><input id="lg-email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" placeholder="nombre@correo.com"></div>' +
+      codeInput('lg-code', 'Código de 6 cifras', 'current-password') +
+      '<button class="btn primary block big-btn" data-act="cloudLogin">Entrar</button>' +
+      '<p class="small first-time"><b>¿Es la primera vez?</b> Usa el código de la familia que te ha llegado por WhatsApp. Justo después elegirás el tuyo.</p>' +
+      (msg ? '<p class="small login-msg">' + msg + '</p>' : '') + '</section>' +
+      '<section class="card"><button class="link" data-act="cloudForgot">He olvidado mi código</button><div id="lg-forgot" hidden><p class="small muted">Te enviamos un enlace a tu email. Ábrelo en este móvil, entrarás y podrás poner un código nuevo.</p><button class="btn block" data-act="cloudEmail">Enviarme el enlace</button>' +
+      '<div class="field" id="lg-otp-box" hidden><label for="lg-otp">¿El correo trae un código? Escríbelo aquí</label><input id="lg-otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code"><button class="btn block" data-act="cloudOtp">Entrar con ese código</button></div></div>' +
+      '<p class="small muted">¿Sin email? Pídele al organizador un usuario y escríbelo en lugar del email.</p></section>');
+    setTimeout(function () { var e = document.getElementById('lg-email'); if (e) e.focus(); }, 50);
+  }
+  function codeSetupView(first, done) {
+    var p = person(ui.me);
+    shell('<section class="card login-card"><span class="login-mark">' + logoMark() + '</span><h1 class="login-title">Hola, <i>' + esc(p ? p.name : '') + '</i></h1>' +
+      '<p>' + (first ? 'Has entrado con el código de la familia. Ahora <b>elige tu código personal</b> de 6 cifras: a partir de hoy entrarás con tu email y este código.' : 'Elige tu nuevo código personal de 6 cifras.') + '</p>' +
+      codeInput('cs-1', 'Tu código nuevo', 'new-password') + codeInput('cs-2', 'Repítelo', 'new-password') +
+      '<button class="btn primary block big-btn" data-act="cloudSetCode">Guardar y entrar</button>' +
+      '<p class="small muted">Consejo: que no sea 123456 ni tu año de nacimiento. Si un día lo olvidas, «He olvidado mi código» o pídele al organizador que te lo reinicie.</p></section>');
+    api._afterCode = done;
+    setTimeout(function () { var e = document.getElementById('cs-1'); if (e) e.focus(); }, 50);
   }
   function bootPending() {
     $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
-    $top.innerHTML = '<span class="wordmark">' + wordmarkHtml('Cónclave') + '</span>';
-    $main.innerHTML = '<div class="view"><section class="hero glass" style="margin-top:28px"><div class="kicker">Casi listo</div><h1>Cónclave</h1><p class="place">Falta conectar la base de datos. En cuanto esté, aquí podréis entrar todos.</p></section></div>';
+    $top.innerHTML = '<span class="wordmark">' + wordmarkHtml(APP_NAME, 'Plataforma familiar') + '</span>';
+    $main.innerHTML = '<div class="view"><section class="card login-card"><h1 class="login-title">Casi <i>listo</i></h1><p class="muted">Falta conectar la base de datos. En cuanto esté, aquí podréis entrar todos.</p></section></div>';
   }
+  var mustChange = false;
+  function enterApp() { return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); startApp(); subscribe(); startPresence(); }); }
   function afterSession() {
     return client().rpc('claim_person').then(check).then(function (r) {
       var pid = r.data;
@@ -207,27 +225,64 @@ var CLOUD = (function () {
         started = false;
         return client().auth.getUser().then(function (u) {
           var anonU = u.data && u.data.user && u.data.user.is_anonymous;
-          if (anonU) return client().auth.signOut().then(function () { loginView('Ese código no vale o ha caducado. Pídele uno nuevo al organizador.'); });
-          shell('<section class="card alert"><h3>Esta cuenta no está en la lista</h3><p>Pide al organizador que añada tu email o que te pase un código.</p><button class="btn block" data-act="logout">Salir</button></section>');
+          if (anonU) return client().auth.signOut().then(function () { loginView(); });
+          shell('<section class="card alert"><h3>Esta cuenta no está en la lista</h3><p>Pide al organizador que añada tu email.</p><button class="btn block" data-act="logout">Salir</button></section>');
         });
       }
       ui.me = pid;
-      return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); startApp(); subscribe(); startPresence(); });
-    }).catch(function (e) { loginView('No he podido entrar: ' + esc(e.message || 'error de conexión')); });
+      return loadAll().then(function (d) {
+        S = fromDb(d); last = snapshot(S);
+        return client().rpc('my_code_status').then(function (st) {
+          if (mustChange || (st && st.data === false)) { var first = mustChange; mustChange = false; codeSetupView(first, function () { startApp(); subscribe(); startPresence(); }); return; }
+          startApp(); subscribe(); startPresence();
+        });
+      });
+    }).catch(function (e) { started = false; loginView('No he podido entrar: ' + esc(e.message || 'error de conexión')); });
   }
   var started = false, codeFlow = false;
   function go2() { if (started) return; started = true; afterSession(); }
   api.boot = function () {
     loginView();
-    client().auth.getSession().then(function (r) {
-      if (r.data && r.data.session) go2();
-    });
+    client().auth.getSession().then(function (r) { if (r.data && r.data.session) go2(); });
     client().auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_IN' && !S && !codeFlow) go2(); });
   };
   api.logout = function () { client().auth.signOut().then(function () { location.href = api.siteUrl; }); };
+  api.login = function () {
+    var em = (val('lg-email') || '').trim().toLowerCase(), code = (val('lg-code') || '').replace(/\D/g, '');
+    if (!em) { toast('Escribe tu email'); return; }
+    if (code.length !== 6) { toast('El código tiene 6 cifras'); return; }
+    var btn = document.querySelector('[data-act=cloudLogin]'); if (btn) { btn.disabled = true; btn.textContent = 'Entrando…'; }
+    codeFlow = true;
+    var pre = Promise.resolve();
+    client().auth.getSession().then(function (r) { return r.data && r.data.session ? null : client().auth.signInAnonymously().then(check); })
+      .then(function () { return client().rpc('login_with_code', { p_login: em, p_code: code }).then(check); })
+      .then(function (r) {
+        codeFlow = false;
+        if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
+        var d = r.data;
+        if (!d || d.error) { toast(d && d.error ? 'Demasiados intentos. Espera un rato o pregunta al organizador' : 'El email o el código no coinciden. Revísalos'); var c = document.getElementById('lg-code'); if (c) { c.value = ''; c.focus(); } return; }
+        mustChange = !!d.must_change; started = false; go2();
+      }).catch(function () { codeFlow = false; if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } toast('No he podido entrar. Revisa la conexión'); });
+  };
+  api.setCode = function () {
+    var a = (val('cs-1') || '').replace(/\D/g, ''), b = (val('cs-2') || '').replace(/\D/g, '');
+    if (a.length !== 6) { toast('Tiene que tener 6 cifras'); return; }
+    if (a !== b) { toast('Los dos códigos no coinciden'); return; }
+    client().rpc('set_my_code', { p_code: a }).then(check).then(function (r) {
+      var m = { formato: 'Tiene que tener 6 cifras', igual_familia: 'Ese es el código de la familia: elige otro', facil: 'Demasiado fácil de adivinar: elige otro', sin_sesion: 'Tu sesión ha caducado. Vuelve a entrar' };
+      if (r.data !== 'ok') { toast(m[r.data] || 'No he podido guardarlo'); return; }
+      var done = api._afterCode; api._afterCode = null;
+      toast('¡Listo! Tu código está guardado. La próxima vez: tu email y ese código');
+      if (done) done(); else { closeSheet(); }
+    }).catch(function () { toast('No he podido guardarlo. Revisa la conexión'); });
+  };
+  api.changeCodeSheet = function () {
+    openSheet('<h2>Cambiar mi código</h2><p class="small muted">Tu código personal de 6 cifras para entrar con tu email.</p>' + codeInput('cs-1', 'Código nuevo', 'new-password') + codeInput('cs-2', 'Repítelo', 'new-password') +
+      '<div class="sheet-actions"><button class="btn primary" data-act="cloudSetCode">Guardar</button><button class="btn" data-act="close">Cancelar</button></div>');
+  };
   api.email = function () {
     var em = (val('lg-email') || '').trim().toLowerCase();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { toast('Escribe tu email completo'); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { toast('Escribe arriba tu email completo'); var e = document.getElementById('lg-email'); if (e) e.focus(); return; }
     client().rpc('email_allowed', { p_email: em }).then(check).then(function (r) {
       if (!r.data) { toast('Ese email no está en la lista. Pídeselo al organizador'); return; }
       return client().auth.signInWithOtp({ email: em, options: { emailRedirectTo: api.siteUrl, shouldCreateUser: true } }).then(check).then(function () {
@@ -240,16 +295,12 @@ var CLOUD = (function () {
     var em = (val('lg-email') || '').trim().toLowerCase(), tk = (val('lg-otp') || '').trim();
     client().auth.verifyOtp({ email: em, token: tk, type: 'email' }).then(check).then(go2).catch(function () { toast('Código incorrecto o caducado'); });
   };
-  api.code = function () {
-    var code = (val('lg-code') || '').replace(/\D/g, '');
-    if (code.length !== 6) { toast('El código tiene 6 cifras'); return; }
-    codeFlow = true;
-    client().auth.signInAnonymously().then(check).then(function () { return client().rpc('claim_with_code', { p_code: code }).then(check); }).then(function (r) {
-      codeFlow = false;
-      if (!r.data) { return client().auth.signOut().then(function () { toast('Ese código no vale. Revísalo con el organizador'); }); }
-      started = false; go2();
-    }).catch(function () { codeFlow = false; toast('No he podido entrar con el código'); });
-  };
+  /* ---------- Admin: código de la familia y códigos personales (nunca se ven, solo si existen) ---------- */
+  api.status = function () { return client().rpc('admin_code_status').then(check).then(function (r) { var o = {}; (r.data || []).forEach(function (x) { o[x.person_id] = { has: x.has_code, at: x.updated_at }; }); return o; }); };
+  api.reset = function (pid) { return client().rpc('admin_reset_code', { p_person: pid }).then(check); };
+  api.getShared = function () { return client().rpc('get_shared_code').then(check).then(function (r) { return r.data; }); };
+  api.setShared = function (code) { return client().rpc('set_shared_code', { p_code: code }).then(check).then(function (r) { if (!r.data) throw new Error('no'); }); };
+
   /* ---------- Álbum: Storage privado con enlaces firmados (1 h) ---------- */
   var phCache = {}, phPending = {}, phT = null;
   function bucket() { return client().storage.from('photos'); }
@@ -281,14 +332,16 @@ var CLOUD = (function () {
   PHOTOS.like = function (ph, on) { var q = client().from('photo_likes'); return (on ? q.insert({ photo_id: ph.id, person_id: ui.me }) : q.delete().match({ photo_id: ph.id, person_id: ui.me })).then(check); };
   PHOTOS.caption = function (ph, txt) { return client().from('photos').update({ caption: txt || null }).match({ id: ph.id }).then(check); };
 
-  /* códigos personales: solo el admin puede leerlos o cambiarlos (RLS) */
-  api.getCode = function (pid) { return client().from('access_codes').select('code').eq('person_id', pid).maybeSingle().then(function (r) { return r.data ? r.data.code : null; }); };
-  api.setCode = function (pid, code) { return client().from('access_codes').upsert({ person_id: pid, code: code }, { onConflict: 'person_id' }).then(check); };
   return api;
 })();
 A.cloudEmail = function () { CLOUD.email(); };
 A.cloudOtp = function () { CLOUD.otp(); };
-A.cloudCode = function () { CLOUD.code(); };
+A.cloudLogin = function () { CLOUD.login(); };
+A.cloudSetCode = function () { CLOUD.setCode(); };
+A.cloudForgot = function () { var f = document.getElementById('lg-forgot'); if (f) f.hidden = !f.hidden; };
+A.myCode = function () { closeSheet(); CLOUD.changeCodeSheet(); };
 A.logout = function () { CLOUD.logout(); };
-if (CLOUD.getCode) { ACCESS.getCode = CLOUD.getCode; ACCESS.setCode = CLOUD.setCode; }
+if (CLOUD.status) { ACCESS.status = CLOUD.status; ACCESS.reset = CLOUD.reset; ACCESS.getShared = CLOUD.getShared; ACCESS.setShared = CLOUD.setShared; ACCESS.cloud = true; }
+/* Intro en el campo de código = Entrar */
+document.addEventListener('keydown', function (e) { if (e.key !== 'Enter') return; var t = e.target; if (t && t.id === 'lg-code') A.cloudLogin(); else if (t && t.id === 'lg-email') { var c = document.getElementById('lg-code'); if (c) c.focus(); } else if (t && t.id === 'cs-2') A.cloudSetCode(); });
 window.CLOUD = CLOUD;

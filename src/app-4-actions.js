@@ -152,20 +152,20 @@ function saveExp() {
 var ACCENTS = [['#C4112F', 'Carmesí'], ['#55663F', 'Verde finca'], ['#94643F', 'Madera'], ['#3F5A7A', 'Pizarra'], ['#7B2D5B', 'Ciruela'], ['#CF5B24', 'Atardecer']];
 function menuSheet() {
   var P = ui.prefs;
-  openSheet((window.CLOUD ? '<h2>' + esc(me().name) + '</h2><p class="small muted">Has entrado como <b>' + esc(me().name) + '</b> · ' + ROLE[me().role] + '</p><button class="btn block" data-act="logout">Salir de esta cuenta</button>' : '<h2>¿Quién eres?</h2><p class="small muted">Solo en la demo: sirve para probar los permisos de cada rol.</p>' +
+  openSheet((window.CLOUD ? '<h2>' + esc(me().name) + '</h2><p class="small muted">Has entrado como <b>' + esc(me().name) + '</b> · ' + ROLE[me().role] + '</p><div class="stack"><button class="btn block" data-act="myCode">' + icon('edit') + 'Cambiar mi código</button><button class="btn block ghost" data-act="logout">Salir de esta cuenta</button></div>' : '<h2>¿Quién eres?</h2><p class="small muted">Solo en la demo: sirve para probar los permisos de cada rol.</p>' +
     S.families.map(function (f) {
       return '<div class="att-fam">' + S.people.filter(function (p) { return p.family === f.id; }).map(function (p) {
         return '<button class="toggle-p" data-act="setMe" data-id="' + p.id + '" aria-pressed="true" style="' + (ui.me === p.id ? 'border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)' : '') + '">' + av(p.id, 'sm') + esc(p.name) + '<span class="small muted">' + ROLE[p.role] + '</span></button>';
       }).join('') + '</div>';
     }).join('')) +
-    '<div class="divider"></div><h2>Personaliza tu Cónclave</h2><p class="small muted">Se guarda en este dispositivo. Cada uno lo pone a su gusto.</p>' +
+    '<div class="divider"></div><h2>Personaliza tu app</h2><p class="small muted">Se guarda en este dispositivo. Cada uno lo pone a su gusto.</p>' +
     '<div class="field"><span class="lbl">Tema</span><div class="seg" role="group"><button data-act="pref" data-k="theme" data-v="light" aria-pressed="' + (P.theme === 'light') + '">Claro</button><button data-act="pref" data-k="theme" data-v="auto" aria-pressed="' + (P.theme === 'auto') + '">Automático</button><button data-act="pref" data-k="theme" data-v="dark" aria-pressed="' + (P.theme === 'dark') + '">Oscuro</button></div></div>' +
     '<div class="field"><span class="lbl">Color</span><div class="swatches">' + ACCENTS.map(function (a) { return '<button class="swatch" style="background:' + a[0] + '" data-act="pref" data-k="accent" data-v="' + a[0] + '" aria-pressed="' + (P.accent === a[0]) + '" aria-label="' + a[1] + '" title="' + a[1] + '"></button>'; }).join('') + '</div></div>' +
     '<div class="field"><span class="lbl">Fondo</span><div class="seg" role="group"><button data-act="pref" data-k="bg" data-v="net" aria-pressed="' + (P.bg === 'net') + '">Cristal + red</button><button data-act="pref" data-k="bg" data-v="glass" aria-pressed="' + (P.bg === 'glass') + '">Cristal</button><button data-act="pref" data-k="bg" data-v="plain" aria-pressed="' + (P.bg === 'plain') + '">Liso</button></div></div>' +
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos del Cónclave · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -219,19 +219,19 @@ function buildEggs() {
     { k: 'baby', name: 'Modo ' + babyName(), how: 'Tocar 3 veces a ' + babyName(), hint: 'El más pequeño esconde algo' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + babyName(), hint: 'Ploc, ploc, ploc' },
     { k: 'trophy', name: 'Campeón', how: 'Coronar al campeón de una eliminatoria o una liguilla', hint: 'Solo puede quedar uno' },
-    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 7 veces el logo', hint: 'El logo guarda un secreto de cónclave' },
+    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 7 veces el logo', hint: 'El logo guarda un secreto' },
     { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Los abuelos ven de maravilla… con ayuda' },
     { k: 'claras', name: 'Cuentas claras', how: 'Dejar la liquidación a cero con gastos apuntados', hint: 'Nadie debe nada a nadie' },
     { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A deshoras' },
-    { k: 'zero', name: 'Habemus Cónclave', how: 'Estar en la app cuando llega la hora de entrada', hint: 'Cuando la cuenta atrás llega a cero' },
+    { k: 'zero', name: '¡Ya estamos aquí!', how: 'Estar en la app cuando llega la hora de entrada', hint: 'Cuando la cuenta atrás llega a cero' },
     { k: 'salud', name: '¡Salud!', how: 'Marcar como comprada la cerveza, el vino o los refrescos', hint: 'Algo para brindar' },
     { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Si llueve, pídeselo al cielo' },
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números del cumpleañero' },
     { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuanta más familia, mejor' },
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Una palabra en latín, en el buscador' },
     { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar' },
-    { k: 'himno', name: 'Himno del Cónclave', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música' },
-    { k: 'habemus', name: 'Habemus campeón', how: 'Terminar todos los juegos del Cónclave', hint: 'Cuando no quede ni un juego por jugar' },
+    { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música' },
+    { k: 'habemus', name: 'Habemus campeón', how: 'Terminar todos los juegos del finde', hint: 'Cuando no quede ni un juego por jugar' },
     { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando' },
     { k: 'album', name: 'Paparazzi en serie', how: 'Llegar a 50 fotos en el álbum', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún' }
   ];
@@ -248,7 +248,7 @@ function egg(k) {
 }
 function secretsSheet() {
   var f = foundMap();
-  openSheet('<h2>Secretos del Cónclave</h2><p class="small muted">' + foundCount() + ' de ' + EGGS.length + ' descubiertos en este dispositivo. ¿Quién de la familia los encuentra todos?</p><div class="stack">' +
+  openSheet('<h2>Secretos de la casa</h2><p class="small muted">' + foundCount() + ' de ' + EGGS.length + ' descubiertos en este dispositivo. ¿Quién de la familia los encuentra todos?</p><div class="stack">' +
     EGGS.map(function (e) {
       var ok = f[e.k];
       return '<div class="row"><span class="av sm" style="background:' + (ok ? 'var(--accent)' : 'var(--surface-2)') + ';color:' + (ok ? '#fff' : 'var(--muted)') + '">' + (ok ? '✓' : '?') + '</span><span class="grow"><b>' + (ok ? esc(e.name) : '???') + '</b><span class="small muted" style="display:block">' + esc(ok ? e.how : 'Pista: ' + e.hint) + '</span></span></div>';
@@ -296,7 +296,7 @@ function fumata() {
     puffs = puffs.filter(function (p) { return p.y + p.r > -40 && p.a > .02; });
     if (t - t0 < D) requestAnimationFrame(f); else fx.done();
   })(t0);
-  setTimeout(function () { message('<h2>HABEMUS<br>COMPRA</h2><p>Fumata blanca: la lista está completa. El Cónclave puede comer en paz.</p>', 3600); }, 900);
+  setTimeout(function () { message('<h2>HABEMUS<br>COMPRA</h2><p>Fumata blanca: la lista está completa. La familia puede comer en paz.</p>', 3600); }, 900);
   egg('fumata');
 }
 function checkFumata() {
@@ -363,8 +363,8 @@ function wish1111() {
   egg('deseo');
 }
 function habemusQuorum(n) {
-  if (!egg('quorum')) { toast(n + ' personas conectadas a la vez. ¡Esto es un cónclave!'); return; }
-  fumataRaw('HABEMUS<br>QUÓRUM', n + ' miembros del Cónclave conectados a la vez. La familia está reunida.');
+  if (!egg('quorum')) { toast(n + ' personas conectadas a la vez. ¡Esto es una reunión familiar!'); return; }
+  fumataRaw('HABEMUS<br>QUÓRUM', n + ' personas de la familia conectadas a la vez. La familia está reunida.');
 }
 function habemusPapam() {
   if (!egg('papa')) return;
@@ -373,7 +373,7 @@ function habemusPapam() {
 function himno() {
   fanfare(); confetti(2600);
   var top = G.ranking(S).filter(function (r) { return r.pos === 1 && r.pts > 0; });
-  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">' + (top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante') + '</h2><p>Que suene el himno del Cónclave. Todos en pie.</p>', 3200);
+  message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">' + (top.length ? top.map(function (r) { return esc(eText(r.id)); }).join(' y ') : 'Trono vacante') + '</h2><p>Que suene el himno de la casa. Todos en pie.</p>', 3200);
   egg('himno');
 }
 var discoOn = false;
@@ -622,13 +622,24 @@ var A = {
   access: function (el) { if (guard('access')) accessSheet(el.dataset.id); },
   rmPhoto: function (el) { var p = person(el.dataset.id); p.avatar = null; save(); render(true); accessSheet(p.id); toast('Foto quitada'); },
   saveAccess: function (el) {
-    var p = person(el.dataset.id), em = val('x-email').trim().toLowerCase();
+    var p = person(el.dataset.id), em = val('x-email').trim().toLowerCase(), lg = val('x-login').trim().toLowerCase();
     if (em && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { toast('Ese email no parece válido'); return; }
-    p.email = em || null; save(); closeSheet(); render(true); toast('Acceso de ' + esc(p.name) + ' guardado');
+    if (lg && !/^[a-z0-9._-]{3,30}$/.test(lg)) { toast('El usuario: solo letras, números y . _ - (mínimo 3)'); return; }
+    if (lg && S.people.some(function (x) { return x.id !== p.id && ((x.login || '') === lg || (x.email || '') === lg); })) { toast('Ese usuario ya lo tiene otra persona'); return; }
+    p.email = em || null; p.login = lg || null; save(); closeSheet(); render(true); toast('Acceso de ' + esc(p.name) + ' guardado');
   },
-  newCode: function (el) {
-    var pid = el.dataset.id, code = String(Math.floor(100000 + Math.random() * 900000));
-    ACCESS.setCode(pid, code).then(function () { accessSheet(pid); toast('Código nuevo para ' + esc(person(pid).name)); }, function () { toast('No he podido guardar el código'); });
+  resetCode: function (el) {
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.textContent = '¿Seguro?'; return; }
+    var pid = el.dataset.id; ACCESS.reset(pid).then(function () { accessSheet(pid); toast('Código reiniciado: entrará con el de la familia y elegirá otro'); }, function () { toast('No he podido reiniciarlo'); });
+  },
+  sharedCode: function () {
+    openSheet('<h2>Código de la familia</h2><p class="small muted">6 cifras. Sirve para entrar la primera vez, junto al email. Quien ya tenga su código propio no lo necesita.</p>' +
+      '<div class="field"><label for="sc-new">Código nuevo</label><input id="sc-new" inputmode="numeric" maxlength="6" style="font-size:1.6rem;letter-spacing:.2em;font-weight:800"></div>' +
+      '<div class="sheet-actions"><button class="btn primary" data-act="saveShared">Guardar</button><button class="btn" data-act="close">Cancelar</button></div>');
+  },
+  saveShared: function () {
+    var c = val('sc-new').replace(/\D/g, ''); if (c.length !== 6) { toast('Tiene que tener 6 cifras'); return; }
+    ACCESS.setShared(c).then(function () { closeSheet(); render(true); toast('Código de la familia cambiado'); }, function () { toast('No he podido guardarlo'); });
   },
   copyInvite: function (el) {
     var t = el.dataset.text;
@@ -636,23 +647,56 @@ var A = {
   }
 };
 function selectText(id) { var n = document.getElementById(id); if (!n) return; var r = document.createRange(); r.selectNodeContents(n); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
-/* Códigos de acceso personales: en la demo se guardan en el navegador; en la nube, en una tabla que solo ve el admin */
+/* Acceso: cada persona entra con su email (o un usuario) + código. La primera vez, el código de la familia; luego elige el suyo.
+   El admin ve si cada uno tiene ya código propio (nunca cuál es) y puede reiniciarlo. En la demo todo vive en el navegador. */
 var ACCESS = {
-  getCode: function (pid) { S.codes = S.codes || {}; return Promise.resolve(S.codes[pid] || null); },
-  setCode: function (pid, code) { S.codes = S.codes || {}; S.codes[pid] = code; save(); return Promise.resolve(); }
+  status: function () { var o = {}; Object.keys(S.codes || {}).forEach(function (k) { o[k] = { has: true, at: null }; }); return Promise.resolve(o); },
+  reset: function (pid) { if (S.codes) delete S.codes[pid]; save(); return Promise.resolve(); },
+  getShared: function () { return Promise.resolve(S.sharedCode || null); },
+  setShared: function (c) { S.sharedCode = c; save(); return Promise.resolve(); }
 };
 function siteUrl() { return (window.CLOUD && CLOUD.siteUrl) || location.href.split('#')[0]; }
+function loginOf(p) { return p.email || p.login || ''; }
+function inviteText(p, code, has) {
+  var id = loginOf(p);
+  if (has) return 'Hola ' + p.name + '! La web de la ' + S.trip.name + ': ' + siteUrl() + ' · Entra con ' + (p.email ? 'tu email ' : 'tu usuario ') + id + ' y tu código personal.';
+  return 'Hola ' + p.name + '! Ya tienes acceso a la web de la ' + S.trip.name + ': ' + siteUrl() + ' · Entra con ' + (id ? (p.email ? 'tu email ' : 'tu usuario ') + id : 'tu email') + ' y el código de la familia ' + (code || '(pídemelo)') + '. La primera vez te pedirá que elijas tu propio código.';
+}
+function groupText(code) {
+  return '¡Familia! Ya está lista la web de la ' + S.trip.name + ': ' + siteUrl() + ' · Entrad con vuestro email y el código ' + (code || '(pídemelo)') + '. Lo primero que os pedirá es que elijáis vuestro propio código. Después: confirmad qué días venís y pedíos productos de la compra. Os paso el manual en PDF.';
+}
+function slug(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, ''); }
 function accessSheet(pid) {
   var p = person(pid);
-  ACCESS.getCode(pid).then(function (code) {
-    var msg = 'Hola ' + p.name + '! Ya tienes acceso a la web del ' + S.trip.name + ': ' + siteUrl() + (p.email ? ' · Entra con tu email (' + p.email + ') y te llegará un enlace' : '') + (code ? (p.email ? ', o' : ' · Pulsa') + ' "Tengo un código" y escribe ' + code : '') + '.';
-    openSheet('<h2>Acceso de ' + esc(p.name) + '</h2><p class="small muted">Rol: <b>' + ROLE[p.role] + '</b> (se cambia en la lista). Puede entrar con su email, con un código de 6 cifras o con los dos.</p>' +
-      '<div class="field"><span class="lbl">Foto</span><div class="row">' + av(pid, 'lg') + '<label class="btn" for="x-photo" style="cursor:pointer">' + icon('edit') + 'Cambiar foto</label><input id="x-photo" type="file" accept="image/*" hidden data-change="photo" data-id="' + pid + '">' + (p.avatar ? '<button class="btn ghost" data-act="rmPhoto" data-id="' + pid + '">Quitar</button>' : '') + '</div><span class="small muted">Se recorta en cuadrado y se reduce a 192 px. Ocupa unos 10 KB.</span></div>' +
+  Promise.all([ACCESS.status(), ACCESS.getShared()]).then(function (r) {
+    var st = r[0][pid] || { has: false }, code = r[1];
+    var msg = inviteText(p, code, st.has);
+    openSheet('<h2>Acceso de ' + esc(p.name) + '</h2><p class="small muted">Rol: <b>' + ROLE[p.role] + '</b> (se cambia en la lista).</p>' +
+      '<div class="field"><span class="lbl">Foto</span><div class="row">' + av(pid, 'lg') + '<label class="btn" for="x-photo" style="cursor:pointer">' + icon('edit') + 'Cambiar foto</label><input id="x-photo" type="file" accept="image/*" hidden data-change="photo" data-id="' + pid + '">' + (p.avatar ? '<button class="btn ghost" data-act="rmPhoto" data-id="' + pid + '">Quitar</button>' : '') + '</div></div>' +
       '<div class="field"><label for="x-email">Email</label><input id="x-email" type="email" inputmode="email" autocomplete="off" value="' + esc(p.email || '') + '" placeholder="nombre@correo.com"></div>' +
-      '<div class="field"><span class="lbl">Código personal</span><div class="row"><b class="big" style="letter-spacing:.12em">' + (code ? esc(code) : '—') + '</b><span class="grow"></span><button class="btn" data-act="newCode" data-id="' + pid + '">' + icon('refresh') + (code ? 'Nuevo código' : 'Crear código') + '</button></div><span class="small muted">Ideal para quien no tenga email a mano o para los abuelos. Si creas uno nuevo, el anterior deja de valer.</span></div>' +
+      '<div class="field"><label for="x-login">Usuario (solo si no tiene email)</label><input id="x-login" autocapitalize="off" autocomplete="off" value="' + esc(p.login || '') + '" placeholder="por ejemplo: ' + esc(slug(p.name)) + '"></div>' +
+      '<div class="field"><span class="lbl">Su código</span><div class="row code-st ' + (st.has ? 'ok' : '') + '">' + icon(st.has ? 'check' : 'clock') + '<span class="grow">' + (st.has ? 'Ya tiene su código propio' + (st.at ? ' (desde el ' + L.ddmm(String(st.at).slice(0, 10)) + ')' : '') + '. Nadie más lo ve.' : 'Aún no. Entrará con el código de la familia y elegirá el suyo.') + '</span>' +
+        (st.has ? '<button class="btn ghost" data-act="resetCode" data-id="' + pid + '">Reiniciar</button>' : '') + '</div></div>' +
       '<div class="field"><span class="lbl">Mensaje para enviarle</span><p class="small card wood" id="invite-text" style="user-select:all">' + esc(msg) + '</p><button class="btn" data-act="copyInvite" data-text="' + esc(msg) + '">' + icon('copy') + 'Copiar mensaje</button></div>' +
-      '<div class="sheet-actions"><button class="btn primary" data-act="saveAccess" data-id="' + pid + '">Guardar email</button><button class="btn" data-act="close">Cerrar</button></div>');
+      '<div class="sheet-actions"><button class="btn primary" data-act="saveAccess" data-id="' + pid + '">Guardar</button><button class="btn" data-act="close">Cerrar</button></div>');
   });
+}
+/* tarjeta de admin en Personas: código de la familia y quién tiene ya el suyo */
+function familyAccessCard() {
+  return '<section class="card access-card" id="accessCard"><div class="card-head"><h3>Acceso de la familia</h3><span class="pill red">Solo tú</span></div><p class="small muted">Cargando…</p></section>';
+}
+function fillFamilyAccess() {
+  var el = document.getElementById('accessCard'); if (!el) return;
+  Promise.all([ACCESS.status(), ACCESS.getShared()]).then(function (r) {
+    var st = r[0], code = r[1], n = S.people.filter(function (p) { return st[p.id] && st[p.id].has; }).length;
+    var noId = S.people.filter(function (p) { return !loginOf(p); });
+    el.innerHTML = '<div class="card-head"><h3>Acceso de la familia</h3><span class="pill red">Solo tú</span></div>' +
+      '<p class="small">Todos entran con <b>su email</b> y este <b>código de la familia</b>. Nada más entrar, cada uno elige el suyo.</p>' +
+      '<div class="row shared-code"><b class="big num" style="letter-spacing:.14em">' + (code ? esc(code) : '——————') + '</b><span class="grow"></span><button class="btn" data-act="sharedCode">' + icon('edit') + (code ? 'Cambiar' : 'Crear') + '</button></div>' +
+      '<button class="btn primary block" data-act="copyInvite" data-text="' + esc(groupText(code)) + '">' + icon('copy') + 'Copiar mensaje para el grupo de WhatsApp</button>' +
+      '<div class="progress" aria-label="Con código propio"><i style="width:' + Math.round(n / S.people.length * 100) + '%"></i></div><p class="small muted">' + n + ' de ' + S.people.length + ' ya tienen su código propio.' +
+      (noId.length ? ' Sin email ni usuario (todavía no pueden entrar): <b>' + noId.map(function (p) { return esc(p.name); }).join(', ') + '</b>. Tócales en la lista para ponérselo.' : '') + '</p>';
+  }, function () { var q = el.querySelector('p'); if (q) q.textContent = 'No he podido cargar los accesos.'; });
 }
 function costSheet(id) {
   var i = S.ingredients.find(function (x) { return x.id === id; });
@@ -717,7 +761,7 @@ function startApp() {
   document.title = S.trip.name; CATS.marc = 'Menú ' + babyName();
   buildEggs(); applyPrefs(); render();
   refreshWeather(false);
-  var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (egg('buho')) toast('¿Todavía despiertos? El Cónclave recomienda dormir'); }, 1500);
+  var h = new Date().getHours(); if (h < 5) setTimeout(function () { if (egg('buho')) toast('¿Todavía despiertos? La casa rural recomienda dormir'); }, 1500);
   var today = new Date().toISOString().slice(0, 10);
   var bd = S.trip.eggs && S.trip.eggs.bdayDate;
   if (bd && today === bd && ui.bdaySeen !== today) { ui.bdaySeen = today; saveUi(); setTimeout(bdayParty, 900); }

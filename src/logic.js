@@ -1,5 +1,5 @@
 /* =====================================================================
-   Cónclave · Lógica pura (sin DOM). Testeable con node: tests/logic.test.js
+   Casa Rural · Lógica pura (sin DOM). Testeable con node: tests/logic.test.js
    ===================================================================== */
 var L = (function () {
   var eur = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
