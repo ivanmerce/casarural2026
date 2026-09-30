@@ -912,6 +912,20 @@ a.fact { color: inherit; text-decoration: none; }
 .finca-seg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .finca-seg .ico { width: 18px; height: 18px; }
 @media (max-width: 400px) { .nav-in { padding: 0 2px; } .nav button { font-size: .6rem; letter-spacing: -.01em; } .nav button .ico { width: 22px; height: 22px; } }
+/* v0.6.5 · Plano: que no se corte nada dentro de las habitaciones */
+.plan-room.bed { justify-content: center; gap: 3px; padding: 3px 2px; }
+.plan-rname { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdots { flex-wrap: nowrap; gap: 0; max-width: 100%; }
+.pdots .pdot + .pdot { margin-left: -7px; }
+.pdot { display: inline-flex; border-radius: 50%; box-shadow: 0 0 0 2px var(--bg); }
+.pdot .av.xs, .pdot.free { width: clamp(16px, 4.6vw, 24px); height: clamp(16px, 4.6vw, 24px); }
+.pdot.free { background: var(--bg); }
+.pdot.baby .av.xs { width: clamp(13px, 3.6vw, 18px); height: clamp(13px, 3.6vw, 18px); }
+.pill.buy-alli { background: color-mix(in srgb, var(--olive) 16%, transparent); color: var(--olive); }
+.pill.buy-antes { background: var(--surface-2); color: var(--muted); }
+.buy-help { padding: 10px 12px; }
+.plan-rname { white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.05; word-break: break-word; }
+.plan-wrap { padding-bottom: 22px; }
 
 </style>
 </head>
@@ -2074,6 +2088,7 @@ VIEWS.compra = function () {
   var list = all.filter(function (i) {
     if (!inFam(i)) return false;
     if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
+    if (ui.buyF && i.buy !== ui.buyF) return false;
     if (q && i.name.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -2099,7 +2114,10 @@ VIEWS.compra = function () {
     '<button class="chip" data-act="fam" data-fam="libre" aria-pressed="' + (f === 'libre') + '">' + icon('basket') + 'Sin dueño <b class="num">' + free.length + '</b></button>' +
     (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro <b class="num">' + mine.length + '</b></button>' : '') +
     '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo</button>' +
+    '<button class="chip" data-act="buyF" data-v="alli" aria-pressed="' + (ui.buyF === 'alli') + '">' + icon('pin') + 'Comprar allí <b class="num">' + all.filter(function (i) { return i.buy === 'alli'; }).length + '</b></button>' +
+    '<button class="chip" data-act="buyF" data-v="antes" aria-pressed="' + (ui.buyF === 'antes') + '">' + icon('car') + 'Antes de ir <b class="num">' + all.filter(function (i) { return i.buy === 'antes'; }).length + '</b></button>' +
     S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + '</button>'; }).join('') + '</div>';
+  if (ui.buyF && S.shopping) h += '<section class="card wood buy-help"><p class="small">' + (ui.buyF === 'alli' ? S.shopping.alli : S.shopping.antes) + '</p></section>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';
   if (ui.mealFilter) {
     var mf = meal(ui.mealFilter), freeM = all.filter(function (i) { return !i.family && i.meals.indexOf(ui.mealFilter) >= 0; }).length;
@@ -2147,6 +2165,7 @@ function itemRow(i) {
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
       (f && L.needsPrice(i) && !mine ? '<span class="pill warn">sin precio</span>' : '') +
+      (i.buy === 'alli' ? '<span class="pill buy-alli">allí</span>' : i.buy === 'antes' ? '<span class="pill buy-antes">antes de ir</span>' : '') +
       (i.split === 'propio' ? '<span class="pill olive">propio</span>' : '') + (i.sug ? '<span class="pill">sugerido</span>' : '') +
       (function () { var sg = L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
     '<div class="price' + (mine && ed ? ' price-edit' : '') + '">' + right + '</div></div>';
@@ -2529,7 +2548,7 @@ function famOptions(cur, allowNone) {
 /* ---------- Ingrediente ---------- */
 function itemSheet(id) {
   var i = id ? S.ingredients.find(function (x) { return x.id === id; }) : { id: null, name: '', cat: 'fresco', qty: 1, unit: 'u', meals: ui.mealFilter ? [ui.mealFilter] : [], family: ui.fam && ui.fam !== 'all' ? ui.fam : me().family, status: 'pendiente', cost: null, split: 'comun', note: '' };
-  draft = { id: i.id, status: i.status, split: i.split || 'comun', meals: i.meals.slice() };
+  draft = { id: i.id, status: i.status, split: i.split || 'comun', meals: i.meals.slice(), buy: i.buy || '' };
   var dis = can('edit') ? '' : ' disabled';
   openSheet(
     '<h2>' + (id ? 'Ingrediente' : 'Nuevo ingrediente') + '</h2>' + roNote() +
@@ -2540,6 +2559,7 @@ function itemSheet(id) {
     '<div class="field"><span class="lbl">¿Lo traéis de casa?</span>' + segHtml('status', [['pendiente', 'No, se compra'], ['casa', 'Sí, de casa (0 €)']], draft.status === 'casa' ? 'casa' : 'pendiente', !can('edit')) + '</div>' +
     '<div class="grid2"><div class="field"><label for="f-cost">Precio real (opcional)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
     '<div class="field"><span class="lbl">Reparto</span>' + segHtml('split', [['comun', 'Común'], ['propio', 'Propio']], draft.split, !can('edit')) + '</div></div>' +
+    '<div class="field"><span class="lbl">Dónde comprarlo</span>' + segHtml('buy', [['antes', 'Antes de ir'], ['alli', 'Allí (pueblo)'], ['', 'Da igual']], draft.buy, !can('edit')) + '</div>' +
     '<div class="field"><span class="lbl">Para qué comidas</span><div class="att-fam">' + S.meals.map(function (m) {
       return '<button type="button" class="chip" data-act="dmeal" data-id="' + m.id + '" aria-pressed="' + (draft.meals.indexOf(m.id) >= 0) + '"' + dis + '>' + esc(dayOf(m.day).short) + ' · ' + slotName(m.slot) + '</button>';
     }).join('') + '</div></div>' +
@@ -2554,7 +2574,7 @@ function saveItem() {
   var name = val('f-name').trim(); if (!name) { toast('Ponle nombre al ingrediente'); return; }
   var o = draft.id ? S.ingredients.find(function (x) { return x.id === draft.id; }) : { id: uid('i'), est: null };
   o.name = name; o.qty = numVal('f-qty') || 1; o.unit = val('f-unit').trim() || 'u'; o.cat = val('f-cat'); o.family = val('f-fam') || null;
-  o.status = draft.status; o.split = draft.split; o.meals = draft.meals; o.note = val('f-note').trim();
+  o.status = draft.status; o.split = draft.split; o.meals = draft.meals; o.note = val('f-note').trim(); o.buy = draft.buy || null;
   o.cost = o.status === 'casa' ? 0 : numVal('f-cost');
   if (!draft.id) S.ingredients.push(o);
   save(); closeSheet(); render(true); toast(draft.id ? 'Guardado' : 'Añadido a la lista'); checkFumata();
@@ -2928,6 +2948,7 @@ var A = {
   day: function (el) { ui.day = el.dataset.day; render(true); },
   sub: function (el) { ui.sub = el.dataset.sub; if (ui.tab !== 'planes') ui.tab = 'planes'; render(true); navPush(); },
   fam: function (el) { ui.fam = el.dataset.fam; saveUi(); render(true); },
+  buyF: function (el) { ui.buyF = ui.buyF === el.dataset.v ? null : el.dataset.v; render(true); },
   st: function (el) { ui.st = el.dataset.st; render(true); },
   superMode: function () { ui.superMode = !ui.superMode; saveUi(); render(true); if (ui.superMode) { ui.st = 'pendiente'; ui.fam = me().family; render(true); toast('Modo súper: tu lista, letra grande y solo lo pendiente'); } },
   clearMeal: function () { ui.mealFilter = null; render(true); },
@@ -4087,7 +4108,7 @@ VIEWS.manual = function () {
     ['Apunta lo que cuesta', 'Cuando lo compréis, en <b>Compra → «Lo nuestro»</b> escribe el <b>precio real</b> en la casilla de cada producto. <b>Sin precio real no cuenta en Cuentas.</b>']
   ];
   var cards = [
-    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper. Cada producto tiene su casilla de <b>precio real</b>; arriba veis cuántos faltan. Si algo lo traéis <b>de casa</b>, tocad el producto y marcadlo (0 €).'],
+    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper. Cada producto tiene su casilla de <b>precio real</b>; arriba veis cuántos faltan. Si algo lo traéis <b>de casa</b>, tocad el producto y marcadlo (0 €). Con <b>«Comprar allí»</b> y <b>«Antes de ir»</b> veis qué conviene comprar en el pueblo y qué antes de salir.'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Toca los comensales si alguien no come ese día: las cantidades se ajustan solas.'],
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
@@ -4436,7 +4457,7 @@ function casasHtml() {
     (fr.length ? '<p class="small">Libres: ' + fr.map(function (r) { return '<button class="chip mini" data-act="roomOpen" data-id="' + r.id + '">' + esc(roomLabel(r.id)) + ' · ' + (r.beds - bedsUsed(r.id)) + (r.beds - bedsUsed(r.id) === 1 ? ' cama' : ' camas') + '</button>'; }).join(' ') + '</p>' : '') +
     '<p class="small muted">Se elige por orden de llegada al móvil: toca la habitación y «Nos la quedamos».</p></section>';
   /* plano */
-  h += '<div class="plan-wrap"><div class="plan" style="aspect-ratio:' + PW + '/' + PH + '">';
+  h += '<div class="plan-wrap"><div class="plan" style="aspect-ratio:' + PW + '/' + Math.round(PH * 1.35) + '">';
   R.houses.forEach(function (hs) {
     h += '<div class="plan-house" style="left:' + pct(hs.x, PW) + ';top:' + pct(hs.y, PH) + ';width:' + pct(hs.w, PW) + ';height:' + pct(hs.h, PH) + ';--hc:' + hs.color + '"><span class="plan-hname">' + esc(hs.name) + '</span></div>';
   });
@@ -4447,7 +4468,7 @@ function casasHtml() {
     var dots = ps.map(function (p) { return '<span class="pdot' + (usesBed(p) ? '' : ' baby') + '">' + av(p.id, 'xs') + '</span>'; }).join('');
     for (var i = used; i < r.beds; i++) dots += '<span class="pdot free" aria-hidden="true"></span>';
     h += '<button class="plan-room bed' + (mine ? ' mine' : '') + (used >= r.beds ? ' full' : used ? '' : ' empty') + '" style="' + style + '" data-act="roomOpen" data-id="' + r.id + '" aria-label="' + esc(roomLabel(r.id)) + ': ' + used + ' de ' + r.beds + ' camas">' +
-      '<span class="plan-rname">' + esc(r.name) + (crib ? ' · cuna' : '') + '</span><span class="pdots">' + dots + '</span></button>';
+      '<span class="plan-rname">' + esc(r.name) + '</span><span class="pdots">' + dots + '</span></button>';
   });
   h += '<span class="plan-note">' + esc(R.note || '') + '</span></div></div>';
   h += '<div class="plan-legend small"><span><i class="lg-free"></i>Cama libre</span><span><i class="lg-mine"></i>Tu habitación</span><span>' + icon('baby') + 'Cuna: no ocupa cama</span></div>';
@@ -4571,7 +4592,7 @@ var CLOUD = (function () {
       pendingPeople: [],
       homes: d.homes.map(function (r) { return { id: r.id, name: r.name, beds: r.beds, free: r.free, rooms: r.rooms, note: r.note, proposal: r.proposal || [] }; }),
       meals: d.meals.map(function (r) { return { id: r.id, day: r.day, slot: r.slot, time: hm(r.time_override), mode: r.mode, title: r.title, dishes: r.dishes || [], cook: r.cook_family_id, marc: r.marc_menu, notes: r.notes, star: r.star }; }),
-      ingredients: d.ingredients.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, cat: r.category, qty: num(r.qty), unit: r.unit, qtyEst: r.qty_estimated, family: r.family_id, status: r.status, split: r.split, cost: num(r.cost), est: num(r.est_cost), per: r.per_diners, sug: r.suggested, note: r.note, sort: r.sort, meals: im[r.id] || [] }; }),
+      ingredients: d.ingredients.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, cat: r.category, qty: num(r.qty), unit: r.unit, qtyEst: r.qty_estimated, family: r.family_id, status: r.status, split: r.split, cost: num(r.cost), est: num(r.est_cost), per: r.per_diners, sug: r.suggested, note: r.note, buy: r.buy_at || null, sort: r.sort, meals: im[r.id] || [] }; }),
       expenses: d.expenses.map(function (r) { return { id: r.id, concept: r.concept, amount: num(r.amount), payer: r.payer_family_id, split: r.split, kind: r.kind, date: r.spent_on }; }),
       house: { total: num(st.house_total), payer: st.house_payer_family_id, cancel: kv.cancel || [], payments: d.house_payments.slice().sort(function (a, b) { return a.id.localeCompare(b.id); }).map(function (r) { return { id: r.id, label: r.label, amount: num(r.amount), due: r.due_on, date: r.paid_on, paid: r.paid, note: r.note }; }) },
       tax: { perNight: num(st.tax_per_night), nights: st.tax_nights, minAge: st.tax_min_age, payer: st.tax_payer_family_id, note: kv.taxNote || '' },
@@ -4581,7 +4602,7 @@ var CLOUD = (function () {
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
-      comp: kv.comp || { duos: [] }, finca: kv.finca || null, rooms: kv.rooms || null,
+      comp: kv.comp || { duos: [] }, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
       roomAssign: (function () { var o = {}; (d.room_assignments || []).forEach(function (r) { o[r.person_id] = r.room_id; }); return o; })(),
       guestReg: (function () { var o = {}; (d.guest_registrations || []).forEach(function (r) { if (r.done) o[r.person_id] = true; }); return o; })(),
       games: (d.games || []).slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return Object.assign({ id: r.id, sort: r.sort }, r.data); }),
@@ -4603,7 +4624,7 @@ var CLOUD = (function () {
     out.award_votes = []; Object.keys(S.awardVotes || {}).forEach(function (a) { Object.keys(S.awardVotes[a] || {}).forEach(function (v) { if (S.awardVotes[a][v]) out.award_votes.push({ award_id: a, voter_id: v, nominee: S.awardVotes[a][v] }); }); });
     out.people = S.people.map(function (p, i) { return { id: p.id, family_id: p.family, name: p.name, age: p.age, age_approx: !!p.approx, kind: p.kind, role: p.role, email: p.email || null, login: p.login || null, attends_default: !!p.attends, pending: !!p.pend, note: p.note || null, avatar: p.avatar || null, sort: p.sort != null ? p.sort : i }; });
     out.meals = S.meals.map(function (m) { return { id: m.id, day: m.day, slot: m.slot, time_override: m.time || null, mode: m.mode, title: m.title, dishes: m.dishes, cook_family_id: m.cook || null, marc_menu: m.marc || null, notes: m.notes || null, star: !!m.star }; });
-    out.ingredients = S.ingredients.map(function (i, k) { return { id: i.id, name: i.name, category: i.cat, qty: i.qty, unit: i.unit, qty_estimated: !!i.qtyEst, family_id: i.family || null, status: i.status, split: i.split || 'comun', cost: i.cost, est_cost: i.est, per_diners: i.per || null, suggested: !!i.sug, note: i.note || null, sort: i.sort != null ? i.sort : 1000 + k }; });
+    out.ingredients = S.ingredients.map(function (i, k) { return { id: i.id, name: i.name, category: i.cat, qty: i.qty, unit: i.unit, qty_estimated: !!i.qtyEst, family_id: i.family || null, status: i.status, split: i.split || 'comun', cost: i.cost, est_cost: i.est, per_diners: i.per || null, suggested: !!i.sug, note: i.note || null, buy_at: i.buy || null, sort: i.sort != null ? i.sort : 1000 + k }; });
     out.activities = S.activities.map(function (a) { return { id: a.id, day: a.day, start_time: a.start, duration_min: a.dur, title: a.title, place: a.place || 'finca', where_text: a.where || null, travel: a.travel || null, age: a.age || null, marc: a.marc, owner_person_id: a.owner || null, plan_b: a.planB || null, description: a.desc || null, star: !!a.star, is_tournament: !!a.tournament }; });
     out.expenses = S.expenses.map(function (e) { return { id: e.id, concept: e.concept, amount: e.amount, payer_family_id: e.payer, split: e.split || 'comun', kind: e.kind || 'gasto', spent_on: e.date || new Date().toISOString().slice(0, 10) }; });
     out.house_payments = S.house.payments.map(function (p) { return { id: p.id, label: p.label, amount: p.amount, due_on: p.due || null, paid_on: p.date || null, paid: !!p.paid, note: p.note || null }; });
