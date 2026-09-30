@@ -237,7 +237,11 @@ function premiosView() {
   ['podio', 'juegos', 'casa', 'publico', 'extra'].forEach(function (gk) {
     var items = list.filter(function (a) { return a.group === gk; }); if (!items.length) return;
     h += '<p class="eyebrow">' + esc(G.GROUPS[gk]) + '</p>' + (gk === 'publico' ? '<p class="small muted">Vota todo el mundo, también los lectores. Un voto por premio; se puede cambiar. El resultado se desvela en la gala.</p>' : '');
-    h += items.map(awardCard).join('');
+    var won = items.filter(function (a) { return a.vote || a.winners.length; }), pend = items.filter(function (a) { return !a.vote && !a.winners.length; });
+    h += won.map(awardCard).join('');
+    if (pend.length) h += '<section class="card aw-pend"><span class="eyebrow">Por decidir · ' + pend.length + '</span>' + pend.map(function (a) {
+      return '<div class="aw-row">' + '<span class="aw-ico sm">' + icon(a.icon || 'star') + '</span><span class="grow"><b>' + esc(a.name) + '</b><small class="muted">' + esc(a.desc) + '</small></span>' + (can('edit') ? '<button class="icon-btn" data-act="aEdit" data-id="' + a.id + '" aria-label="Decidir ' + esc(a.name) + '">' + icon('edit') + '</button>' : '') + '</div>';
+    }).join('') + '</section>';
   });
   return h;
 }

@@ -27,7 +27,7 @@ function save() {
 }
 function loadUi() { try { return JSON.parse(localStorage.getItem(KEY + '-ui')) || {}; } catch (e) { return {}; } }
 function saveUi() {
-  try { localStorage.setItem(KEY + '-ui', JSON.stringify({ tab: ui.tab, me: ui.me, fam: ui.fam, theme: ui.theme, superMode: ui.superMode, bdaySeen: ui.bdaySeen, howClosed: ui.howClosed })); } catch (e) {}
+  try { localStorage.setItem(KEY + '-ui', JSON.stringify({ tab: ui.tab, me: ui.me, theme: ui.theme, superMode: ui.superMode, bdaySeen: ui.bdaySeen, howClosed: ui.howClosed })); } catch (e) {}
 }
 function uid(p) { return p + Math.random().toString(36).slice(2, 8); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }

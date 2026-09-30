@@ -645,7 +645,7 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .fam-bar b { font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fam-bar .num { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; }
 .fam-bar small { grid-column: 2 / 4; font-size: .72rem; }
-.fam-bar.libre { border-style: dashed; border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.fam-bar.libre { grid-column: 1 / -1; grid-template-columns: auto 1fr auto; border-style: dashed; border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .fam-bar.libre .num { color: var(--accent); }
 .fam-dot.none { background: transparent; border: 2px dashed var(--muted); width: 11px; height: 11px; }
 .item.free { background: color-mix(in srgb, var(--accent) 3%, transparent); }
@@ -690,3 +690,11 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .vw-actions { justify-content: center; }
 .vw-actions .btn:not(.primary):not(.danger) { background: rgba(255, 255, 255, .12); color: #fff; border-color: rgba(255, 255, 255, .15); }
 @media (max-width: 400px) { .cam-btn { width: 38px; height: 38px; } .ph-strip { grid-template-columns: repeat(3, 1fr); } }
+
+.gala-card .btn:not(.primary) { background: rgba(255, 255, 255, .1); color: #fff; border-color: rgba(255, 255, 255, .18); }
+.aw-pend { gap: 0; }
+.aw-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.aw-row:nth-child(2) { border-top: 0; }
+.aw-row .grow { flex: 1; min-width: 0; } .aw-row b { display: block; font-size: .95rem; } .aw-row small { display: block; font-size: .8rem; line-height: 1.3; }
+.aw-ico.sm { width: 34px; height: 34px; border-radius: 11px; } .aw-ico.sm .ico { width: 18px; height: 18px; }
+.aw-row .icon-btn { width: 40px; height: 40px; }

@@ -215,9 +215,9 @@ VIEWS.compra = function () {
     '<button class="chip" data-act="superMode" aria-pressed="' + !!ui.superMode + '">' + icon('cart') + 'Modo súper</button></div>';
   /* cómo funciona: 3 pasos, siempre a mano */
   h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">3 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
-    '<li><b>Mira lo que falta.</b> En «Sin dueño» está todo lo que nadie se ha pedido todavía.</li>' +
-    '<li><b>Pídetelo.</b> Toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span> en lo que vaya a comprar (o traer de casa) tu familia. Si vienes desde Comidas, puedes pedirte la comida entera.</li>' +
-    '<li><b>En el súper, márcalo.</b> En «' + esc(fam(myF) ? fam(myF).name : 'Lo nuestro') + '» toca el círculo al meterlo en el carro y apunta el precio: las cuentas salen solas.</li></ol>') + '</section>';
+    '<li><span><b>Mira lo que falta.</b> En «Sin dueño» está todo lo que nadie se ha pedido todavía.</span></li>' +
+    '<li><span><b>Pídetelo.</b> Toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span> en lo que vaya a comprar (o traer de casa) tu familia. Si vienes desde Comidas, puedes pedirte la comida entera.</span></li>' +
+    '<li><span><b>En el súper, márcalo.</b> En «' + esc(fam(myF) ? fam(myF).name : 'Lo nuestro') + '» toca el círculo al meterlo en el carro y apunta el precio: las cuentas salen solas.</span></li></ol>') + '</section>';
   /* reparto: quién se ha pedido qué */
   h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + all.length + ' con dueño</span></div>' +
     '<div class="progress split" role="progressbar" aria-valuenow="' + pctA + '" aria-valuemin="0" aria-valuemax="100">' + S.families.map(function (x) { var n = all.filter(function (i) { return i.family === x.id; }).length; return n ? '<i class="fb ' + x.color + '" style="width:' + (n / all.length * 100) + '%"></i>' : ''; }).join('') + '</div>' +
@@ -244,7 +244,7 @@ VIEWS.compra = function () {
   if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a la lista de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '. Te lo puedes quitar después.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
 
   if (!list.length) {
-    h += '<div class="empty">' + icon('basket') + (f === 'libre' ? '<b>¡Todo tiene dueño!</b><span>No queda nada sin repartir. Ahora, a por ello al súper.</span>' : f === myF && !scope.length ? '<b>Tu lista está vacía</b><span>Pásate por «Sin dueño» y pídete algo. Los demás te lo agradecerán.</span>' : st === 'pendiente' && scope.length ? '<b>Nada por comprar aquí</b><span>Esta familia es una máquina. Mira en «Hecho» o echa una mano a otra.</span>' : '<b>La lista está vacía</b><span>Añade el primer ingrediente con el botón +</span>') + '</div>';
+    h += '<div class="empty">' + icon('basket') + (f === 'libre' ? '<b>¡Todo tiene dueño!</b><span>No queda nada sin repartir. Ahora, a por ello al súper.</span>' : f === myF && !scope.length ? '<b>Tu lista está vacía</b><span>Pásate por «Sin dueño» y pídete algo. Los demás te lo agradecerán.</span><button class="btn primary" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : fam(f) && !scope.length ? '<b>' + esc(fam(f).name) + ' aún no se ha pedido nada</b><span>Cuando se pidan productos, aparecerán aquí.</span><button class="btn" data-act="fam" data-fam="libre">Ver lo que está sin dueño</button>' : st === 'pendiente' && scope.length ? '<b>Nada por comprar aquí</b><span>Esta familia es una máquina. Mira en «Hecho» o echa una mano a otra.</span>' : '<b>La lista está vacía</b><span>Añade el primer ingrediente con el botón +</span>') + '</div>';
   } else {
     var groups = {};
     list.forEach(function (i) { (groups[i.cat] = groups[i.cat] || []).push(i); });
