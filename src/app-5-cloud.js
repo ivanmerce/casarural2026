@@ -272,7 +272,16 @@ var CLOUD = (function () {
         codeFlow = false;
         if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; }
         var d = r.data;
-        if (!d || d.error) { toast(d && d.error ? 'Demasiados intentos. Espera un rato o pregunta al organizador' : 'El email o el código no coinciden. Revísalos'); clearPin('lg-code', true); return; }
+        if (!d || d.error) {
+          var LM = { too_many: 'Demasiados intentos seguidos. Espera un rato o pregunta al organizador',
+            no_user: 'Ese email o usuario no está en la lista. Revísalo o pregúntale al organizador',
+            own_code: 'Ya elegiste tu propio código: usa ese, no el de la familia. ¿No te acuerdas? Toca «He olvidado mi código»',
+            bad_code: 'El código no es correcto. La primera vez es el de la familia; después, el tuyo' };
+          loginView(LM[d && d.error] || 'El email o el código no coinciden. Revísalos');
+          var e1 = document.getElementById('lg-email'); if (e1) e1.value = em;
+          if (d && d.error !== 'no_user') setTimeout(function () { var c = document.getElementById('lg-code'); if (c) c.focus(); }, 80);
+          return;
+        }
         mustChange = !!d.must_change; started = false; go2();
       }).catch(function () { codeFlow = false; if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } toast('No he podido entrar. Revisa la conexión'); });
   };
