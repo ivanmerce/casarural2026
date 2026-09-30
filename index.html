@@ -909,6 +909,9 @@ a.fact { color: inherit; text-decoration: none; }
 .room-p { flex-direction: row; }
 .room-p small { font-size: .72rem; }
 .room-p[aria-pressed] { opacity: 1; text-decoration: none; }
+.finca-seg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.finca-seg .ico { width: 18px; height: 18px; }
+@media (max-width: 400px) { .nav-in { padding: 0 2px; } .nav button { font-size: .6rem; letter-spacing: -.01em; } .nav button .ico { width: 22px; height: 22px; } }
 
 </style>
 </head>
@@ -1801,6 +1804,7 @@ function numVal(id) { var v = val(id).replace(',', '.').trim(); if (v === '') re
 /* ---------- Shell ---------- */
 var TABS = [
   { k: 'inicio', t: 'Inicio', i: 'home' },
+  { k: 'finca', t: 'La Finca', i: 'house' },
   { k: 'comidas', t: 'Comidas', i: 'meals' },
   { k: 'compra', t: 'Compra', i: 'cart' },
   { k: 'planes', t: 'Planes', i: 'plans' },
@@ -2676,7 +2680,7 @@ function menuSheet() {
     '<div class="field"><label for="p-glass">Transparencia del cristal</label><input class="range" id="p-glass" type="range" min="35" max="92" value="' + Math.round(P.glass * 100) + '" data-input="glass"></div>' +
     '<div class="field"><span class="lbl">Tamaño de letra</span><div class="seg" role="group"><button data-act="pref" data-k="size" data-v="m" aria-pressed="' + (P.size === 'm') + '">Normal</button><button data-act="pref" data-k="size" data-v="l" aria-pressed="' + (P.size === 'l') + '">Grande</button><button data-act="pref" data-k="size" data-v="xl" aria-pressed="' + (P.size === 'xl') + '">Muy grande</button></div></div>' +
     '<div class="divider"></div>' +
-    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="casas">' + icon('bed') + '¿Dónde dormimos?</button><button class="btn block" data-act="goSheet" data-tab="finca">' + icon('house') + 'La finca: Wi-Fi, normas y compras</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
+    '<div class="stack"><button class="btn block" data-act="goSheet" data-tab="manual">' + icon('bulb') + 'Manual de uso</button><button class="btn block" data-act="goSheet" data-tab="finca" data-fsub="dormir">' + icon('bed') + 'La Finca: habitaciones, Wi-Fi y normas</button><button class="btn block" data-act="goSheet" data-tab="asistencia">' + icon('plans') + 'Asistencia por día</button><button class="btn block" data-act="goSheet" data-tab="personas">' + icon('users') + 'Personas y accesos</button><button class="btn block" data-act="goSheet" data-tab="tiempo">' + icon('partly') + 'El tiempo</button><button class="btn block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>' +
     (can('access') ? '<button class="btn danger block" data-act="resetData">' + icon('refresh') + 'Restablecer datos de la demo</button>' : '') + '</div>');
 }
 function defaultPrefs() { return { theme: 'light', accent: '#C4112F', bg: 'net', glass: 0.62, size: 'm' }; }
@@ -2916,8 +2920,8 @@ function eggTap(k, el) {
 
 /* ---------- Acciones ---------- */
 var A = {
-  tab: function (el) { ui.mealFilter = null; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
-  goSheet: function (el) { closeSheet(); go(el.dataset.tab); },
+  tab: function (el) { ui.mealFilter = null; if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
+  goSheet: function (el) { closeSheet(); if (el.dataset.fsub) ui.fsub = el.dataset.fsub; go(el.dataset.tab); },
   logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); } },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
@@ -3309,7 +3313,7 @@ function startApp() {
 function boot() {
   var u = loadUi();
   ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
-  if (['personas', 'tiempo', 'asistencia', 'manual', 'finca', 'casas'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
+  if (['personas', 'tiempo', 'asistencia', 'manual', 'casas'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();
   if (typeof SEED !== 'undefined') { S = load(); startApp(); }
@@ -4079,7 +4083,7 @@ VIEWS.manual = function () {
     ['Entra', 'Con <b>tu email</b> (los peques, con su <b>usuario</b>) y el <b>código de la familia</b> que te ha llegado por WhatsApp. Justo después <b>eliges tu propio código</b> de 6 cifras: ya solo entrarás con ese.'],
     ['Revisa tus días', 'Ya están apuntados. Si <b>cambia algo</b>, en <b>Inicio → «Vuestros días»</b> toca el día: <b>✓</b> viene · <b>✕</b> no viene. Los padres lo cambian por toda su familia.'],
     ['Pídete la compra', 'En <b>Compra → «Sin dueño»</b> toca <b>«Me lo pido»</b>: queda a vuestro cargo. ¿Error? En «Lo nuestro», <b>Soltar</b>.'],
-    ['Regístrate en la finca', 'Obligatorio por ley desde los 14 años: en <b>Inicio → La finca</b>, «Rellenar el formulario de la finca» (uno por persona) y luego <b>marca tu nombre</b>. Los padres marcan a su familia.'],
+    ['Regístrate en la finca', 'Obligatorio por ley desde los 14 años: en la pestaña <b>La Finca → Práctico</b>, «Rellenar el formulario de la finca» (uno por persona) y luego <b>marca tu nombre</b>. Los padres marcan a su familia.'],
     ['Apunta lo que cuesta', 'Cuando lo compréis, en <b>Compra → «Lo nuestro»</b> escribe el <b>precio real</b> en la casilla de cada producto. <b>Sin precio real no cuenta en Cuentas.</b>']
   ];
   var cards = [
@@ -4088,8 +4092,8 @@ VIEWS.manual = function () {
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
-    ['bed', '¿Dónde dormimos?', 'En Inicio, tu habitación. Toca «Ver el plano» para ver las tres casas: cada habitación con quién duerme y las camas libres. Los adultos colocan a su familia con un toque («Nos la quedamos»).'],
-    ['house', 'La finca', 'En <b>Inicio → La finca</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y dónde comprar en el pueblo (el domingo solo abre uno).'],
+    ['bed', '¿Dónde dormimos?', 'Pestaña <b>La Finca → Dormir</b> (y tu habitación, también en Inicio): el plano de las tres casas, cada habitación con quién duerme y las camas libres. Los adultos colocan a su familia con un toque («Nos la quedamos»).'],
+    ['house', 'La Finca', 'Pestaña <b>La Finca → Práctico</b>: el <b>Wi-Fi</b> (un toque copia la contraseña), llegada y salida, normas de la casa, qué hacer si se va la luz, <b>antes de irnos</b> y y en <b>Compras</b>, dónde comprar en el pueblo (el domingo solo abre uno).'],
     ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía <b>a proporción de personas y comidas</b> (los peques cuentan como un adulto; ' + esc(babyN) + ', no) y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
   ];
   var h = '<div class="view-head"><div><h2>Manual de uso</h2><p class="muted small">Todo lo que hay que saber de la ' + esc(T.name || 'app') + '</p></div></div>';
@@ -4143,7 +4147,7 @@ function buildEggs() {
     { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'El primer secreto es saber que hay secretos', more: 'Ya lo tienes: abrir esta lista' },
     { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'Quien lee las instrucciones hasta el final…', more: 'Inicio → Manual de uso, y baja hasta abajo del todo' },
     { k: 'dias', name: 'Presente', how: 'Tocar un día en «Vuestros días» o en Asistencia', hint: 'Pasar lista', more: 'En Inicio, toca un día de tu fila en «Vuestros días»' },
-    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Inicio → La finca → toca el Wi-Fi' },
+    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Pestaña La Finca → Práctico → toca el Wi-Fi' },
     { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Mira al cielo… desde la app', more: 'Inicio → El tiempo en la finca → Detalle' },
     { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'Apaga la luz', more: 'Toca tu nombre arriba a la derecha y busca el tema' },
     { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'Los planes también se quieren', more: 'En Planes, el corazón de cualquier actividad' },
@@ -4336,7 +4340,7 @@ function fincaHomeCard() {
   var F = S.finca; if (!F) return '';
   var rp = regPeople(), done = rp.filter(function (p) { return regDone(p.id); }).length;
   var mine = rp.filter(function (p) { return canAttendFor(p.id) && (p.family === me().family || p.id === me().id); });
-  var h = '<section class="card finca-card"><div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca">Todo lo práctico ' + icon('arrow') + '</button></div>';
+  var h = '<section class="card finca-card"><div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca" data-fsub="info">Todo lo práctico ' + icon('arrow') + '</button></div>';
   if (F.wifi) h += '<button class="wifi" data-act="wifiCopy"><span class="aw-ico sm">' + icon('bolt') + '</span><span class="grow"><small class="muted">Wi-Fi</small><b>' + esc(F.wifi.net) + '</b></span><span class="wifi-pass"><small class="muted">Contraseña</small><b>' + esc(F.wifi.pass) + '</b></span>' + icon('copy') + '</button>';
   if (F.register && rp.length) {
     h += '<div class="reg"><div class="row"><span class="grow small"><b>Registro de huéspedes</b> · obligatorio por ley desde ' + F.register.minAge + ' años</span><span class="pill ' + (done === rp.length ? 'ok' : 'warn') + '">' + done + '/' + rp.length + '</span></div>' +
@@ -4348,10 +4352,11 @@ function fincaHomeCard() {
   }
   return h + '</section>';
 }
-VIEWS.finca = function () {
+function fincaInfo(part) {
   var F = S.finca || {}, T = S.trip || {};
-  var h = '<div class="view-head"><div><h2>La finca</h2><p class="muted small">' + esc(T.place || '') + ' · todo lo práctico, de la guía de ' + esc(F.host || 'la finca') + '</p></div></div>';
+  var h = '';
   if (!S.finca) return h + '<div class="empty">' + icon('house') + '<b>Aún no hay información de la finca</b></div>';
+  if (part === 'pueblo') return fincaShops();
   if (can('access') && F.todo && F.todo.length) h += '<section class="card alert"><div class="card-head"><h3>Pendiente con la finca</h3><span class="pill">Solo lo ves tú</span></div><ul class="small finca-ul">' + F.todo.map(function (t) { return '<li>' + fincaMd(t) + '</li>'; }).join('') + '</ul></section>';
   h += fincaHomeCard().replace('<div class="card-head"><h3>La finca</h3><button class="link" data-act="tab" data-tab="finca">Todo lo práctico ' + icon('arrow') + '</button></div>', '<div class="card-head"><h3>Wi-Fi y registro</h3></div>');
   h += '<section class="card wood"><div class="facts">' +
@@ -4363,6 +4368,10 @@ VIEWS.finca = function () {
   (F.sections || []).forEach(function (sec) {
     h += '<section class="card"><div class="row" style="gap:10px"><span class="aw-ico sm">' + icon(sec.icon || 'house') + '</span><h3 class="grow">' + esc(sec.title) + '</h3></div><ul class="finca-ul">' + sec.items.map(function (t) { return '<li>' + fincaMd(t) + '</li>'; }).join('') + '</ul></section>';
   });
+  return h;
+};
+function fincaShops() {
+  var F = S.finca || {}, T = S.trip || {}, h = '';
   if (F.shops && F.shops.length) h += '<section class="card"><div class="row" style="gap:10px"><span class="aw-ico sm">' + icon('cart') + '</span><h3 class="grow">Comprar en ' + esc(T.town || 'el pueblo') + '</h3></div><div class="stack" style="gap:2px">' + F.shops.map(function (x) {
     return '<a class="row shop" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="grow"><b>' + esc(x.name) + '</b><small class="muted" style="display:block">' + esc(x.note || '') + '</small></span>' + icon('pin') + '</a>';
   }).join('') + '</div>' + (F.near ? '<p class="small muted">' + fincaMd(F.near) + '</p>' : '') + '</section>';
@@ -4404,7 +4413,7 @@ function freeRooms() { var R = roomsCfg(); return R ? R.list.filter(function (r)
 function myRoomCard(compact) {
   var R = roomsCfg(); if (!R) return '';
   var rid = roomOf(me().id), un = unassigned();
-  var h = '<section class="card casas-card"><div class="card-head"><h3>' + (compact ? 'Tu habitación' : '¿Dónde dormimos?') + '</h3>' + (compact ? '' : '<button class="link" data-act="tab" data-tab="casas">Ver el plano ' + icon('arrow') + '</button>') + '</div>';
+  var h = '<section class="card casas-card"><div class="card-head"><h3>' + (compact ? 'Tu habitación' : '¿Dónde dormimos?') + '</h3>' + (compact ? '' : '<button class="link" data-act="tab" data-tab="finca" data-fsub="dormir">Ver el plano ' + icon('arrow') + '</button>') + '</div>';
   if (rid) {
     var r = roomById(rid), hs = houseById(r.home), mates = roomPeople(rid).filter(function (p) { return p.id !== me().id; });
     h += '<div class="my-room" style="--hc:' + hs.color + '"><span class="my-room-house">' + esc(hs.name) + '</span><b>' + esc(r.name) + '</b><span class="small">' + (mates.length ? 'Con ' + mates.map(function (p) { return esc(p.name); }).join(', ').replace(/, ([^,]*)$/, ' y $1') : 'Para ti solo') + '</span><span class="avs">' + roomPeople(rid).map(function (p) { return av(p.id, 'sm'); }).join('') + '</span></div>';
@@ -4417,9 +4426,9 @@ function famGroups(list) {
   return Object.keys(by).map(function (f) { return esc(by[f].join(' y ')); }).join(' · ');
 }
 
-VIEWS.casas = function () {
+function casasHtml() {
   var R = roomsCfg();
-  var h = '<div class="view-head"><div><h2>¿Dónde dormimos?</h2><p class="muted small">Toca una habitación para ver quién duerme y, si puedes, cambiarlo</p></div></div>';
+  var h = '';
   if (!R) return h + '<div class="empty">' + icon('house') + '<b>Aún no hay plano</b></div>';
   h += myRoomCard(true);
   var un = unassigned(), fr = freeRooms();
@@ -4498,6 +4507,24 @@ Object.assign(A, {
     toast(esc(person(pid).name) + ' sin habitación', 'Deshacer', function () { S.roomAssign[pid] = el.dataset.r; save(); render(true); });
   }
 });
+
+/* ===================== La Finca (pestaña) =====================
+   Todo lo de la finca en un sitio: dónde dormimos (plano), lo práctico (Wi-Fi, registro, normas…) y compras en el pueblo. */
+var FINCA_SUBS = [['dormir', 'Dormir', 'bed'], ['info', 'Práctico', 'bulb'], ['pueblo', 'Compras', 'cart']];
+VIEWS.finca = function () {
+  var F = S.finca || {}, T = S.trip || {}, sub = ui.fsub || 'dormir';
+  if (!FINCA_SUBS.some(function (x) { return x[0] === sub; })) sub = 'dormir';
+  var h = '<div class="view-head"><div><h2>La Finca</h2><p class="muted small">' + esc(T.place || '') + (T.town ? ' · ' + esc(T.town) : '') + '</p></div></div>' +
+    '<div class="seg finca-seg" role="group" aria-label="Sección">' + FINCA_SUBS.map(function (x) {
+      return '<button data-act="fsub" data-v="' + x[0] + '" aria-pressed="' + (sub === x[0]) + '">' + icon(x[2]) + x[1] + '</button>';
+    }).join('') + '</div>';
+  if (sub === 'dormir') h += (typeof casasHtml === 'function' ? casasHtml() : '');
+  else if (sub === 'info') h += fincaInfo('info');
+  else h += fincaInfo('pueblo');
+  return h;
+};
+VIEWS.casas = function () { ui.tab = 'finca'; ui.fsub = 'dormir'; return VIEWS.finca(); };
+Object.assign(A, { fsub: function (el) { ui.fsub = el.dataset.v; render(); window.scrollTo(0, 0); } });
 
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
