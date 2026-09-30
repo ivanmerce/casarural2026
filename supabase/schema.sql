@@ -487,3 +487,31 @@ create policy "hab_del" on public.room_assignments for delete to authenticated u
 grant select, insert, update, delete on public.room_assignments to authenticated;
 alter publication supabase_realtime add table public.room_assignments;
 -- app_config 'rooms': plano esquemático y habitaciones.
+-- v0.6.5: dónde comprar cada producto ('antes' | 'alli')
+alter table public.ingredients add column if not exists buy_at text;
+-- app_config 'shopping': consejos de dónde comprar.
+
+-- ===================== v0.7 · Buzón de ideas =====================
+create table if not exists public.ideas (
+  id text primary key,
+  person_id text not null references public.people(id) on delete cascade,
+  text text not null check (length(text) between 1 and 400),
+  status text not null default 'nueva' check (status in ('nueva','vista','hecha','no')),
+  created_at timestamptz not null default now()
+);
+create table if not exists public.idea_likes (
+  idea_id text not null references public.ideas(id) on delete cascade,
+  person_id text not null references public.people(id) on delete cascade,
+  primary key (idea_id, person_id)
+);
+alter table public.ideas enable row level security;
+alter table public.idea_likes enable row level security;
+create policy "leer_miembros" on public.ideas for select to authenticated using (public.is_member());
+create policy "idea_ins" on public.ideas for insert to authenticated with check (person_id = public.my_person_id() and public.is_member());
+create policy "idea_upd" on public.ideas for update to authenticated using (public.is_admin() or person_id = public.my_person_id()) with check (public.is_admin() or (person_id = public.my_person_id() and status = 'nueva'));
+create policy "idea_del" on public.ideas for delete to authenticated using (public.is_admin() or person_id = public.my_person_id());
+create policy "leer_miembros" on public.idea_likes for select to authenticated using (public.is_member());
+create policy "like_ins" on public.idea_likes for insert to authenticated with check (person_id = public.my_person_id() and public.is_member());
+create policy "like_del" on public.idea_likes for delete to authenticated using (person_id = public.my_person_id() or public.is_admin());
+grant select, insert, update, delete on public.ideas, public.idea_likes to authenticated;
+alter publication supabase_realtime add table public.ideas, public.idea_likes;
