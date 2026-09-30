@@ -113,7 +113,7 @@ p { margin: 0; }
 .glass { background: var(--glass); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.5); backdrop-filter: blur(var(--blur)) saturate(1.5); border: 1px solid var(--glass-line); box-shadow: var(--shadow); }
 
 /* ---------- Shell ---------- */
-.app { max-width: 560px; margin: 0 auto; padding-bottom: calc(var(--nav-h) + 28px + env(safe-area-inset-bottom, 0px)); }
+.app { max-width: 560px; margin: 0 auto; padding-bottom: calc(var(--nav-h) + 92px + env(safe-area-inset-bottom, 0px)); }
 .topbar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
   display: flex; align-items: center; gap: 10px; padding: 8px max(16px, calc(50% - 264px)); margin: 0 auto;
@@ -130,7 +130,7 @@ p { margin: 0; }
 .ico { width: 22px; height: 22px; flex: none; }
 
 main { padding: 0 16px; }
-.view { display: flex; flex-direction: column; gap: 16px; animation: viewIn .3s ease both; }
+.view { display: flex; flex-direction: column; gap: 16px; animation: viewIn .3s ease backwards; }
 @keyframes viewIn { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .view-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-top: 18px; }
 .view-head p { margin-top: 4px; }
@@ -168,6 +168,9 @@ main { padding: 0 16px; }
 
 /* ---------- Botones ---------- */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--tap); padding: 0 18px; border-radius: 999px; border: 1px solid var(--glass-line); background: var(--glass-strong); font-weight: 700; transition: transform .12s ease, background .2s; }
+a { color: var(--accent); }
+a.btn, a.chip, a.link { color: inherit; text-decoration: none; }
+a.btn.accent, a.btn.primary { color: var(--on-accent); }
 .btn:active { transform: scale(.97); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent); }
 .btn.ghost { background: transparent; border-color: var(--line); }
@@ -250,11 +253,11 @@ main { padding: 0 16px; }
 .search { width: 100%; min-height: var(--tap); border-radius: 999px; border: 1px solid var(--glass-line); background: var(--glass); padding: 0 18px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 
 /* ---------- Timeline ---------- */
-.tl { position: relative; display: flex; flex-direction: column; gap: 12px; padding-left: 62px; }
-.tl::before { content: ''; position: absolute; left: 48px; top: 8px; bottom: 8px; width: 2px; background: repeating-linear-gradient(var(--line) 0 6px, transparent 6px 10px); }
+.tl { position: relative; display: flex; flex-direction: column; gap: 12px; padding-left: 72px; }
+.tl::before { content: ''; position: absolute; left: 56px; top: 8px; bottom: 8px; width: 2px; background: repeating-linear-gradient(var(--line) 0 6px, transparent 6px 10px); }
 .tl-item { position: relative; }
-.tl-time { position: absolute; left: -62px; top: 16px; width: 42px; text-align: right; font-weight: 800; font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: .98rem; }
-.tl-item::before { content: ''; position: absolute; left: -19px; top: 21px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); }
+.tl-time { position: absolute; left: -72px; top: 17px; width: 48px; white-space: nowrap; text-align: right; font-weight: 800; font-family: var(--font-display); font-variant-numeric: tabular-nums; font-size: .9rem; }
+.tl-item::before { content: ''; position: absolute; left: -21px; top: 21px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); }
 .tl-item.star::before { background: var(--accent); }
 .facts { display: flex; flex-wrap: wrap; gap: 6px; }
 .fact { display: inline-flex; align-items: center; gap: 5px; font-size: .82rem; padding: 4px 9px; border-radius: 8px; background: var(--surface-2); }
@@ -374,7 +377,7 @@ details ul { margin: 6px 0 0; padding-left: 18px; }
 /* ---------- Sheet ---------- */
 .scrim { position: fixed; inset: 0; z-index: 50; background: rgba(20, 10, 8, .32); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s ease both; }
 @keyframes fade { from { opacity: 0; } }
-.sheet { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; border-radius: 26px 26px 0 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 14px; animation: up .3s cubic-bezier(.2, .9, .3, 1) both;
+.sheet { width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; border-radius: 26px 26px 0 0; padding: 10px 16px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 14px; animation: up .3s cubic-bezier(.2, .9, .3, 1) backwards;
   background: color-mix(in srgb, var(--bg) 88%, transparent); -webkit-backdrop-filter: blur(24px) saturate(1.5); backdrop-filter: blur(24px) saturate(1.5); border: 1px solid var(--glass-line); }
 @keyframes up { from { transform: translateY(40px); opacity: .5; } }
 .grab { width: 44px; height: 5px; border-radius: 3px; background: var(--line); align-self: center; }
@@ -409,6 +412,16 @@ details ul { margin: 6px 0 0; padding-left: 18px; }
 html.disco .ambient { animation: discoHue 1.2s linear infinite; }
 html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infinite alternate; }
 @keyframes discoHue { to { filter: hue-rotate(360deg) saturate(1.8); } }
+.disco-fx { position: fixed; inset: 0; z-index: 78; pointer-events: none; overflow: hidden; animation: fade .4s both; transition: opacity .5s; }
+.disco-fx.out { opacity: 0; }
+.disco-fx .beams { position: absolute; left: 50%; top: 40px; width: 240vmax; height: 240vmax; margin: -120vmax 0 0 -120vmax;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 40, 140, .20) 0 6deg, transparent 6deg 24deg, rgba(40, 200, 255, .20) 24deg 30deg, transparent 30deg 48deg, rgba(255, 210, 40, .22) 48deg 54deg, transparent 54deg 72deg);
+  animation: discoSpin 7s linear infinite; }
+.disco-fx .beams.b2 { animation-duration: 11s; animation-direction: reverse; opacity: .7; }
+.disco-fx .ball { position: absolute; left: 50%; top: 18px; width: 64px; height: 64px; margin-left: -32px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .95), transparent 35%), repeating-conic-gradient(#cfd6de 0 15deg, #f5f7fa 15deg 30deg);
+  box-shadow: 0 0 30px rgba(255, 255, 255, .9), 0 0 70px rgba(255, 60, 160, .5); animation: discoSpin 2.5s linear infinite, discoHue 1.2s linear infinite; }
+@keyframes discoSpin { to { transform: rotate(360deg); } }
 @keyframes discoBeat { from { transform: scale(1); } to { transform: scale(1.012); } }
 .sun-overlay { position: fixed; inset: 0; z-index: 79; display: grid; place-items: center; pointer-events: none; background: radial-gradient(circle at 50% 45%, rgba(255, 214, 102, .55), rgba(255, 170, 60, .15) 45%, transparent 70%); animation: fade .4s both; }
 .sun-core .ico { width: 190px; height: 190px; color: #F4B400; filter: drop-shadow(0 0 40px rgba(255, 190, 60, .8)); animation: sunSpin 3s linear both; }
@@ -719,7 +732,7 @@ function person(id) { return S.people.find(function (p) { return p.id === id; })
 function meal(id) { return S.meals.find(function (m) { return m.id === id; }); }
 function dayOf(k) { return S.days.find(function (d) { return d.k === k; }); }
 function slotName(k) { var s = S.slots.find(function (x) { return x.k === k; }); return s ? s.name : k; }
-function me() { return person(ui.me) || person('ivan'); }
+function me() { return person(ui.me) || (S.people.filter(function (p) { return p.role === 'admin'; })[0] || S.people[0]); }
 function initial(name) { return (name || '?').slice(0, 1).toUpperCase(); }
 /* Quién activa cada easter egg: viene de los datos (S.trip.eggs), no del código */
 function eggRole(pid) {
@@ -965,7 +978,7 @@ VIEWS.inicio = function () {
     '<button class="card" data-act="tab" data-tab="compra" style="text-align:left;color:inherit;font:inherit">' +
       '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' cubiertos</span></button>' +
     '<button class="card" data-act="tab" data-tab="cuentas" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(lgR.total) + '</span><span class="small muted">gastado de momento<br>Previsión ≈ ' + L.money(lgE.total) + ' <span class="pill est">ESTIMADO</span></span></button>' +
+      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(lgR.total) + '</span><span class="small muted">gastado de momento<br>Previsión a repartir ≈ ' + L.money(lgE.total) + ' <span class="pill est">ESTIMADO</span></span></button>' +
     '</div>';
 
   /* Familia */
@@ -1021,9 +1034,10 @@ function startHero() {
     ctx.globalAlpha = 1;
     for (var i = 0; i < nodes.length; i++) {
       var a = nodes[i];
-      if (!still) { a.x += a.vx; a.y += a.vy; var m = a.R || 0; if (a.x < W * (withFaces ? X0 : .3) || a.x > W - m) a.vx *= -1; if (a.y < m || a.y > (withFaces ? H * 0.56 : H) - m) a.vy *= -1; }
+      if (!still) { var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy); if (sp > .3) { a.vx *= .3 / sp; a.vy *= .3 / sp; } a.x += a.vx; a.y += a.vy; var m = a.R || 0; if (a.x < W * (withFaces ? X0 : .3) || a.x > W - m) a.vx *= -1; if (a.y < m || a.y > (withFaces ? H * 0.56 : H) - m) a.vy *= -1; }
       for (var j = i + 1; j < nodes.length; j++) {
         var b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.sqrt(dx * dx + dy * dy);
+        if (a.R && b.R && d > 0.1) { var gap = a.R + b.R + 6; if (d < gap) { var f = (gap - d) / d * 0.04; a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f; } }
         if (d < 150) { ctx.strokeStyle = accent; ctx.globalAlpha = (1 - d / 150) * .35; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
       }
     }
@@ -1103,7 +1117,7 @@ VIEWS.compra = function () {
     '<button class="chip" data-act="superMode" aria-pressed="' + !!ui.superMode + '">' + icon('cart') + 'Modo súper</button></div>';
   h += '<section class="card"><div class="row"><span class="big">' + cov.pct + '%</span><span class="grow small muted">' + cov.done + ' de ' + cov.tot + ' cubiertos' + (f !== 'all' ? ' en ' + esc(fam(f).name) : '') + '</span></div>' +
     '<div class="progress" role="progressbar" aria-valuenow="' + cov.pct + '" aria-valuemin="0" aria-valuemax="100"><i id="covbar" style="width:' + cov.pct + '%"></i></div>' +
-    '<div class="row small"><span class="grow">Gastado: <b class="num">' + L.money(real) + '</b></span><span>Previsión ≈ <b class="num">' + L.money(est) + '</b> <span class="pill est">ESTIMADO</span></span></div></section>';
+    '<div class="row small"><span class="grow">Gastado: <b class="num">' + L.money(real) + '</b></span><span>Previsión de la lista ≈ <b class="num">' + L.money(est) + '</b> <span class="pill est">ESTIMADO</span></span></div></section>';
 
   var nSug = S.ingredients.filter(function (i) { return i.status === 'pendiente' && L.suggestQty(S, i); }).length;
   if (nSug) h += '<section class="card alert" style="gap:8px"><p class="small"><b>' + nSug + ' cantidades</b> vienen de la hoja (pensadas para 14) y no cuadran con los comensales previstos según la asistencia.</p><div class="row wrap">' + (can('edit') ? '<button class="btn" data-act="applyAllQty">Ajustar todas</button>' : '') + '<button class="btn ghost" data-act="tab" data-tab="asistencia">Ver asistencia</button></div></section>';
@@ -1826,8 +1840,12 @@ var discoOn = false;
 function discoMode() {
   if (discoOn) return; discoOn = true; egg('disco');
   document.documentElement.classList.add('disco');
-  toast('¡Que empiece la fiesta!');
-  setTimeout(function () { document.documentElement.classList.remove('disco'); discoOn = false; }, 9000);
+  var fx = document.createElement('div'); fx.className = 'disco-fx'; fx.setAttribute('aria-hidden', 'true');
+  fx.innerHTML = '<div class="beams"></div><div class="beams b2"></div><div class="ball"></div>';
+  document.body.appendChild(fx);
+  if (navigator.vibrate) try { navigator.vibrate([60, 60, 60, 60, 120]); } catch (e) {}
+  toast('¡Que empiece la fiesta! Modo discoteca 9 segundos');
+  setTimeout(function () { document.documentElement.classList.remove('disco'); fx.classList.add('out'); setTimeout(function () { fx.remove(); }, 500); discoOn = false; }, 9000);
 }
 function fumataRaw(title, text) {
   var fx = fxLayer(true), puffs = [], t0 = performance.now(), D = 5000;
