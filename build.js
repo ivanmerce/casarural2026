@@ -5,12 +5,12 @@ var fs = require('fs'), path = require('path');
 var src = function (f) { return fs.readFileSync(path.join(__dirname, 'src', f), 'utf8'); };
 var has = function (f) { return fs.existsSync(path.join(__dirname, 'src', f)); };
 var css = src('styles.css');
-var APP = ['app-1-core.js', 'app-2-views.js', 'app-2b-asistencia.js', 'app-3-views.js', 'app-4-actions.js'];
-var icon = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#C4112F"/><g stroke="#fff" stroke-width="2.5" opacity=".7"><path d="M12 44 28 16l20 10 4 22-20 6z"/></g><g fill="#fff"><circle cx="12" cy="44" r="5"/><circle cx="28" cy="16" r="5"/><circle cx="48" cy="26" r="5"/><circle cx="52" cy="48" r="5"/><circle cx="32" cy="54" r="5"/></g></svg>');
+var APP = ['app-1-core.js', 'app-2-views.js', 'app-2b-asistencia.js', 'app-2c-presence.js', 'app-3-views.js', 'app-4-actions.js', 'app-6-juegos.js', 'app-7-album.js'];
+var icon = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E3304A"/><stop offset="1" stop-color="#9E0D25"/></linearGradient></defs><rect width="40" height="40" rx="10" fill="url(#g)"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M13 12 27 12M10 29 20 22 30 29" stroke-width="1.2" stroke-opacity=".4"/><path d="M10 29 13 12 20 22 27 12 30 29" stroke-width="2"/></g><g fill="#fff"><circle cx="10" cy="29" r="2.5"/><circle cx="13" cy="12" r="2.5"/><circle cx="20" cy="22" r="2.7"/><circle cx="27" cy="12" r="2.5"/><circle cx="30" cy="29" r="2.5"/></g><circle cx="20" cy="7.2" r="2" fill="#F6CD62"/></svg>');
 var head = '<!doctype html>\n<html lang="es">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
   '<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-title" content="Cónclave">\n<link rel="icon" href="' + icon + '">\n<link rel="apple-touch-icon" href="' + icon + '">\n';
 function page(body) { return head + body.replace(/<div class="ambient"/, '</head>\n<body>\n<div class="ambient"') + '\n</body>\n</html>\n'; }
-function bundle(files, pre) { return (pre || '') + src('logic.js') + '\n(function () {\n"use strict";\n' + files.map(src).join('\n') + '\n})();'; }
+function bundle(files, pre) { return (pre || '') + src('logic.js') + '\n' + src('games.js') + '\n(function () {\n"use strict";\n' + files.map(src).join('\n') + '\n})();'; }
 
 /* ---- Web pública ---- */
 var pubJs = bundle(APP.concat('app-5-cloud.js'));
