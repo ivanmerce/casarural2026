@@ -799,7 +799,7 @@ function startApp() {
 }
 function boot() {
   var u = loadUi();
-  ui = { tab: u.tab || 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
+  ui = { tab: 'inicio', me: u.me || null, fam: null, st: 'pendiente', howClosed: !!u.howClosed, superMode: !!u.superMode, day: null, sub: 'plan', costView: 'real', bdaySeen: u.bdaySeen, prefs: loadPrefs() };
   if (['personas', 'tiempo', 'asistencia', 'manual', 'casas'].indexOf(ui.tab) >= 0) ui.tab = 'inicio';
   $main = document.getElementById('main'); $nav = document.getElementById('nav'); $top = document.getElementById('top');
   applyPrefs(); bindEvents();

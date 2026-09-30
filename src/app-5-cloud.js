@@ -229,7 +229,7 @@ var CLOUD = (function () {
     $main.innerHTML = '<div class="view"><section class="card login-card"><h1 class="login-title">Casi <i>listo</i></h1><p class="muted">Falta conectar la base de datos. En cuanto esté, aquí podréis entrar todos.</p></section></div>';
   }
   var mustChange = false, fromLink = /[?&#](code|access_token|token_hash)=/.test(location.href);
-  function enterApp() { return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); startApp(); subscribe(); startPresence(); }); }
+  function enterApp() { return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); ui.tab = 'inicio'; ui.game = null; startApp(); subscribe(); startPresence(); }); }
   /* Sin código propio la base de datos no enseña nada (RLS), así que primero se comprueba y, si falta, se pide */
   function afterSession() {
     return client().rpc('claim_person').then(check).then(function (r) {
