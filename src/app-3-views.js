@@ -85,10 +85,11 @@ VIEWS.cuentas = function () {
   /* Tasa turística */
   var exNames = tx.rows.filter(function (r) { return !r.pays; }).map(function (r) { return pname(r.id); });
   h += '<section class="card"><div class="card-head"><h3>Tasa turística</h3>' + (S.tax.payer ? '<span class="pill olive">Invitan ' + esc(fam(S.tax.payer).name) + '</span>' : '<span class="pill pend">Quién paga: PENDIENTE</span>') + '</div>' +
+    (tx.fixed ? '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">Lo que dice la finca: ' + S.tax.fixed.persons + ' personas × ' + (S.tax.fixed.nights || S.tax.nights) + ' noches × ' + L.money(S.tax.perNight) + '</span></div><p class="small muted">' + esc(S.tax.note) + '. No entra en el reparto.</p></section>' :
     '<div class="row"><span class="big">' + L.money(tx.withExemption) + '</span><span class="grow small muted">' + tx.stays + ' noches-persona × ' + L.money(S.tax.perNight) + ' · ' + tx.adults + ' pagan</span></div>' +
     '<div class="tax-list">' + tx.rows.filter(function (r) { return r.pays; }).map(function (r) { return '<span class="online-chip">' + av(r.id, 'xs') + pname(r.id) + ' <small class="muted">' + r.nights + (r.nights === 1 ? ' noche' : ' noches') + '</small></span>'; }).join('') + '</div>' +
     (exNames.length ? '<p class="small"><b>Exentos por edad (menores de ' + (S.tax.minAge || 16) + '):</b> ' + exNames.join(', ') + '</p>' : '') +
-    '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
+    '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>');
 
   /* Reparto */
   /* El rincón de los abuelos (anfitriones: fuera del reparto) */

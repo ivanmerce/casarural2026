@@ -219,6 +219,12 @@ var L = (function () {
     var payers = rows.filter(function (r) { return r.pays; });
     var stays = payers.reduce(function (a, r) { return a + r.nights; }, 0);
     var allStays = rows.reduce(function (a, r) { return a + r.nights; }, 0);
+    /* Si la finca fija el cálculo (p. ej. 12 adultos de la reserva × 3 noches), manda lo que dice la finca */
+    if (t.fixed && t.fixed.persons) {
+      var fs = t.fixed.persons * (t.fixed.nights || t.nights || 3);
+      return { rows: rows, adults: t.fixed.persons, exempt: 0, all: rows.length, stays: fs, fixed: true,
+        withExemption: r2(fs * t.perNight), withoutExemption: r2(fs * t.perNight) };
+    }
     return {
       rows: rows, adults: payers.length, exempt: rows.length - payers.length, all: rows.length, stays: stays,
       withExemption: r2(stays * t.perNight), withoutExemption: r2(allStays * t.perNight)
