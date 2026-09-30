@@ -412,3 +412,9 @@ revoke all on public.personal_codes from anon, authenticated;
 -- guard_people_update: además de rol y email, el usuario (login) solo lo cambia el admin
 -- Funciones: login_with_code(login, code) · set_my_code(code) · my_code_status() · admin_code_status() · admin_reset_code(person) · get_shared_code() · set_shared_code(code)
 -- (definición completa en la migración v05_acceso_email_codigo; el acceso solo por código queda retirado: revoke claim_with_code)
+
+-- ---------- v0.5: sin código propio no se ve nada; manual en PDF privado ----------
+-- my_person_id() e is_member() exigen que la persona tenga código propio (personal_codes); my_person_id_raw() no.
+-- Bucket privado «docs» (solo PDF): select para miembros. La app abre el PDF más reciente con un enlace firmado.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values ('docs', 'docs', false, 10485760, array['application/pdf']) on conflict (id) do nothing;
+create policy "docs_leer" on storage.objects for select to authenticated using (bucket_id = 'docs' and public.is_member());
