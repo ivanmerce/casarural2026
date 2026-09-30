@@ -896,3 +896,17 @@ a.fact { color: inherit; text-decoration: none; }
 .finca-seg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .finca-seg .ico { width: 18px; height: 18px; }
 @media (max-width: 400px) { .nav-in { padding: 0 2px; } .nav button { font-size: .6rem; letter-spacing: -.01em; } .nav button .ico { width: 22px; height: 22px; } }
+/* v0.6.5 · Plano: que no se corte nada dentro de las habitaciones */
+.plan-room.bed { justify-content: center; gap: 3px; padding: 3px 2px; }
+.plan-rname { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pdots { flex-wrap: nowrap; gap: 0; max-width: 100%; }
+.pdots .pdot + .pdot { margin-left: -7px; }
+.pdot { display: inline-flex; border-radius: 50%; box-shadow: 0 0 0 2px var(--bg); }
+.pdot .av.xs, .pdot.free { width: clamp(16px, 4.6vw, 24px); height: clamp(16px, 4.6vw, 24px); }
+.pdot.free { background: var(--bg); }
+.pdot.baby .av.xs { width: clamp(13px, 3.6vw, 18px); height: clamp(13px, 3.6vw, 18px); }
+.pill.buy-alli { background: color-mix(in srgb, var(--olive) 16%, transparent); color: var(--olive); }
+.pill.buy-antes { background: var(--surface-2); color: var(--muted); }
+.buy-help { padding: 10px 12px; }
+.plan-rname { white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.05; word-break: break-word; }
+.plan-wrap { padding-bottom: 22px; }

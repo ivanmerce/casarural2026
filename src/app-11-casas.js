@@ -42,7 +42,7 @@ function casasHtml() {
     (fr.length ? '<p class="small">Libres: ' + fr.map(function (r) { return '<button class="chip mini" data-act="roomOpen" data-id="' + r.id + '">' + esc(roomLabel(r.id)) + ' · ' + (r.beds - bedsUsed(r.id)) + (r.beds - bedsUsed(r.id) === 1 ? ' cama' : ' camas') + '</button>'; }).join(' ') + '</p>' : '') +
     '<p class="small muted">Se elige por orden de llegada al móvil: toca la habitación y «Nos la quedamos».</p></section>';
   /* plano */
-  h += '<div class="plan-wrap"><div class="plan" style="aspect-ratio:' + PW + '/' + PH + '">';
+  h += '<div class="plan-wrap"><div class="plan" style="aspect-ratio:' + PW + '/' + Math.round(PH * 1.35) + '">';
   R.houses.forEach(function (hs) {
     h += '<div class="plan-house" style="left:' + pct(hs.x, PW) + ';top:' + pct(hs.y, PH) + ';width:' + pct(hs.w, PW) + ';height:' + pct(hs.h, PH) + ';--hc:' + hs.color + '"><span class="plan-hname">' + esc(hs.name) + '</span></div>';
   });
@@ -53,7 +53,7 @@ function casasHtml() {
     var dots = ps.map(function (p) { return '<span class="pdot' + (usesBed(p) ? '' : ' baby') + '">' + av(p.id, 'xs') + '</span>'; }).join('');
     for (var i = used; i < r.beds; i++) dots += '<span class="pdot free" aria-hidden="true"></span>';
     h += '<button class="plan-room bed' + (mine ? ' mine' : '') + (used >= r.beds ? ' full' : used ? '' : ' empty') + '" style="' + style + '" data-act="roomOpen" data-id="' + r.id + '" aria-label="' + esc(roomLabel(r.id)) + ': ' + used + ' de ' + r.beds + ' camas">' +
-      '<span class="plan-rname">' + esc(r.name) + (crib ? ' · cuna' : '') + '</span><span class="pdots">' + dots + '</span></button>';
+      '<span class="plan-rname">' + esc(r.name) + '</span><span class="pdots">' + dots + '</span></button>';
   });
   h += '<span class="plan-note">' + esc(R.note || '') + '</span></div></div>';
   h += '<div class="plan-legend small"><span><i class="lg-free"></i>Cama libre</span><span><i class="lg-mine"></i>Tu habitación</span><span>' + icon('baby') + 'Cuna: no ocupa cama</span></div>';

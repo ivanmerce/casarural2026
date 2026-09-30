@@ -17,7 +17,7 @@ VIEWS.manual = function () {
     ['Apunta lo que cuesta', 'Cuando lo compréis, en <b>Compra → «Lo nuestro»</b> escribe el <b>precio real</b> en la casilla de cada producto. <b>Sin precio real no cuenta en Cuentas.</b>']
   ];
   var cards = [
-    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper. Cada producto tiene su casilla de <b>precio real</b>; arriba veis cuántos faltan. Si algo lo traéis <b>de casa</b>, tocad el producto y marcadlo (0 €).'],
+    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper. Cada producto tiene su casilla de <b>precio real</b>; arriba veis cuántos faltan. Si algo lo traéis <b>de casa</b>, tocad el producto y marcadlo (0 €). Con <b>«Comprar allí»</b> y <b>«Antes de ir»</b> veis qué conviene comprar en el pueblo y qué antes de salir.'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Toca los comensales si alguien no come ese día: las cantidades se ajustan solas.'],
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],

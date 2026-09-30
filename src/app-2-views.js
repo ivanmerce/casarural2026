@@ -205,6 +205,7 @@ VIEWS.compra = function () {
   var list = all.filter(function (i) {
     if (!inFam(i)) return false;
     if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
+    if (ui.buyF && i.buy !== ui.buyF) return false;
     if (q && i.name.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -230,7 +231,10 @@ VIEWS.compra = function () {
     '<button class="chip" data-act="fam" data-fam="libre" aria-pressed="' + (f === 'libre') + '">' + icon('basket') + 'Sin dueño <b class="num">' + free.length + '</b></button>' +
     (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro <b class="num">' + mine.length + '</b></button>' : '') +
     '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo</button>' +
+    '<button class="chip" data-act="buyF" data-v="alli" aria-pressed="' + (ui.buyF === 'alli') + '">' + icon('pin') + 'Comprar allí <b class="num">' + all.filter(function (i) { return i.buy === 'alli'; }).length + '</b></button>' +
+    '<button class="chip" data-act="buyF" data-v="antes" aria-pressed="' + (ui.buyF === 'antes') + '">' + icon('car') + 'Antes de ir <b class="num">' + all.filter(function (i) { return i.buy === 'antes'; }).length + '</b></button>' +
     S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + '</button>'; }).join('') + '</div>';
+  if (ui.buyF && S.shopping) h += '<section class="card wood buy-help"><p class="small">' + (ui.buyF === 'alli' ? S.shopping.alli : S.shopping.antes) + '</p></section>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';
   if (ui.mealFilter) {
     var mf = meal(ui.mealFilter), freeM = all.filter(function (i) { return !i.family && i.meals.indexOf(ui.mealFilter) >= 0; }).length;
@@ -278,6 +282,7 @@ function itemRow(i) {
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
       (f && L.needsPrice(i) && !mine ? '<span class="pill warn">sin precio</span>' : '') +
+      (i.buy === 'alli' ? '<span class="pill buy-alli">allí</span>' : i.buy === 'antes' ? '<span class="pill buy-antes">antes de ir</span>' : '') +
       (i.split === 'propio' ? '<span class="pill olive">propio</span>' : '') + (i.sug ? '<span class="pill">sugerido</span>' : '') +
       (function () { var sg = L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
     '<div class="price' + (mine && ed ? ' price-edit' : '') + '">' + right + '</div></div>';

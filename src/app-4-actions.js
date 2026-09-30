@@ -14,7 +14,7 @@ function famOptions(cur, allowNone) {
 /* ---------- Ingrediente ---------- */
 function itemSheet(id) {
   var i = id ? S.ingredients.find(function (x) { return x.id === id; }) : { id: null, name: '', cat: 'fresco', qty: 1, unit: 'u', meals: ui.mealFilter ? [ui.mealFilter] : [], family: ui.fam && ui.fam !== 'all' ? ui.fam : me().family, status: 'pendiente', cost: null, split: 'comun', note: '' };
-  draft = { id: i.id, status: i.status, split: i.split || 'comun', meals: i.meals.slice() };
+  draft = { id: i.id, status: i.status, split: i.split || 'comun', meals: i.meals.slice(), buy: i.buy || '' };
   var dis = can('edit') ? '' : ' disabled';
   openSheet(
     '<h2>' + (id ? 'Ingrediente' : 'Nuevo ingrediente') + '</h2>' + roNote() +
@@ -25,6 +25,7 @@ function itemSheet(id) {
     '<div class="field"><span class="lbl">¿Lo traéis de casa?</span>' + segHtml('status', [['pendiente', 'No, se compra'], ['casa', 'Sí, de casa (0 €)']], draft.status === 'casa' ? 'casa' : 'pendiente', !can('edit')) + '</div>' +
     '<div class="grid2"><div class="field"><label for="f-cost">Precio real (opcional)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
     '<div class="field"><span class="lbl">Reparto</span>' + segHtml('split', [['comun', 'Común'], ['propio', 'Propio']], draft.split, !can('edit')) + '</div></div>' +
+    '<div class="field"><span class="lbl">Dónde comprarlo</span>' + segHtml('buy', [['antes', 'Antes de ir'], ['alli', 'Allí (pueblo)'], ['', 'Da igual']], draft.buy, !can('edit')) + '</div>' +
     '<div class="field"><span class="lbl">Para qué comidas</span><div class="att-fam">' + S.meals.map(function (m) {
       return '<button type="button" class="chip" data-act="dmeal" data-id="' + m.id + '" aria-pressed="' + (draft.meals.indexOf(m.id) >= 0) + '"' + dis + '>' + esc(dayOf(m.day).short) + ' · ' + slotName(m.slot) + '</button>';
     }).join('') + '</div></div>' +
@@ -39,7 +40,7 @@ function saveItem() {
   var name = val('f-name').trim(); if (!name) { toast('Ponle nombre al ingrediente'); return; }
   var o = draft.id ? S.ingredients.find(function (x) { return x.id === draft.id; }) : { id: uid('i'), est: null };
   o.name = name; o.qty = numVal('f-qty') || 1; o.unit = val('f-unit').trim() || 'u'; o.cat = val('f-cat'); o.family = val('f-fam') || null;
-  o.status = draft.status; o.split = draft.split; o.meals = draft.meals; o.note = val('f-note').trim();
+  o.status = draft.status; o.split = draft.split; o.meals = draft.meals; o.note = val('f-note').trim(); o.buy = draft.buy || null;
   o.cost = o.status === 'casa' ? 0 : numVal('f-cost');
   if (!draft.id) S.ingredients.push(o);
   save(); closeSheet(); render(true); toast(draft.id ? 'Guardado' : 'Añadido a la lista'); checkFumata();
@@ -413,6 +414,7 @@ var A = {
   day: function (el) { ui.day = el.dataset.day; render(true); },
   sub: function (el) { ui.sub = el.dataset.sub; if (ui.tab !== 'planes') ui.tab = 'planes'; render(true); navPush(); },
   fam: function (el) { ui.fam = el.dataset.fam; saveUi(); render(true); },
+  buyF: function (el) { ui.buyF = ui.buyF === el.dataset.v ? null : el.dataset.v; render(true); },
   st: function (el) { ui.st = el.dataset.st; render(true); },
   superMode: function () { ui.superMode = !ui.superMode; saveUi(); render(true); if (ui.superMode) { ui.st = 'pendiente'; ui.fam = me().family; render(true); toast('Modo súper: tu lista, letra grande y solo lo pendiente'); } },
   clearMeal: function () { ui.mealFilter = null; render(true); },
