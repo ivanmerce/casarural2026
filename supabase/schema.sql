@@ -465,3 +465,25 @@ create policy "propia_del" on public.guest_registrations for delete to authentic
 grant select, insert, update, delete on public.guest_registrations to authenticated;
 alter publication supabase_realtime add table public.guest_registrations;
 -- app_config 'finca': información práctica de la finca (privada, solo miembros).
+
+-- ===================== v0.6.3 · Habitaciones =====================
+create or replace function public.can_room_for(p_person text) returns boolean language sql stable security definer set search_path to 'public' as $$
+  select public.is_editor() or exists (
+    select 1 from public.people me join public.people t on t.family_id = me.family_id
+    where me.id = public.my_person_id() and me.kind = 'adulto' and t.id = p_person);
+$$;
+revoke all on function public.can_room_for(text) from public, anon;
+grant execute on function public.can_room_for(text) to authenticated;
+create table if not exists public.room_assignments (
+  person_id text primary key references public.people(id) on delete cascade,
+  room_id text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.room_assignments enable row level security;
+create policy "leer_miembros" on public.room_assignments for select to authenticated using (public.is_member());
+create policy "hab_ins" on public.room_assignments for insert to authenticated with check (public.can_room_for(person_id));
+create policy "hab_upd" on public.room_assignments for update to authenticated using (public.can_room_for(person_id)) with check (public.can_room_for(person_id));
+create policy "hab_del" on public.room_assignments for delete to authenticated using (public.can_room_for(person_id));
+grant select, insert, update, delete on public.room_assignments to authenticated;
+alter publication supabase_realtime add table public.room_assignments;
+-- app_config 'rooms': plano esquemático y habitaciones.
