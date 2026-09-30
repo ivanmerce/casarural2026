@@ -987,7 +987,7 @@ var L = (function () {
     var n = Math.max.apply(null, item.meals.map(function (id) { return diners(S, id).length; }));
     if (!n || n === item.per) return null;
     var q = item.qty * n / item.per;
-    q = item.qty >= 10 || /u$|^u|latas|canelones|láminas/.test(item.unit) ? Math.ceil(q) : Math.ceil(q * 10) / 10;
+    q = item.qty >= 10 || !/^(g|kg|l|ml|cl)$/i.test(String(item.unit).trim()) ? Math.ceil(q) : Math.ceil(q * 10) / 10;   /* lo que se cuenta por unidades, siempre entero */
     return q === item.qty ? null : { n: n, qty: q };
   }
   function diners(S, mealId) {
