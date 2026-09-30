@@ -27,9 +27,9 @@ VIEWS.inicio = function () {
   var ev = nextEvents(3);
   afterRender.push(startHero, startCountdown);
 
-  var h = '<section class="hero glass" aria-label="Cuenta atrás"><canvas id="heroNet" aria-hidden="true"></canvas>' +
+  var h = (typeof secretsHomeBanner === 'function' ? secretsHomeBanner() : '') + '<section class="hero glass" aria-label="Cuenta atrás"><canvas id="heroNet" aria-hidden="true"></canvas>' +
     '<div class="kicker">' + esc(S.trip.dateLabel || '') + '</div>' +
-    '<h1>' + (function () { var r = splitLast(S.trip.name); return esc(r[0]) + (r[0] ? '<br>' : '') + '<span>' + esc(r[1]) + '</span>'; })() + '</h1>' +
+    '<h1 data-egg="logo">' + (function () { var r = splitLast(S.trip.name); return esc(r[0]) + (r[0] ? '<br>' : '') + '<span>' + esc(r[1]) + '</span>'; })() + '</h1>' +
     '<p class="place">' + icon('pin') + esc(S.trip.place) + (S.trip.town ? ' · ' + esc(S.trip.town) : '') + '</p>';
   if (c.phase === 'before') {
     h += '<div class="count" id="count" data-egg="disco"><div><b id="cd-d">' + c.d + '</b><span>días</span></div><div><b id="cd-h">' + c.h + '</b><span>horas</span></div><div><b id="cd-m">' + c.m + '</b><span>min</span></div><div><b id="cd-s">' + c.s + '</b><span>seg</span></div></div>' +
@@ -76,7 +76,7 @@ VIEWS.inicio = function () {
     '<button class="card" data-act="tab" data-tab="compra" style="text-align:left;color:inherit;font:inherit">' +
       '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' con dueño' + (L.unassigned(S).length ? '<br><b style="color:var(--accent)">' + L.unassigned(S).length + ' sin dueño</b>' : '') + '</span></button>' +
     '<button class="card" data-act="tab" data-tab="cuentas" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(L.estCommon(S)) + '</span><span class="small muted">previsto para el bote común<br>' + L.money(lgR.total) + ' ya a cargo de alguna familia <span class="pill est">ESTIMADO</span></span></button>' +
+      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(lgR.total) + '</span><span class="small muted">con precio real, ya cuenta<br>previsto ≈ ' + L.money(L.estCommon(S)) + ' <span class="pill est">ESTIMADO</span></span></button>' +
     '</div>';
 
   /* Familia */
@@ -93,7 +93,7 @@ VIEWS.inicio = function () {
       '<div class="row">' + icon('house') + '<span class="grow">Incluye ropa de cama, toallas, limpieza final, piscina, La Barbacoa (con horno de leña), nave deportiva, WiFi y aparcamiento</span></div>' +
     '</div><div class="row wrap"><a class="btn" href="' + S.trip.maps + '" target="_blank" rel="noopener">' + icon('pin') + 'Cómo llegar</a><a class="btn ghost" href="' + S.trip.web + '" target="_blank" rel="noopener">Web de la finca</a></div></section>';
 
-  h += '<button class="btn ghost block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>';
+  h += '<button class="btn ghost block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + ' · ranking</button>';
   return h;
 };
 function ring(pct) {
@@ -210,9 +210,10 @@ VIEWS.compra = function () {
   var mine = all.filter(function (i) { return i.family === myF; }), mineCost = mine.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
 
   var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div></div>';
-  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">2 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
+  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">3 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
     '<li><span><b>Pídete lo que vayáis a comprar.</b> En «Sin dueño», toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span>. Ya queda a cargo de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + ' con su precio estimado. Desde Comidas puedes pedirte una comida entera.</span></li>' +
-    '<li><span><b>¿Te has equivocado?</b> En «Lo nuestro», toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si queréis, tocando un producto podéis poner el precio real o marcar que lo traéis de casa (0 €). Las cuentas se hacen solas.</p>') + '</section>';
+    '<li><span><b>Cuando lo compréis, apunta el precio.</b> En «Lo nuestro», escribe lo que ha costado en la casilla de cada producto. <b>Sin precio real no cuenta en las cuentas.</b></span></li>' +
+    '<li><span><b>¿Te has equivocado?</b> Toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si algo lo traéis de casa, tocad el producto y marcadlo (cuenta 0 €).</p>') + '</section>';
   h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + all.length + ' con dueño</span></div>' +
     '<div class="progress split" role="progressbar" aria-valuenow="' + pctA + '" aria-valuemin="0" aria-valuemax="100">' + S.families.map(function (x) { var n = all.filter(function (i) { return i.family === x.id; }).length; return n ? '<i class="fb ' + x.color + '" style="width:' + (n / all.length * 100) + '%"></i>' : ''; }).join('') + '</div>' +
     '<div class="fam-bars">' + S.families.map(function (x) {
@@ -234,7 +235,7 @@ VIEWS.compra = function () {
     h += '<section class="card wood" style="gap:8px"><div class="row"><span class="grow"><span class="eyebrow">Solo esta comida</span><b style="display:block">' + esc(mf.title) + '</b><small class="muted">' + esc(dayOf(mf.day).long) + ' · ' + slotName(mf.slot) + '</small></span><button class="link" data-act="clearMeal">Quitar filtro ' + icon('x') + '</button></div>' +
       (freeM && can('edit') && fam(myF) ? '<button class="btn primary block" data-act="claimMeal" data-id="' + mf.id + '">' + icon('plus') + 'Nos pedimos esta comida (' + freeM + ' sin dueño)</button>' : '') + '</section>';
   }
-  if (f === myF && mine.length) h += '<section class="card mine-sum"><div class="row"><span class="grow"><span class="eyebrow">A cargo de ' + esc(fam(myF).name) + '</span><b class="big num">≈ ' + L.money(mineCost) + '</b></span><span class="small muted">' + mine.length + (mine.length === 1 ? ' producto' : ' productos') + '</span></div><p class="small muted">Esta es vuestra lista para el súper. ¿Algo que no vais a comprar? Tócale «Soltar».</p></section>';
+  if (f === myF && mine.length) h += '<section class="card mine-sum" id="mineSum">' + mineSumHtml(mine) + '</section>';
   if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a «Lo nuestro» de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
 
   if (!list.length) {
@@ -251,18 +252,31 @@ VIEWS.compra = function () {
   if (can('edit')) h += '<button class="fab" data-act="newItem" aria-label="Añadir ingrediente">' + icon('plus') + '</button>';
   return h;
 };
+function mineSumHtml(mine) {
+  var done = mine.filter(function (i) { return !L.needsPrice(i); }), miss = mine.filter(function (i) { return L.needsPrice(i); });
+  var real = done.reduce(function (a, i) { return a + L.realCost(i); }, 0), est = miss.reduce(function (a, i) { return a + (i.est || 0); }, 0);
+  return '<div class="row"><span class="grow"><span class="eyebrow">A cargo de ' + esc(fam(me().family).name) + '</span><b class="big num">' + L.money(real) + '</b><small class="muted" style="display:block">con precio real · ya cuenta en Cuentas</small></span>' +
+    '<span class="price-prog"><b class="num">' + done.length + '/' + mine.length + '</b><small>con precio</small></span></div>' +
+    '<div class="progress"><i style="width:' + Math.round(done.length / mine.length * 100) + '%"></i></div>' +
+    (miss.length ? '<p class="small"><b>Faltan ' + miss.length + ' precios</b> (≈ ' + L.money(est) + '). Escribe lo que os ha costado cada cosa en su casilla: hasta entonces <b>no cuenta</b> en las cuentas.</p>' : '<p class="small ok-txt">Todo con precio. ¡Cuentas al día!</p>');
+}
 function itemRow(i) {
   var f = fam(i.family), mine = i.family && i.family === me().family, ed = can('edit');
   var mealNames = i.meals.map(function (id) { var m = meal(id); return m ? dayOf(m.day).short + ' ' + slotName(m.slot).toLowerCase() : ''; }).filter(Boolean);
   var price = i.status === 'casa' ? '<span class="muted">0 €</span><small>DE CASA</small>' : i.cost != null ? L.money(i.cost) : (i.est != null ? '<span class="muted">≈ ' + L.money(i.est) + '</span><small>ESTIMADO</small>' : '');
-  var act = !f ? (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>')
-    : mine ? (ed ? '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>' : '<span class="owner ' + f.color + ' mine">Nuestro</span>')
-    : '<button class="owner ' + f.color + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + esc(f.short || f.name) + '</button>';
-  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + '" id="it-' + i.id + '">' +
+  var right;
+  if (!f) right = price + (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>');
+  else if (mine && ed) right = (i.status === 'casa' ? '<span class="casa-tag">De casa · 0 €</span>'
+      : '<label class="price-in' + (i.cost != null ? ' ok' : '') + '"><input inputmode="decimal" enterkeyhint="next" autocomplete="off" class="price-field" data-change="itemCost" data-id="' + i.id + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) : 'precio') + '" aria-label="Precio real de ' + esc(i.name) + '"><span>€</span></label>') +
+      '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>';
+  else right = price + '<button class="owner ' + f.color + (mine ? ' mine' : '') + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + (mine ? 'Nuestro' : esc(f.short || f.name)) + '</button>';
+  var st = f && L.needsPrice(i) ? ' noprice' : '';
+  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + st + '" id="it-' + i.id + '">' +
     (f ? '<i class="own-bar ' + f.color + '" aria-hidden="true"></i>' : '') +
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
+      (f && L.needsPrice(i) && !mine ? '<span class="pill warn">sin precio</span>' : '') +
       (i.split === 'propio' ? '<span class="pill olive">propio</span>' : '') + (i.sug ? '<span class="pill">sugerido</span>' : '') +
       (function () { var sg = L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
-    '<div class="price">' + price + act + '</div></div>';
+    '<div class="price' + (mine && ed ? ' price-edit' : '') + '">' + right + '</div></div>';
 }

@@ -209,52 +209,7 @@ function startAmbient() {
   ambRAF = requestAnimationFrame(frame);
 }
 
-/* ---------- Easter eggs ---------- */
-var EGGS = [];
-function buildEggs() {
-  var g = ((S.trip.eggs && S.trip.eggs.grand) || []).map(function (id) { return nameOf(id); }).filter(Boolean).join(' o a ');
-  EGGS = [
-    { k: 'fumata', name: 'Habemus compra', how: 'Completar toda la lista de la compra', hint: 'Cuando no quede nada pendiente…' },
-    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + bdayName() + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años' },
-    { k: 'baby', name: 'Modo ' + babyName(), how: 'Tocar 3 veces a ' + babyName(), hint: 'El más pequeño esconde algo' },
-    { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + babyName(), hint: 'Ploc, ploc, ploc' },
-    { k: 'trophy', name: 'Campeón', how: 'Coronar al campeón de una eliminatoria o una liguilla', hint: 'Solo puede quedar uno' },
-    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 7 veces el logo', hint: 'El logo guarda un secreto' },
-    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Los abuelos ven de maravilla… con ayuda' },
-    { k: 'claras', name: 'Cuentas claras', how: 'Dejar la liquidación a cero con gastos apuntados', hint: 'Nadie debe nada a nadie' },
-    { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A deshoras' },
-    { k: 'zero', name: '¡Ya estamos aquí!', how: 'Estar en la app cuando llega la hora de entrada', hint: 'Cuando la cuenta atrás llega a cero' },
-    { k: 'salud', name: '¡Salud!', how: 'Marcar como comprada la cerveza, el vino o los refrescos', hint: 'Algo para brindar' },
-    { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Si llueve, pídeselo al cielo' },
-    { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números del cumpleañero' },
-    { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuanta más familia, mejor' },
-    { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Una palabra en latín, en el buscador' },
-    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar' },
-    { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música' },
-    { k: 'habemus', name: 'Habemus campeón', how: 'Terminar todos los juegos del finde', hint: 'Cuando no quede ni un juego por jugar' },
-    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando' },
-    { k: 'album', name: 'Paparazzi en serie', how: 'Llegar a 50 fotos en el álbum', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún' }
-  ];
-}
-function foundMap() { try { return JSON.parse(localStorage.getItem(KEY + '-eggs')) || {}; } catch (e) { return ui._eggs || {}; } }
-function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
-function egg(k) {
-  var f = foundMap(); if (f[k]) return false;
-  f[k] = new Date().toISOString(); ui._eggs = f;
-  try { localStorage.setItem(KEY + '-eggs', JSON.stringify(f)); } catch (e) {}
-  var e = EGGS.find(function (x) { return x.k === k; });
-  setTimeout(function () { toast('Secreto descubierto: <b>' + esc(e.name) + '</b> · ' + foundCount() + '/' + EGGS.length, 'Ver', secretsSheet); }, 2600);
-  return true;
-}
-function secretsSheet() {
-  var f = foundMap();
-  openSheet('<h2>Secretos de la casa</h2><p class="small muted">' + foundCount() + ' de ' + EGGS.length + ' descubiertos en este dispositivo. ¿Quién de la familia los encuentra todos?</p><div class="stack">' +
-    EGGS.map(function (e) {
-      var ok = f[e.k];
-      return '<div class="row"><span class="av sm" style="background:' + (ok ? 'var(--accent)' : 'var(--surface-2)') + ';color:' + (ok ? '#fff' : 'var(--muted)') + '">' + (ok ? '✓' : '?') + '</span><span class="grow"><b>' + (ok ? esc(e.name) : '???') + '</b><span class="small muted" style="display:block">' + esc(ok ? e.how : 'Pista: ' + e.hint) + '</span></span></div>';
-    }).join('') + '</div><button class="btn primary block" data-act="close">Seguir buscando</button>');
-}
-
+/* ---------- Easter eggs: la lista, el marcador y el ranking viven en app-9-secretos.js ---------- */
 var fxBusy = false;
 function fxLayer(veil) {
   var l = document.createElement('div'); l.className = 'fx'; l.innerHTML = '<canvas></canvas>';
@@ -283,7 +238,7 @@ function bdayParty() {
   if (fxBusy) return; fxBusy = true; setTimeout(function () { fxBusy = false; }, 4200);
   confetti(4200);
   var e = S.trip.eggs || {};
-  message('<div class="eleven">' + (e.bdayAge || '') + '</div><h2 style="font-size:clamp(1.8rem,8vw,3rem)">¡Felicidades, ' + esc(bdayName()) + '!</h2><p>' + (e.bdayAge || '') + ' años y un ' + esc(S.trip.name.split(' ')[0]) + ' entero para celebrarlo.</p>', 3800);
+  message('<div class="eleven">' + (e.bdayAge || '') + '</div><h2 style="font-size:clamp(1.8rem,8vw,3rem)">¡Felicidades, ' + esc(bdayName()) + '!</h2><p>' + (e.bdayAge || '') + ' años y un finde entero para celebrarlo.</p>', 3800);
   egg('bday');
 }
 function fumata() {
@@ -410,13 +365,15 @@ function abueloMode() {
   egg('abuelo');
 }
 var tapCount = {}, tapTimer = {};
-function eggTap(k) {
+var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 5, sun: 5, disco: 3, podio: 3, abumeter: 3 };
+function eggTap(k, el) {
+  var need = EGG_TAPS[k]; if (!need) return false;
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
-  tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2200);
-  var need = { bday: 5, baby: 3, grand: 3, logo: 7, sun: 5, disco: 3, podio: 3 }[k];
+  tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2400);
+  if (el && tapCount[k] >= 2 && tapCount[k] < need) { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {} }
   if (tapCount[k] >= need) {
     tapCount[k] = 0;
-    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else abueloMode();
+    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else if (k === 'abumeter') abuMeterFx(); else abueloMode();
     return true;
   }
   return false;
@@ -424,9 +381,9 @@ function eggTap(k) {
 
 /* ---------- Acciones ---------- */
 var A = {
-  tab: function (el) { ui.mealFilter = null; go(el.dataset.tab); },
+  tab: function (el) { ui.mealFilter = null; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
   goSheet: function (el) { closeSheet(); go(el.dataset.tab); },
-  logo: function () { if (!eggTap('logo')) { if (ui.tab !== 'inicio') go('inicio'); } },
+  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); } },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
   day: function (el) { ui.day = el.dataset.day; render(true); },
@@ -523,6 +480,7 @@ var A = {
     var pid = el.dataset.p, day = el.dataset.day;
     if (!guard('attend', pid)) return;
     var next = { pend: 'si', si: 'no', no: 'pend' }[L.dayStatus(S, pid, day)];
+    egg('dias');
     S.dayConfirm[pid] = S.dayConfirm[pid] || {};
     if (next === 'pend') delete S.dayConfirm[pid][day]; else S.dayConfirm[pid][day] = next;
     /* la confirmación del día manda: se quitan las excepciones de sus comidas */
@@ -556,7 +514,7 @@ var A = {
     S.votes = S.votes || {}; var v = S.votes[el.dataset.id] = S.votes[el.dataset.id] || [];
     var k = v.indexOf(me().id); if (k >= 0) v.splice(k, 1); else v.push(me().id);
     save(); el.setAttribute('aria-pressed', k < 0); el.querySelector('.num').textContent = v.length;
-    if (k < 0) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+    if (k < 0) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); egg('apunto'); }
   },
   editAct: function (el) { if (guard('edit')) actSheet(el.dataset.id); },
   newAct: function () { if (guard('edit')) actSheet(null); },
@@ -595,6 +553,23 @@ var A = {
   newExp: function () { if (guard('edit')) expSheet(null); },
   editExp: function (el) { if (guard('edit')) expSheet(el.dataset.id); },
   saveExp: saveExp,
+  abuC: function (el) { var f = document.getElementById('abu-amt'); if (f && f.value) ui.abuA = numVal('abu-amt'); ui.abuC = ui.abuC === el.dataset.v ? '' : el.dataset.v; render(); },
+  abuA: function (el) { var n = +el.dataset.v; ui.abuA = ui.abuA === n ? null : n; var f = document.getElementById('abu-amt'); if (f) f.value = ''; render(); },
+  abuGo: function () {
+    if (!guard('edit')) return;
+    var ex = L.excluded(S); if (!ex.length) return;
+    var typed = numVal('abu-amt'), amt = typed != null ? typed : ui.abuA;
+    if (!amt || amt <= 0) { toast('¿Cuánto? Toca un importe o escríbelo'); return; }
+    var before = abuLevel(L.ledger(S, false).rows.filter(function (r) { return r.id === ex[0]; }).reduce(function (a, r) { return a + r.paid; }, 0) + S.expenses.filter(function (e) { return e.payer === ex[0] && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + e.amount; }, 0));
+    S.expenses.push({ id: uid('e'), concept: ui.abuC || 'Invitación de los abuelos', amount: amt, payer: ex[0], split: 'comun', kind: 'aportacion', date: new Date().toISOString().slice(0, 10) });
+    ui.abuC = ''; ui.abuA = null; save(); render(true);
+    var tot = S.expenses.filter(function (e) { return e.payer === ex[0] && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + e.amount; }, 0) + (L.ledger(S, false).rows.find(function (r) { return r.id === ex[0]; }) || { paid: 0 }).paid;
+    var after = abuLevel(tot);
+    confetti(1600);
+    if (after.l[1] !== before.l[1]) setTimeout(function () { message('<h2 style="font-size:clamp(1.8rem,9vw,3rem)">¡Nivel nuevo!<br>' + esc(after.l[1]) + '</h2>', 2600); }, 250);
+    else toast('¡Gracias, abuelos! ' + L.money(amt) + ' menos en el bote');
+    checkClaras();
+  },
   delExp: function (el) {
     if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Seguro? Toca otra vez'; return; }
     S.expenses = S.expenses.filter(function (x) { return x.id !== el.dataset.id; }); save(); closeSheet(); render(true); toast('Gasto borrado');
@@ -604,6 +579,7 @@ var A = {
   setMe: function (el) { ui.me = el.dataset.id; saveUi(); closeSheet(); render(true); toast('Ahora eres ' + esc(me().name) + ' (' + ROLE[me().role] + ')'); },
   pref: function (el) {
     ui.prefs[el.dataset.k] = el.dataset.v; savePrefs(); applyPrefs();
+    if (el.dataset.k === 'theme' && el.dataset.v === 'dark') egg('noche');
     el.parentNode.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b === el); });
     if (el.dataset.k === 'accent' || el.dataset.k === 'theme') { stopHero(); if (ui.tab === 'inicio') startHero(); }
   },
@@ -714,6 +690,16 @@ function costSheet(id) {
     '<div class="sheet-actions"><button class="btn primary" data-act="saveCost" data-id="' + id + '">Guardar precio</button><button class="btn" data-act="close">Luego</button></div>');
 }
 var C = {
+  itemCost: function (el) {
+    if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
+    var v = el.value.replace(/[€\s]/g, '').replace(',', '.').trim();
+    if (v === '') i.cost = null; else { var n = parseFloat(v); if (isNaN(n) || n < 0) { toast('Escribe un precio, por ejemplo 4,50'); el.value = i.cost != null ? L.n(i.cost) : ''; return; } i.cost = Math.round(n * 100) / 100; el.value = L.n(i.cost); }
+    save();
+    var lab = el.closest('.price-in'); if (lab) lab.classList.toggle('ok', i.cost != null);
+    var row = document.getElementById('it-' + i.id); if (row) row.classList.toggle('noprice', L.needsPrice(i));
+    var sum = document.getElementById('mineSum'); if (sum) sum.innerHTML = mineSumHtml(S.ingredients.filter(function (x) { return x.family === me().family; }));
+    if (i.cost != null) { if (navigator.vibrate) try { navigator.vibrate(10); } catch (e) {} if (!S.ingredients.some(function (x) { return x.family === me().family && L.needsPrice(x); })) { confetti(1600); toast('¡Todo con precio! Ya cuenta en Cuentas'); } }
+  },
   score: function (el) { var m = S.tournament.rounds[+el.dataset.r][+el.dataset.m]; var v = parseInt(el.value, 10); m['s' + el.dataset.side] = isNaN(v) ? null : v; save(); },
   weight: function (el) { var v = parseFloat(el.value.replace(',', '.')); if (!isNaN(v) && v >= 0) { S.split.w[el.dataset.k] = v; save(); render(true); } },
   photo: function (el) {
@@ -750,7 +736,7 @@ function refreshWeather(manual) {
 function bindEvents() {
   document.addEventListener('click', function (e) {
     var eg = e.target.closest('[data-egg]');
-    if (eg && S && eggTap(eg.dataset.egg)) { e.preventDefault(); return; }
+    if (eg && S && eggTap(eg.dataset.egg, eg)) { e.preventDefault(); return; }
     var t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
     var fn = A[t.dataset.act]; if (fn) { e.preventDefault(); fn(t, e); }
   });
@@ -758,10 +744,17 @@ function bindEvents() {
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
+    if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('El brindis');
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
     if (t.dataset.input === 'glass') { ui.prefs.glass = t.value / 100; savePrefs(); applyPrefs(); }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSheet();
+    if (e.key === 'Enter' && e.target && e.target.classList && e.target.classList.contains('price-field')) {
+      e.preventDefault(); var all = Array.prototype.slice.call(document.querySelectorAll('.price-field')), k = all.indexOf(e.target);
+      if (all[k + 1]) all[k + 1].focus(); else e.target.blur();
+    }
+  });
 }
 /* Se llama cuando S ya está cargado (demo local o nube) */
 function startApp() {
@@ -775,6 +768,7 @@ function startApp() {
   var bd = S.trip.eggs && S.trip.eggs.bdayDate;
   if (bd && today === bd && ui.bdaySeen !== today) { ui.bdaySeen = today; saveUi(); setTimeout(bdayParty, 900); }
   if (countdownParts().phase === 'during') egg('zero');
+  secretsWatch();
   setInterval(function () { var d = new Date(); if (d.getHours() % 12 === 11 && d.getMinutes() === 11 && ui.lastWish !== d.toDateString() + d.getHours()) { ui.lastWish = d.toDateString() + d.getHours(); wish1111(); } }, 20000);
 }
 function boot() {

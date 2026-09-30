@@ -126,7 +126,7 @@ Object.assign(A, {
     var p = (S.photos || []).find(function (x) { return x.id === el.dataset.id; }); if (!p) return;
     var on = likesOf(p).indexOf(me().id) < 0;
     S.photoLikes = S.photoLikes || {}; var l = S.photoLikes[p.id] = S.photoLikes[p.id] || []; if (on) { if (l.indexOf(me().id) < 0) l.push(me().id); } else l.splice(l.indexOf(me().id), 1);
-    viewerRender(); if (on && navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
+    viewerRender(); if (on) egg('corazon'); if (on && navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
     PHOTOS.like(p, on).catch(function () { toast('No he podido guardar el corazón'); });
   },
   phCaption: function (el) {
@@ -157,7 +157,7 @@ Object.assign(C, {
     chain.then(function () {
       var n = document.getElementById('ph-progress'); if (n) n.textContent = '';
       render(true);
-      if (done) { confetti(1200); toast(done + (done === 1 ? ' foto subida' : ' fotos subidas') + (fail ? ' · ' + fail + ' no se han podido leer' : '') + '. ¡Gracias, paparazzi!'); if (photoList().length >= 50) egg('album'); }
+      if (done) { confetti(1200); toast(done + (done === 1 ? ' foto subida' : ' fotos subidas') + (fail ? ' · ' + fail + ' no se han podido leer' : '') + '. ¡Gracias, paparazzi!'); egg('foto'); if (photoList().length >= 50) egg('album'); }
       else toast('No he podido subir esas fotos. Prueba con otras (JPG o PNG)');
     });
   }

@@ -2,11 +2,8 @@
 
 VIEWS.planes = function () {
   if (!ui.day) ui.day = tripDayDefault();
-  var sub = ui.sub || 'plan';
-  var h = '<div class="view-head"><div><h2>Planes</h2><p class="muted small">Sencillos y sin gastos extra</p></div></div>' +
-    '<div class="seg" role="group" aria-label="Sección"><button data-act="sub" data-sub="plan" aria-pressed="' + (sub === 'plan') + '">Planning</button><button data-act="sub" data-sub="coste" aria-pressed="' + (sub === 'coste') + '">Con coste</button></div>';
-  if (sub === 'torneo') { ui.sub = 'plan'; sub = 'plan'; }
-  if (sub === 'coste') return h + costeView();
+  ui.sub = 'plan';
+  var h = '<div class="view-head"><div><h2>Planes</h2><p class="muted small">Sencillos, en la finca y sin gastos extra. Los minijuegos de cada día, en Juegos</p></div></div>';
 
   h += daySelector('day');
   var w = S.weather.days.find(function (x) { return x.k === ui.day; });
@@ -46,7 +43,7 @@ function torneoView() {
   var champ = L.advance(T);
   var names = ['Cuartos', 'Semifinal', 'Final'];
   var h = '<section class="card"><div class="card-head"><h3>' + esc(T.name) + '</h3><span class="pill olive">Nave deportiva</span></div>' +
-    '<p class="small muted">Sábado 17:00 cuartos y semis · domingo 19:30 la final. Toca un nombre para darle la victoria y apunta el marcador.</p>' +
+    '<p class="small muted">Sábado desde las 17:00, todo el torneo de un tirón. Toca un nombre para darle la victoria y apunta el marcador.</p>' +
     '<div class="bracket-wrap"><div class="bracket">' + T.rounds.map(function (r, ri) {
       return '<div class="round"><h4>' + names[ri] + '</h4>' + r.map(function (m, mi) {
         return '<div class="match">' + ['a', 'b'].map(function (side) {
@@ -63,18 +60,10 @@ function torneoView() {
   if (champ) h += '<div class="champ card" style="box-shadow:none">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón del finde</span><h3>' + pname(champ) + '</h3></div><button class="btn" data-act="trophy">Ver trofeo</button></div>';
   if (can('edit')) h += '<div class="row wrap"><button class="btn" data-act="editPlayers">' + icon('users') + 'Cambiar jugadores</button><button class="btn ghost" data-act="resetBracket">Reiniciar cuadro</button></div>';
   h += '</section>';
-  h += '<section class="card wood"><h3>Reglas de la casa</h3><ul class="small" style="margin:0;padding-left:18px"><li>Partidos a 11 puntos, cambio de saque cada 2.</li><li>La final, al mejor de 3.</li><li>Los abuelos son árbitros inapelables.</li><li>El campeón elige la película de la noche de cine del próximo viaje.</li></ul></section>';
+  h += '<section class="card wood"><h3>Reglas de la casa</h3><ul class="small" style="margin:0;padding-left:18px"><li>Partidos a 11 puntos, cambio de saque cada 2.</li><li>La final, al mejor de 3.</li><li>Los abuelos son árbitros inapelables.</li><li>El campeón elige el primer juego de la noche de juegos de mesa.</li></ul></section>';
   return h;
 }
 
-function costeView() {
-  return '<section class="card wood"><h3>Fuera del plan</h3><p class="small">Pediste planes sin gastos extra, así que estas opciones no están en el planning. Quedan aquí solo por si alguien quiere ir por su cuenta o hay un día de lluvia.</p></section>' +
-    S.paidOptions.map(function (o) {
-      return '<article class="card" style="gap:8px"><div class="row"><h3 class="grow">' + esc(o.name) + '</h3><span class="pill ' + (/CERRADO/.test(o.hours) ? 'red' : 'warn') + '">' + (/CERRADO/.test(o.hours) ? 'Cerrado' : 'Con coste') + '</span></div>' +
-        '<div class="facts"><span class="fact">' + icon('car') + esc(o.travel) + '</span><span class="fact">' + icon('baby') + esc(babyName()) + ': ' + esc(o.marc) + '</span></div>' +
-        '<p class="small"><b>Precio:</b> ' + esc(o.price) + '</p><p class="small muted">' + esc(o.hours) + '</p></article>';
-    }).join('') + '<p class="small muted">Distancias y tiempos en coche calculados desde la finca (OSRM). Precios y horarios de las webs oficiales; confirmar antes de ir.</p>';
-}
 
 /* ---------- CUENTAS ---------- */
 VIEWS.cuentas = function () {
@@ -102,7 +91,13 @@ VIEWS.cuentas = function () {
     '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
 
   /* Reparto */
-  h += '<section class="card"><div class="card-head"><h3>Reparto entre familias</h3></div>' +
+  /* El rincón de los abuelos (anfitriones: fuera del reparto) */
+  h += abuCard(lg, tx);
+
+  var exF = lg.excluded || [], rowsR = lg.rows.filter(function (r) { return exF.indexOf(r.id) < 0; });
+  var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
+  h += '<section class="card"><div class="card-head"><h3>Reparto entre hermanos y compañía</h3></div>' +
+    (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
     '<div class="field"><span class="lbl">Criterio' + (mode === 'ponderado' ? ' (por defecto)' : '') + '</span><div class="seg" role="group" aria-label="Criterio de reparto"><button data-act="mode" data-v="ponderado" aria-pressed="' + (mode === 'ponderado') + '">Ponderado</button><button data-act="mode" data-v="persona" aria-pressed="' + (mode === 'persona') + '">Por persona</button><button data-act="mode" data-v="familia" aria-pressed="' + (mode === 'familia') + '">Por familia</button></div></div>' +
     '<p class="small muted">' + modeText(mode) + '</p>';
   if (mode === 'ponderado') {
@@ -110,13 +105,19 @@ VIEWS.cuentas = function () {
       return '<div class="field"><label for="w-' + k + '">' + KIND[k] + (k === 'bebe' ? ' (' + esc(babyName()) + ')' : '') + '</label><input id="w-' + k + '" inputmode="decimal" value="' + L.n(S.split.w[k]) + '" data-change="weight" data-k="' + k + '"' + (can('edit') ? '' : ' disabled') + '></div>';
     }).join('') + '</div>';
   }
-  h += '<p class="small muted">Lo que cada familia se ha pedido de la compra cuenta con su precio real si lo habéis apuntado y, si no, con el estimado <span class="pill est">ESTIMADO</span>. Más los gastos de abajo.</p>';
+  var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
+  h += '<p class="small muted">Aquí solo cuentan los productos de la compra <b>con precio real</b> (o que vienen de casa) y los gastos de abajo.</p>' +
+    (noP.length ? '<div class="card alert" style="padding:10px 12px;gap:6px"><p class="small"><b>' + noP.length + ' productos pedidos aún sin precio</b> (≈ ' + L.money(noP.reduce(function (a, i) { return a + (i.est || 0); }, 0)) + '): ' +
+      S.families.map(function (f) { var n = noP.filter(function (i) { return i.family === f.id; }).length; return n ? esc(f.short || f.name) + ' ' + n : ''; }).filter(Boolean).join(' · ') + '. Cuando cada familia apunte lo que le ha costado, entrarán en el reparto.</p><button class="btn" data-act="tab" data-tab="compra">Ir a la compra</button></div>' : '');
   h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Familia</th><th>Ha puesto</th><th>Le toca</th><th>Saldo</th></tr></thead><tbody>' +
-    lg.rows.map(function (r) {
+    rowsR.map(function (r) {
       var f = fam(r.id);
       return '<tr><td><span class="row" style="gap:6px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</span><span class="small muted">' + Math.round(r.share * 100) + ' %</span>' + (r.gift ? '<span class="small" style="display:block;color:var(--olive)">incluye aportación de ' + L.money(r.gift) + '</span>' : '') + '</td><td>' + L.money(r.paid) + '</td><td>' + L.money(r.owe) + '</td><td class="' + (r.bal > 0.004 ? 'pos' : r.bal < -0.004 ? 'neg' : '') + '">' + (r.bal > 0 ? '+' : '') + L.money(r.bal) + '</td></tr>';
-    }).join('') + '<tr><td><b>Total</b></td><td><b>' + L.money(lg.total) + '</b></td><td></td><td></td></tr></tbody></table></div>' +
-    (lg.gifts ? '<p class="small"><span class="pill olive">Aportaciones</span> ' + L.money(lg.gifts) + ' puestos de regalo: se reparten ' + L.money(lg.toShare) + ' en vez de ' + L.money(lg.total) + '.</p>' : '');
+    }).join('') + '</tbody></table></div>' +
+    '<div class="pot"><div class="row"><span class="grow">Gasto total con precio real</span><b class="num">' + L.money(lg.total) + '</b></div>' +
+    (lg.gifts ? '<div class="row olive-t"><span class="grow">Invitaciones' + (exF.length ? ' (abuelos y regalos)' : '') + '</span><b class="num">− ' + L.money(lg.gifts) + '</b></div>' : '') +
+    '<div class="row pot-total"><span class="grow"><b>A repartir entre hermanos y compañía</b></span><b class="num">' + L.money(lg.toShare) + '</b></div></div>' +
+    (lg.giftsPledged > lg.gifts + 0.004 ? '<p class="small muted">Hay ' + L.money(lg.giftsPledged - lg.gifts) + ' de invitación esperando: se aplicarán en cuanto haya más gastos.</p>' : '');
 
   if (lg.total === 0) {
     h += '<div class="empty" style="padding:12px">' + icon('coins') + '<b>Todavía no hay nada a cargo de nadie</b><span>Cuando las familias se pidan productos de la compra o añadáis gastos, aparecerá aquí quién paga a quién.</span></div>';
@@ -130,15 +131,65 @@ VIEWS.cuentas = function () {
   h += '</section>';
 
   /* Gastos extra */
-  var ingPaid = S.ingredients.filter(function (i) { return i.family && (i.split || 'comun') === 'comun'; });
+  var ingPaid = S.ingredients.filter(function (i) { return i.family && (i.split || 'comun') === 'comun' && !L.needsPrice(i); });
   h += '<section class="card"><div class="card-head"><h3>Gastos</h3>' + (can('edit') ? '<button class="btn primary" data-act="newExp">' + icon('plus') + 'Añadir</button>' : '') + '</div>' +
-    '<div class="row small"><span class="grow">Productos de la compra con dueño (' + ingPaid.length + ')</span><b class="num">≈ ' + L.money(ingPaid.reduce(function (a, i) { return a + L.itemCost(i); }, 0)) + '</b></div><div class="divider"></div>' +
+    '<div class="row small"><span class="grow">Productos de la compra con precio real (' + ingPaid.length + ')</span><b class="num">' + L.money(ingPaid.reduce(function (a, i) { return a + L.realCost(i); }, 0)) + '</b></div><div class="divider"></div>' +
     (S.expenses.length ? S.expenses.map(function (e) {
       return '<button class="row" data-act="editExp" data-id="' + e.id + '" style="background:none;border:0;text-align:left;font:inherit;color:inherit;padding:6px 0;min-height:44px"><i class="fam-dot ' + fam(e.payer).color + '"></i><span class="grow"><b>' + esc(e.concept) + '</b><span class="small muted"> · ' + esc(fam(e.payer).name) + (e.kind === 'aportacion' ? ' · aportación de regalo' : e.split === 'propio' ? ' · propio' : '') + '</span></span><b class="num">' + L.money(e.amount) + '</b></button>';
     }).join('') : '<p class="small muted">Carbón, gasolina, tarta, decoración, regalos… Todo lo que no sea un ingrediente va aquí, con quién lo pagó. Si alguien quiere poner algo extra de regalo para el bote, apúntalo como aportación.</p>') +
     '</section>';
   return h;
 };
+/* ---------- Rincón de los abuelos ---------- */
+function abuIdeas() { return ['El vermut del sábado', 'Los helados de los nietos', 'El carbón de la barbacoa', 'La tarta de ' + bdayName(), 'Una ronda de churros', 'Lo que haga falta']; }
+var ABU_LEVELS = [
+  [0, 'Modo jubilado zen', 'Ya han pagado la casa. Tienen derecho a tumbarse en la hamaca y no mover un dedo.'],
+  [1, 'Abuelos enrollados', 'Primera invitación en el bote. Los nietos ya murmuran.'],
+  [50, 'Abuelos de oro', 'A este ritmo les ponen una placa en la finca.'],
+  [120, 'Mecenas del Finde', 'Lorenzo de Médici, pero con tortilla de patatas.'],
+  [250, 'Leyenda familiar', 'Se contará en todas las sobremesas de aquí a 2040.']
+];
+function abuLevel(v) { var l = ABU_LEVELS[0], nx = null; ABU_LEVELS.forEach(function (x, i) { if (v >= x[0]) { l = x; nx = ABU_LEVELS[i + 1] || null; } }); return { l: l, next: nx }; }
+function abuCard(lg, tx) {
+  var ex = lg.excluded || []; if (!ex.length) return '';
+  var k = ex[0], F = fam(k), house = S.house, fn = F.name.replace(/\s*&\s*/g, ' y ');
+  var r = lg.rows.find(function (x) { return x.id === k; }) || { paid: 0 };
+  var mine = S.expenses.filter(function (e) { return e.payer === k && e.kind === 'aportacion'; });
+  var aport = L.r2(mine.reduce(function (a, e) { return a + (e.amount || 0); }, 0));
+  var prods = S.ingredients.filter(function (i) { return i.family === k && (i.split || 'comun') === 'comun'; });
+  var invited = L.r2(aport + (r.paid || 0));
+  var base = (house && house.payer === k ? house.total : 0) + (S.tax.payer === k ? tx.withExemption : 0);
+  var lv = abuLevel(invited), isAbu = me().family === k, canInv = can('edit') && (isAbu || can('access'));
+  var pct = lv.next ? Math.max(4, Math.min(100, Math.round((invited - lv.l[0]) / (lv.next[0] - lv.l[0]) * 100))) : 100;
+  var h = '<section class="card abu" id="abu"><div class="card-head"><span class="eyebrow">El rincón de los abuelos</span><span class="pill olive">Fuera del reparto</span></div>' +
+    '<h3>' + (isAbu ? 'Abuelos, aquí nadie os pasa factura' : esc(fn) + ': aquí nadie les pasa factura') + '</h3>' +
+    '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ': <b class="num">' + L.money(base) + '</b>. Con eso ' + (isAbu ? 'tenéis' : 'tienen') + ' barra libre de nietos, sofá y mando de la tele. No ' + (isAbu ? 'entráis' : 'entran') + ' en el reparto.</p>' +
+    '<p class="small">' + (isAbu ? '¿Os apetece invitar a algo más?' : '¿Y si les apetece invitar a algo más?') + ' <b>Totalmente opcional.</b> Lo que ' + (isAbu ? 'pongáis' : 'pongan') + ' se <b>descuenta del bote</b> que se reparten los hermanos y compañía (que lo agradecerán con besos y fregando platos).</p>' +
+    '<div class="abu-meter" data-egg="abumeter"><div class="row"><span class="aw-ico sm">' + icon('trophy') + '</span><span class="grow"><b>Abuelómetro:</b> ' + esc(lv.l[1]) + '<small class="muted" style="display:block">' + esc(lv.l[2]) + '</small></span><b class="num">' + L.money(invited) + '</b></div>' +
+    '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+    (lv.next ? '<small class="muted">Faltan ' + L.money(L.r2(lv.next[0] - invited)) + ' para «' + esc(lv.next[1]) + '»</small>' : '<small class="gold">Nivel máximo. Ya no hay más medallas que darles.</small>') + '</div>';
+  if (mine.length || prods.length) {
+    h += '<div class="stack" style="gap:2px">' + mine.map(function (e) {
+      var inner = '<span class="grow"><b>' + esc(e.concept) + '</b></span><b class="num">' + L.money(e.amount) + '</b>';
+      return can('edit') ? '<button class="row abu-inv" data-act="editExp" data-id="' + e.id + '">' + inner + '</button>' : '<div class="row abu-inv">' + inner + '</div>';
+    }).join('') + (prods.length ? '<div class="row small abu-inv"><span class="grow">Productos de la compra que se han pedido (' + prods.length + ')</span><b class="num">' + L.money(r.paid || 0) + '</b></div>' : '') + '</div>';
+  }
+  if (canInv) {
+    var c = ui.abuC || '', a = ui.abuA || null;
+    h += '<div class="abu-form"><span class="lbl">¿A qué invitáis?</span><div class="chips">' + abuIdeas().map(function (x) {
+      return '<button class="chip" data-act="abuC" data-v="' + esc(x) + '" aria-pressed="' + (c === x) + '">' + esc(x) + '</button>';
+    }).join('') + '</div>' +
+      '<span class="lbl">¿Cuánto?</span><div class="chips">' + [10, 20, 50, 100].map(function (n) {
+        return '<button class="chip" data-act="abuA" data-v="' + n + '" aria-pressed="' + (a === n) + '">' + n + ' €</button>';
+      }).join('') + '<label class="price-in"><input class="price-field" id="abu-amt" inputmode="decimal" placeholder="Otro" value="' + (a && [10, 20, 50, 100].indexOf(a) < 0 ? L.n(a) : '') + '">€</label></div>' +
+      '<button class="btn primary block" data-act="abuGo">' + icon('gift') + '¡Invitamos nosotros!</button>' +
+      '<p class="small muted">Luego la app os dice a quién hacer el bizum. Si os arrepentís, tocad la invitación y se borra (sin rencores).</p></div>';
+  } else {
+    h += '<p class="small muted">Solo los abuelos pueden invitar desde aquí. Se admiten indirectas.</p>' +
+      '<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Abuelos, os echamos de menos en el Abuelómetro de la app de ' + (S.trip.short || 'la casa rural') + '. Ni una presión, eh. Bueno, un poco. ' + location.origin + location.pathname + ' ') + '">' + icon('megaphone') + 'Mandar una indirecta a los abuelos</a>';
+  }
+  return h + '</section>';
+}
 function modeText(m) {
   if (m === 'familia') return 'Cada familia que asiste paga lo mismo, venga quien venga.';
   if (m === 'persona') return 'Cada persona cuenta 1 por cada comida a la que asiste, sea de la edad que sea.';

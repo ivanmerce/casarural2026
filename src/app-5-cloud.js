@@ -159,12 +159,12 @@ var CLOUD = (function () {
       api.presence.online = on; onPresence();
     });
     ch.subscribe(function (status) { if (status === 'SUBSCRIBED') ch.track({ pid: ui.me, at: new Date().toISOString() }); });
-    ping(); setInterval(ping, 60000);
+    api.pingNow = ping; ping(); setInterval(ping, 60000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) { ping(); ch.track({ pid: ui.me, at: new Date().toISOString() }); } });
   }
   function ping() {
-    var eg = 0; try { eg = foundCount(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg }).then(function () {
+    var eg = 0; try { eg = rankedCount(); } catch (e) {}
+    client().rpc('ping', { p_eggs: eg, p_ver: 2 }).then(function () {
       return client().from('presence').select('person_id,last_seen,visits,minutes,eggs');
     }).then(function (r) {
       if (r && r.data) {

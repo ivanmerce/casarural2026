@@ -423,7 +423,7 @@ function gGuard() { return guard('edit'); }
 
 Object.assign(A, {
   jsub: function (el) { ui.jsub = el.dataset.v; ui.game = null; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
-  gOpen: function (el) { ui.game = el.dataset.id; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
+  gOpen: function (el) { if (ui.tab === 'planes') egg('ojeador'); ui.game = el.dataset.id; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
   gBack: function () { var st = history.state, g = ui.game; ui.game = null; render(); window.scrollTo(0, 0); if (st && st.app && st.v && st.v.game === g && history.length > 1) history.back(); else navPush(); },
   gNew: function () { if (gGuard()) newGameSheet(); },
   gCreate: function (el) { createGame(el.dataset.k); },
@@ -529,6 +529,7 @@ Object.assign(A, {
   aPick: function (el) {
     var aid = el.dataset.id, nom = el.dataset.e, myE = G.entrantOf(S, me().id);
     if (nom === me().id || nom === myE) { toast('Votarte a ti mismo no vale. Buen intento'); return; }
+    egg('jurado');
     S.awardVotes = S.awardVotes || {}; S.awardVotes[aid] = S.awardVotes[aid] || {}; S.awardVotes[aid][me().id] = nom;
     save(); closeSheet(); render(true); toast('Voto guardado para ' + esc(eText(nom)));
   },

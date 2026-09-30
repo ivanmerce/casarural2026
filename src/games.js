@@ -291,6 +291,8 @@ var G = (function () {
       auto: function (S) { var st = S.stats || {}; var arr = S.people.map(function (p) { var x = st[p.id] || {}; return { id: p.id, n: (x.minutes || 0) + 3 * (x.visits || 0) }; }); var w = topBy(arr, 'n', 5); return w.length ? { winners: ids(w), why: ((st[w[0].id] || {}).minutes || 0) + ' min en la app' } : null; } },
     { id: 'cazador', group: 'casa', icon: 'search', name: 'Cazasecretos', desc: 'Quien ha descubierto más secretos escondidos en la app.',
       auto: function (S) { var st = S.stats || {}; var arr = S.people.map(function (p) { return { id: p.id, n: (st[p.id] || {}).eggs || 0 }; }); var w = topBy(arr, 'n', 2); return w.length ? { winners: ids(w), why: w[0].n + ' secretos' } : null; } },
+    { id: 'guardian', group: 'casa', icon: 'shield', name: 'Guardián de los Secretos', desc: 'Desbloqueó todos los secretos de la casa… y (en teoría) no se lo contó a nadie.',
+      auto: function (S) { var tot = typeof EGGS !== 'undefined' && EGGS.length ? EGGS.length : 20, st = S.stats || {}; var w = S.people.filter(function (p) { return ((st[p.id] || {}).eggs || 0) >= tot; }); return w.length ? { winners: ids(w), why: 'Los ' + tot + ' secretos, sin chivarse' } : null; } },
     { id: 'paparazzi', group: 'casa', icon: 'camera', name: 'Paparazzi del Finde', desc: 'Quien más fotos ha subido al álbum.',
       auto: function (S) { var n = {}; (S.photos || []).forEach(function (p) { n[p.by] = (n[p.by] || 0) + 1; }); var arr = Object.keys(n).map(function (id) { return { id: id, n: n[id] }; }); var w = topBy(arr, 'n', 3); return w.length ? { winners: ids(w), why: w[0].n + ' fotos' } : null; } },
     { id: 'fotaza', group: 'casa', icon: 'star', name: 'La Foto del Finde', desc: 'Autor de la foto con más corazones del álbum.',
@@ -358,6 +360,11 @@ var G = (function () {
     { key: 'ppt', name: 'Piedra, papel o tijera', cat: 'ingenio', format: 'bracket', icon: 'hand', rules: 'Al mejor de 3. Sin trampas de última hora.' },
     { key: 'pañuelo', name: 'El pañuelo', cat: 'velocidad', format: 'teams', icon: 'flag', rules: 'Dos equipos numerados. El que se lleva el pañuelo suma un punto.', points: [8, 4], allowDraw: true },
     { key: 'sillas', name: 'Sillas musicales', cat: 'mini', format: 'ranking', mode: 'order', icon: 'music', rules: 'Apunta en orden inverso: el primero es el que se queda con la última silla.' },
+    { key: 'nerf', name: 'Nerf: atrapa la bandera', cat: 'deporte', format: 'teams', icon: 'flag', rules: 'Dos equipos con su bandera. Si te dan, a tu base a recargar. Gana quien lleve la bandera rival a su campo.', points: [10, 5], allowDraw: false },
+    { key: 'gimcana', name: 'Gimcana', cat: 'velocidad', format: 'teams', teamRank: true, icon: 'search', rules: 'Pistas, pruebas y adivinanzas. Apunta el orden de llegada de los equipos.', points: [10, 7] },
+    { key: 'peso', name: 'Adivina el peso', cat: 'mini', format: 'ranking', mode: 'low', unit: 'g de error', icon: 'flame', rules: 'Cada uno dice un peso; se mira la etiqueta. Apunta los gramos de error: gana quien menos se equivoca.' },
+    { key: 'canasta', name: 'Canasta de papel', cat: 'mini', format: 'ranking', mode: 'high', unit: 'canastas', icon: 'ball', rules: 'Bolas de papel a una papelera, 5 tiros cada uno.' },
+    { key: 'silencio', name: 'El juego del silencio', cat: 'mini', format: 'ranking', mode: 'order', icon: 'moon', rules: 'Quien hable o se ría queda eliminado. El primero de la lista es quien más aguanta.' },
     { key: 'libre', name: 'Juego nuevo', cat: 'mini', format: 'ranking', mode: 'order', icon: 'star', rules: '' }
   ];
 

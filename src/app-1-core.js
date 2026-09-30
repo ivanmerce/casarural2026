@@ -280,6 +280,7 @@ function render(keepScroll) {
   renderTop(); renderNav();
   afterRender.forEach(function (f) { f(); });
   if (keepScroll) window.scrollTo(0, y);
+  if (typeof secretsOnView === 'function') secretsOnView();
 }
 function go(tab, opts) {
   ui.tab = tab; if (tab !== 'juegos') ui.game = null; Object.assign(ui, opts || {}); saveUi(); render(); window.scrollTo(0, 0); navPush();

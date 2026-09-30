@@ -62,6 +62,12 @@ var L = (function () {
     var w = (S.split && S.split.w) || { adulto: 1, menor: 0.5, bebe: 0 };
     return w[p.kind] != null ? w[p.kind] : 1;
   }
+  /* familias fuera del reparto: por defecto, quien paga la casa (los abuelos). Lo que paguen o aporten se descuenta del bote */
+  function excluded(S) {
+    var x = S.split && S.split.exclude;
+    if (Array.isArray(x)) return x.slice();
+    return S.house && S.house.payer ? [S.house.payer] : [];
+  }
   /* devuelve { familyId: fracción 0..1 } */
   function shares(S) {
     var mode = (S.split && S.split.mode) || 'ponderado';
@@ -79,6 +85,7 @@ var L = (function () {
         units[p.family] = (units[p.family] || 0) + w * m;
       });
     }
+    excluded(S).forEach(function (k) { if (k in units) units[k] = 0; });
     var tot = Object.keys(units).reduce(function (a, k) { return a + units[k]; }, 0);
     var out = {};
     Object.keys(units).forEach(function (k) { out[k] = tot ? units[k] / tot : 0; });
@@ -87,13 +94,15 @@ var L = (function () {
 
   /* gastos comunes por familia. Un producto que una familia se pide cuenta ya a su cargo:
      con el precio real si lo ha apuntado y, si no, con el estimado. «Viene de casa» = 0 €. */
-  function itemCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : (i.est || 0); }
+  function itemCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : (i.est || 0); }   /* para previsiones */
+  function realCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : null; }           /* para Cuentas */
+  function needsPrice(i) { return !!i.family && realCost(i) == null; }
   function paidBy(S) {
     var paid = {};
     S.families.forEach(function (f) { paid[f.id] = 0; });
     S.ingredients.forEach(function (i) {
       if ((i.split || 'comun') !== 'comun' || !i.family || paid[i.family] == null) return;
-      paid[i.family] += itemCost(i);
+      var v = realCost(i); if (v != null) paid[i.family] += v;   /* sin precio real todavía no cuenta */
     });
     (S.expenses || []).forEach(function (e) {
       if ((e.split || 'comun') !== 'comun' || e.kind === 'aportacion') return;
@@ -135,7 +144,8 @@ var L = (function () {
   function ledger(S, useEst) {
     var paid = paidBy(S, useEst);
     var total = r2(Object.keys(paid).reduce(function (a, k) { return a + paid[k]; }, 0));
-    var g = gifts(S);
+    var g = gifts(S), ex = excluded(S);
+    ex.forEach(function (k) { if (k in g) g[k] = r2(g[k] + (paid[k] || 0)); });   /* lo que pagan los anfitriones es una invitación */
     var gTot = r2(Object.keys(g).reduce(function (a, k) { return a + g[k]; }, 0));
     var gUsed = Math.min(gTot, total);                      /* una aportación no puede superar el gasto */
     var ratio = gTot ? gUsed / gTot : 0;
@@ -153,7 +163,7 @@ var L = (function () {
       big.owe = r2(big.owe + diff); big.bal = r2(big.paid - big.owe);
     }
     var bal = {}; rows.forEach(function (r) { bal[r.id] = r.bal; });
-    return { total: total, gifts: gUsed, giftsPledged: gTot, toShare: toShare, rows: rows, tx: settle(bal) };
+    return { total: total, gifts: gUsed, giftsPledged: gTot, toShare: toShare, rows: rows, tx: settle(bal), excluded: ex };
   }
 
   /* ¿Cae una comida fuera del horario de entrada/salida que habéis elegido? */
@@ -245,6 +255,6 @@ var L = (function () {
     return f.w ? f[f.w] : null;
   }
 
-  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, itemCost: itemCost, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;
