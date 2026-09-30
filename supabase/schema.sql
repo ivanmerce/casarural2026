@@ -418,3 +418,35 @@ revoke all on public.personal_codes from anon, authenticated;
 -- Bucket privado «docs» (solo PDF): select para miembros. La app abre el PDF más reciente con un enlace firmado.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values ('docs', 'docs', false, 10485760, array['application/pdf']) on conflict (id) do nothing;
 create policy "docs_leer" on storage.objects for select to authenticated using (bucket_id = 'docs' and public.is_member());
+
+-- ===================== v0.5.8 · Secretos por persona, ranking que se cierra =====================
+-- La app antigua (ping de 1 argumento) ya no toca los secretos; la nueva llama a ping(p_eggs, p_ver).
+-- El marcador de secretos se congela el domingo 11 a las 11:00 (cierre del ranking).
+create or replace function public.ping(p_eggs integer default null::integer)
+ returns timestamptz language plpgsql security definer set search_path to 'public' as $f$
+declare pid text := public.my_person_id();
+begin
+  if pid is null then return null; end if;
+  insert into public.presence (person_id, last_seen, eggs) values (pid, now(), 0)
+    on conflict (person_id) do update set
+      visits = public.presence.visits + case when public.presence.last_seen < now() - interval '30 minutes' then 1 else 0 end,
+      minutes = public.presence.minutes + case when public.presence.last_seen < now() - interval '50 seconds' and public.presence.last_seen > now() - interval '5 minutes' then 1 else 0 end,
+      last_seen = now();
+  return now();
+end $f$;
+create or replace function public.ping(p_eggs integer, p_ver integer)
+ returns timestamptz language plpgsql security definer set search_path to 'public' as $f$
+declare pid text := public.my_person_id(); n int := coalesce(least(greatest(p_eggs, 0), 99), 0);
+begin
+  if pid is null then return null; end if;
+  insert into public.presence (person_id, last_seen, eggs) values (pid, now(), n)
+    on conflict (person_id) do update set
+      visits = public.presence.visits + case when public.presence.last_seen < now() - interval '30 minutes' then 1 else 0 end,
+      minutes = public.presence.minutes + case when public.presence.last_seen < now() - interval '50 seconds' and public.presence.last_seen > now() - interval '5 minutes' then 1 else 0 end,
+      eggs = case when now() < timestamptz '2026-10-11 11:00:00+02' then greatest(public.presence.eggs, n) else public.presence.eggs end,
+      last_seen = now();
+  return now();
+end $f$;
+revoke all on function public.ping(integer, integer) from public, anon;
+grant execute on function public.ping(integer, integer) to authenticated;
+-- update public.presence set eggs = 0;   -- reinicio del marcador (hecho el 30/09/2026)
