@@ -773,6 +773,66 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
   .man-grid { grid-template-columns: 1fr 1fr; }
 }
 
+/* precio real en línea (Lo nuestro) */
+.item .price.price-edit { flex-direction: column; align-items: flex-end; gap: 6px; }
+.price-in { display: inline-flex; align-items: center; gap: 4px; padding: 0 10px 0 4px; min-height: 44px; border-radius: 12px; border: 2px dashed color-mix(in srgb, var(--warn) 70%, transparent); background: var(--glass-strong); }
+.price-in input { width: 74px; border: 0; background: transparent; font: inherit; font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; text-align: right; padding: 6px 2px; color: var(--ink); font-size: 16px; }
+.price-in input::placeholder { color: var(--muted); font-weight: 600; font-size: .9rem; }
+.price-in span { font-weight: 800; color: var(--muted); }
+.price-in.ok { border-style: solid; border-color: color-mix(in srgb, var(--ok) 55%, transparent); background: color-mix(in srgb, var(--ok) 8%, var(--glass-strong)); }
+.price-in.ok span { color: var(--ok); }
+.casa-tag { font-size: .8rem; font-weight: 800; color: var(--olive); }
+.price-prog { display: flex; flex-direction: column; align-items: flex-end; } .price-prog b { font-family: var(--font-display); font-size: 1.3rem; } .price-prog small { color: var(--muted); font-size: .72rem; }
+.ok-txt { color: var(--ok); font-weight: 700; }
+.mine-sum { gap: 8px; }
+
+/* v0.5.7 · Rincón de los abuelos y bote */
+.card.abu { background: linear-gradient(160deg, color-mix(in srgb, var(--wood) 14%, var(--glass)), color-mix(in srgb, var(--olive) 10%, var(--glass))); border-color: color-mix(in srgb, var(--wood) 35%, var(--glass-line)); }
+.card.abu h3 { font-size: 1.25rem; line-height: 1.15; }
+.abu-meter { display: grid; gap: 6px; padding: 12px; border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--glass-line); }
+.abu-meter .bar { height: 10px; border-radius: 999px; background: var(--olive-soft); overflow: hidden; }
+.abu-meter .bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--olive), var(--wood)); transition: width .6s cubic-bezier(.2,.8,.2,1); }
+.abu-inv { background: none; border: 0; border-bottom: 1px dashed var(--glass-line); text-align: left; font: inherit; color: inherit; padding: 8px 0; min-height: 44px; width: 100%; }
+.abu-form { display: grid; gap: 8px; }
+.abu-form .chips { margin: 0; padding: 2px 0; flex-wrap: wrap; overflow: visible; }
+.abu-form .price-in { min-height: 42px; }
+.abu-form .price-in input { width: 70px; }
+.pot { display: grid; gap: 4px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface-2); }
+.pot .row { min-height: 28px; }
+.pot .olive-t { color: var(--olive); }
+.pot .pot-total { border-top: 1px solid var(--glass-line); padding-top: 6px; margin-top: 2px; }
+.abu-form .price-in { border: 1px solid var(--glass-line); }
+
+/* v0.5.8 · Secretos: ranking, pistas y alarma */
+@keyframes eggPoke { 0% { transform: scale(1); } 40% { transform: scale(.94) rotate(-2deg); } 100% { transform: scale(1); } }
+.egg-poke { animation: eggPoke .28s ease; }
+[data-egg] { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.hero h1[data-egg] { cursor: default; user-select: none; -webkit-user-select: none; }
+.sec-mission { padding: 10px 12px; gap: 6px; }
+.sec-me { display: grid; gap: 8px; padding: 12px; border-radius: var(--r-sm); background: var(--surface-2); }
+.sec-me .big small { font-size: .5em; color: var(--muted); font-weight: 700; }
+.sec-me .bar, .sec-row .bar { height: 8px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+.sec-me .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold, #E8B64A)); border-radius: inherit; }
+.sec-rank { display: grid; gap: 4px; }
+.sec-row { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 4px 10px; border-radius: 12px; }
+.sec-row.me { background: var(--accent-soft); }
+.sec-row .num { font-weight: 800; }
+.sec-egg .sec-more { display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; padding: 6px 8px; border-radius: 10px; background: color-mix(in srgb, var(--gold, #E8B64A) 16%, transparent); }
+.sec-egg .sec-more .ico { flex: none; width: 16px; height: 16px; margin-top: 2px; }
+.sec-hint { min-height: 40px; padding: 0 10px; flex: none; }
+.sec-hint.armed { border-color: var(--accent); color: var(--accent); font-size: .85rem; }
+.sec-banner { display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; color: inherit; border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-line)); background: color-mix(in srgb, var(--accent) 10%, var(--glass)); animation: secPulse 2.4s ease-in-out infinite; }
+.sec-banner small { display: block; color: var(--muted); }
+@keyframes secPulse { 0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); } 50% { box-shadow: 0 0 0 8px transparent; } }
+.sec-alarm { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(12, 8, 8, .62); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: fadeIn .25s ease; }
+.sec-alarm-in { width: min(420px, 100%); display: grid; gap: 10px; text-align: center; padding: 22px 18px; border-radius: 22px; background: var(--bg); border: 2px solid var(--accent); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+.sec-alarm-in h2 { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+.sec-bell { width: 64px; height: 64px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #fff; animation: bell 1s ease-in-out infinite; }
+.sec-bell .ico { width: 34px; height: 34px; }
+@keyframes bell { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) { .sec-banner, .sec-bell, .egg-poke { animation: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 </style>
 </head>
 <body>
@@ -848,6 +908,12 @@ var L = (function () {
     var w = (S.split && S.split.w) || { adulto: 1, menor: 0.5, bebe: 0 };
     return w[p.kind] != null ? w[p.kind] : 1;
   }
+  /* familias fuera del reparto: por defecto, quien paga la casa (los abuelos). Lo que paguen o aporten se descuenta del bote */
+  function excluded(S) {
+    var x = S.split && S.split.exclude;
+    if (Array.isArray(x)) return x.slice();
+    return S.house && S.house.payer ? [S.house.payer] : [];
+  }
   /* devuelve { familyId: fracción 0..1 } */
   function shares(S) {
     var mode = (S.split && S.split.mode) || 'ponderado';
@@ -865,6 +931,7 @@ var L = (function () {
         units[p.family] = (units[p.family] || 0) + w * m;
       });
     }
+    excluded(S).forEach(function (k) { if (k in units) units[k] = 0; });
     var tot = Object.keys(units).reduce(function (a, k) { return a + units[k]; }, 0);
     var out = {};
     Object.keys(units).forEach(function (k) { out[k] = tot ? units[k] / tot : 0; });
@@ -873,13 +940,15 @@ var L = (function () {
 
   /* gastos comunes por familia. Un producto que una familia se pide cuenta ya a su cargo:
      con el precio real si lo ha apuntado y, si no, con el estimado. «Viene de casa» = 0 €. */
-  function itemCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : (i.est || 0); }
+  function itemCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : (i.est || 0); }   /* para previsiones */
+  function realCost(i) { if (i.status === 'casa') return 0; return i.cost != null ? i.cost : null; }           /* para Cuentas */
+  function needsPrice(i) { return !!i.family && realCost(i) == null; }
   function paidBy(S) {
     var paid = {};
     S.families.forEach(function (f) { paid[f.id] = 0; });
     S.ingredients.forEach(function (i) {
       if ((i.split || 'comun') !== 'comun' || !i.family || paid[i.family] == null) return;
-      paid[i.family] += itemCost(i);
+      var v = realCost(i); if (v != null) paid[i.family] += v;   /* sin precio real todavía no cuenta */
     });
     (S.expenses || []).forEach(function (e) {
       if ((e.split || 'comun') !== 'comun' || e.kind === 'aportacion') return;
@@ -921,7 +990,8 @@ var L = (function () {
   function ledger(S, useEst) {
     var paid = paidBy(S, useEst);
     var total = r2(Object.keys(paid).reduce(function (a, k) { return a + paid[k]; }, 0));
-    var g = gifts(S);
+    var g = gifts(S), ex = excluded(S);
+    ex.forEach(function (k) { if (k in g) g[k] = r2(g[k] + (paid[k] || 0)); });   /* lo que pagan los anfitriones es una invitación */
     var gTot = r2(Object.keys(g).reduce(function (a, k) { return a + g[k]; }, 0));
     var gUsed = Math.min(gTot, total);                      /* una aportación no puede superar el gasto */
     var ratio = gTot ? gUsed / gTot : 0;
@@ -939,7 +1009,7 @@ var L = (function () {
       big.owe = r2(big.owe + diff); big.bal = r2(big.paid - big.owe);
     }
     var bal = {}; rows.forEach(function (r) { bal[r.id] = r.bal; });
-    return { total: total, gifts: gUsed, giftsPledged: gTot, toShare: toShare, rows: rows, tx: settle(bal) };
+    return { total: total, gifts: gUsed, giftsPledged: gTot, toShare: toShare, rows: rows, tx: settle(bal), excluded: ex };
   }
 
   /* ¿Cae una comida fuera del horario de entrada/salida que habéis elegido? */
@@ -1031,7 +1101,7 @@ var L = (function () {
     return f.w ? f[f.w] : null;
   }
 
-  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, itemCost: itemCost, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;
 
@@ -1328,6 +1398,8 @@ var G = (function () {
       auto: function (S) { var st = S.stats || {}; var arr = S.people.map(function (p) { var x = st[p.id] || {}; return { id: p.id, n: (x.minutes || 0) + 3 * (x.visits || 0) }; }); var w = topBy(arr, 'n', 5); return w.length ? { winners: ids(w), why: ((st[w[0].id] || {}).minutes || 0) + ' min en la app' } : null; } },
     { id: 'cazador', group: 'casa', icon: 'search', name: 'Cazasecretos', desc: 'Quien ha descubierto más secretos escondidos en la app.',
       auto: function (S) { var st = S.stats || {}; var arr = S.people.map(function (p) { return { id: p.id, n: (st[p.id] || {}).eggs || 0 }; }); var w = topBy(arr, 'n', 2); return w.length ? { winners: ids(w), why: w[0].n + ' secretos' } : null; } },
+    { id: 'guardian', group: 'casa', icon: 'shield', name: 'Guardián de los Secretos', desc: 'Desbloqueó todos los secretos de la casa… y (en teoría) no se lo contó a nadie.',
+      auto: function (S) { var tot = typeof EGGS !== 'undefined' && EGGS.length ? EGGS.length : 20, st = S.stats || {}; var w = S.people.filter(function (p) { return ((st[p.id] || {}).eggs || 0) >= tot; }); return w.length ? { winners: ids(w), why: 'Los ' + tot + ' secretos, sin chivarse' } : null; } },
     { id: 'paparazzi', group: 'casa', icon: 'camera', name: 'Paparazzi del Finde', desc: 'Quien más fotos ha subido al álbum.',
       auto: function (S) { var n = {}; (S.photos || []).forEach(function (p) { n[p.by] = (n[p.by] || 0) + 1; }); var arr = Object.keys(n).map(function (id) { return { id: id, n: n[id] }; }); var w = topBy(arr, 'n', 3); return w.length ? { winners: ids(w), why: w[0].n + ' fotos' } : null; } },
     { id: 'fotaza', group: 'casa', icon: 'star', name: 'La Foto del Finde', desc: 'Autor de la foto con más corazones del álbum.',
@@ -1395,6 +1467,11 @@ var G = (function () {
     { key: 'ppt', name: 'Piedra, papel o tijera', cat: 'ingenio', format: 'bracket', icon: 'hand', rules: 'Al mejor de 3. Sin trampas de última hora.' },
     { key: 'pañuelo', name: 'El pañuelo', cat: 'velocidad', format: 'teams', icon: 'flag', rules: 'Dos equipos numerados. El que se lleva el pañuelo suma un punto.', points: [8, 4], allowDraw: true },
     { key: 'sillas', name: 'Sillas musicales', cat: 'mini', format: 'ranking', mode: 'order', icon: 'music', rules: 'Apunta en orden inverso: el primero es el que se queda con la última silla.' },
+    { key: 'nerf', name: 'Nerf: atrapa la bandera', cat: 'deporte', format: 'teams', icon: 'flag', rules: 'Dos equipos con su bandera. Si te dan, a tu base a recargar. Gana quien lleve la bandera rival a su campo.', points: [10, 5], allowDraw: false },
+    { key: 'gimcana', name: 'Gimcana', cat: 'velocidad', format: 'teams', teamRank: true, icon: 'search', rules: 'Pistas, pruebas y adivinanzas. Apunta el orden de llegada de los equipos.', points: [10, 7] },
+    { key: 'peso', name: 'Adivina el peso', cat: 'mini', format: 'ranking', mode: 'low', unit: 'g de error', icon: 'flame', rules: 'Cada uno dice un peso; se mira la etiqueta. Apunta los gramos de error: gana quien menos se equivoca.' },
+    { key: 'canasta', name: 'Canasta de papel', cat: 'mini', format: 'ranking', mode: 'high', unit: 'canastas', icon: 'ball', rules: 'Bolas de papel a una papelera, 5 tiros cada uno.' },
+    { key: 'silencio', name: 'El juego del silencio', cat: 'mini', format: 'ranking', mode: 'order', icon: 'moon', rules: 'Quien hable o se ría queda eliminado. El primero de la lista es quien más aguanta.' },
     { key: 'libre', name: 'Juego nuevo', cat: 'mini', format: 'ranking', mode: 'order', icon: 'star', rules: '' }
   ];
 
@@ -1692,6 +1769,7 @@ function render(keepScroll) {
   renderTop(); renderNav();
   afterRender.forEach(function (f) { f(); });
   if (keepScroll) window.scrollTo(0, y);
+  if (typeof secretsOnView === 'function') secretsOnView();
 }
 function go(tab, opts) {
   ui.tab = tab; if (tab !== 'juegos') ui.game = null; Object.assign(ui, opts || {}); saveUi(); render(); window.scrollTo(0, 0); navPush();
@@ -1735,9 +1813,9 @@ VIEWS.inicio = function () {
   var ev = nextEvents(3);
   afterRender.push(startHero, startCountdown);
 
-  var h = '<section class="hero glass" aria-label="Cuenta atrás"><canvas id="heroNet" aria-hidden="true"></canvas>' +
+  var h = (typeof secretsHomeBanner === 'function' ? secretsHomeBanner() : '') + '<section class="hero glass" aria-label="Cuenta atrás"><canvas id="heroNet" aria-hidden="true"></canvas>' +
     '<div class="kicker">' + esc(S.trip.dateLabel || '') + '</div>' +
-    '<h1>' + (function () { var r = splitLast(S.trip.name); return esc(r[0]) + (r[0] ? '<br>' : '') + '<span>' + esc(r[1]) + '</span>'; })() + '</h1>' +
+    '<h1 data-egg="logo">' + (function () { var r = splitLast(S.trip.name); return esc(r[0]) + (r[0] ? '<br>' : '') + '<span>' + esc(r[1]) + '</span>'; })() + '</h1>' +
     '<p class="place">' + icon('pin') + esc(S.trip.place) + (S.trip.town ? ' · ' + esc(S.trip.town) : '') + '</p>';
   if (c.phase === 'before') {
     h += '<div class="count" id="count" data-egg="disco"><div><b id="cd-d">' + c.d + '</b><span>días</span></div><div><b id="cd-h">' + c.h + '</b><span>horas</span></div><div><b id="cd-m">' + c.m + '</b><span>min</span></div><div><b id="cd-s">' + c.s + '</b><span>seg</span></div></div>' +
@@ -1784,7 +1862,7 @@ VIEWS.inicio = function () {
     '<button class="card" data-act="tab" data-tab="compra" style="text-align:left;color:inherit;font:inherit">' +
       '<span class="eyebrow">Compra</span>' + ring(cov.pct) + '<span class="small muted">' + cov.done + ' de ' + cov.tot + ' con dueño' + (L.unassigned(S).length ? '<br><b style="color:var(--accent)">' + L.unassigned(S).length + ' sin dueño</b>' : '') + '</span></button>' +
     '<button class="card" data-act="tab" data-tab="cuentas" style="text-align:left;color:inherit;font:inherit">' +
-      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(L.estCommon(S)) + '</span><span class="small muted">previsto para el bote común<br>' + L.money(lgR.total) + ' ya a cargo de alguna familia <span class="pill est">ESTIMADO</span></span></button>' +
+      '<span class="eyebrow">Cuentas</span><span class="big">' + L.money(lgR.total) + '</span><span class="small muted">con precio real, ya cuenta<br>previsto ≈ ' + L.money(L.estCommon(S)) + ' <span class="pill est">ESTIMADO</span></span></button>' +
     '</div>';
 
   /* Familia */
@@ -1801,7 +1879,7 @@ VIEWS.inicio = function () {
       '<div class="row">' + icon('house') + '<span class="grow">Incluye ropa de cama, toallas, limpieza final, piscina, La Barbacoa (con horno de leña), nave deportiva, WiFi y aparcamiento</span></div>' +
     '</div><div class="row wrap"><a class="btn" href="' + S.trip.maps + '" target="_blank" rel="noopener">' + icon('pin') + 'Cómo llegar</a><a class="btn ghost" href="' + S.trip.web + '" target="_blank" rel="noopener">Web de la finca</a></div></section>';
 
-  h += '<button class="btn ghost block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + '</button>';
+  h += '<button class="btn ghost block" data-act="secrets">' + icon('trophy') + 'Secretos de la casa · ' + foundCount() + '/' + EGGS.length + ' · ranking</button>';
   return h;
 };
 function ring(pct) {
@@ -1918,9 +1996,10 @@ VIEWS.compra = function () {
   var mine = all.filter(function (i) { return i.family === myF; }), mineCost = mine.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
 
   var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div></div>';
-  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">2 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
+  h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">3 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
     '<li><span><b>Pídete lo que vayáis a comprar.</b> En «Sin dueño», toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span>. Ya queda a cargo de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + ' con su precio estimado. Desde Comidas puedes pedirte una comida entera.</span></li>' +
-    '<li><span><b>¿Te has equivocado?</b> En «Lo nuestro», toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si queréis, tocando un producto podéis poner el precio real o marcar que lo traéis de casa (0 €). Las cuentas se hacen solas.</p>') + '</section>';
+    '<li><span><b>Cuando lo compréis, apunta el precio.</b> En «Lo nuestro», escribe lo que ha costado en la casilla de cada producto. <b>Sin precio real no cuenta en las cuentas.</b></span></li>' +
+    '<li><span><b>¿Te has equivocado?</b> Toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si algo lo traéis de casa, tocad el producto y marcadlo (cuenta 0 €).</p>') + '</section>';
   h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + all.length + ' con dueño</span></div>' +
     '<div class="progress split" role="progressbar" aria-valuenow="' + pctA + '" aria-valuemin="0" aria-valuemax="100">' + S.families.map(function (x) { var n = all.filter(function (i) { return i.family === x.id; }).length; return n ? '<i class="fb ' + x.color + '" style="width:' + (n / all.length * 100) + '%"></i>' : ''; }).join('') + '</div>' +
     '<div class="fam-bars">' + S.families.map(function (x) {
@@ -1942,7 +2021,7 @@ VIEWS.compra = function () {
     h += '<section class="card wood" style="gap:8px"><div class="row"><span class="grow"><span class="eyebrow">Solo esta comida</span><b style="display:block">' + esc(mf.title) + '</b><small class="muted">' + esc(dayOf(mf.day).long) + ' · ' + slotName(mf.slot) + '</small></span><button class="link" data-act="clearMeal">Quitar filtro ' + icon('x') + '</button></div>' +
       (freeM && can('edit') && fam(myF) ? '<button class="btn primary block" data-act="claimMeal" data-id="' + mf.id + '">' + icon('plus') + 'Nos pedimos esta comida (' + freeM + ' sin dueño)</button>' : '') + '</section>';
   }
-  if (f === myF && mine.length) h += '<section class="card mine-sum"><div class="row"><span class="grow"><span class="eyebrow">A cargo de ' + esc(fam(myF).name) + '</span><b class="big num">≈ ' + L.money(mineCost) + '</b></span><span class="small muted">' + mine.length + (mine.length === 1 ? ' producto' : ' productos') + '</span></div><p class="small muted">Esta es vuestra lista para el súper. ¿Algo que no vais a comprar? Tócale «Soltar».</p></section>';
+  if (f === myF && mine.length) h += '<section class="card mine-sum" id="mineSum">' + mineSumHtml(mine) + '</section>';
   if (f === 'libre' && free.length) h += '<p class="small muted">' + (can('edit') ? 'Toca «Me lo pido» y pasa a «Lo nuestro» de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + '.' : 'Los adultos de cada familia se piden lo que van a comprar.') + '</p>';
 
   if (!list.length) {
@@ -1959,20 +2038,33 @@ VIEWS.compra = function () {
   if (can('edit')) h += '<button class="fab" data-act="newItem" aria-label="Añadir ingrediente">' + icon('plus') + '</button>';
   return h;
 };
+function mineSumHtml(mine) {
+  var done = mine.filter(function (i) { return !L.needsPrice(i); }), miss = mine.filter(function (i) { return L.needsPrice(i); });
+  var real = done.reduce(function (a, i) { return a + L.realCost(i); }, 0), est = miss.reduce(function (a, i) { return a + (i.est || 0); }, 0);
+  return '<div class="row"><span class="grow"><span class="eyebrow">A cargo de ' + esc(fam(me().family).name) + '</span><b class="big num">' + L.money(real) + '</b><small class="muted" style="display:block">con precio real · ya cuenta en Cuentas</small></span>' +
+    '<span class="price-prog"><b class="num">' + done.length + '/' + mine.length + '</b><small>con precio</small></span></div>' +
+    '<div class="progress"><i style="width:' + Math.round(done.length / mine.length * 100) + '%"></i></div>' +
+    (miss.length ? '<p class="small"><b>Faltan ' + miss.length + ' precios</b> (≈ ' + L.money(est) + '). Escribe lo que os ha costado cada cosa en su casilla: hasta entonces <b>no cuenta</b> en las cuentas.</p>' : '<p class="small ok-txt">Todo con precio. ¡Cuentas al día!</p>');
+}
 function itemRow(i) {
   var f = fam(i.family), mine = i.family && i.family === me().family, ed = can('edit');
   var mealNames = i.meals.map(function (id) { var m = meal(id); return m ? dayOf(m.day).short + ' ' + slotName(m.slot).toLowerCase() : ''; }).filter(Boolean);
   var price = i.status === 'casa' ? '<span class="muted">0 €</span><small>DE CASA</small>' : i.cost != null ? L.money(i.cost) : (i.est != null ? '<span class="muted">≈ ' + L.money(i.est) + '</span><small>ESTIMADO</small>' : '');
-  var act = !f ? (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>')
-    : mine ? (ed ? '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>' : '<span class="owner ' + f.color + ' mine">Nuestro</span>')
-    : '<button class="owner ' + f.color + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + esc(f.short || f.name) + '</button>';
-  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + '" id="it-' + i.id + '">' +
+  var right;
+  if (!f) right = price + (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>');
+  else if (mine && ed) right = (i.status === 'casa' ? '<span class="casa-tag">De casa · 0 €</span>'
+      : '<label class="price-in' + (i.cost != null ? ' ok' : '') + '"><input inputmode="decimal" enterkeyhint="next" autocomplete="off" class="price-field" data-change="itemCost" data-id="' + i.id + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) : 'precio') + '" aria-label="Precio real de ' + esc(i.name) + '"><span>€</span></label>') +
+      '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>';
+  else right = price + '<button class="owner ' + f.color + (mine ? ' mine' : '') + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + (mine ? 'Nuestro' : esc(f.short || f.name)) + '</button>';
+  var st = f && L.needsPrice(i) ? ' noprice' : '';
+  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + st + '" id="it-' + i.id + '">' +
     (f ? '<i class="own-bar ' + f.color + '" aria-hidden="true"></i>' : '') +
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
+      (f && L.needsPrice(i) && !mine ? '<span class="pill warn">sin precio</span>' : '') +
       (i.split === 'propio' ? '<span class="pill olive">propio</span>' : '') + (i.sug ? '<span class="pill">sugerido</span>' : '') +
       (function () { var sg = L.suggestQty(S, i); return sg ? '<span class="pill warn">Para ' + sg.n + ': ' + L.n(sg.qty) + ' ' + esc(i.unit) + '</span>' : ''; })() + '</span></button>' +
-    '<div class="price">' + price + act + '</div></div>';
+    '<div class="price' + (mine && ed ? ' price-edit' : '') + '">' + right + '</div></div>';
 }
 
 /* ===================== Confirmación de asistencia por día ===================== */
@@ -2093,11 +2185,8 @@ function onPresence() {
 
 VIEWS.planes = function () {
   if (!ui.day) ui.day = tripDayDefault();
-  var sub = ui.sub || 'plan';
-  var h = '<div class="view-head"><div><h2>Planes</h2><p class="muted small">Sencillos y sin gastos extra</p></div></div>' +
-    '<div class="seg" role="group" aria-label="Sección"><button data-act="sub" data-sub="plan" aria-pressed="' + (sub === 'plan') + '">Planning</button><button data-act="sub" data-sub="coste" aria-pressed="' + (sub === 'coste') + '">Con coste</button></div>';
-  if (sub === 'torneo') { ui.sub = 'plan'; sub = 'plan'; }
-  if (sub === 'coste') return h + costeView();
+  ui.sub = 'plan';
+  var h = '<div class="view-head"><div><h2>Planes</h2><p class="muted small">Sencillos, en la finca y sin gastos extra. Los minijuegos de cada día, en Juegos</p></div></div>';
 
   h += daySelector('day');
   var w = S.weather.days.find(function (x) { return x.k === ui.day; });
@@ -2137,7 +2226,7 @@ function torneoView() {
   var champ = L.advance(T);
   var names = ['Cuartos', 'Semifinal', 'Final'];
   var h = '<section class="card"><div class="card-head"><h3>' + esc(T.name) + '</h3><span class="pill olive">Nave deportiva</span></div>' +
-    '<p class="small muted">Sábado 17:00 cuartos y semis · domingo 19:30 la final. Toca un nombre para darle la victoria y apunta el marcador.</p>' +
+    '<p class="small muted">Sábado desde las 17:00, todo el torneo de un tirón. Toca un nombre para darle la victoria y apunta el marcador.</p>' +
     '<div class="bracket-wrap"><div class="bracket">' + T.rounds.map(function (r, ri) {
       return '<div class="round"><h4>' + names[ri] + '</h4>' + r.map(function (m, mi) {
         return '<div class="match">' + ['a', 'b'].map(function (side) {
@@ -2154,18 +2243,10 @@ function torneoView() {
   if (champ) h += '<div class="champ card" style="box-shadow:none">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón del finde</span><h3>' + pname(champ) + '</h3></div><button class="btn" data-act="trophy">Ver trofeo</button></div>';
   if (can('edit')) h += '<div class="row wrap"><button class="btn" data-act="editPlayers">' + icon('users') + 'Cambiar jugadores</button><button class="btn ghost" data-act="resetBracket">Reiniciar cuadro</button></div>';
   h += '</section>';
-  h += '<section class="card wood"><h3>Reglas de la casa</h3><ul class="small" style="margin:0;padding-left:18px"><li>Partidos a 11 puntos, cambio de saque cada 2.</li><li>La final, al mejor de 3.</li><li>Los abuelos son árbitros inapelables.</li><li>El campeón elige la película de la noche de cine del próximo viaje.</li></ul></section>';
+  h += '<section class="card wood"><h3>Reglas de la casa</h3><ul class="small" style="margin:0;padding-left:18px"><li>Partidos a 11 puntos, cambio de saque cada 2.</li><li>La final, al mejor de 3.</li><li>Los abuelos son árbitros inapelables.</li><li>El campeón elige el primer juego de la noche de juegos de mesa.</li></ul></section>';
   return h;
 }
 
-function costeView() {
-  return '<section class="card wood"><h3>Fuera del plan</h3><p class="small">Pediste planes sin gastos extra, así que estas opciones no están en el planning. Quedan aquí solo por si alguien quiere ir por su cuenta o hay un día de lluvia.</p></section>' +
-    S.paidOptions.map(function (o) {
-      return '<article class="card" style="gap:8px"><div class="row"><h3 class="grow">' + esc(o.name) + '</h3><span class="pill ' + (/CERRADO/.test(o.hours) ? 'red' : 'warn') + '">' + (/CERRADO/.test(o.hours) ? 'Cerrado' : 'Con coste') + '</span></div>' +
-        '<div class="facts"><span class="fact">' + icon('car') + esc(o.travel) + '</span><span class="fact">' + icon('baby') + esc(babyName()) + ': ' + esc(o.marc) + '</span></div>' +
-        '<p class="small"><b>Precio:</b> ' + esc(o.price) + '</p><p class="small muted">' + esc(o.hours) + '</p></article>';
-    }).join('') + '<p class="small muted">Distancias y tiempos en coche calculados desde la finca (OSRM). Precios y horarios de las webs oficiales; confirmar antes de ir.</p>';
-}
 
 /* ---------- CUENTAS ---------- */
 VIEWS.cuentas = function () {
@@ -2193,7 +2274,13 @@ VIEWS.cuentas = function () {
     '<p class="small muted">' + esc(S.tax.note) + '. Se recalcula sola con la asistencia por día. No entra en el reparto.</p></section>';
 
   /* Reparto */
-  h += '<section class="card"><div class="card-head"><h3>Reparto entre familias</h3></div>' +
+  /* El rincón de los abuelos (anfitriones: fuera del reparto) */
+  h += abuCard(lg, tx);
+
+  var exF = lg.excluded || [], rowsR = lg.rows.filter(function (r) { return exF.indexOf(r.id) < 0; });
+  var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
+  h += '<section class="card"><div class="card-head"><h3>Reparto entre hermanos y compañía</h3></div>' +
+    (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
     '<div class="field"><span class="lbl">Criterio' + (mode === 'ponderado' ? ' (por defecto)' : '') + '</span><div class="seg" role="group" aria-label="Criterio de reparto"><button data-act="mode" data-v="ponderado" aria-pressed="' + (mode === 'ponderado') + '">Ponderado</button><button data-act="mode" data-v="persona" aria-pressed="' + (mode === 'persona') + '">Por persona</button><button data-act="mode" data-v="familia" aria-pressed="' + (mode === 'familia') + '">Por familia</button></div></div>' +
     '<p class="small muted">' + modeText(mode) + '</p>';
   if (mode === 'ponderado') {
@@ -2201,13 +2288,19 @@ VIEWS.cuentas = function () {
       return '<div class="field"><label for="w-' + k + '">' + KIND[k] + (k === 'bebe' ? ' (' + esc(babyName()) + ')' : '') + '</label><input id="w-' + k + '" inputmode="decimal" value="' + L.n(S.split.w[k]) + '" data-change="weight" data-k="' + k + '"' + (can('edit') ? '' : ' disabled') + '></div>';
     }).join('') + '</div>';
   }
-  h += '<p class="small muted">Lo que cada familia se ha pedido de la compra cuenta con su precio real si lo habéis apuntado y, si no, con el estimado <span class="pill est">ESTIMADO</span>. Más los gastos de abajo.</p>';
+  var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
+  h += '<p class="small muted">Aquí solo cuentan los productos de la compra <b>con precio real</b> (o que vienen de casa) y los gastos de abajo.</p>' +
+    (noP.length ? '<div class="card alert" style="padding:10px 12px;gap:6px"><p class="small"><b>' + noP.length + ' productos pedidos aún sin precio</b> (≈ ' + L.money(noP.reduce(function (a, i) { return a + (i.est || 0); }, 0)) + '): ' +
+      S.families.map(function (f) { var n = noP.filter(function (i) { return i.family === f.id; }).length; return n ? esc(f.short || f.name) + ' ' + n : ''; }).filter(Boolean).join(' · ') + '. Cuando cada familia apunte lo que le ha costado, entrarán en el reparto.</p><button class="btn" data-act="tab" data-tab="compra">Ir a la compra</button></div>' : '');
   h += '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Familia</th><th>Ha puesto</th><th>Le toca</th><th>Saldo</th></tr></thead><tbody>' +
-    lg.rows.map(function (r) {
+    rowsR.map(function (r) {
       var f = fam(r.id);
       return '<tr><td><span class="row" style="gap:6px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</span><span class="small muted">' + Math.round(r.share * 100) + ' %</span>' + (r.gift ? '<span class="small" style="display:block;color:var(--olive)">incluye aportación de ' + L.money(r.gift) + '</span>' : '') + '</td><td>' + L.money(r.paid) + '</td><td>' + L.money(r.owe) + '</td><td class="' + (r.bal > 0.004 ? 'pos' : r.bal < -0.004 ? 'neg' : '') + '">' + (r.bal > 0 ? '+' : '') + L.money(r.bal) + '</td></tr>';
-    }).join('') + '<tr><td><b>Total</b></td><td><b>' + L.money(lg.total) + '</b></td><td></td><td></td></tr></tbody></table></div>' +
-    (lg.gifts ? '<p class="small"><span class="pill olive">Aportaciones</span> ' + L.money(lg.gifts) + ' puestos de regalo: se reparten ' + L.money(lg.toShare) + ' en vez de ' + L.money(lg.total) + '.</p>' : '');
+    }).join('') + '</tbody></table></div>' +
+    '<div class="pot"><div class="row"><span class="grow">Gasto total con precio real</span><b class="num">' + L.money(lg.total) + '</b></div>' +
+    (lg.gifts ? '<div class="row olive-t"><span class="grow">Invitaciones' + (exF.length ? ' (abuelos y regalos)' : '') + '</span><b class="num">− ' + L.money(lg.gifts) + '</b></div>' : '') +
+    '<div class="row pot-total"><span class="grow"><b>A repartir entre hermanos y compañía</b></span><b class="num">' + L.money(lg.toShare) + '</b></div></div>' +
+    (lg.giftsPledged > lg.gifts + 0.004 ? '<p class="small muted">Hay ' + L.money(lg.giftsPledged - lg.gifts) + ' de invitación esperando: se aplicarán en cuanto haya más gastos.</p>' : '');
 
   if (lg.total === 0) {
     h += '<div class="empty" style="padding:12px">' + icon('coins') + '<b>Todavía no hay nada a cargo de nadie</b><span>Cuando las familias se pidan productos de la compra o añadáis gastos, aparecerá aquí quién paga a quién.</span></div>';
@@ -2221,15 +2314,65 @@ VIEWS.cuentas = function () {
   h += '</section>';
 
   /* Gastos extra */
-  var ingPaid = S.ingredients.filter(function (i) { return i.family && (i.split || 'comun') === 'comun'; });
+  var ingPaid = S.ingredients.filter(function (i) { return i.family && (i.split || 'comun') === 'comun' && !L.needsPrice(i); });
   h += '<section class="card"><div class="card-head"><h3>Gastos</h3>' + (can('edit') ? '<button class="btn primary" data-act="newExp">' + icon('plus') + 'Añadir</button>' : '') + '</div>' +
-    '<div class="row small"><span class="grow">Productos de la compra con dueño (' + ingPaid.length + ')</span><b class="num">≈ ' + L.money(ingPaid.reduce(function (a, i) { return a + L.itemCost(i); }, 0)) + '</b></div><div class="divider"></div>' +
+    '<div class="row small"><span class="grow">Productos de la compra con precio real (' + ingPaid.length + ')</span><b class="num">' + L.money(ingPaid.reduce(function (a, i) { return a + L.realCost(i); }, 0)) + '</b></div><div class="divider"></div>' +
     (S.expenses.length ? S.expenses.map(function (e) {
       return '<button class="row" data-act="editExp" data-id="' + e.id + '" style="background:none;border:0;text-align:left;font:inherit;color:inherit;padding:6px 0;min-height:44px"><i class="fam-dot ' + fam(e.payer).color + '"></i><span class="grow"><b>' + esc(e.concept) + '</b><span class="small muted"> · ' + esc(fam(e.payer).name) + (e.kind === 'aportacion' ? ' · aportación de regalo' : e.split === 'propio' ? ' · propio' : '') + '</span></span><b class="num">' + L.money(e.amount) + '</b></button>';
     }).join('') : '<p class="small muted">Carbón, gasolina, tarta, decoración, regalos… Todo lo que no sea un ingrediente va aquí, con quién lo pagó. Si alguien quiere poner algo extra de regalo para el bote, apúntalo como aportación.</p>') +
     '</section>';
   return h;
 };
+/* ---------- Rincón de los abuelos ---------- */
+function abuIdeas() { return ['El vermut del sábado', 'Los helados de los nietos', 'El carbón de la barbacoa', 'La tarta de ' + bdayName(), 'Una ronda de churros', 'Lo que haga falta']; }
+var ABU_LEVELS = [
+  [0, 'Modo jubilado zen', 'Ya han pagado la casa. Tienen derecho a tumbarse en la hamaca y no mover un dedo.'],
+  [1, 'Abuelos enrollados', 'Primera invitación en el bote. Los nietos ya murmuran.'],
+  [50, 'Abuelos de oro', 'A este ritmo les ponen una placa en la finca.'],
+  [120, 'Mecenas del Finde', 'Lorenzo de Médici, pero con tortilla de patatas.'],
+  [250, 'Leyenda familiar', 'Se contará en todas las sobremesas de aquí a 2040.']
+];
+function abuLevel(v) { var l = ABU_LEVELS[0], nx = null; ABU_LEVELS.forEach(function (x, i) { if (v >= x[0]) { l = x; nx = ABU_LEVELS[i + 1] || null; } }); return { l: l, next: nx }; }
+function abuCard(lg, tx) {
+  var ex = lg.excluded || []; if (!ex.length) return '';
+  var k = ex[0], F = fam(k), house = S.house, fn = F.name.replace(/\s*&\s*/g, ' y ');
+  var r = lg.rows.find(function (x) { return x.id === k; }) || { paid: 0 };
+  var mine = S.expenses.filter(function (e) { return e.payer === k && e.kind === 'aportacion'; });
+  var aport = L.r2(mine.reduce(function (a, e) { return a + (e.amount || 0); }, 0));
+  var prods = S.ingredients.filter(function (i) { return i.family === k && (i.split || 'comun') === 'comun'; });
+  var invited = L.r2(aport + (r.paid || 0));
+  var base = (house && house.payer === k ? house.total : 0) + (S.tax.payer === k ? tx.withExemption : 0);
+  var lv = abuLevel(invited), isAbu = me().family === k, canInv = can('edit') && (isAbu || can('access'));
+  var pct = lv.next ? Math.max(4, Math.min(100, Math.round((invited - lv.l[0]) / (lv.next[0] - lv.l[0]) * 100))) : 100;
+  var h = '<section class="card abu" id="abu"><div class="card-head"><span class="eyebrow">El rincón de los abuelos</span><span class="pill olive">Fuera del reparto</span></div>' +
+    '<h3>' + (isAbu ? 'Abuelos, aquí nadie os pasa factura' : esc(fn) + ': aquí nadie les pasa factura') + '</h3>' +
+    '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ': <b class="num">' + L.money(base) + '</b>. Con eso ' + (isAbu ? 'tenéis' : 'tienen') + ' barra libre de nietos, sofá y mando de la tele. No ' + (isAbu ? 'entráis' : 'entran') + ' en el reparto.</p>' +
+    '<p class="small">' + (isAbu ? '¿Os apetece invitar a algo más?' : '¿Y si les apetece invitar a algo más?') + ' <b>Totalmente opcional.</b> Lo que ' + (isAbu ? 'pongáis' : 'pongan') + ' se <b>descuenta del bote</b> que se reparten los hermanos y compañía (que lo agradecerán con besos y fregando platos).</p>' +
+    '<div class="abu-meter" data-egg="abumeter"><div class="row"><span class="aw-ico sm">' + icon('trophy') + '</span><span class="grow"><b>Abuelómetro:</b> ' + esc(lv.l[1]) + '<small class="muted" style="display:block">' + esc(lv.l[2]) + '</small></span><b class="num">' + L.money(invited) + '</b></div>' +
+    '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
+    (lv.next ? '<small class="muted">Faltan ' + L.money(L.r2(lv.next[0] - invited)) + ' para «' + esc(lv.next[1]) + '»</small>' : '<small class="gold">Nivel máximo. Ya no hay más medallas que darles.</small>') + '</div>';
+  if (mine.length || prods.length) {
+    h += '<div class="stack" style="gap:2px">' + mine.map(function (e) {
+      var inner = '<span class="grow"><b>' + esc(e.concept) + '</b></span><b class="num">' + L.money(e.amount) + '</b>';
+      return can('edit') ? '<button class="row abu-inv" data-act="editExp" data-id="' + e.id + '">' + inner + '</button>' : '<div class="row abu-inv">' + inner + '</div>';
+    }).join('') + (prods.length ? '<div class="row small abu-inv"><span class="grow">Productos de la compra que se han pedido (' + prods.length + ')</span><b class="num">' + L.money(r.paid || 0) + '</b></div>' : '') + '</div>';
+  }
+  if (canInv) {
+    var c = ui.abuC || '', a = ui.abuA || null;
+    h += '<div class="abu-form"><span class="lbl">¿A qué invitáis?</span><div class="chips">' + abuIdeas().map(function (x) {
+      return '<button class="chip" data-act="abuC" data-v="' + esc(x) + '" aria-pressed="' + (c === x) + '">' + esc(x) + '</button>';
+    }).join('') + '</div>' +
+      '<span class="lbl">¿Cuánto?</span><div class="chips">' + [10, 20, 50, 100].map(function (n) {
+        return '<button class="chip" data-act="abuA" data-v="' + n + '" aria-pressed="' + (a === n) + '">' + n + ' €</button>';
+      }).join('') + '<label class="price-in"><input class="price-field" id="abu-amt" inputmode="decimal" placeholder="Otro" value="' + (a && [10, 20, 50, 100].indexOf(a) < 0 ? L.n(a) : '') + '">€</label></div>' +
+      '<button class="btn primary block" data-act="abuGo">' + icon('gift') + '¡Invitamos nosotros!</button>' +
+      '<p class="small muted">Luego la app os dice a quién hacer el bizum. Si os arrepentís, tocad la invitación y se borra (sin rencores).</p></div>';
+  } else {
+    h += '<p class="small muted">Solo los abuelos pueden invitar desde aquí. Se admiten indirectas.</p>' +
+      '<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Abuelos, os echamos de menos en el Abuelómetro de la app de ' + (S.trip.short || 'la casa rural') + '. Ni una presión, eh. Bueno, un poco. ' + location.origin + location.pathname + ' ') + '">' + icon('megaphone') + 'Mandar una indirecta a los abuelos</a>';
+  }
+  return h + '</section>';
+}
 function modeText(m) {
   if (m === 'familia') return 'Cada familia que asiste paga lo mismo, venga quien venga.';
   if (m === 'persona') return 'Cada persona cuenta 1 por cada comida a la que asiste, sea de la edad que sea.';
@@ -2501,52 +2644,7 @@ function startAmbient() {
   ambRAF = requestAnimationFrame(frame);
 }
 
-/* ---------- Easter eggs ---------- */
-var EGGS = [];
-function buildEggs() {
-  var g = ((S.trip.eggs && S.trip.eggs.grand) || []).map(function (id) { return nameOf(id); }).filter(Boolean).join(' o a ');
-  EGGS = [
-    { k: 'fumata', name: 'Habemus compra', how: 'Completar toda la lista de la compra', hint: 'Cuando no quede nada pendiente…' },
-    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + bdayName() + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años' },
-    { k: 'baby', name: 'Modo ' + babyName(), how: 'Tocar 3 veces a ' + babyName(), hint: 'El más pequeño esconde algo' },
-    { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + babyName(), hint: 'Ploc, ploc, ploc' },
-    { k: 'trophy', name: 'Campeón', how: 'Coronar al campeón de una eliminatoria o una liguilla', hint: 'Solo puede quedar uno' },
-    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 7 veces el logo', hint: 'El logo guarda un secreto' },
-    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Los abuelos ven de maravilla… con ayuda' },
-    { k: 'claras', name: 'Cuentas claras', how: 'Dejar la liquidación a cero con gastos apuntados', hint: 'Nadie debe nada a nadie' },
-    { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A deshoras' },
-    { k: 'zero', name: '¡Ya estamos aquí!', how: 'Estar en la app cuando llega la hora de entrada', hint: 'Cuando la cuenta atrás llega a cero' },
-    { k: 'salud', name: '¡Salud!', how: 'Marcar como comprada la cerveza, el vino o los refrescos', hint: 'Algo para brindar' },
-    { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Si llueve, pídeselo al cielo' },
-    { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números del cumpleañero' },
-    { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuanta más familia, mejor' },
-    { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Una palabra en latín, en el buscador' },
-    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar' },
-    { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música' },
-    { k: 'habemus', name: 'Habemus campeón', how: 'Terminar todos los juegos del finde', hint: 'Cuando no quede ni un juego por jugar' },
-    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando' },
-    { k: 'album', name: 'Paparazzi en serie', how: 'Llegar a 50 fotos en el álbum', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún' }
-  ];
-}
-function foundMap() { try { return JSON.parse(localStorage.getItem(KEY + '-eggs')) || {}; } catch (e) { return ui._eggs || {}; } }
-function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
-function egg(k) {
-  var f = foundMap(); if (f[k]) return false;
-  f[k] = new Date().toISOString(); ui._eggs = f;
-  try { localStorage.setItem(KEY + '-eggs', JSON.stringify(f)); } catch (e) {}
-  var e = EGGS.find(function (x) { return x.k === k; });
-  setTimeout(function () { toast('Secreto descubierto: <b>' + esc(e.name) + '</b> · ' + foundCount() + '/' + EGGS.length, 'Ver', secretsSheet); }, 2600);
-  return true;
-}
-function secretsSheet() {
-  var f = foundMap();
-  openSheet('<h2>Secretos de la casa</h2><p class="small muted">' + foundCount() + ' de ' + EGGS.length + ' descubiertos en este dispositivo. ¿Quién de la familia los encuentra todos?</p><div class="stack">' +
-    EGGS.map(function (e) {
-      var ok = f[e.k];
-      return '<div class="row"><span class="av sm" style="background:' + (ok ? 'var(--accent)' : 'var(--surface-2)') + ';color:' + (ok ? '#fff' : 'var(--muted)') + '">' + (ok ? '✓' : '?') + '</span><span class="grow"><b>' + (ok ? esc(e.name) : '???') + '</b><span class="small muted" style="display:block">' + esc(ok ? e.how : 'Pista: ' + e.hint) + '</span></span></div>';
-    }).join('') + '</div><button class="btn primary block" data-act="close">Seguir buscando</button>');
-}
-
+/* ---------- Easter eggs: la lista, el marcador y el ranking viven en app-9-secretos.js ---------- */
 var fxBusy = false;
 function fxLayer(veil) {
   var l = document.createElement('div'); l.className = 'fx'; l.innerHTML = '<canvas></canvas>';
@@ -2575,7 +2673,7 @@ function bdayParty() {
   if (fxBusy) return; fxBusy = true; setTimeout(function () { fxBusy = false; }, 4200);
   confetti(4200);
   var e = S.trip.eggs || {};
-  message('<div class="eleven">' + (e.bdayAge || '') + '</div><h2 style="font-size:clamp(1.8rem,8vw,3rem)">¡Felicidades, ' + esc(bdayName()) + '!</h2><p>' + (e.bdayAge || '') + ' años y un ' + esc(S.trip.name.split(' ')[0]) + ' entero para celebrarlo.</p>', 3800);
+  message('<div class="eleven">' + (e.bdayAge || '') + '</div><h2 style="font-size:clamp(1.8rem,8vw,3rem)">¡Felicidades, ' + esc(bdayName()) + '!</h2><p>' + (e.bdayAge || '') + ' años y un finde entero para celebrarlo.</p>', 3800);
   egg('bday');
 }
 function fumata() {
@@ -2702,13 +2800,15 @@ function abueloMode() {
   egg('abuelo');
 }
 var tapCount = {}, tapTimer = {};
-function eggTap(k) {
+var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 5, sun: 5, disco: 3, podio: 3, abumeter: 3 };
+function eggTap(k, el) {
+  var need = EGG_TAPS[k]; if (!need) return false;
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
-  tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2200);
-  var need = { bday: 5, baby: 3, grand: 3, logo: 7, sun: 5, disco: 3, podio: 3 }[k];
+  tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2400);
+  if (el && tapCount[k] >= 2 && tapCount[k] < need) { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {} }
   if (tapCount[k] >= need) {
     tapCount[k] = 0;
-    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else abueloMode();
+    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else if (k === 'abumeter') abuMeterFx(); else abueloMode();
     return true;
   }
   return false;
@@ -2716,9 +2816,9 @@ function eggTap(k) {
 
 /* ---------- Acciones ---------- */
 var A = {
-  tab: function (el) { ui.mealFilter = null; go(el.dataset.tab); },
+  tab: function (el) { ui.mealFilter = null; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
   goSheet: function (el) { closeSheet(); go(el.dataset.tab); },
-  logo: function () { if (!eggTap('logo')) { if (ui.tab !== 'inicio') go('inicio'); } },
+  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); } },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
   day: function (el) { ui.day = el.dataset.day; render(true); },
@@ -2815,6 +2915,7 @@ var A = {
     var pid = el.dataset.p, day = el.dataset.day;
     if (!guard('attend', pid)) return;
     var next = { pend: 'si', si: 'no', no: 'pend' }[L.dayStatus(S, pid, day)];
+    egg('dias');
     S.dayConfirm[pid] = S.dayConfirm[pid] || {};
     if (next === 'pend') delete S.dayConfirm[pid][day]; else S.dayConfirm[pid][day] = next;
     /* la confirmación del día manda: se quitan las excepciones de sus comidas */
@@ -2848,7 +2949,7 @@ var A = {
     S.votes = S.votes || {}; var v = S.votes[el.dataset.id] = S.votes[el.dataset.id] || [];
     var k = v.indexOf(me().id); if (k >= 0) v.splice(k, 1); else v.push(me().id);
     save(); el.setAttribute('aria-pressed', k < 0); el.querySelector('.num').textContent = v.length;
-    if (k < 0) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+    if (k < 0) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); egg('apunto'); }
   },
   editAct: function (el) { if (guard('edit')) actSheet(el.dataset.id); },
   newAct: function () { if (guard('edit')) actSheet(null); },
@@ -2887,6 +2988,23 @@ var A = {
   newExp: function () { if (guard('edit')) expSheet(null); },
   editExp: function (el) { if (guard('edit')) expSheet(el.dataset.id); },
   saveExp: saveExp,
+  abuC: function (el) { var f = document.getElementById('abu-amt'); if (f && f.value) ui.abuA = numVal('abu-amt'); ui.abuC = ui.abuC === el.dataset.v ? '' : el.dataset.v; render(); },
+  abuA: function (el) { var n = +el.dataset.v; ui.abuA = ui.abuA === n ? null : n; var f = document.getElementById('abu-amt'); if (f) f.value = ''; render(); },
+  abuGo: function () {
+    if (!guard('edit')) return;
+    var ex = L.excluded(S); if (!ex.length) return;
+    var typed = numVal('abu-amt'), amt = typed != null ? typed : ui.abuA;
+    if (!amt || amt <= 0) { toast('¿Cuánto? Toca un importe o escríbelo'); return; }
+    var before = abuLevel(L.ledger(S, false).rows.filter(function (r) { return r.id === ex[0]; }).reduce(function (a, r) { return a + r.paid; }, 0) + S.expenses.filter(function (e) { return e.payer === ex[0] && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + e.amount; }, 0));
+    S.expenses.push({ id: uid('e'), concept: ui.abuC || 'Invitación de los abuelos', amount: amt, payer: ex[0], split: 'comun', kind: 'aportacion', date: new Date().toISOString().slice(0, 10) });
+    ui.abuC = ''; ui.abuA = null; save(); render(true);
+    var tot = S.expenses.filter(function (e) { return e.payer === ex[0] && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + e.amount; }, 0) + (L.ledger(S, false).rows.find(function (r) { return r.id === ex[0]; }) || { paid: 0 }).paid;
+    var after = abuLevel(tot);
+    confetti(1600);
+    if (after.l[1] !== before.l[1]) setTimeout(function () { message('<h2 style="font-size:clamp(1.8rem,9vw,3rem)">¡Nivel nuevo!<br>' + esc(after.l[1]) + '</h2>', 2600); }, 250);
+    else toast('¡Gracias, abuelos! ' + L.money(amt) + ' menos en el bote');
+    checkClaras();
+  },
   delExp: function (el) {
     if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Seguro? Toca otra vez'; return; }
     S.expenses = S.expenses.filter(function (x) { return x.id !== el.dataset.id; }); save(); closeSheet(); render(true); toast('Gasto borrado');
@@ -2896,6 +3014,7 @@ var A = {
   setMe: function (el) { ui.me = el.dataset.id; saveUi(); closeSheet(); render(true); toast('Ahora eres ' + esc(me().name) + ' (' + ROLE[me().role] + ')'); },
   pref: function (el) {
     ui.prefs[el.dataset.k] = el.dataset.v; savePrefs(); applyPrefs();
+    if (el.dataset.k === 'theme' && el.dataset.v === 'dark') egg('noche');
     el.parentNode.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', b === el); });
     if (el.dataset.k === 'accent' || el.dataset.k === 'theme') { stopHero(); if (ui.tab === 'inicio') startHero(); }
   },
@@ -3006,6 +3125,16 @@ function costSheet(id) {
     '<div class="sheet-actions"><button class="btn primary" data-act="saveCost" data-id="' + id + '">Guardar precio</button><button class="btn" data-act="close">Luego</button></div>');
 }
 var C = {
+  itemCost: function (el) {
+    if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }); if (!i) return;
+    var v = el.value.replace(/[€\s]/g, '').replace(',', '.').trim();
+    if (v === '') i.cost = null; else { var n = parseFloat(v); if (isNaN(n) || n < 0) { toast('Escribe un precio, por ejemplo 4,50'); el.value = i.cost != null ? L.n(i.cost) : ''; return; } i.cost = Math.round(n * 100) / 100; el.value = L.n(i.cost); }
+    save();
+    var lab = el.closest('.price-in'); if (lab) lab.classList.toggle('ok', i.cost != null);
+    var row = document.getElementById('it-' + i.id); if (row) row.classList.toggle('noprice', L.needsPrice(i));
+    var sum = document.getElementById('mineSum'); if (sum) sum.innerHTML = mineSumHtml(S.ingredients.filter(function (x) { return x.family === me().family; }));
+    if (i.cost != null) { if (navigator.vibrate) try { navigator.vibrate(10); } catch (e) {} if (!S.ingredients.some(function (x) { return x.family === me().family && L.needsPrice(x); })) { confetti(1600); toast('¡Todo con precio! Ya cuenta en Cuentas'); } }
+  },
   score: function (el) { var m = S.tournament.rounds[+el.dataset.r][+el.dataset.m]; var v = parseInt(el.value, 10); m['s' + el.dataset.side] = isNaN(v) ? null : v; save(); },
   weight: function (el) { var v = parseFloat(el.value.replace(',', '.')); if (!isNaN(v) && v >= 0) { S.split.w[el.dataset.k] = v; save(); render(true); } },
   photo: function (el) {
@@ -3042,7 +3171,7 @@ function refreshWeather(manual) {
 function bindEvents() {
   document.addEventListener('click', function (e) {
     var eg = e.target.closest('[data-egg]');
-    if (eg && S && eggTap(eg.dataset.egg)) { e.preventDefault(); return; }
+    if (eg && S && eggTap(eg.dataset.egg, eg)) { e.preventDefault(); return; }
     var t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
     var fn = A[t.dataset.act]; if (fn) { e.preventDefault(); fn(t, e); }
   });
@@ -3050,10 +3179,17 @@ function bindEvents() {
   document.addEventListener('input', function (e) {
     var t = e.target;
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
+    if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('El brindis');
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
     if (t.dataset.input === 'glass') { ui.prefs.glass = t.value / 100; savePrefs(); applyPrefs(); }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSheet();
+    if (e.key === 'Enter' && e.target && e.target.classList && e.target.classList.contains('price-field')) {
+      e.preventDefault(); var all = Array.prototype.slice.call(document.querySelectorAll('.price-field')), k = all.indexOf(e.target);
+      if (all[k + 1]) all[k + 1].focus(); else e.target.blur();
+    }
+  });
 }
 /* Se llama cuando S ya está cargado (demo local o nube) */
 function startApp() {
@@ -3067,6 +3203,7 @@ function startApp() {
   var bd = S.trip.eggs && S.trip.eggs.bdayDate;
   if (bd && today === bd && ui.bdaySeen !== today) { ui.bdaySeen = today; saveUi(); setTimeout(bdayParty, 900); }
   if (countdownParts().phase === 'during') egg('zero');
+  secretsWatch();
   setInterval(function () { var d = new Date(); if (d.getHours() % 12 === 11 && d.getMinutes() === 11 && ui.lastWish !== d.toDateString() + d.getHours()) { ui.lastWish = d.toDateString() + d.getHours(); wish1111(); } }, 20000);
 }
 function boot() {
@@ -3505,7 +3642,7 @@ function gGuard() { return guard('edit'); }
 
 Object.assign(A, {
   jsub: function (el) { ui.jsub = el.dataset.v; ui.game = null; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
-  gOpen: function (el) { ui.game = el.dataset.id; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
+  gOpen: function (el) { if (ui.tab === 'planes') egg('ojeador'); ui.game = el.dataset.id; if (ui.tab !== 'juegos') ui.tab = 'juegos'; render(); window.scrollTo(0, 0); navPush(); },
   gBack: function () { var st = history.state, g = ui.game; ui.game = null; render(); window.scrollTo(0, 0); if (st && st.app && st.v && st.v.game === g && history.length > 1) history.back(); else navPush(); },
   gNew: function () { if (gGuard()) newGameSheet(); },
   gCreate: function (el) { createGame(el.dataset.k); },
@@ -3611,6 +3748,7 @@ Object.assign(A, {
   aPick: function (el) {
     var aid = el.dataset.id, nom = el.dataset.e, myE = G.entrantOf(S, me().id);
     if (nom === me().id || nom === myE) { toast('Votarte a ti mismo no vale. Buen intento'); return; }
+    egg('jurado');
     S.awardVotes = S.awardVotes || {}; S.awardVotes[aid] = S.awardVotes[aid] || {}; S.awardVotes[aid][me().id] = nom;
     save(); closeSheet(); render(true); toast('Voto guardado para ' + esc(eText(nom)));
   },
@@ -3789,7 +3927,7 @@ Object.assign(A, {
     var p = (S.photos || []).find(function (x) { return x.id === el.dataset.id; }); if (!p) return;
     var on = likesOf(p).indexOf(me().id) < 0;
     S.photoLikes = S.photoLikes || {}; var l = S.photoLikes[p.id] = S.photoLikes[p.id] || []; if (on) { if (l.indexOf(me().id) < 0) l.push(me().id); } else l.splice(l.indexOf(me().id), 1);
-    viewerRender(); if (on && navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
+    viewerRender(); if (on) egg('corazon'); if (on && navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
     PHOTOS.like(p, on).catch(function () { toast('No he podido guardar el corazón'); });
   },
   phCaption: function (el) {
@@ -3820,7 +3958,7 @@ Object.assign(C, {
     chain.then(function () {
       var n = document.getElementById('ph-progress'); if (n) n.textContent = '';
       render(true);
-      if (done) { confetti(1200); toast(done + (done === 1 ? ' foto subida' : ' fotos subidas') + (fail ? ' · ' + fail + ' no se han podido leer' : '') + '. ¡Gracias, paparazzi!'); if (photoList().length >= 50) egg('album'); }
+      if (done) { confetti(1200); toast(done + (done === 1 ? ' foto subida' : ' fotos subidas') + (fail ? ' · ' + fail + ' no se han podido leer' : '') + '. ¡Gracias, paparazzi!'); egg('foto'); if (photoList().length >= 50) egg('album'); }
       else toast('No he podido subir esas fotos. Prueba con otras (JPG o PNG)');
     });
   }
@@ -3841,20 +3979,21 @@ VIEWS.manual = function () {
   var steps = [
     ['Entra', 'Con <b>tu email</b> (los peques, con su <b>usuario</b>) y el <b>código de la familia</b> que te ha llegado por WhatsApp. Justo después <b>eliges tu propio código</b> de 6 cifras: ya solo entrarás con ese.'],
     ['Revisa tus días', 'Ya están apuntados. Si <b>cambia algo</b>, en <b>Inicio → «Vuestros días»</b> toca el día: <b>✓</b> viene · <b>✕</b> no viene. Los padres lo cambian por toda su familia.'],
-    ['Pídete la compra', 'En <b>Compra → «Sin dueño»</b> toca <b>«Me lo pido»</b>: queda a vuestro cargo con su precio estimado. ¿Error? En «Lo nuestro», <b>Soltar</b>.']
+    ['Pídete la compra', 'En <b>Compra → «Sin dueño»</b> toca <b>«Me lo pido»</b>: queda a vuestro cargo. ¿Error? En «Lo nuestro», <b>Soltar</b>.'],
+    ['Apunta lo que cuesta', 'Cuando lo compréis, en <b>Compra → «Lo nuestro»</b> escribe el <b>precio real</b> en la casilla de cada producto. <b>Sin precio real no cuenta en Cuentas.</b>']
   ];
   var cards = [
-    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con el total estimado. Tocando un producto podéis poner el <b>precio real</b> o marcar que lo traéis <b>de casa</b> (0 €).'],
+    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper. Cada producto tiene su casilla de <b>precio real</b>; arriba veis cuántos faltan. Si algo lo traéis <b>de casa</b>, tocad el producto y marcadlo (0 €).'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Toca los comensales si alguien no come ese día: las cantidades se ajustan solas.'],
     ['trophy', 'Juegos en directo', 'Los editores apuntan resultados: <b>toca el nombre del ganador</b> o usa <b>+ / −</b> en el marcador. El ranking y el podio se actualizan solos.'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos de lo que pasa en la app y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores y descárgalas cuando quieras.'],
-    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>. ' : '') + 'El resto se reparte y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
+    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa turística las pagan <b>' + esc(payer.name) + '</b>, que no entran en el reparto (si les apetece invitar a algo, en <b>«El rincón de los abuelos»</b>, y se descuenta del bote). ' : '') + 'El resto se reparte entre hermanos y compañía y la app dice <b>quién paga a quién</b> con el mínimo de transferencias.']
   ];
   var h = '<div class="view-head"><div><h2>Manual de uso</h2><p class="muted small">Todo lo que hay que saber de la ' + esc(T.name || 'app') + '</p></div></div>';
   h += '<section class="card manual-dl"><div class="row" style="align-items:flex-start"><span class="aw-ico">' + icon('copy') + '</span><div class="grow"><b>El manual en PDF</b><p class="small muted">Para guardarlo en el móvil o reenviarlo por WhatsApp.</p></div></div>' +
     '<div class="row wrap"><button class="btn primary" data-act="manualPdf">' + icon('arrow') + 'Descargar PDF</button><button class="btn ghost" data-act="manualPrint">Imprimir esta página</button></div></section>';
-  h += '<p class="eyebrow">Lo primero</p><div class="stack man-steps">' + steps.map(function (s, i) {
+  h += '<p class="eyebrow">Paso a paso</p><div class="stack man-steps">' + steps.map(function (s, i) {
     return '<article class="card man-step"><span class="man-n">' + (i + 1) + '</span><div class="grow"><h3>' + s[0] + '</h3><p class="small">' + s[1] + '</p></div></article>';
   }).join('') + '</div>';
   h += '<p class="eyebrow">Durante el finde</p><div class="man-grid">' + cards.map(function (c) {
@@ -3863,7 +4002,8 @@ VIEWS.manual = function () {
   h += '<section class="card man-dark"><div class="man-tips">' +
     '<div><b>Como una app</b><p class="small">iPhone: <b>Compartir → Añadir a pantalla de inicio</b>. Android: menú (los tres puntos) → <b>Añadir a pantalla de inicio</b>.</p></div>' +
     '<div><b>Quién puede qué</b><p class="small">Todos lo ven todo, se apuntan a planes, votan y suben fotos. Los <b>editores</b> apuntan compras, precios y resultados. Los adultos confirman a su familia.</p></div>' +
-    '<div><b class="gold">Secretos</b><p class="small">Hay <b>easter eggs escondidos</b>: toques repetidos, horas raras, palabras mágicas… Arriba se ve quién está conectado.</p></div></div></section>';
+    '<div><b class="gold">Secretos de la casa</b><p class="small">Hay <b>' + (EGGS.length || 31) + ' secretos</b> repartidos por la app: toques repetidos, horas raras, palabras mágicas… Cada uno tiene los suyos, con <b>3 pistas extra</b> y un <b>ranking</b> (al final de Inicio o tocando tu nombre). Se cierra el <b>' + esc(fmtClose()) + '</b>. Chitón.</p></div></div></section>' +
+    '<p class="small muted" style="text-align:center">Has llegado al final del manual. Eso, en esta casa, tiene premio.</p>';
   h += '<section class="card wood small"><p><b>Llegada:</b> ' + esc(dayOf(S.days[0].k).long) + ' a las ' + esc(T.arrival || '—') + ' · <b>Salida:</b> ' + esc(dayOf(S.days[S.days.length - 1].k).long) + ' a las ' + esc(T.departure || '—') + '</p>' +
     (T.address ? '<p>' + esc(T.place || '') + ' · ' + esc(T.address) + '</p>' : '') + (T.phone ? '<p>Teléfono de la finca: <b>' + esc(T.phone) + '</b></p>' : '') +
     '<p class="muted">¿Dudas? Pregúntale al organizador.</p></section>';
@@ -3881,6 +4021,195 @@ Object.assign(A, {
     }, function () { if (win) win.close(); el.disabled = false; el.innerHTML = t; toast('No he podido abrir el PDF. Prueba otra vez'); });
   }
 });
+
+/* ===================== Secretos de la casa =====================
+   Cada persona tiene los suyos (se guardan por persona en su dispositivo; la nube solo recibe CUÁNTOS lleva).
+   Misión: desbloquearlos todos sin contárselo a nadie. 3 pistas extra por persona, en total.
+   El ranking se cierra el domingo a las 11:00 y avisa a todos 2 horas antes. */
+var SECRETS_CLOSE = '2026-10-11T11:00:00+02:00', SECRETS_WARN_MIN = 120, SECRETS_HINTS = 3;
+var EGGS = [];
+function secretsCloseIso() { var e = S && S.trip && S.trip.eggs; return (e && e.close) || SECRETS_CLOSE; }
+function secretsClose() { return new Date(secretsCloseIso()); }
+function secretsClosed() { return Date.now() >= secretsClose().getTime(); }
+function closeHour() { return secretsCloseIso().slice(11, 16); }
+function fmtClose() { var d = dayOf(secretsCloseIso().slice(0, 10)); return (d && d.long ? d.long.toLowerCase() : 'domingo') + ' a las ' + closeHour(); }
+function buildEggs() {
+  var g = ((S.trip.eggs && S.trip.eggs.grand) || []).map(function (id) { return nameOf(id); }).filter(Boolean).join(' o a ');
+  var b = babyName(), c = bdayName();
+  EGGS = [
+    /* Para empezar: conocer la app */
+    { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'El primer secreto es saber que hay secretos', more: 'Ya lo tienes: abrir esta lista' },
+    { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'Quien lee las instrucciones hasta el final…', more: 'Inicio → Manual de uso, y baja hasta abajo del todo' },
+    { k: 'dias', name: 'Presente', how: 'Tocar un día en «Vuestros días» o en Asistencia', hint: 'Pasar lista', more: 'En Inicio, toca un día de tu fila en «Vuestros días»' },
+    { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Mira al cielo… desde la app', more: 'Inicio → El tiempo en la finca → Detalle' },
+    { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'Apaga la luz', more: 'Toca tu nombre arriba a la derecha y busca el tema' },
+    { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'Los planes también se quieren', more: 'En Planes, el corazón de cualquier actividad' },
+    { k: 'ojeador', name: 'Ojeador', how: 'Abrir un marcador desde Planes', hint: 'Algunos planes esconden un marcador', more: 'En Planes, busca «Marcador» en una actividad con juego' },
+    { k: 'jurado', name: 'Jurado popular', how: 'Votar en un premio', hint: 'Tu voto cuenta', more: 'Juegos → Premios → uno que se vote' },
+    { k: 'foto', name: 'Primera foto', how: 'Subir una foto al álbum', hint: 'Sonría, por favor', more: 'La cámara de arriba → Subir fotos' },
+    { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Un poco de amor para el álbum', more: 'Abre una foto del álbum y toca el corazón' },
+    /* Toques escondidos */
+    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 5 veces seguidas el logo', hint: 'El logo guarda un secreto', more: 'La casita de arriba a la izquierda o el título grande de Inicio: 5 toques rápidos' },
+    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años', more: 'Busca su foto en Personas y tócala 5 veces seguidas' },
+    { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño esconde algo', more: 'En Comidas, toca 3 veces «Menú ' + b + '»' },
+    { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas' },
+    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Los abuelos ven de maravilla… con ayuda', more: 'Busca a los abuelos en Personas y toca 3 veces su foto' },
+    { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Si llueve, pídeselo al cielo', more: 'En Inicio, el título «El tiempo en la finca»' },
+    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar', more: 'En Inicio, los números de la cuenta atrás' },
+    { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música', more: 'Juegos → Ranking, el primero del podio' },
+    { k: 'abumetro', name: 'Abuelómetro al rojo', how: 'Tocar 3 veces el Abuelómetro', hint: 'Hay un medidor de abuelos', more: 'Cuentas → El rincón de los abuelos' },
+    /* Palabras mágicas */
+    { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Una palabra en latín, en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
+    { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra (o pedirse la bebida)', hint: 'Algo para brindar', more: 'En el buscador de Compra, lo que se dice al brindar' },
+    /* A su hora */
+    { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A deshoras', more: 'Cuando todos duermen…' },
+    { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números de ' + c, more: 'Mañana o noche, cuando el reloj marque cuatro unos' },
+    { k: 'zero', name: '¡Ya estamos aquí!', how: 'Abrir la app cuando ya estamos en la finca', hint: 'Cuando la cuenta atrás llega a cero', more: 'Abre la app durante el finde' },
+    { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuanta más familia, mejor', more: 'Mira arriba quién está conectado: hacen falta 6 a la vez' },
+    /* Cuando pasa algo en la familia */
+    { k: 'fumata', name: 'Habemus compra', how: 'Ver la lista de la compra completa', hint: 'Cuando no quede nada sin dueño…', more: 'Entra en Compra cuando todos los productos tengan dueño' },
+    { k: 'claras', name: 'Cuentas claras', how: 'Ver la liquidación a cero con gastos apuntados', hint: 'Nadie debe nada a nadie', more: 'Entra en Cuentas cuando ya no quede ninguna transferencia pendiente' },
+    { k: 'trophy', name: 'Campeón', how: 'Ver el trofeo de un campeón', hint: 'Solo puede quedar uno', more: 'Cuando acabe una eliminatoria, abre el juego y toca «Ver trofeo»' },
+    { k: 'habemus', name: 'Habemus campeón', how: 'Entrar en Juegos con todos los juegos terminados', hint: 'Cuando no quede ni un juego por jugar', more: 'El último día, pásate por Juegos' },
+    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando', more: 'Juegos → Premios → Gala de premios, hasta la última' },
+    { k: 'album', name: 'Paparazzi en serie', how: 'Ver el álbum con 50 fotos o más', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún', more: 'Entre todos, llegad a 50 fotos en el álbum' }
+  ];
+}
+
+/* ----- Almacén por persona ----- */
+function eggKey() { return KEY + '-eggs2-' + (ui.me || 'anon'); }
+function hintKey() { return KEY + '-hints2-' + (ui.me || 'anon'); }
+function readJ(k, mem) { try { var v = JSON.parse(localStorage.getItem(k)); if (v) return v; } catch (e) {} return (ui[mem] && ui[mem][ui.me]) || {}; }
+function writeJ(k, mem, v) { ui[mem] = ui[mem] || {}; ui[mem][ui.me] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function foundMap() { return readJ(eggKey(), '_eggs'); }
+function hintsMap() { return readJ(hintKey(), '_hints'); }
+function hasEgg(k) { return !!foundMap()[k]; }
+function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
+/* Lo que cuenta para el ranking: lo descubierto antes del cierre */
+function rankedCount() { var f = foundMap(), c = secretsClose().getTime(); return EGGS.filter(function (e) { return f[e.k] && new Date(f[e.k]).getTime() < c; }).length; }
+function egg(k) {
+  var f = foundMap(); if (f[k]) return false;
+  var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
+  f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
+  var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
+  setTimeout(function () {
+    if (all && !late) message('<div class="trophy">' + icon('trophy') + '</div><h2 style="font-size:clamp(1.8rem,9vw,3rem)">Guardián de los Secretos</h2><p>Los ' + EGGS.length + ' secretos de la casa. Trofeo asegurado en la gala… y ni una palabra a nadie.</p>', 4200);
+    else toast('Secreto descubierto: <b>' + esc(e.name) + '</b> · ' + n + '/' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet);
+  }, k === 'curioso' ? 500 : 2600);
+  try { if (window.CLOUD && CLOUD.pingNow) CLOUD.pingNow(); } catch (x) {}
+  return true;
+}
+
+/* ----- Pistas extra: 3 por persona en total ----- */
+function hintsLeft() { return Math.max(0, SECRETS_HINTS - Object.keys(hintsMap()).length); }
+
+/* ----- Ranking (la nube solo sabe cuántos lleva cada uno) ----- */
+function secretsRanking() {
+  var st = S.stats || {}, rows = {};
+  Object.keys(st).forEach(function (pid) { if (person(pid) && (st[pid].eggs || 0) > 0) rows[pid] = st[pid].eggs; });
+  rows[ui.me] = rankedCount();   /* lo mío, siempre al día desde este dispositivo */
+  var arr = Object.keys(rows).map(function (pid) { return { id: pid, n: Math.min(rows[pid], EGGS.length) }; }).filter(function (r) { return r.n > 0 || r.id === ui.me; });
+  arr.sort(function (a, b) { return b.n - a.n || String(pname(a.id)).localeCompare(String(pname(b.id))); });
+  var pos = 0, last = -1; arr.forEach(function (r, i) { if (r.n !== last) { pos = i + 1; last = r.n; } r.pos = pos; });
+  return arr;
+}
+function secretsSheet() {
+  egg('curioso');
+  var f = foundMap(), h = hintsMap(), left = hintsLeft(), closed = secretsClosed(), rk = secretsRanking(), n = foundCount();
+  var mine = rk.find(function (r) { return r.id === ui.me; });
+  var html = '<h2>Secretos de la casa</h2>' +
+    '<div class="card wood small sec-mission"><p><b>Tu misión:</b> desbloquear los ' + EGGS.length + ' secretos <b>sin contárselo a nadie</b>. Cada uno tiene los suyos y están repartidos por toda la app.</p>' +
+    '<p>' + (closed ? '<b>El ranking se cerró</b> el ' + esc(fmtClose()) + '. Lo que descubras ahora ya no suma.' : 'El ranking se cierra el <b>' + esc(fmtClose()) + '</b> (2 horas antes sonará una alarma). Quien los consiga todos se lleva el trofeo <b>Guardián de los Secretos</b> en la gala.') + '</p></div>' +
+    '<div class="sec-me"><div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small">' + (mine && mine.n ? '<b>' + mine.pos + '.º</b> en el ranking' : 'Aún sin estrenar') + '<br><span class="muted">' + left + (left === 1 ? ' pista extra' : ' pistas extra') + ' de ' + SECRETS_HINTS + '. Úsalas con cabeza</span></span></div>' +
+    '<div class="bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div></div>';
+  html += '<p class="eyebrow">Ranking de cazasecretos</p><div class="sec-rank">' + rk.map(function (r) {
+    return '<div class="sec-row' + (r.id === ui.me ? ' me' : '') + '">' + medal(r.pos) + av(r.id, 'sm') + '<b class="grow">' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</b><span class="num">' + r.n + '/' + EGGS.length + '</span></div>';
+  }).join('') + '<p class="small muted">' + (rk.length < 2 ? 'Aquí saldrá toda la familia en cuanto empiecen a descubrir secretos. ' : 'Se actualiza cada minuto. ') + 'Solo se ve cuántos lleva cada uno, nunca cuáles.</p></div>';
+  html += '<p class="eyebrow">Tus secretos</p><div class="stack">' + EGGS.map(function (e) {
+    var ok = f[e.k], hint = h[e.k];
+    return '<div class="row sec-egg' + (ok ? ' ok' : '') + '"><span class="av sm" style="background:' + (ok ? 'var(--accent)' : 'var(--surface-2)') + ';color:' + (ok ? '#fff' : 'var(--muted)') + '">' + (ok ? '✓' : '?') + '</span><span class="grow"><b>' + (ok ? esc(e.name) : '???') + '</b><span class="small muted" style="display:block">' + esc(ok ? e.how : 'Pista: ' + e.hint) + '</span>' +
+      (!ok && hint ? '<span class="small sec-more">' + icon('bulb') + esc(e.more) + '</span>' : '') + '</span>' +
+      (!ok && !hint && left > 0 && !closed ? '<button class="btn ghost sec-hint" data-act="secHint" data-k="' + e.k + '" aria-label="Usar una pista extra">' + icon('bulb') + '</button>' : '') + '</div>';
+  }).join('') + '</div><button class="btn primary block" data-act="close">Seguir buscando</button>';
+  openSheet(html);
+}
+Object.assign(A, {
+  secHint: function (el) {
+    var k = el.dataset.k, left = hintsLeft();
+    if (!left) { toast('Ya has gastado tus ' + SECRETS_HINTS + ' pistas extra. Ahora, a pensar'); return; }
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = icon('bulb') + '¿Gastar 1 de ' + left + '?'; el.classList.add('armed'); return; }
+    var h = hintsMap(); h[k] = new Date().toISOString(); writeJ(hintKey(), '_hints', h);
+    closeSheet(); setTimeout(secretsSheet, 80);
+    toast(hintsLeft() ? 'Pista usada. Te quedan ' + hintsLeft() : 'Última pista usada. Suerte');
+  },
+  secAlarmGo: function () { var v = document.querySelector('.sec-alarm'); if (v) v.remove(); secretsSheet(); },
+  secAlarmClose: function () { var v = document.querySelector('.sec-alarm'); if (v) v.remove(); }
+});
+
+/* ----- Disparadores que dependen de lo que se ve (así cualquier rol puede conseguirlos) ----- */
+function secretsOnView() {
+  try {
+    var t = ui.tab;
+    if (t === 'tiempo') egg('meteo');
+    if (t === 'compra') { var c = L.coverage(S.ingredients); if (c.tot && c.done === c.tot && !hasEgg('fumata') && !ui._fumataPend) { ui._fumataPend = true; setTimeout(function () { ui._fumataPend = false; if (!hasEgg('fumata')) fumata(); }, 450); } }
+    if (t === 'cuentas') { var lg = L.ledger(S, false); if (lg.total > 0 && !lg.tx.length && !hasEgg('claras')) setTimeout(checkClaras, 300); }
+    if (t === 'juegos' && !hasEgg('habemus')) { var gs = S.games || []; if (gs.length && gs.every(function (g) { return G.isDone(S, g); })) { ui.allDoneShown = false; checkAllGames(); } }
+    if (t === 'album' && typeof photoList === 'function' && photoList().length >= 50) egg('album');
+    if (t === 'manual') setTimeout(manualEndCheck, 300);
+  } catch (e) {}
+}
+function manualEndCheck() {
+  if (!ui || ui.tab !== 'manual' || hasEgg('manual')) return;
+  var doc = document.documentElement;
+  if (window.innerHeight + window.scrollY >= doc.scrollHeight - 140) egg('manual');
+}
+window.addEventListener('scroll', function () { if (ui && ui.tab === 'manual') manualEndCheck(); }, { passive: true });
+function abuMeterFx() {
+  confetti(1800);
+  message('<h2 style="font-size:clamp(1.8rem,9vw,3rem)">Abuelómetro<br>al rojo vivo</h2><p>Aviso: el medidor no acepta sobornos. Bueno, un vermut sí.</p>', 3000);
+  egg('abumetro');
+}
+
+/* ----- Alarma del cierre: 2 horas antes, para todos los que estén en la app ----- */
+function flagGet(k) { try { return localStorage.getItem(KEY + '-' + k + '-' + ui.me) === '1'; } catch (e) { return !!ui['_' + k]; } }
+function flagSet(k) { ui['_' + k] = true; try { localStorage.setItem(KEY + '-' + k + '-' + ui.me, '1'); } catch (e) {} }
+function secretsWatch() {
+  function tick() {
+    var ms = secretsClose().getTime() - Date.now();
+    if (ms <= 0) { if (ms > -6 * 3600000 && !flagGet('secClosed')) { flagSet('secClosed'); secretsClosedFx(); } return; }
+    if (ms > SECRETS_WARN_MIN * 60000) return;
+    if (ui.tab === 'inicio' && !document.querySelector('.sec-banner')) render(true);
+    if (flagGet('secWarn')) return; flagSet('secWarn');
+    secretsAlarm(ms);
+  }
+  setTimeout(tick, 5200); setInterval(tick, 30000);   /* después de la fiesta de cumple si coincide */
+}
+function secretsAlarm(ms) {
+  var min = Math.max(1, Math.round(ms / 60000)), hrs = Math.floor(min / 60), rest = min % 60;
+  var left = hrs ? hrs + (hrs === 1 ? ' hora' : ' horas') + (rest ? ' y ' + rest + ' min' : '') : min + ' minutos';
+  if (navigator.vibrate) try { navigator.vibrate([200, 100, 200, 100, 400]); } catch (e) {}
+  alarmBeep();
+  var old = document.querySelector('.sec-alarm'); if (old) old.remove();
+  var v = document.createElement('div'); v.className = 'sec-alarm'; v.setAttribute('role', 'alertdialog'); v.setAttribute('aria-label', 'Alarma de secretos');
+  v.innerHTML = '<div class="sec-alarm-in"><div class="sec-bell">' + icon('clock') + '</div><span class="eyebrow">Alarma de secretos</span><h2>¡Quedan ' + esc(left) + '!</h2><p>El ranking de secretos se cierra a las <b>' + closeHour() + '</b>. Llevas <b>' + foundCount() + ' de ' + EGGS.length + '</b> y te ' + (hintsLeft() === 1 ? 'queda 1 pista extra' : 'quedan ' + hintsLeft() + ' pistas extra') + '.</p><div class="row wrap" style="justify-content:center"><button class="btn primary" data-act="secAlarmGo">Ver mis secretos</button><button class="btn ghost" data-act="secAlarmClose">Luego</button></div></div>';
+  document.body.appendChild(v);
+}
+function secretsClosedFx() {
+  var rk = secretsRanking(), top = rk.filter(function (r) { return r.pos === 1 && r.n > 0; });
+  fumataRaw('RANKING<br>CERRADO', top.length ? 'Mejor cazasecretos: ' + top.map(function (r) { return esc(pname(r.id)); }).join(' y ') + ' (' + top[0].n + '/' + EGGS.length + '). Desde ahora, los secretos ya no suman.' : 'El ranking de secretos se ha cerrado.');
+}
+function alarmBeep() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    [0, .25, .5].forEach(function (d) { var o = actx.createOscillator(), g = actx.createGain(); o.type = 'square'; o.frequency.value = 880; g.gain.setValueAtTime(.08, actx.currentTime + d); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d + .2); o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + d); o.stop(actx.currentTime + d + .22); });
+  } catch (e) {}
+}
+/* Aviso fijo en Inicio durante las 2 horas previas al cierre */
+function secretsHomeBanner() {
+  var ms = secretsClose().getTime() - Date.now();
+  if (ms <= 0 || ms > SECRETS_WARN_MIN * 60000) return '';
+  return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
+}
 
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
@@ -4043,12 +4372,12 @@ var CLOUD = (function () {
       api.presence.online = on; onPresence();
     });
     ch.subscribe(function (status) { if (status === 'SUBSCRIBED') ch.track({ pid: ui.me, at: new Date().toISOString() }); });
-    ping(); setInterval(ping, 60000);
+    api.pingNow = ping; ping(); setInterval(ping, 60000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) { ping(); ch.track({ pid: ui.me, at: new Date().toISOString() }); } });
   }
   function ping() {
-    var eg = 0; try { eg = foundCount(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg }).then(function () {
+    var eg = 0; try { eg = rankedCount(); } catch (e) {}
+    client().rpc('ping', { p_eggs: eg, p_ver: 2 }).then(function () {
       return client().from('presence').select('person_id,last_seen,visits,minutes,eggs');
     }).then(function (r) {
       if (r && r.data) {
