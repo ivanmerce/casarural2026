@@ -450,3 +450,18 @@ end $f$;
 revoke all on function public.ping(integer, integer) from public, anon;
 grant execute on function public.ping(integer, integer) to authenticated;
 -- update public.presence set eggs = 0;   -- reinicio del marcador (hecho el 30/09/2026)
+
+-- ===================== v0.6 · Registro de huéspedes (ley: 14 años o más) =====================
+create table if not exists public.guest_registrations (
+  person_id text primary key references public.people(id) on delete cascade,
+  done boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+alter table public.guest_registrations enable row level security;
+create policy "leer_miembros" on public.guest_registrations for select to authenticated using (public.is_member());
+create policy "propia_ins" on public.guest_registrations for insert to authenticated with check (public.is_editor() or public.can_attend_for(person_id));
+create policy "propia_upd" on public.guest_registrations for update to authenticated using (public.is_editor() or public.can_attend_for(person_id)) with check (public.is_editor() or public.can_attend_for(person_id));
+create policy "propia_del" on public.guest_registrations for delete to authenticated using (public.is_editor() or public.can_attend_for(person_id));
+grant select, insert, update, delete on public.guest_registrations to authenticated;
+alter publication supabase_realtime add table public.guest_registrations;
+-- app_config 'finca': información práctica de la finca (privada, solo miembros).
