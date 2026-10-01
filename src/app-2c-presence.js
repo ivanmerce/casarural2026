@@ -19,10 +19,14 @@ function timeAgo(iso) {
   var d = Math.round(s / 86400); return 'hace ' + d + (d === 1 ? ' día' : ' días');
 }
 function presencePill() {
-  var ids = onlineIds();
-  return '<button class="online-pill" data-act="whoOnline" aria-label="' + ids.length + ' conectados ahora">' +
-    '<span class="live-dot" aria-hidden="true"></span><span class="avs">' + ids.slice(0, 3).map(function (id) { return av(id, 'xs'); }).join('') + '</span>' +
-    '<b class="num">' + ids.length + '</b></button>';
+  var ids = onlineIds(), noTip = function (h) { return h.replace(/ title="[^"]*"/g, ''); };
+  /* al pasar el ratón (o con el foco del teclado) se despliega quién está; en el móvil, el toque abre la lista completa */
+  var pop = '<span class="online-pop" role="tooltip"><span class="op-head"><span class="live-dot" aria-hidden="true"></span>' + (ids.length === 1 ? '1 persona conectada' : ids.length + ' personas conectadas') + '</span>' +
+    ids.map(function (id) { var p = person(id) || {}; return '<span class="op-row">' + noTip(av(id, 'sm')) + '<span class="op-name">' + esc(p.name || '') + (id === ui.me ? ' <small>(tú)</small>' : '') + (p.spy ? ' <small>· de incógnito</small>' : '') + '</span></span>'; }).join('') +
+    '<span class="op-foot">Toca para ver quién ha pasado por aquí</span></span>';
+  return '<span class="online-wrap"><button class="online-pill" data-act="whoOnline" aria-label="' + ids.length + ' conectados ahora">' +
+    '<span class="live-dot" aria-hidden="true"></span><span class="avs">' + ids.slice(0, 3).map(function (id) { return noTip(av(id, 'xs')); }).join('') + '</span>' +
+    '<b class="num">' + ids.length + '</b></button>' + pop + '</span>';
 }
 function presenceCard() {
   var ids = onlineIds(), pd = presenceData();
@@ -46,7 +50,7 @@ function whoList() {
 }
 var lastOnlineCount = 0;
 function onPresence() {
-  var t = document.getElementById('onlineSlot'); if (t) t.innerHTML = presencePill();
+  var t = document.getElementById('onlineSlot'); if (t) { var ph = presencePill(); if (t._h !== ph) { t.innerHTML = ph; t._h = ph; } }   /* sin repintar si no cambia: el popover no parpadea */
   var c = document.getElementById('presenceCard'); if (c) c.outerHTML = presenceCard();
   var w = document.getElementById('whoSheet'); if (w) w.innerHTML = whoList();
   var n = onlineIds().length;
