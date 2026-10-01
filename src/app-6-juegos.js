@@ -81,7 +81,7 @@ function compCard() {
   var live = (S.games || []).filter(function (g) { return gStatus(g) === 'vivo'; });
   var now = new Date().toISOString().slice(0, 16).replace('T', ' ');
   var next = (S.games || []).filter(function (g) { return gStatus(g) === 'prox'; })[0];
-  var done = G.doneGames(S).length, tot = (S.games || []).length;
+  var done = G.realDone(S).length, tot = (S.games || []).length;
   return '<section class="card comp-card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('trophy') + 'Competición</h3><button class="link" data-act="tab" data-tab="juegos">Juegos ' + icon('arrow') + '</button></div>' +
     (leader.length ? '<button class="leader" data-act="jsub" data-v="ranking">' + eAv(leader[0].id, 'sm') + '<span class="grow"><span class="eyebrow">Líder del finde</span><b>' + leader.map(function (l) { return eName(l.id); }).join(' y ') + '</b></span><span class="big num">' + leader[0].pts + '</span><small class="muted">pts</small></button>'
       : '<p class="small muted">Nadie ha puntuado todavía. El trono está libre.</p>') +
@@ -105,14 +105,26 @@ function gamesList() {
   /* Sin días ni horas: en juego, por jugar (por tipo) y terminados. Se elige el que apetezca */
   var gs = (S.games || []).slice().sort(function (a, b) { return (CAT_ORDER_G.indexOf(a.cat) - CAT_ORDER_G.indexOf(b.cat)) || (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name, 'es'); });
   if (!gs.length) return '<div class="empty">' + icon('games') + '<b>Sin juegos todavía</b><span>Pulsa + y crea el primero. El sofá no cuenta como deporte.</span></div>' + (can('edit') ? '<button class="fab" data-act="gNew" aria-label="Añadir juego">' + icon('plus') + '</button>' : '');
-  var h = '<p class="small muted games-free">Sin horarios: elegid el que os apetezca en cada momento. Tocad uno para empezar a apuntar.</p>';
+  var h = '<p class="small muted games-free">Sin horarios: elegid el que os apetezca en cada momento. Tocad uno para empezar a apuntar.</p>' + secretsGameCard();
   var live = gs.filter(function (g) { return gStatus(g) === 'vivo'; }), todo = gs.filter(function (g) { return gStatus(g) === 'prox'; }), fin = gs.filter(function (g) { return gStatus(g) === 'fin'; });
   if (live.length) h += '<p class="eyebrow live-label"><span class="live-dot" aria-hidden="true"></span> En juego ahora</p>' + live.map(gameCard).join('');
   if (todo.length) h += '<p class="eyebrow">Por jugar · ' + todo.length + '</p>' + todo.map(gameCard).join('');
   if (fin.length) h += '<p class="eyebrow">Terminados · ' + fin.length + '</p>' + fin.map(gameCard).join('');
-  h += '<section class="card wood small"><h3>Cómo se puntúa</h3><p>Cada juego reparte puntos según el puesto (se puede cambiar en cada juego). El ranking global suma todo. Si hay empate a puntos, manda quien tenga más oros, luego platas y luego bronces.</p><p class="muted">Todos compiten por su cuenta. ' + esc((S.comp && S.comp.duos || []).map(function (d) { return d.name; }).join(', ')) + (S.comp && S.comp.duos && S.comp.duos.length ? ' compiten en pareja: si ganan, ganan los dos.' : '') + '</p></section>';
+  h += '<section class="card wood small"><h3>Cómo se puntúa</h3><p>Cada juego reparte puntos según el puesto (se puede cambiar en cada juego). El ranking global suma todo, <b>Cazasecretos incluido</b>: el puesto en el ranking de secretos da puntos como un juego más (1.º 10, 2.º 8, 3.º 6…) y es provisional hasta el cierre. Si hay empate a puntos, manda quien tenga más oros, luego platas y luego bronces.</p><p class="muted">Todos compiten por su cuenta. ' + esc((S.comp && S.comp.duos || []).map(function (d) { return d.name; }).join(', ')) + (S.comp && S.comp.duos && S.comp.duos.length ? ' compiten en pareja: si ganan, ganan los dos.' : '') + '</p></section>';
   if (can('edit')) h += '<button class="fab" data-act="gNew" aria-label="Añadir juego">' + icon('plus') + '</button>';
   return h;
+}
+/* Cazasecretos: siempre en juego (hasta el cierre), arriba del todo */
+function secretsGameCard() {
+  var sg = G.secretsGame(S); if (!sg) return '';
+  var sd = G.standings(S, sg), top = sd.rows.filter(function (r) { return r.pos && r.pos <= 3; });
+  var mine = sd.rows.find(function (r) { return G.membersOf(S, r.id).indexOf(ui.me) >= 0; });
+  return '<p class="eyebrow live-label">' + (sg.provisional ? '<span class="live-dot" aria-hidden="true"></span> Ya puntúa' : 'Terminado') + '</p>' +
+    '<button class="card game-card sg-card st-' + (sg.provisional ? 'vivo' : 'fin') + '" data-act="secrets"><span class="g-ico">' + icon('search') + '</span><span class="grow g-body">' +
+    '<b class="g-name">Cazasecretos</b><span class="small muted">Secretos · ' + (sg.provisional ? 'se cierra el ' + esc(typeof fmtClose === 'function' ? fmtClose() : 'domingo a las 11:00') : 'cerrado') + '</span>' +
+    '<span class="row wrap" style="gap:6px"><span class="pill ' + (sg.provisional ? 'red live' : 'ok') + '">' + (sg.provisional ? 'En juego · provisional' : 'Definitivo') + '</span><span class="pill">Individual</span>' + (mine && mine.pos ? '<span class="pill olive">Vas ' + mine.pos + '.º</span>' : '') + '</span>' +
+    (top.length ? '<span class="g-champ">' + icon('trophy') + top.map(function (r) { return eAv(r.id, 'xs'); }).join('') + '<b>' + top.filter(function (r) { return r.pos === 1; }).map(function (r) { return eName(r.id); }).join(', ') + '</b><small class="muted">' + (top[0].score || '') + ' secretos</small></span>' : '<span class="small muted">Nadie ha encontrado ninguno todavía</span>') +
+    '</span>' + icon('arrow') + '</button>';
 }
 function gameCard(g) {
   ensureGame(g);
@@ -245,7 +257,7 @@ function standingsHtml(g, sd) {
 
 /* ---------- Ranking global ---------- */
 function rankingView() {
-  var rank = G.ranking(S), done = G.doneGames(S);
+  var rank = G.ranking(S), done = G.doneGames(S), real = G.realDone(S), sg = G.secretsGame(S);
   if (!done.length) {
     var nx = (S.games || [])[0];
     return '<div class="empty"><span data-egg="podio" class="podio-empty">' + icon('podium') + '</span><b>El podio está vacío</b><span>En cuanto termine el primer juego aparecen aquí los puntos. Se admiten apuestas.</span></div>' + (nx ? '<button class="btn block" data-act="jsub" data-v="juegos">Ver los juegos</button>' : '');
@@ -255,9 +267,10 @@ function rankingView() {
     var p = [2, 1, 3][i]; if (!list.length) return '<div class="pod p' + p + ' empty"><div class="block">' + p + '</div></div>';
     return '<div class="pod p' + p + '"' + (p === 1 ? ' data-egg="podio"' : '') + '>' + (p === 1 ? '<span class="crown">' + icon('trophy') + '</span>' : '') + '<span class="pod-av pod-avs">' + list.slice(0, 3).map(function (r) { return eAv(r.id, 'lg'); }).join('') + '</span><b class="pod-name">' + list.map(function (r) { return eName(r.id); }).join('<br>') + '</b><span class="pod-pts num">' + list[0].pts + ' pts</span><div class="block">' + p + '</div></div>';
   }).join('') + '</div></section>';
-  h += '<section class="card"><div class="card-head"><h3>Clasificación general</h3><span class="small muted">' + done.length + ' de ' + (S.games || []).length + ' juegos</span></div><div class="stack" style="gap:0">' +
+  if (sg && sg.any) h += '<button class="card sg-note" data-act="secrets">' + icon('search') + '<span class="grow"><b>Incluye Cazasecretos' + (sg.provisional ? ' · provisional' : '') + '</b><small class="muted">' + (sg.provisional ? 'Los puestos del ranking de secretos ya puntúan como un juego más y se mueven solos hasta el cierre (' + esc(typeof fmtClose === 'function' ? fmtClose() : 'domingo a las 11:00') + ').' : 'Ranking de secretos cerrado: sus puntos ya son definitivos.') + '</small></span>' + icon('arrow') + '</button>';
+  h += '<section class="card"><div class="card-head"><h3>Clasificación general' + (sg && sg.provisional && sg.any ? ' <span class="pill warn">Provisional</span>' : '') + '</h3><span class="small muted">' + real.length + ' de ' + (S.games || []).length + ' juegos' + (sg && sg.any ? ' + secretos' : '') + '</span></div><div class="stack" style="gap:0">' +
     rank.map(function (r) {
-      return '<button class="rk-row" data-act="gRow" data-e="' + r.id + '">' + medal(r.pts ? r.pos : null) + eAv(r.id, 'sm') + '<span class="grow"><b>' + eName(r.id) + '</b><small class="muted" style="display:block">' + r.played + (r.played === 1 ? ' juego' : ' juegos') + (r.gold || r.silver || r.bronze ? ' · ' + [r.gold ? r.gold + ' oro' + (r.gold > 1 ? 's' : '') : '', r.silver ? r.silver + ' plata' + (r.silver > 1 ? 's' : '') : '', r.bronze ? r.bronze + ' bronce' + (r.bronze > 1 ? 's' : '') : ''].filter(Boolean).join(', ') : '') + '</small></span><b class="pts num">' + r.pts + '</b></button>';
+      return '<button class="rk-row" data-act="gRow" data-e="' + r.id + '">' + medal(r.pts ? r.pos : null) + eAv(r.id, 'sm') + '<span class="grow"><b>' + eName(r.id) + '</b><small class="muted" style="display:block">' + [r.played ? r.played + (r.played === 1 ? ' juego' : ' juegos') : '', (function () { var v = r.byGame.find(function (b) { return b.virtual; }); return v ? 'secretos: ' + v.pos + '.º' : ''; })()].filter(Boolean).join(' · ') + (!r.byGame.length ? 'Aún sin puntuar' : '') + (r.gold || r.silver || r.bronze ? ' · ' + [r.gold ? r.gold + ' oro' + (r.gold > 1 ? 's' : '') : '', r.silver ? r.silver + ' plata' + (r.silver > 1 ? 's' : '') : '', r.bronze ? r.bronze + ' bronce' + (r.bronze > 1 ? 's' : '') : ''].filter(Boolean).join(', ') : '') + '</small></span><b class="pts num">' + r.pts + '</b></button>';
     }).join('') + '</div></section>';
   var cb = G.comeback(S);
   if (cb) h += '<section class="card wood small"><p><b>Remontada en marcha:</b> ' + eName(cb.id) + ' ha pasado del ' + cb.from + '.º al ' + cb.to + '.º.</p></section>';
@@ -370,7 +383,7 @@ function gameSheet(id) {
   draft = { id: id, entrants: (g.entrants || []).slice(), format: g.format, mode: g.mode || 'order', cat: g.cat, allowDraw: !!g.allowDraw, teamRank: !!g.teamRank };
   openSheet('<h2>Editar juego</h2>' +
     '<div class="field"><label for="g-name">Nombre</label><input id="g-name" value="' + esc(g.name) + '"></div>' +
-    '<div class="grid2"><div class="field"><label for="g-cat">Tipo de prueba</label><select id="g-cat">' + Object.keys(G.CATS).map(function (c) { return '<option value="' + c + '"' + (g.cat === c ? ' selected' : '') + '>' + G.CATS[c] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grid2"><div class="field"><label for="g-cat">Tipo de prueba</label><select id="g-cat">' + Object.keys(G.CATS).filter(function (c) { return c !== 'secretos'; }).map(function (c) { return '<option value="' + c + '"' + (g.cat === c ? ' selected' : '') + '>' + G.CATS[c] + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label for="g-format">Formato</label><select id="g-format">' + Object.keys(G.FORMATS).map(function (f) { return '<option value="' + f + '"' + (g.format === f ? ' selected' : '') + '>' + G.FORMATS[f] + '</option>'; }).join('') + '</select></div></div>' +
     '<div class="field"><span class="lbl">Si es clasificación, ¿cómo se ordena?</span>' + segHtml('mode', [['order', 'Orden'], ['high', 'Más es mejor'], ['low', 'Menos es mejor']], draft.mode) + '</div>' +
     '<div class="grid2"><div class="field"><label for="g-unit">Unidad</label><input id="g-unit" value="' + esc(g.unit || '') + '" placeholder="puntos, s, m…"></div>' +

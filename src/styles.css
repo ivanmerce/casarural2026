@@ -1233,3 +1233,9 @@ img, svg, canvas { max-width: 100%; }
 .egg-reveal .torti { font-size: min(18vw, 76px); line-height: 1; letter-spacing: .05em; }
 .podio-empty { display: inline-grid; place-items: center; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .egg-reveal .rv-sticker { animation: none; } }
+
+/* v0.7.31 · Cazasecretos en Juegos */
+.sg-note { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: inherit; border-left: 4px solid var(--accent); }
+.sg-note > .ico { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.sg-note .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sg-card .g-ico { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }

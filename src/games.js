@@ -3,7 +3,7 @@
    Participante ("entrant") = una persona o un dúo (p. ej. un adulto con un bebé que compiten juntos). */
 var G = (function () {
   var DEFAULT_POINTS = [10, 8, 6, 5, 4, 3, 2, 1];
-  var CATS = { deporte: 'Deporte', velocidad: 'Velocidad', ingenio: 'Ingenio', escondite: 'Escondite', mini: 'Minijuego', mesa: 'Mesa' };
+  var CATS = { deporte: 'Deporte', velocidad: 'Velocidad', ingenio: 'Ingenio', escondite: 'Escondite', mini: 'Minijuego', mesa: 'Mesa', secretos: 'Secretos' };
   var FORMATS = { bracket: 'Eliminatoria 1 contra 1', league: 'Liguilla', teams: 'Por equipos', ranking: 'Individual' };
   var MODES = { order: 'Orden de llegada', high: 'Más es mejor', low: 'Menos es mejor' };
 
@@ -175,11 +175,27 @@ var G = (function () {
   function gamePoints(S, g) {
     var st = standings(S, g), out = {};
     if (!hasResults(st)) return out;
-    st.rows.forEach(function (r) { out[r.id] = { pts: pointsFor(g, r.pos), pos: r.pos }; });
+    st.rows.forEach(function (r) { if (g.virtual && !r.pos) return; out[r.id] = { pts: pointsFor(g, r.pos), pos: r.pos }; });   /* en Cazasecretos, sin secretos no hay puntos */
     return out;
   }
+  /* ---------- Cazasecretos: un juego más del ranking, vivo desde ya ----------
+     La app deja en S.secretsLive = { counts: {persona: secretos}, closed, close } lo que dice el ranking de secretos.
+     Puntúa como cualquier juego (por puestos); es provisional hasta que se cierra el ranking de secretos. El espía no entra. */
+  var SECRETS_ID = 'g-secretos';
+  function secretsGame(S) {
+    var L0 = S.secretsLive; if (!L0 || !L0.counts) return null;
+    var res = {}, any = false;
+    entrantIds(S).forEach(function (id) {
+      var n = 0; membersOf(S, id).forEach(function (pid) { n = Math.max(n, L0.counts[pid] || 0); });
+      if (n > 0) { res[id] = n; any = true; }
+    });
+    return { id: SECRETS_ID, virtual: true, name: 'Cazasecretos', cat: 'secretos', format: 'ranking', mode: 'high', unit: 'secretos', icon: 'search',
+      entrants: entrantIds(S), results: res, part: 0, closed: !!L0.closed, provisional: !L0.closed, any: any, close: L0.close || null };
+  }
   function when(g) { return (g.day || '9999') + ' ' + (g.time || '99:99'); }
-  function doneGames(S) { return (S.games || []).filter(function (g) { return isDone(S, g); }).sort(function (a, b) { return when(a).localeCompare(when(b)) || (a.sort || 0) - (b.sort || 0); }); }
+  function realDone(S) { return (S.games || []).filter(function (g) { return isDone(S, g); }).sort(function (a, b) { return when(a).localeCompare(when(b)) || (a.sort || 0) - (b.sort || 0); }); }
+  /* los juegos que puntúan: Cazasecretos (si alguien lleva alguno) + los terminados */
+  function doneGames(S) { var sg = secretsGame(S); return (sg && sg.any ? [sg] : []).concat(realDone(S)); }
 
   /* ---------- Ranking global ---------- */
   function rankFrom(S, games) {
@@ -189,13 +205,14 @@ var G = (function () {
       var gp = gamePoints(S, g);
       Object.keys(gp).forEach(function (id) {
         var a = acc[id]; if (!a) return;
-        a.pts += gp[id].pts; a.played++;
+        a.pts += gp[id].pts; if (!g.virtual) a.played++;
         if (gp[id].pos === 1) a.gold++; else if (gp[id].pos === 2) a.silver++; else if (gp[id].pos === 3) a.bronze++;
-        a.byGame.push({ game: g.id, name: g.name, pos: gp[id].pos, pts: gp[id].pts });
+        a.byGame.push({ game: g.id, name: g.name + (g.provisional ? ' (provisional)' : ''), pos: gp[id].pos, pts: gp[id].pts, virtual: !!g.virtual });
       });
     });
     var rows = Object.keys(acc).map(function (k) { return acc[k]; });
     function cmp(x, y) { return (y.pts - x.pts) || (y.gold - x.gold) || (y.silver - x.silver) || (y.bronze - x.bronze); }
+    rows.forEach(function (r) { r.scored = r.byGame.length; });
     rows.sort(function (x, y) { return cmp(x, y) || (y.played - x.played); });
     rows.forEach(function (r, i) { var p = rows[i - 1]; r.pos = p && cmp(p, r) === 0 ? p.pos : i + 1; r.pts = r2(r.pts); });
     return rows;
@@ -203,7 +220,7 @@ var G = (function () {
   function ranking(S) { return rankFrom(S, doneGames(S)); }
   /* la mayor remontada: peor puesto tras algún juego (desde el 2.º) frente al puesto final */
   function comeback(S) {
-    var gs = doneGames(S); if (gs.length < 3) return null;
+    var gs = doneGames(S); if (realDone(S).length < 2) return null;
     var worst = {}, fin = rankFrom(S, gs);
     for (var k = 1; k < gs.length; k++) rankFrom(S, gs.slice(0, k)).forEach(function (r) { if (r.played) worst[r.id] = Math.max(worst[r.id] || 0, r.pos); });
     var best = null;
@@ -360,9 +377,9 @@ var G = (function () {
     { key: 'futbol', name: 'Partido de fútbol', cat: 'deporte', format: 'teams', icon: 'ball', rules: 'Dos tiempos de 10 minutos. Los peques pueden tirar desde donde quieran.', points: [8, 4], allowDraw: true },
     { key: 'escondite', name: 'Escondite', cat: 'escondite', format: 'ranking', mode: 'order', icon: 'ghost', rules: 'Apunta el orden en que os van encontrando: el primero de la lista es el último en ser encontrado (el mejor escondido).' },
     { key: 'ruleta', name: 'La ruleta de globos', cat: 'deporte', format: 'teams', teamRank: true, icon: 'shuffle', points: [8, 4], rules: 'Dos equipos en círculo, globos de agua en el centro. La botella-ruleta elige quién lanza (sin moverse) a uno del otro equipo; los demás huyen. Gana el equipo del último que quede.' },
-    { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'low', unit: 's', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando. Sin manos, se balancea para tumbar latas del suelo. Gana el más rápido.' },
-    { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'high', unit: 'm', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos (en metros).' },
-    { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'high', unit: 'aciertos', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
+    { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'order', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando hasta las rodillas. Sin manos, hay que metérsela en la boca. El ranking es el orden en que lo vais consiguiendo.' },
+    { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'order', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos. Se apunta por orden.' },
+    { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'order', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
     { key: 'pañuelo', name: 'El pañuelo', cat: 'velocidad', format: 'teams', icon: 'flag', rules: 'Dos equipos numerados. El que se lleva el pañuelo suma un punto.', points: [8, 4], allowDraw: true },
     { key: 'sillas', name: 'Sillas musicales', cat: 'mini', format: 'ranking', mode: 'order', icon: 'music', rules: 'Apunta en orden inverso: el primero es el que se queda con la última silla.' },
     { key: 'nerf', name: 'Nerf: atrapa la bandera', cat: 'deporte', format: 'teams', icon: 'flag', rules: 'Dos equipos con su bandera. Si te dan, a tu base a recargar. Gana quien lleve la bandera rival a su campo.', points: [10, 5], allowDraw: false },
@@ -372,6 +389,7 @@ var G = (function () {
   ];
 
   return {
+    secretsGame: secretsGame, realDone: realDone, SECRETS_ID: SECRETS_ID,
     CATS: CATS, FORMATS: FORMATS, MODES: MODES, DEFAULT_POINTS: DEFAULT_POINTS, TEMPLATES: TEMPLATES, AWARDS: AWARDS, GROUPS: GROUPS,
     entrantIds: entrantIds, entrant: entrant, entrantOf: entrantOf, membersOf: membersOf, presentOn: presentOn, presentList: presentList, ageOf: ageOf,
     makeBracket: makeBracket, seedOrder: seedOrder, advance: advance, roundName: roundName, winnerOf: winnerOf, isBye: isBye,

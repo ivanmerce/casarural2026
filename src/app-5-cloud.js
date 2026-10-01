@@ -182,8 +182,15 @@ var CLOUD = (function () {
       if (r && r.data) {
         var st = {};
         r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs, keys: x.egg_keys || [] }; });
+        var before = S && S.secretsLive ? JSON.stringify(S.secretsLive.counts) : '';
         if (S) S.stats = st;
-        try { if (st[ui.me] && typeof eggsRestore === 'function' && eggsRestore(st[ui.me].keys)) render(true); } catch (x) {}
+        try {
+          var restored = st[ui.me] && typeof eggsRestore === 'function' && eggsRestore(st[ui.me].keys);
+          if (typeof secretsLiveUpdate === 'function') secretsLiveUpdate();
+          var moved = S && S.secretsLive && JSON.stringify(S.secretsLive.counts) !== before;
+          /* el ranking de juegos se mueve solo cuando cambia el de secretos */
+          if (restored || (moved && before && (ui.tab === 'juegos' || ui.tab === 'inicio') && !document.getElementById('scrim') && !document.querySelector('.egg-reveal'))) render(true);
+        } catch (x) {}
         onPresence();
       }
     }).catch(function () {});

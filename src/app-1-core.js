@@ -306,6 +306,7 @@ function render(keepScroll) {
   var y = window.scrollY;
   stopHero();
   afterRender = [];
+  try { if (typeof secretsLiveUpdate === 'function') secretsLiveUpdate(); } catch (e) {}
   var fn = VIEWS[ui.tab] || VIEWS.inicio;
   $main.innerHTML = '<div class="view" data-view="' + ui.tab + '">' + fn() + '</div>';
   renderTop(); renderNav(); fitChrome();

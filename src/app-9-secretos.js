@@ -185,6 +185,12 @@ function secretsRanking() {
   var pos = 0, last = -1, k = 0; arr.forEach(function (r) { if (r.spy) { r.pos = null; return; } k++; if (r.n !== last) { pos = k; last = r.n; } r.pos = pos; });
   return arr;
 }
+/* Para el ranking de juegos: lo que dice ahora mismo el ranking de secretos (sin el espía) */
+function secretsLiveUpdate() {
+  if (!S || !EGGS.length) return;
+  var c = {}; secretsRanking().forEach(function (r) { if (!r.spy && r.n > 0) c[r.id] = r.n; });
+  S.secretsLive = { counts: c, closed: secretsClosed(), close: secretsCloseIso() };
+}
 function secretsSheet() {
   egg('curioso');
   var f = foundMap(), h = hintsMap(), left = hintsLeft(), closed = secretsClosed(), rk = secretsRanking(), n = foundCount();
@@ -223,7 +229,7 @@ function secretsOnView() {
     if (t === 'tiempo') egg('meteo');
     if (t === 'compra') { var c = L.coverage(S.ingredients); if (c.tot && c.done === c.tot && !hasEgg('fumata') && !ui._fumataPend) { ui._fumataPend = true; setTimeout(function () { ui._fumataPend = false; if (!hasEgg('fumata')) fumata(); }, 450); } }
     if (t === 'cuentas' && !hasEgg('claras')) setTimeout(checkClaras, 300);
-    if (t === 'juegos' && !hasEgg('habemus') && G.doneGames(S).length >= 5) setTimeout(function () { if (!hasEgg('habemus')) fumataRaw('¡Habemus liga!', 'Cinco juegos terminados y el ranking ya echa humo. Aquí ya no se rinde nadie: quien no corre, vuela.', 'habemus'); }, 400);
+    if (t === 'juegos' && !hasEgg('habemus') && G.realDone(S).length >= 5) setTimeout(function () { if (!hasEgg('habemus')) fumataRaw('¡Habemus liga!', 'Cinco juegos terminados y el ranking ya echa humo. Aquí ya no se rinde nadie: quien no corre, vuela.', 'habemus'); }, 400);
     if (t === 'juegos') { var gs = S.games || []; if (gs.length && gs.every(function (g) { return G.isDone(S, g); }) && !ui.allDoneShown) checkAllGames(); }
     if (t === 'album' && typeof photoList === 'function' && photoList().length >= 50) egg('album');
     if (t === 'manual') setTimeout(manualEndCheck, 300);

@@ -60,7 +60,7 @@ function homeSecrets() {
 }
 function homeGames() {
   var rank = G.ranking(S).filter(function (r) { return r.pts > 0; }).slice(0, 3);
-  var done = G.doneGames(S).length, tot = (S.games || []).length;
+  var done = G.realDone(S).length, tot = (S.games || []).length;
   return '<section class="card home-games"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('trophy') + 'Ranking de juegos</h3><button class="link" data-act="jsub" data-v="ranking">Ranking ' + icon('arrow') + '</button></div>' +
     (rank.length ? '<div class="mini-rank">' + rank.map(function (r) { return '<span class="mr">' + medal(r.pos) + eAv(r.id, 'xs') + '<b>' + eName(r.id) + '</b><small class="num">' + r.pts + ' pts</small></span>'; }).join('') + '</div>'
       : '<p class="small muted">Aún no ha puntuado nadie. El trono está libre y el sábado empieza el hockey.</p>') +
