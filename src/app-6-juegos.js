@@ -378,20 +378,6 @@ function galaFact(wid) {
   f.sort(function (a, b) { return b[0] - a[0]; });
   return 'Dato del jurado: ' + f[0][1] + '.';
 }
-function galaSlides(trailer, awardsList) {
-  if (trailer) return [{ t: 'intro', trailer: true }, { t: 'ad', ad: GALA_ADS[0] }, { t: 'teaser' }, { t: 'ad', ad: GALA_ADS[3] }, { t: 'final', trailer: true }];
-  var list = (awardsList || G.awards(S)).filter(function (a) { return a.winners.length; });
-  var order = ['casa', 'juegos', 'publico', 'extra'], slides = [{ t: 'intro' }], n = 0, ad = 0;
-  order.forEach(function (gk) {
-    var it = list.filter(function (a) { return a.group === gk; }); if (!it.length) return;
-    slides.push({ t: 'group', g: gk });
-    it.forEach(function (a) { slides.push({ t: 'award', a: a }); n++; if (n % 5 === 0 && ad < GALA_ADS.length) slides.push({ t: 'ad', ad: GALA_ADS[ad++] }); });
-  });
-  var pod = ['bronce', 'plata', 'oro'].map(function (id) { return list.find(function (a) { return a.id === id; }); }).filter(Boolean);
-  if (pod.length) { slides.push({ t: 'group', g: 'podio' }); pod.forEach(function (a) { slides.push({ t: 'award', a: a, podium: true }); }); }
-  slides.push({ t: 'final' }, { t: 'credits' });
-  return slides;
-}
 function galaCredits() {
   var e = S.trip.eggs || {}, host = S.house && S.house.payer, fam = host ? S.families.find(function (f) { return f.id === host; }) : null;
   var admin = S.people.filter(function (p) { return p.role === 'admin'; }).map(function (p) { return p.name; });
@@ -405,35 +391,6 @@ function galaCredits() {
     ['Ningún miembro de la familia sufrió daños', 'salvo en el orgullo, durante el ping-pong']
   ];
   return '<div class="gala-credits"><div class="gc-roll">' + rows.map(function (r) { return '<p><small>' + esc(r[0]) + '</small><b>' + esc(r[1]) + '</b></p>'; }).join('') + '<p class="gc-end"><b>' + esc(S.trip.name) + '</b><small>Nos vemos en la próxima</small></p></div></div>';
-}
-function galaRender() {
-  var el = document.getElementById('gala'); if (!el || !gala) return;
-  var s = gala.slides[gala.i], inner = '';
-  el.classList.toggle('is-ad', s.t === 'ad');
-  if (s.t === 'intro') inner = '<div class="gala-curtain" aria-hidden="true"><i></i><i></i></div><span class="eyebrow">' + esc(S.trip.name) + (gala.rehearsal ? ' · ensayo' : gala.sim ? ' · simulación' : '') + '</span><h1 class="gala-title">' + (s.trailer ? 'Próximamente' : 'Gala de premios') + '</h1>' +
-    (s.trailer ? '<p>La gran noche llega el <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>' : '<p>Silencio en la sala. Apagad los móviles… bueno, este no.</p><p class="small">' + gala.slides.filter(function (x) { return x.t === 'award'; }).length + ' premios · alfombra roja · cero modestia</p>');
-  else if (s.t === 'group') inner = '<span class="eyebrow">A continuación</span><h1 class="gala-title">' + esc(G.GROUPS[s.g]) + '</h1><p>' + esc({ casa: 'Lo que ha pasado en la casa (y en la app) no se queda en la casa.', juegos: 'Sudor, gritos y alguna trampa legal.', publico: 'Ha votado el pueblo. El pueblo es sabio. A veces.', extra: 'Premios especiales: porque hay cosas que no caben en ninguna categoría.', podio: 'Lo que todos esperabais: el podio del finde.' }[s.g] || '') + '</p>';
-  else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p><p class="small">Volvemos en 3, 2, 1…</p>';
-  else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">' + G.awards(S).length + ' premios. Una noche.</h1><p>Habrá lágrimas, discursos de 30 segundos (cronometrados) y algún que otro «yo no he sido». Nadie se queda sin estatuilla.</p>';
-  else if (s.t === 'award') {
-    var a = s.a, drum = pickOne(GALA_DRUM, a.id + gala.i);
-    inner = '<span class="gala-ico">' + icon(a.icon || 'star') + '</span><span class="eyebrow">' + esc(G.GROUPS[a.group] || 'Premio') + '</span><h1 class="gala-title">' + esc(a.name) + '</h1><p>' + esc(a.desc) + '</p>' +
-      (gala.revealed === true ? '<div class="gala-win">' + a.winners.map(function (w) { return '<span class="gw">' + eAv(w, 'xl') + '<b>' + eName(w) + '</b></span>'; }).join('') + '</div>' +
-        (a.why ? '<p class="gala-why">' + esc(a.why) + '</p>' : '') + (GALA_QUIP[a.id] ? '<p class="gala-quip">' + esc(GALA_QUIP[a.id]) + '</p>' : '') +
-        (a.fact ? '<p class="gala-fact">' + esc(a.fact) + '</p>' : a.winners.length === 1 && !gala.sim && galaFact(a.winners[0]) ? '<p class="gala-fact">' + esc(galaFact(a.winners[0])) + '</p>' : '') +
-        '<button class="btn gala-speech" data-act="galaSpeech">🎤 Discurso (30 s)</button>'
-        : '<div class="gala-env' + (gala.revealed === 'wait' ? ' opening' : '') + '" aria-hidden="true"><i></i></div><p class="gala-drum' + (gala.revealed === 'wait' ? ' rolling' : '') + '">' + esc(drum) + '</p><p class="small">Toca para abrir el sobre</p>');
-  } else if (s.t === 'final') {
-    if (s.trailer) inner = '<span class="eyebrow">' + esc(galaWhen()) + '</span><h1 class="gala-title">No te lo pierdas</h1><p>Trae palomitas, pañuelos y el discurso preparado. Por si acaso.</p>';
-    else {
-      var t = gala.sim ? simTally(gala.list) : G.tally(S), names = {}; (gala.list || G.awards(S)).forEach(function (a) { names[a.id] = a.name; });
-      inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p) { return '<div class="ga">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (k) { return esc(names[k] || k); }).join(' · ') + '</small></div>'; }).join('') + '</div>';
-    }
-  } else if (s.t === 'credits') inner = galaCredits();
-  el.querySelector('.gala-in').innerHTML = inner;
-  el.querySelector('.gala-count').textContent = (gala.i + 1) + ' / ' + gala.slides.length;
-  el.querySelector('[data-act=galaPrev]').disabled = gala.i === 0;
-  el.querySelector('.gala-ctl [data-act=galaNext]').innerHTML = s.t === 'award' && gala.revealed !== true ? 'Abrir el sobre' : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
 }
 function drumroll(long) {
   try {
@@ -527,16 +484,6 @@ function simTally(list) {
   (list || []).forEach(function (a) { var seen = {}; a.winners.forEach(function (w) { G.peopleOf(S, w).forEach(function (pid) { if (t[pid] && !seen[pid]) { seen[pid] = 1; t[pid].push(a.id); } }); }); });
   return t;
 }
-function galaOpen(mode) {
-  var trailer = mode === 'trailer';
-  var sim = mode === 'sim', list = sim ? simAwards() : null;
-  gala = { slides: galaSlides(trailer, list), i: 0, revealed: false, trailer: trailer, rehearsal: mode === 'rehearsal', sim: sim, list: list };
-  var el = document.createElement('div'); el.className = 'gala'; el.id = 'gala'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Gala de premios');
-  el.innerHTML = '<div class="gala-spot" aria-hidden="true"></div><div class="gala-spot s2" aria-hidden="true"></div><button class="gala-x icon-btn" data-act="galaExit" aria-label="Salir de la gala">' + icon('x') + '</button><div class="gala-in" data-act="galaNext" aria-live="polite"></div><div class="gala-ctl"><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
-  document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('gala');
-  galaRender(); try { fanfare(); } catch (e) {}
-}
-function galaClose(fromNav) { clearInterval(speechT); var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; gala = null; if (el && !fromNav) overlayDone(); }
 
 /* ---------- Hojas de edición ---------- */
 function gameSheet(id) {
@@ -774,25 +721,7 @@ Object.assign(A, {
     if (!gGuard()) return; S.awardData = S.awardData || {}; var id = uid('aw'); S.awardData[id] = { custom: true, name: 'Premio especial', desc: '', winners: [], icon: 'star' };
     save(); render(true); awardSheet(id);
   },
-  galaStart: function (el) { galaOpen(el.dataset.mode || (galaOpenNow() ? 'gala' : 'trailer')); },
-  galaSpeech: function () { galaSpeech(); },
-  galaSpeechEnd: function () { clearInterval(speechT); var m = document.querySelector('.gala-mic'); if (m) m.remove(); applause(1.6); },
-  galaExit: function () { galaClose(); },
-  galaPrev: function () { if (!gala || !gala.i) return; gala.i--; gala.revealed = gala.slides[gala.i].t === 'award'; galaRender(); },
-  galaNext: function () {
-    if (!gala) return; var s = gala.slides[gala.i];
-    if (s.t === 'award' && !gala.revealed) {
-      gala.revealed = 'wait'; drumroll(s.podium); galaRender();
-      setTimeout(function () { if (!gala) return; gala.revealed = true; galaRender(); applause(s.podium ? 3 : 2); confetti(s.podium ? 3600 : 1800); if (s.podium) { try { fireworks(4200, s.a.id === 'oro' ? 12 : 6); } catch (x) {} } if (s.podium && s.a.id === 'oro') fanfare(); if (navigator.vibrate) try { navigator.vibrate([30, 40, 30]); } catch (x) {} }, s.podium ? 2300 : 1400);
-      return;
-    }
-    if (gala.revealed === 'wait') return;
-    if (gala.i >= gala.slides.length - 1) { var wasSim = gala.sim; galaClose(); if (!wasSim) egg('gala'); return; }
-    gala.i++; gala.revealed = false; galaRender();
-    clearInterval(speechT); var mic = document.querySelector('.gala-mic'); if (mic) mic.remove();
-    if (gala.slides[gala.i].t === 'final' && !gala.trailer) { confetti(3000); applause(3); }
-    if (gala.i === gala.slides.length - 1 && !gala.sim) egg('gala');
-  }
+
 });
 Object.assign(C, {
   gVal: function (el) {

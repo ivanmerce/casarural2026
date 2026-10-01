@@ -1281,3 +1281,48 @@ img, svg, canvas { max-width: 100%; }
 @keyframes credits { to { transform: translateY(calc(-100% - 62vh)); } }
 .gala-date { display: flex; gap: 8px; align-items: flex-start; } .gala-date .ico { width: 18px; height: 18px; flex: none; margin-top: 2px; color: #E8B64A; }
 @media (prefers-reduced-motion: reduce) { .gala-curtain { display: none; } .gc-roll { animation: none; position: static; } .gala-credits { height: auto; -webkit-mask-image: none; mask-image: none; } }
+
+/* v0.7.34 · Gala v2: fiesta de fondo, ráfagas, presentación */
+body.gala-on .fx { z-index: 94; }
+.gala-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+.gala > :not(.gala-fx) { position: relative; z-index: 1; }
+.gala > .gala-spot { position: absolute; }
+.gala-tools { position: absolute !important; top: calc(12px + env(safe-area-inset-top, 0px)); left: 12px; z-index: 3 !important; display: flex; gap: 8px; }
+.gala-tools .icon-btn { color: #fff; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15); font-size: 1.05rem; }
+.gala-tools .icon-btn.on { background: #E8B64A; color: #1C1614; border-color: #E8B64A; }
+.gala-x { position: absolute !important; z-index: 3 !important; }
+.gala-prog { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: rgba(255,255,255,.08); }
+.gala-prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #E8B64A, #FF3B5C); }
+.gala-title.xl { font-size: clamp(2.6rem, 12vw, 5rem); background: linear-gradient(90deg, #FFE7A8, #E8B64A, #FFF4D6, #E8B64A); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 200% 100%; animation: eggIn .6s cubic-bezier(.2, 1.4, .4, 1) both, goldShine 3.5s linear infinite; }
+@keyframes goldShine { to { background-position: -200% 0; } }
+.gala-start { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px; }
+.gala-start .btn:not(.primary) { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.2); }
+.gala-burst { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; width: min(900px, 100%); }
+.gb { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px 12px 16px; border-radius: 20px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); text-align: center; min-height: 190px; justify-content: center; overflow: hidden; }
+.gb-ico .ico { width: 34px; height: 34px; color: #E8B64A; }
+.gb-name { font-family: var(--font-display); font-size: 1.15rem; line-height: 1.15; color: #fff; }
+.gb-desc { color: #CDBDB4; font-size: .82rem; }
+.gb-env { width: 64px; height: 42px; border-radius: 6px; background: linear-gradient(160deg, #F2C65A, #C8902E); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); box-shadow: inset 0 -20px 0 rgba(0,0,0,.08); animation: envFloat 2.4s ease-in-out infinite; animation-delay: var(--d); }
+.gb.on { animation: gbFlip .8s cubic-bezier(.2, 1.4, .35, 1) both; animation-delay: var(--d); border-color: rgba(232, 182, 74, .55); background: linear-gradient(160deg, rgba(232, 182, 74, .18), rgba(255,255,255,.04)); }
+@keyframes gbFlip { 0% { transform: rotateY(90deg) scale(.8); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.gb-win { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.gb-win .gw { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.gb-win .gw b { font-size: .9rem; color: #fff; }
+.gb-quip { color: #FFD9A8; font-style: italic; font-size: .8rem; line-height: 1.3; }
+.gala-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; width: min(820px, 100%); }
+.gala-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 4px solid #fff; box-shadow: 0 10px 26px rgba(0,0,0,.4); transform: rotate(var(--r)); animation: phIn .7s cubic-bezier(.2, 1.4, .35, 1) both; animation-delay: var(--d); }
+@keyframes phIn { from { opacity: 0; transform: translateY(40px) rotate(0) scale(.6); } }
+.gala-all .ga { animation: rvUp .5s ease both; animation-delay: var(--d); }
+/* modo presentación: todo más grande y los controles se esconden solos */
+.gala.present .gala-in { max-width: none; padding-top: 56px; }
+.gala.present .gala-title { font-size: clamp(2.6rem, 7vw, 6rem); }
+.gala.present .gala-in p { font-size: clamp(1rem, 1.8vw, 1.5rem); max-width: 46ch; }
+.gala.present .gb-name { font-size: clamp(1.1rem, 2vw, 1.7rem); }
+.gala.present .gb-quip, .gala.present .gb-desc { font-size: clamp(.85rem, 1.3vw, 1.1rem); }
+.gala.present .gala-burst { width: min(1200px, 100%); }
+.gala.present .gala-ctl, .gala.present .gala-tools, .gala.present .gala-x { transition: opacity .4s; }
+.gala.present:not(.awake) .gala-ctl, .gala.present:not(.awake) .gala-tools, .gala.present:not(.awake) .gala-x { opacity: 0; pointer-events: none; }
+.gala.present:not(.awake) { cursor: none; }
+.gala.present .gala-prog { opacity: 1 !important; }
+.gala.present .gala-ctl .gala-prog { position: fixed; top: auto; bottom: 0; }
+@media (max-width: 520px) { .gala-burst { grid-template-columns: 1fr; gap: 8px; } .gb { min-height: 0; padding: 12px; flex-direction: row; flex-wrap: wrap; justify-content: center; } .gb-desc { flex-basis: 100%; } .gala-tools .icon-btn { width: 38px; height: 38px; } }
