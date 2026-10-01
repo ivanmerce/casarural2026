@@ -212,7 +212,7 @@ VIEWS.compra = function () {
   var assigned = all.length - free.length, pctA = all.length ? Math.round(assigned / all.length * 100) : 0;
   var mine = all.filter(function (i) { return i.family === myF; }), mineCost = mine.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
 
-  var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div></div>';
+  var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div><button class="btn ghost exp-btn" data-act="exportList" aria-label="Exportar la lista a Excel o PDF">' + icon('basket') + 'Exportar</button></div>';
   h += '<section class="card how' + (ui.howClosed ? '' : ' open') + '"><button class="how-head" data-act="howToggle" aria-expanded="' + !ui.howClosed + '"><b>Cómo funciona</b><span class="small muted">3 pasos</span></button>' + (ui.howClosed ? '' : '<ol class="steps">' +
     '<li><span><b>Pídete lo que vayáis a comprar.</b> En «Sin dueño», toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span>. Ya queda a cargo de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + ' con su precio estimado. Desde Comidas puedes pedirte una comida entera.</span></li>' +
     '<li><span><b>Cuando lo compréis, apunta el precio.</b> En «Lo nuestro», escribe lo que ha costado en la casilla de cada producto. <b>Sin precio real no cuenta en las cuentas.</b></span></li>' +

@@ -1100,3 +1100,27 @@ img, svg, canvas { max-width: 100%; }
 .dup-warn { margin-top: 8px; padding: 10px 12px; border-radius: 14px; background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); display: grid; gap: 6px; animation: rvUp .25s ease both; }
 .dup-row { display: flex; align-items: center; gap: 10px; padding-top: 6px; border-top: 1px solid color-mix(in srgb, var(--warn) 20%, transparent); }
 .dup-row .btn { min-height: 36px; padding: 4px 12px; flex: none; }
+/* ---------- Exportar la compra ---------- */
+.exp-btn { flex: none; min-height: 40px; }
+.exp-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#print-list { display: none; }
+@media print {
+  html.printing-list body > *:not(#print-list) { display: none !important; }
+  html.printing-list #print-list { display: block !important; color: #111; font-family: var(--font-body); }
+  html.printing-list body { background: #fff !important; }
+}
+#print-list .pl-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #C4112F; padding-bottom: 8px; margin-bottom: 10px; }
+#print-list .pl-kicker { font-size: 10pt; color: #C4112F; font-weight: 700; letter-spacing: .04em; }
+#print-list h1 { font-family: var(--font-display); font-size: 22pt; margin: 2px 0; }
+#print-list .pl-sub, #print-list .pl-date { font-size: 10pt; color: #555; }
+#print-list .pl-group { break-inside: avoid; margin-top: 10px; }
+#print-list h2 { font-size: 11pt; text-transform: uppercase; letter-spacing: .08em; color: #C4112F; border-bottom: 1px solid #ddd; padding-bottom: 3px; margin: 0 0 2px; }
+#print-list h2 small { color: #999; font-weight: 600; }
+#print-list table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+#print-list td { padding: 5px 4px; border-bottom: 1px solid #eee; vertical-align: top; }
+#print-list .pl-box { width: 18px; } #print-list .pl-box::before { content: ""; display: inline-block; width: 12px; height: 12px; border: 1.5px solid #333; border-radius: 3px; vertical-align: -2px; margin-right: -12px; }
+#print-list tr.done { color: #888; } #print-list tr.done .pl-name b { text-decoration: line-through; }
+#print-list .pl-name small, #print-list .pl-meta small { display: block; color: #777; font-size: 9pt; }
+#print-list .pl-qty { white-space: nowrap; font-weight: 700; width: 90px; }
+#print-list .pl-meta { color: #555; font-size: 9.5pt; width: 38%; }
+#print-list .pl-foot { margin-top: 14px; font-size: 9pt; color: #777; }
