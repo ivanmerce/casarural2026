@@ -27,6 +27,9 @@ var CLOUD = (function () {
 
   /* ---------- Base de datos → S ---------- */
   function fromDb(d) {
+    var spyRows = d.people.filter(function (r) { return r.family_id === SPY_FAM; });
+    SPIES = spyRows.map(function (r) { return { id: r.id, name: r.name, family: r.family_id, kind: r.kind, role: r.role, attends: false, note: r.note, avatar: r.avatar, spy: true }; });
+    d = Object.assign({}, d, { people: d.people.filter(function (r) { return r.family_id !== SPY_FAM; }), families: d.families.filter(function (f) { return f.id !== SPY_FAM; }) });
     var kv = {}; d.app_config.forEach(function (r) { kv[r.key] = r.value; });
     var st = d.settings[0] || {};
     var im = {}; d.ingredient_meals.forEach(function (r) { (im[r.ingredient_id] = im[r.ingredient_id] || []).push(r.meal_id); });
@@ -229,7 +232,9 @@ var CLOUD = (function () {
     $main.innerHTML = '<div class="view"><section class="card login-card"><h1 class="login-title">Casi <i>listo</i></h1><p class="muted">Falta conectar la base de datos. En cuanto esté, aquí podréis entrar todos.</p></section></div>';
   }
   var mustChange = false, fromLink = /[?&#](code|access_token|token_hash)=/.test(location.href);
-  function enterApp() { return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); ui.tab = 'inicio'; ui.game = null; startApp(); subscribe(); startPresence(); }); }
+  function enterApp() { return loadAll().then(function (d) { S = fromDb(d); last = snapshot(S); ui.tab = 'inicio'; ui.game = null; startApp(); subscribe(); startPresence();
+    /* quién es el espía: solo lo devuelve la base de datos al admin y al propio espía */
+    client().rpc('spy_identity').then(function (r) { if (r && r.data) { SPY_REAL = r.data; if (ui.tab === 'familia' || ui.tab === 'inicio') render(true); } }).catch(function () {}); }); }
   /* Sin código propio la base de datos no enseña nada (RLS), así que primero se comprueba y, si falta, se pide */
   function afterSession() {
     return client().rpc('claim_person').then(check).then(function (r) {

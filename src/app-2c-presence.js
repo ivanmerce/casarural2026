@@ -32,7 +32,7 @@ function presenceCard() {
 }
 function whoList() {
   var pd = presenceData(), on = pd.online;
-  var rows = S.people.slice().sort(function (a, b) {
+  var rows = S.people.concat(SPIES).sort(function (a, b) {
     var ao = on[a.id] ? 1 : 0, bo = on[b.id] ? 1 : 0; if (ao !== bo) return bo - ao;
     var at = pd.lastSeen[a.id] ? new Date(pd.lastSeen[a.id]).getTime() : 0, bt = pd.lastSeen[b.id] ? new Date(pd.lastSeen[b.id]).getTime() : 0;
     return bt - at;

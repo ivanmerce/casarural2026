@@ -221,6 +221,10 @@ VIEWS.personas = function () {
   var h = '<div class="view-head"><div><h2>Personas y accesos</h2><p class="muted small">' + S.people.length + ' en la lista · ' + S.families.length + ' familias · ' + S.homes.reduce(function (a, x) { return a + x.beds; }, 0) + ' camas</p></div></div>';
   if (adm) { h += familyAccessCard(); afterRender.push(fillFamilyAccess); }
   h += window.CLOUD ? '' : '<section class="card wood small"><p><b>Demo:</b> arriba a la derecha eliges quién eres para probar cómo se ve con cada rol. En la versión online cada uno entra con su email o con un código, y los permisos los aplica la base de datos.</p></section>';
+  if (SPIES.length) h += '<section class="card spy-card"><div class="card-head"><h3>Hay un espía entre nosotros</h3><span class="pill">Incógnito</span></div>' + SPIES.map(function (p) {
+    return '<div class="person">' + av(p.id, 'lg') + '<div class="grow"><b>' + esc(p.name) + '</b><div class="small muted">' +
+      (SPY_REAL ? 'Identidad real: <b>' + esc(SPY_REAL) + '</b> · solo la ves tú' : 'Identidad: clasificada. Prueba la app y deja sus informes en el buzón') + '</div></div></div>';
+  }).join('') + '</section>';
   S.families.forEach(function (f) {
     var ps = S.people.filter(function (p) { return p.family === f.id; });
     h += '<section class="card"><div class="card-head"><h3 class="row" style="gap:8px"><i class="fam-dot ' + f.color + '"></i>' + esc(f.name) + '</h3>' + (f.note ? '<span class="pill">' + esc(f.note) + '</span>' : '') + '</div><div>' +

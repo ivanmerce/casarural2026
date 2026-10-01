@@ -32,7 +32,9 @@ function saveUi() {
 function uid(p) { return p + Math.random().toString(36).slice(2, 8); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 function fam(id) { return S.families.find(function (f) { return f.id === id; }); }
-function person(id) { return S.people.find(function (p) { return p.id === id; }); }
+var SPY_FAM = 'esp', SPIES = [], SPY_REAL = null;   /* el espía: invitado de incógnito, fuera de familias, repartos y rankings */
+function person(id) { return S.people.find(function (p) { return p.id === id; }) || SPIES.find(function (p) { return p.id === id; }); }
+function isSpy(id) { var p = person(id || ui.me); return !!(p && p.spy); }
 function meal(id) { return S.meals.find(function (m) { return m.id === id; }); }
 function dayOf(k) { return S.days.find(function (d) { return d.k === k; }); }
 function slotName(k) { var s = S.slots.find(function (x) { return x.k === k; }); return s ? s.name : k; }
@@ -75,10 +77,10 @@ function ownerLabel(o) {
 
 /* ---------- Permisos (en v0.2 los aplica la base de datos con RLS) ---------- */
 /* Peques (menores con rol lector): solo miran y cazan secretos. La base de datos también lo impide (RLS). */
-function isKid() { var m = typeof me === 'function' && me(); return !!(m && m.role === 'lector' && m.kind !== 'adulto'); }
+function isKid() { var m = typeof me === 'function' && me(); return !!(m && ((m.role === 'lector' && m.kind !== 'adulto') || m.spy)); }
 var KID_BLOCK = { vote: 1, aVote: 1, aPick: 1, aUnvote: 1, ideaAdd: 1, ideaLike: 1, ideaDel: 1, phLike: 1, phUpload: 1, phCaption: 1, phDel: 1, greg: 1, roomIn: 1, roomOut: 1,
   day: 1, attendance: 1, famAttend: 1, togAtt: 1, conf: 1, confFam: 1, claim: 1, unclaim: 1, claimMeal: 1, owner: 1, setOwner: 1, tick: 1, saveCost: 1, newItem: 1, dupItem: 1, delItem: 1 };
-function kidNope() { toast('Modo explorador: aquí puedes mirarlo todo (y cazar secretos), pero no cambiar nada'); }
+function kidNope() { toast(isSpy() ? 'Modo espía: se mira, se toma nota y se deja el informe en el buzón de ideas. Tocar, no' : 'Modo explorador: aquí puedes mirarlo todo (y cazar secretos), pero no cambiar nada'); }
 function can(what, target) {
   var r = me().role;
   if (r === 'admin') return true;

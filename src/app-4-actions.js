@@ -228,7 +228,7 @@ function message(html, ms) {
   var gone = false, close = function () { if (gone) return; gone = true; m.style.transition = 'opacity .35s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 350); };
   var born = Date.now();
   m.addEventListener('click', function (e) { e.stopPropagation(); if (Date.now() - born < 1100) return; close(); });
-  document.body.appendChild(m); setTimeout(close, ms || 4200);
+  document.body.appendChild(m);   /* se queda hasta que el usuario toque la pantalla */
 }
 function confetti(ms) {
   var fx = fxLayer(false), cols = ['#C4112F', '#1C1614', '#FFFFFF', '#E8B64A', getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()];
@@ -768,7 +768,7 @@ function bindEvents() {
     var eg = e.target.closest('[data-egg]');
     if (eg && S && eggTap(eg.dataset.egg, eg)) { e.preventDefault(); return; }
     var t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
-    if (S && KID_BLOCK[t.dataset.act] && isKid()) { e.preventDefault(); kidNope(); return; }
+    if (S && KID_BLOCK[t.dataset.act] && isKid() && !(isSpy() && /^idea/.test(t.dataset.act))) { e.preventDefault(); kidNope(); return; }
     var fn = A[t.dataset.act]; if (fn) { e.preventDefault(); fn(t, e); }
   });
   document.addEventListener('change', function (e) { var t = e.target.closest('[data-change]'); if (t && C[t.dataset.change]) C[t.dataset.change](t); });
