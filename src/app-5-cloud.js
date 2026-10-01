@@ -171,13 +171,13 @@ var CLOUD = (function () {
     document.addEventListener('visibilitychange', function () { if (!document.hidden) { ping(); ch.track({ pid: ui.me, at: new Date().toISOString() }); } });
   }
   function ping() {
-    var eg = 0; try { eg = rankedCount(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg, p_ver: 2 }).then(function () {
-      return client().from('presence').select('person_id,last_seen,visits,minutes,eggs');
+    var eg = 0, ks = []; try { eg = rankedCount(); ks = rankedKeys(); } catch (e) {}
+    client().rpc('ping', { p_eggs: eg, p_ver: 3, p_keys: ks }).then(function () {
+      return client().from('presence').select('person_id,last_seen,visits,minutes,eggs,egg_keys');
     }).then(function (r) {
       if (r && r.data) {
         var st = {};
-        r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs }; });
+        r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs, keys: x.egg_keys || [] }; });
         if (S) S.stats = st; onPresence();
       }
     }).catch(function () {});

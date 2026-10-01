@@ -226,7 +226,8 @@ function message(html, ms) {
   var m = document.createElement('div'); m.className = 'egg-msg'; m.setAttribute('role', 'status');
   m.innerHTML = '<div class="inner">' + html + '<span class="egg-tap">Toca para cerrar</span></div>';
   var gone = false, close = function () { if (gone) return; gone = true; m.style.transition = 'opacity .35s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 350); };
-  m.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+  var born = Date.now();
+  m.addEventListener('click', function (e) { e.stopPropagation(); if (Date.now() - born < 1100) return; close(); });
   document.body.appendChild(m); setTimeout(close, ms || 4200);
 }
 function confetti(ms) {
@@ -382,7 +383,7 @@ function fumataRaw(title, text, k) {
 }
 function extraOmnes() {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
-  eggCard('omnes', 'Toc, toc…', 'Has llamado 5 veces a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
+  eggCard('omnes', 'Toc, toc…', 'Has llamado a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
   setTimeout(function () { v.remove(); }, 4400);
 }
 function abueloMode() {
@@ -390,9 +391,10 @@ function abueloMode() {
   eggToast('abuelo', ui.prefs.size === 'xl' ? 'Letra de abuelo: todo en grande, sin gafas. Toca 3 veces otra vez para volver.' : 'Letra normal. ¿Alguien ha visto mis gafas?');
 }
 var tapCount = {}, tapTimer = {};
-var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 5, sun: 5, disco: 3, podio: 3, abumeter: 3 };
+var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 1, sun: 5, disco: 3, podio: 3, abumeter: 3 };
 function eggTap(k, el) {
   var need = EGG_TAPS[k]; if (!need) return false;
+  if (k === 'logo' && hasEgg('omnes')) return false;   /* una vez descubierto, la casita vuelve a ser el botón de Inicio */
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
   tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2400);
   if (el && tapCount[k] >= 2 && tapCount[k] < need) { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {} }

@@ -26,7 +26,7 @@ function buildEggs() {
     { k: 'foto', name: 'Primera foto', how: 'Subir una foto al álbum', hint: 'Sonría, por favor', more: 'La cámara de arriba → Subir fotos' },
     { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Un poco de amor para el álbum', more: 'Abre una foto del álbum y toca el corazón' },
     /* Toques escondidos */
-    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 5 veces seguidas el logo', hint: 'El logo guarda un secreto', more: 'La casita de arriba a la izquierda o el título grande de Inicio: 5 toques rápidos' },
+    { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'La casa esconde algo', more: 'Toca la casita de arriba a la izquierda o el título grande de Inicio' },
     { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años', more: 'En la pestaña Familia, toca su foto 5 veces seguidas' },
     { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño esconde algo', more: 'En Comidas, toca 3 veces «Menú ' + b + '»' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas' },
@@ -109,9 +109,7 @@ function secretsSheet() {
     '<p>' + (closed ? '<b>El ranking se cerró</b> el ' + esc(fmtClose()) + '. Lo que descubras ahora ya no suma.' : 'El ranking se cierra el <b>' + esc(fmtClose()) + '</b> (2 horas antes sonará una alarma). Quien los consiga todos se lleva el trofeo <b>Guardián de los Secretos</b> en la gala.') + '</p></div>' +
     '<div class="sec-me"><div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small">' + (mine && mine.n ? '<b>' + mine.pos + '.º</b> en el ranking' : 'Aún sin estrenar') + '<br><span class="muted">' + left + (left === 1 ? ' pista extra' : ' pistas extra') + ' de ' + SECRETS_HINTS + '. Úsalas con cabeza</span></span></div>' +
     '<div class="bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div></div>';
-  html += '<p class="eyebrow">Ranking de cazasecretos</p><div class="sec-rank">' + rk.map(function (r) {
-    return '<div class="sec-row' + (r.id === ui.me ? ' me' : '') + '">' + medal(r.pos) + av(r.id, 'sm') + '<b class="grow">' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</b><span class="num">' + r.n + '/' + EGGS.length + '</span></div>';
-  }).join('') + '<p class="small muted">' + (rk.length < 2 ? 'Aquí saldrá toda la familia en cuanto empiecen a descubrir secretos. ' : 'Se actualiza cada minuto. ') + 'Solo se ve cuántos lleva cada uno, nunca cuáles.</p></div>';
+  html += '<p class="eyebrow">Ranking de cazasecretos</p><div class="sec-rank">' + (typeof secretsWho === 'function' ? secretsWho() : '') + '<p class="small muted">Se actualiza cada minuto.</p></div>';
   html += '<p class="eyebrow">Tus secretos</p><div class="stack">' + EGGS.map(function (e) {
     var ok = f[e.k], hint = h[e.k];
     return '<div class="row sec-egg' + (ok ? ' ok' : '') + '"><span class="av sm" style="background:' + (ok ? 'var(--accent)' : 'var(--surface-2)') + ';color:' + (ok ? '#fff' : 'var(--muted)') + '">' + (ok ? '✓' : '?') + '</span><span class="grow"><b>' + (ok ? esc(e.name) : '???') + '</b><span class="small muted" style="display:block">' + esc(ok ? e.how : 'Pista: ' + e.hint) + '</span>' +
