@@ -359,6 +359,7 @@ var G = (function () {
     { key: 'hockey', name: 'Partido de hockey', cat: 'deporte', format: 'teams', icon: 'stick', rules: 'Dos tiempos de 10 minutos. Stick por debajo de la cintura.', points: [8, 4], allowDraw: true },
     { key: 'futbol', name: 'Partido de fútbol', cat: 'deporte', format: 'teams', icon: 'ball', rules: 'Dos tiempos de 10 minutos. Los peques pueden tirar desde donde quieran.', points: [8, 4], allowDraw: true },
     { key: 'escondite', name: 'Escondite', cat: 'escondite', format: 'ranking', mode: 'order', icon: 'ghost', rules: 'Apunta el orden en que os van encontrando: el primero de la lista es el último en ser encontrado (el mejor escondido).' },
+    { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'high', unit: 'm', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos (en metros).' },
     { key: 'sprint', name: 'Sprint de 30 metros', cat: 'velocidad', format: 'ranking', mode: 'low', unit: 's', icon: 'bolt', rules: 'Tiempo en segundos. Los peques salen con ventaja.' },
     { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'high', unit: 'aciertos', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
     { key: 'zapatilla', name: 'Lanzamiento de zapatilla', cat: 'mini', format: 'ranking', mode: 'high', unit: 'm', icon: 'shoe', rules: 'Tres intentos, cuenta el mejor. Metros medidos a pasos.' },
@@ -369,7 +370,7 @@ var G = (function () {
     { key: 'gimcana', name: 'Gimcana', cat: 'velocidad', format: 'teams', teamRank: true, icon: 'search', rules: 'Pistas, pruebas y adivinanzas. Apunta el orden de llegada de los equipos.', points: [10, 7] },
     { key: 'peso', name: 'Adivina el peso', cat: 'mini', format: 'ranking', mode: 'low', unit: 'g de error', icon: 'flame', rules: 'Cada uno dice un peso; se mira la etiqueta. Apunta los gramos de error: gana quien menos se equivoca.' },
     { key: 'canasta', name: 'Canasta de papel', cat: 'mini', format: 'ranking', mode: 'high', unit: 'canastas', icon: 'ball', rules: 'Bolas de papel a una papelera, 5 tiros cada uno.' },
-    { key: 'silencio', name: 'El juego del silencio', cat: 'mini', format: 'ranking', mode: 'order', icon: 'moon', rules: 'Quien hable o se ría queda eliminado. El primero de la lista es quien más aguanta.' },
+    { key: 'sonidos', name: '¡Caliente, caliente! La acción secreta', cat: 'ingenio', format: 'teams', teamRank: true, icon: 'music', points: [8, 5, 3], rules: 'Equipos de 4. Uno sale; los rivales escriben una acción secreta. Sus 3 compañeros solo pueden guiarle con sonidos de «bien» o «mal». 5 minutos. Gana quien lo logra más rápido.' },
     { key: 'libre', name: 'Juego nuevo', cat: 'mini', format: 'ranking', mode: 'order', icon: 'star', rules: '' }
   ];
 
