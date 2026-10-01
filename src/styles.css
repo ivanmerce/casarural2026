@@ -1326,3 +1326,5 @@ body.gala-on .fx { z-index: 94; }
 .gala.present .gala-prog { opacity: 1 !important; }
 .gala.present .gala-ctl .gala-prog { position: fixed; top: auto; bottom: 0; }
 @media (max-width: 520px) { .gala-burst { grid-template-columns: 1fr; gap: 8px; } .gb { min-height: 0; padding: 12px; flex-direction: row; flex-wrap: wrap; justify-content: center; } .gb-desc { flex-basis: 100%; } .gala-tools .icon-btn { width: 38px; height: 38px; } }
+
+@media (min-width: 521px) { .gala-burst { grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); width: min(980px, 100%); } .gala[data-slide="burst"] .gala-in { max-width: none; } }

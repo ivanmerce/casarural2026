@@ -43,7 +43,7 @@ function galaRender() {
   else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p><p class="small">Volvemos en 3, 2, 1…</p>';
   else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">' + G.awards(S).length + ' premios. Una noche.</h1><p>Habrá lágrimas, discursos de 30 segundos (cronometrados) y algún que otro «yo no he sido». Nadie se queda sin estatuilla.</p>';
   else if (s.t === 'burst') {
-    inner = '<span class="eyebrow">' + esc(G.GROUPS[s.g] || 'Premios') + ' · ráfaga</span><div class="gala-burst">' + s.items.map(function (a, k) {
+    inner = '<span class="eyebrow">' + esc(G.GROUPS[s.g] || 'Premios') + ' · ráfaga</span><div class="gala-burst" style="--n:' + s.items.length + '">' + s.items.map(function (a, k) {
       return '<div class="gb' + (rv === true ? ' on' : '') + '" style="--d:' + (k * .55) + 's"><span class="gb-ico">' + icon(a.icon || 'star') + '</span><b class="gb-name">' + esc(a.name) + '</b>' +
         (rv === true ? '<div class="gb-win">' + winnersHtml(a, a.winners.length > 2 ? 'sm' : 'md') + '</div><small class="gb-quip">' + esc(GALA_QUIP[a.id] || a.why || '') + '</small>' : '<small class="gb-desc">' + esc(a.desc) + '</small><span class="gb-env" aria-hidden="true"></span>') + '</div>';
     }).join('') + '</div>' + (rv === true ? '' : '<p class="gala-drum' + (rv === 'wait' ? ' rolling' : '') + '">' + esc(pickOne(GALA_DRUM, s.g + gala.i)) + '</p>');
