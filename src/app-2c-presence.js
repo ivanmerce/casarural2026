@@ -8,7 +8,7 @@ function presenceData() {
 }
 function onlineIds() {
   var on = presenceData().online;
-  return S ? S.people.filter(function (p) { return on[p.id]; }).map(function (p) { return p.id; }) : [];
+  return S ? S.people.concat(typeof SPIES !== 'undefined' ? SPIES : []).filter(function (p) { return on[p.id]; }).map(function (p) { return p.id; }) : [];   /* el espía también sale conectado */
 }
 function timeAgo(iso) {
   if (!iso) return null;
