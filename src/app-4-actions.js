@@ -298,7 +298,9 @@ function checkClaras() {
 var marcOn = false, popped = 0;
 function marcMode() {
   if (marcOn) return; marcOn = true; popped = 0;
-  eggToast('baby', 'Modo ' + esc(babyName()) + ': ¡explota las burbujas antes de que se escapen! (Hay premio si llegas a 15)');
+  eggThen('baby', 'Modo ' + esc(babyName()), '¡Explota las burbujas antes de que se escapen! Si llegas a 15, hay premio.', marcBubbles);
+}
+function marcBubbles() {
   var end = Date.now() + 14000;
   var iv = setInterval(function () {
     if (Date.now() > end) { clearInterval(iv); marcOn = false; return; }
@@ -362,12 +364,14 @@ function himno() {
 var discoOn = false;
 function discoMode() {
   if (discoOn) return; discoOn = true;
+  eggThen('disco', '¡Modo discoteca!', '9 segundos de fiesta. Si alguien te mira raro, di que es la app.', discoGo);
+}
+function discoGo() {
   document.documentElement.classList.add('disco');
   var fx = document.createElement('div'); fx.className = 'disco-fx'; fx.setAttribute('aria-hidden', 'true');
   fx.innerHTML = '<div class="beams"></div><div class="beams b2"></div><div class="ball"></div>';
   document.body.appendChild(fx);
   if (navigator.vibrate) try { navigator.vibrate([60, 60, 60, 60, 120]); } catch (e) {}
-  eggToast('disco', '¡Modo discoteca! 9 segundos de fiesta. Si alguien te mira raro, di que es la app.');
   setTimeout(function () { document.documentElement.classList.remove('disco'); fx.classList.add('out'); setTimeout(function () { fx.remove(); }, 500); discoOn = false; }, 9000);
 }
 function fumataRaw(title, text, k) {
@@ -382,9 +386,7 @@ function fumataRaw(title, text, k) {
   setTimeout(function () { if (k) eggCard(k, title, text); else message('<h2>' + title + '</h2><p>' + text + '</p>', 4200); }, 600);
 }
 function extraOmnes() {
-  var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
   eggCard('omnes', 'Toc, toc…', 'Has llamado a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
-  setTimeout(function () { v.remove(); }, 4400);
 }
 function abueloMode() {
   ui.prefs.size = ui.prefs.size === 'xl' ? 'm' : 'xl'; savePrefs(); applyPrefs(); render(true);
@@ -410,7 +412,7 @@ function eggTap(k, el) {
 var A = {
   tab: function (el) { ui.mealFilter = null; if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
   goSheet: function (el) { closeSheet(); if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; go(el.dataset.tab); },
-  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); } },
+  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); else { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); toast('Toc, toc… Sigue sin abrir nadie: están todos en la nave'); } } },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
   day: function (el) { ui.day = el.dataset.day; render(true); },

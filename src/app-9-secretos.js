@@ -69,22 +69,67 @@ function egg(k, quiet) {
   var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
   f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
   var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
-  if (all && !late) setTimeout(function () { fireworks(7000, 14); message('<div class="trophy">' + icon('trophy') + '</div><span class="egg-badge">Los ' + EGGS.length + ' de ' + EGGS.length + '</span><h2>Guardián de los Secretos</h2><p>Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.</p>', 5200); }, quiet ? 4800 : 300);
-  else if (!quiet) setTimeout(function () { fireworks(3000, 3); toast('<b>¡Secreto desbloqueado!</b> «' + esc(e.name) + '» · ' + n + ' de ' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet); }, 250);
+  /* los secretos «silenciosos» (sin efecto propio) también tienen su gran momento */
+  if (!quiet) revealSecret(e, { title: e.name, text: 'Lo has encontrado: ' + e.how.charAt(0).toLowerCase() + e.how.slice(1) + '.' });
+  if (all && !late) revealSecret(null, { trophy: true });
   try { if (window.CLOUD && CLOUD.pingNow) CLOUD.pingNow(); } catch (x) {}
   return true;
 }
-/* Un secreto con efecto: una sola tarjeta, al momento, que se entiende */
-function eggBadge(isNew) { return isNew ? '<span class="egg-badge">Secreto desbloqueado · ' + foundCount() + ' de ' + EGGS.length + '</span>' : ''; }
+
+/* ===== La revelación: una tarjeta grande, con fuegos, anillo de progreso y en cola (nunca se pisan) ===== */
+var revealQ = [], revealOn = false;
+function revealSecret(e, o) { revealQ.push({ e: e, o: o || {}, n: foundCount() }); if (!revealOn) { revealOn = true; setTimeout(revealNext, 60); } }
+function revealNext() {
+  var it = revealQ.shift(); if (!it) { revealOn = false; return; }
+  document.querySelectorAll('.egg-msg').forEach(function (x) { x.remove(); });
+  var o = it.o, n = it.n, N = EGGS.length, trophy = !!o.trophy;
+  var C = 2 * Math.PI * 46, from = C * (1 - Math.max(0, n - 1) / N), to = C * (1 - n / N);
+  var veil = document.createElement('div'); veil.className = 'egg-veil reveal-veil'; document.body.appendChild(veil);
+  var m = document.createElement('div'); m.className = 'egg-msg egg-reveal' + (trophy ? ' is-trophy' : ''); m.setAttribute('role', 'dialog'); m.setAttribute('aria-live', 'assertive');
+  m.innerHTML = '<div class="inner">' +
+    '<div class="rv-seal"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="rv-track" cx="50" cy="50" r="46"/><circle class="rv-ring" cx="50" cy="50" r="46" style="stroke-dasharray:' + C.toFixed(1) + ';stroke-dashoffset:' + from.toFixed(1) + '"/></svg>' +
+      '<div class="rv-core">' + (trophy ? icon('trophy') : '<b class="num">' + n + '</b><small>de ' + N + '</small>') + '</div></div>' +
+    '<span class="egg-badge">' + (trophy ? 'Los ' + N + ' de ' + N : 'Secreto desbloqueado') + '</span>' +
+    (o.top ? '<div class="rv-top">' + o.top + '</div>' : '') +
+    '<h2>' + (trophy ? 'Guardián de los Secretos' : o.title) + '</h2>' +
+    '<p>' + (trophy ? 'Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.' : o.text) + '</p>' +
+    (it.e && it.e.name !== o.title ? '<small class="rv-name">«' + esc(it.e.name) + '»</small>' : '') +
+    '<div class="rv-actions"><button class="btn primary" data-rv="ok">¡Toma ya!</button><button class="btn ghost" data-rv="see">Mis secretos</button></div>' +
+    '<small class="egg-hush">' + (secretsClosed() ? 'El ranking ya está cerrado: este no suma' : 'Chitón: que cada uno encuentre los suyos') + '</small></div>';
+  document.body.appendChild(m);
+  var show = function () { if (m.classList.contains('in')) return; var r = m.querySelector('.rv-ring'); if (r) r.style.strokeDashoffset = to.toFixed(1); m.classList.add('in'); };
+  requestAnimationFrame(function () { requestAnimationFrame(show); }); setTimeout(show, 120);
+  try { fireworks(trophy ? 7000 : 4600, trophy ? 14 : 7); } catch (x) {}
+  if (navigator.vibrate) try { navigator.vibrate(trophy ? [20, 60, 20, 60, 40] : [14, 50, 14]); } catch (x) {}
+  var born = Date.now(), gone = false, tm;
+  function close(then) {
+    if (gone) return; gone = true; clearTimeout(tm);
+    m.classList.add('out'); veil.classList.add('out');
+    setTimeout(function () { m.remove(); veil.remove(); if (then) then(); if (o.after) try { o.after(); } catch (x) {} setTimeout(revealNext, revealQ.length ? 220 : 0); }, 380);
+  }
+  m.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-rv]'); ev.stopPropagation();
+    if (b && b.dataset.rv === 'see') { close(function () { if (typeof secretsSheet === 'function') secretsSheet(); }); return; }
+    if (b || Date.now() - born > 1200) close();
+  });
+  tm = setTimeout(close, trophy ? 9000 : 6500);
+}
+/* Un secreto con efecto: si es nuevo, revelación completa; si ya lo tenías, solo el efecto con su frase */
 function eggCard(k, title, text, top, ms) {
-  var isNew = egg(k, true);
-  if (isNew) fireworks(4200, 6);
-  message((top || '') + eggBadge(isNew) + '<h2>' + title + '</h2><p>' + text + '</p>' + (isNew ? '<small class="egg-hush">Chitón: que cada uno encuentre los suyos</small>' : ''), ms || 4600);
+  var isNew = egg(k, true), e = EGGS.find(function (x) { return x.k === k; });
+  if (isNew) revealSecret(e, { title: title, text: text, top: top });
+  else message((top || '') + '<h2>' + title + '</h2><p>' + text + '</p>', ms || 4200);
+}
+/* Secreto con efecto interactivo (burbujas, discoteca…): primero la revelación y, al cerrarla, el efecto */
+function eggThen(k, title, text, fn) {
+  var isNew = egg(k, true), e = EGGS.find(function (x) { return x.k === k; });
+  if (isNew) revealSecret(e, { title: title, text: text, after: fn });
+  else { fn(); toast(text); }
 }
 function eggToast(k, text) {
-  var isNew = egg(k, true);
-  if (isNew) fireworks(3000, 3);
-  toast((isNew ? '<b>¡Secreto ' + foundCount() + ' de ' + EGGS.length + '!</b> ' : '') + text, isNew ? 'Ver' : null, isNew ? secretsSheet : null);
+  var isNew = egg(k, true), e = EGGS.find(function (x) { return x.k === k; });
+  if (isNew) revealSecret(e, { title: e ? e.name : '¡Secreto!', text: text });
+  else toast(text);
 }
 
 /* ----- Pistas extra: 3 por persona en total ----- */
