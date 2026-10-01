@@ -1251,6 +1251,12 @@ img, svg, canvas { max-width: 100%; }
 .podio-empty { display: inline-grid; place-items: center; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .egg-reveal .rv-sticker { animation: none; } }
 
+/* v0.7.31 · Cazasecretos en Juegos */
+.sg-note { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; color: inherit; border-left: 4px solid var(--accent); }
+.sg-note > .ico { width: 22px; height: 22px; color: var(--accent); flex: none; }
+.sg-note .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sg-card .g-ico { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -1563,7 +1569,7 @@ if (typeof module !== 'undefined') module.exports = L;
    Participante ("entrant") = una persona o un dúo (p. ej. un adulto con un bebé que compiten juntos). */
 var G = (function () {
   var DEFAULT_POINTS = [10, 8, 6, 5, 4, 3, 2, 1];
-  var CATS = { deporte: 'Deporte', velocidad: 'Velocidad', ingenio: 'Ingenio', escondite: 'Escondite', mini: 'Minijuego', mesa: 'Mesa' };
+  var CATS = { deporte: 'Deporte', velocidad: 'Velocidad', ingenio: 'Ingenio', escondite: 'Escondite', mini: 'Minijuego', mesa: 'Mesa', secretos: 'Secretos' };
   var FORMATS = { bracket: 'Eliminatoria 1 contra 1', league: 'Liguilla', teams: 'Por equipos', ranking: 'Individual' };
   var MODES = { order: 'Orden de llegada', high: 'Más es mejor', low: 'Menos es mejor' };
 
@@ -1735,11 +1741,27 @@ var G = (function () {
   function gamePoints(S, g) {
     var st = standings(S, g), out = {};
     if (!hasResults(st)) return out;
-    st.rows.forEach(function (r) { out[r.id] = { pts: pointsFor(g, r.pos), pos: r.pos }; });
+    st.rows.forEach(function (r) { if (g.virtual && !r.pos) return; out[r.id] = { pts: pointsFor(g, r.pos), pos: r.pos }; });   /* en Cazasecretos, sin secretos no hay puntos */
     return out;
   }
+  /* ---------- Cazasecretos: un juego más del ranking, vivo desde ya ----------
+     La app deja en S.secretsLive = { counts: {persona: secretos}, closed, close } lo que dice el ranking de secretos.
+     Puntúa como cualquier juego (por puestos); es provisional hasta que se cierra el ranking de secretos. El espía no entra. */
+  var SECRETS_ID = 'g-secretos';
+  function secretsGame(S) {
+    var L0 = S.secretsLive; if (!L0 || !L0.counts) return null;
+    var res = {}, any = false;
+    entrantIds(S).forEach(function (id) {
+      var n = 0; membersOf(S, id).forEach(function (pid) { n = Math.max(n, L0.counts[pid] || 0); });
+      if (n > 0) { res[id] = n; any = true; }
+    });
+    return { id: SECRETS_ID, virtual: true, name: 'Cazasecretos', cat: 'secretos', format: 'ranking', mode: 'high', unit: 'secretos', icon: 'search',
+      entrants: entrantIds(S), results: res, part: 0, closed: !!L0.closed, provisional: !L0.closed, any: any, close: L0.close || null };
+  }
   function when(g) { return (g.day || '9999') + ' ' + (g.time || '99:99'); }
-  function doneGames(S) { return (S.games || []).filter(function (g) { return isDone(S, g); }).sort(function (a, b) { return when(a).localeCompare(when(b)) || (a.sort || 0) - (b.sort || 0); }); }
+  function realDone(S) { return (S.games || []).filter(function (g) { return isDone(S, g); }).sort(function (a, b) { return when(a).localeCompare(when(b)) || (a.sort || 0) - (b.sort || 0); }); }
+  /* los juegos que puntúan: Cazasecretos (si alguien lleva alguno) + los terminados */
+  function doneGames(S) { var sg = secretsGame(S); return (sg && sg.any ? [sg] : []).concat(realDone(S)); }
 
   /* ---------- Ranking global ---------- */
   function rankFrom(S, games) {
@@ -1749,13 +1771,14 @@ var G = (function () {
       var gp = gamePoints(S, g);
       Object.keys(gp).forEach(function (id) {
         var a = acc[id]; if (!a) return;
-        a.pts += gp[id].pts; a.played++;
+        a.pts += gp[id].pts; if (!g.virtual) a.played++;
         if (gp[id].pos === 1) a.gold++; else if (gp[id].pos === 2) a.silver++; else if (gp[id].pos === 3) a.bronze++;
-        a.byGame.push({ game: g.id, name: g.name, pos: gp[id].pos, pts: gp[id].pts });
+        a.byGame.push({ game: g.id, name: g.name + (g.provisional ? ' (provisional)' : ''), pos: gp[id].pos, pts: gp[id].pts, virtual: !!g.virtual });
       });
     });
     var rows = Object.keys(acc).map(function (k) { return acc[k]; });
     function cmp(x, y) { return (y.pts - x.pts) || (y.gold - x.gold) || (y.silver - x.silver) || (y.bronze - x.bronze); }
+    rows.forEach(function (r) { r.scored = r.byGame.length; });
     rows.sort(function (x, y) { return cmp(x, y) || (y.played - x.played); });
     rows.forEach(function (r, i) { var p = rows[i - 1]; r.pos = p && cmp(p, r) === 0 ? p.pos : i + 1; r.pts = r2(r.pts); });
     return rows;
@@ -1763,7 +1786,7 @@ var G = (function () {
   function ranking(S) { return rankFrom(S, doneGames(S)); }
   /* la mayor remontada: peor puesto tras algún juego (desde el 2.º) frente al puesto final */
   function comeback(S) {
-    var gs = doneGames(S); if (gs.length < 3) return null;
+    var gs = doneGames(S); if (realDone(S).length < 2) return null;
     var worst = {}, fin = rankFrom(S, gs);
     for (var k = 1; k < gs.length; k++) rankFrom(S, gs.slice(0, k)).forEach(function (r) { if (r.played) worst[r.id] = Math.max(worst[r.id] || 0, r.pos); });
     var best = null;
@@ -1920,9 +1943,9 @@ var G = (function () {
     { key: 'futbol', name: 'Partido de fútbol', cat: 'deporte', format: 'teams', icon: 'ball', rules: 'Dos tiempos de 10 minutos. Los peques pueden tirar desde donde quieran.', points: [8, 4], allowDraw: true },
     { key: 'escondite', name: 'Escondite', cat: 'escondite', format: 'ranking', mode: 'order', icon: 'ghost', rules: 'Apunta el orden en que os van encontrando: el primero de la lista es el último en ser encontrado (el mejor escondido).' },
     { key: 'ruleta', name: 'La ruleta de globos', cat: 'deporte', format: 'teams', teamRank: true, icon: 'shuffle', points: [8, 4], rules: 'Dos equipos en círculo, globos de agua en el centro. La botella-ruleta elige quién lanza (sin moverse) a uno del otro equipo; los demás huyen. Gana el equipo del último que quede.' },
-    { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'low', unit: 's', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando. Sin manos, se balancea para tumbar latas del suelo. Gana el más rápido.' },
-    { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'high', unit: 'm', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos (en metros).' },
-    { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'high', unit: 'aciertos', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
+    { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'order', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando hasta las rodillas. Sin manos, hay que metérsela en la boca. El ranking es el orden en que lo vais consiguiendo.' },
+    { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'order', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos. Se apunta por orden.' },
+    { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'order', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
     { key: 'pañuelo', name: 'El pañuelo', cat: 'velocidad', format: 'teams', icon: 'flag', rules: 'Dos equipos numerados. El que se lleva el pañuelo suma un punto.', points: [8, 4], allowDraw: true },
     { key: 'sillas', name: 'Sillas musicales', cat: 'mini', format: 'ranking', mode: 'order', icon: 'music', rules: 'Apunta en orden inverso: el primero es el que se queda con la última silla.' },
     { key: 'nerf', name: 'Nerf: atrapa la bandera', cat: 'deporte', format: 'teams', icon: 'flag', rules: 'Dos equipos con su bandera. Si te dan, a tu base a recargar. Gana quien lleve la bandera rival a su campo.', points: [10, 5], allowDraw: false },
@@ -1932,6 +1955,7 @@ var G = (function () {
   ];
 
   return {
+    secretsGame: secretsGame, realDone: realDone, SECRETS_ID: SECRETS_ID,
     CATS: CATS, FORMATS: FORMATS, MODES: MODES, DEFAULT_POINTS: DEFAULT_POINTS, TEMPLATES: TEMPLATES, AWARDS: AWARDS, GROUPS: GROUPS,
     entrantIds: entrantIds, entrant: entrant, entrantOf: entrantOf, membersOf: membersOf, presentOn: presentOn, presentList: presentList, ageOf: ageOf,
     makeBracket: makeBracket, seedOrder: seedOrder, advance: advance, roundName: roundName, winnerOf: winnerOf, isBye: isBye,
@@ -2251,6 +2275,7 @@ function render(keepScroll) {
   var y = window.scrollY;
   stopHero();
   afterRender = [];
+  try { if (typeof secretsLiveUpdate === 'function') secretsLiveUpdate(); } catch (e) {}
   var fn = VIEWS[ui.tab] || VIEWS.inicio;
   $main.innerHTML = '<div class="view" data-view="' + ui.tab + '">' + fn() + '</div>';
   renderTop(); renderNav(); fitChrome();
@@ -3870,7 +3895,7 @@ function compCard() {
   var live = (S.games || []).filter(function (g) { return gStatus(g) === 'vivo'; });
   var now = new Date().toISOString().slice(0, 16).replace('T', ' ');
   var next = (S.games || []).filter(function (g) { return gStatus(g) === 'prox'; })[0];
-  var done = G.doneGames(S).length, tot = (S.games || []).length;
+  var done = G.realDone(S).length, tot = (S.games || []).length;
   return '<section class="card comp-card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('trophy') + 'Competición</h3><button class="link" data-act="tab" data-tab="juegos">Juegos ' + icon('arrow') + '</button></div>' +
     (leader.length ? '<button class="leader" data-act="jsub" data-v="ranking">' + eAv(leader[0].id, 'sm') + '<span class="grow"><span class="eyebrow">Líder del finde</span><b>' + leader.map(function (l) { return eName(l.id); }).join(' y ') + '</b></span><span class="big num">' + leader[0].pts + '</span><small class="muted">pts</small></button>'
       : '<p class="small muted">Nadie ha puntuado todavía. El trono está libre.</p>') +
@@ -3894,14 +3919,26 @@ function gamesList() {
   /* Sin días ni horas: en juego, por jugar (por tipo) y terminados. Se elige el que apetezca */
   var gs = (S.games || []).slice().sort(function (a, b) { return (CAT_ORDER_G.indexOf(a.cat) - CAT_ORDER_G.indexOf(b.cat)) || (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name, 'es'); });
   if (!gs.length) return '<div class="empty">' + icon('games') + '<b>Sin juegos todavía</b><span>Pulsa + y crea el primero. El sofá no cuenta como deporte.</span></div>' + (can('edit') ? '<button class="fab" data-act="gNew" aria-label="Añadir juego">' + icon('plus') + '</button>' : '');
-  var h = '<p class="small muted games-free">Sin horarios: elegid el que os apetezca en cada momento. Tocad uno para empezar a apuntar.</p>';
+  var h = '<p class="small muted games-free">Sin horarios: elegid el que os apetezca en cada momento. Tocad uno para empezar a apuntar.</p>' + secretsGameCard();
   var live = gs.filter(function (g) { return gStatus(g) === 'vivo'; }), todo = gs.filter(function (g) { return gStatus(g) === 'prox'; }), fin = gs.filter(function (g) { return gStatus(g) === 'fin'; });
   if (live.length) h += '<p class="eyebrow live-label"><span class="live-dot" aria-hidden="true"></span> En juego ahora</p>' + live.map(gameCard).join('');
   if (todo.length) h += '<p class="eyebrow">Por jugar · ' + todo.length + '</p>' + todo.map(gameCard).join('');
   if (fin.length) h += '<p class="eyebrow">Terminados · ' + fin.length + '</p>' + fin.map(gameCard).join('');
-  h += '<section class="card wood small"><h3>Cómo se puntúa</h3><p>Cada juego reparte puntos según el puesto (se puede cambiar en cada juego). El ranking global suma todo. Si hay empate a puntos, manda quien tenga más oros, luego platas y luego bronces.</p><p class="muted">Todos compiten por su cuenta. ' + esc((S.comp && S.comp.duos || []).map(function (d) { return d.name; }).join(', ')) + (S.comp && S.comp.duos && S.comp.duos.length ? ' compiten en pareja: si ganan, ganan los dos.' : '') + '</p></section>';
+  h += '<section class="card wood small"><h3>Cómo se puntúa</h3><p>Cada juego reparte puntos según el puesto (se puede cambiar en cada juego). El ranking global suma todo, <b>Cazasecretos incluido</b>: el puesto en el ranking de secretos da puntos como un juego más (1.º 10, 2.º 8, 3.º 6…) y es provisional hasta el cierre. Si hay empate a puntos, manda quien tenga más oros, luego platas y luego bronces.</p><p class="muted">Todos compiten por su cuenta. ' + esc((S.comp && S.comp.duos || []).map(function (d) { return d.name; }).join(', ')) + (S.comp && S.comp.duos && S.comp.duos.length ? ' compiten en pareja: si ganan, ganan los dos.' : '') + '</p></section>';
   if (can('edit')) h += '<button class="fab" data-act="gNew" aria-label="Añadir juego">' + icon('plus') + '</button>';
   return h;
+}
+/* Cazasecretos: siempre en juego (hasta el cierre), arriba del todo */
+function secretsGameCard() {
+  var sg = G.secretsGame(S); if (!sg) return '';
+  var sd = G.standings(S, sg), top = sd.rows.filter(function (r) { return r.pos && r.pos <= 3; });
+  var mine = sd.rows.find(function (r) { return G.membersOf(S, r.id).indexOf(ui.me) >= 0; });
+  return '<p class="eyebrow live-label">' + (sg.provisional ? '<span class="live-dot" aria-hidden="true"></span> Ya puntúa' : 'Terminado') + '</p>' +
+    '<button class="card game-card sg-card st-' + (sg.provisional ? 'vivo' : 'fin') + '" data-act="secrets"><span class="g-ico">' + icon('search') + '</span><span class="grow g-body">' +
+    '<b class="g-name">Cazasecretos</b><span class="small muted">Secretos · ' + (sg.provisional ? 'se cierra el ' + esc(typeof fmtClose === 'function' ? fmtClose() : 'domingo a las 11:00') : 'cerrado') + '</span>' +
+    '<span class="row wrap" style="gap:6px"><span class="pill ' + (sg.provisional ? 'red live' : 'ok') + '">' + (sg.provisional ? 'En juego · provisional' : 'Definitivo') + '</span><span class="pill">Individual</span>' + (mine && mine.pos ? '<span class="pill olive">Vas ' + mine.pos + '.º</span>' : '') + '</span>' +
+    (top.length ? '<span class="g-champ">' + icon('trophy') + top.map(function (r) { return eAv(r.id, 'xs'); }).join('') + '<b>' + top.filter(function (r) { return r.pos === 1; }).map(function (r) { return eName(r.id); }).join(', ') + '</b><small class="muted">' + (top[0].score || '') + ' secretos</small></span>' : '<span class="small muted">Nadie ha encontrado ninguno todavía</span>') +
+    '</span>' + icon('arrow') + '</button>';
 }
 function gameCard(g) {
   ensureGame(g);
@@ -4034,7 +4071,7 @@ function standingsHtml(g, sd) {
 
 /* ---------- Ranking global ---------- */
 function rankingView() {
-  var rank = G.ranking(S), done = G.doneGames(S);
+  var rank = G.ranking(S), done = G.doneGames(S), real = G.realDone(S), sg = G.secretsGame(S);
   if (!done.length) {
     var nx = (S.games || [])[0];
     return '<div class="empty"><span data-egg="podio" class="podio-empty">' + icon('podium') + '</span><b>El podio está vacío</b><span>En cuanto termine el primer juego aparecen aquí los puntos. Se admiten apuestas.</span></div>' + (nx ? '<button class="btn block" data-act="jsub" data-v="juegos">Ver los juegos</button>' : '');
@@ -4044,9 +4081,10 @@ function rankingView() {
     var p = [2, 1, 3][i]; if (!list.length) return '<div class="pod p' + p + ' empty"><div class="block">' + p + '</div></div>';
     return '<div class="pod p' + p + '"' + (p === 1 ? ' data-egg="podio"' : '') + '>' + (p === 1 ? '<span class="crown">' + icon('trophy') + '</span>' : '') + '<span class="pod-av pod-avs">' + list.slice(0, 3).map(function (r) { return eAv(r.id, 'lg'); }).join('') + '</span><b class="pod-name">' + list.map(function (r) { return eName(r.id); }).join('<br>') + '</b><span class="pod-pts num">' + list[0].pts + ' pts</span><div class="block">' + p + '</div></div>';
   }).join('') + '</div></section>';
-  h += '<section class="card"><div class="card-head"><h3>Clasificación general</h3><span class="small muted">' + done.length + ' de ' + (S.games || []).length + ' juegos</span></div><div class="stack" style="gap:0">' +
+  if (sg && sg.any) h += '<button class="card sg-note" data-act="secrets">' + icon('search') + '<span class="grow"><b>Incluye Cazasecretos' + (sg.provisional ? ' · provisional' : '') + '</b><small class="muted">' + (sg.provisional ? 'Los puestos del ranking de secretos ya puntúan como un juego más y se mueven solos hasta el cierre (' + esc(typeof fmtClose === 'function' ? fmtClose() : 'domingo a las 11:00') + ').' : 'Ranking de secretos cerrado: sus puntos ya son definitivos.') + '</small></span>' + icon('arrow') + '</button>';
+  h += '<section class="card"><div class="card-head"><h3>Clasificación general' + (sg && sg.provisional && sg.any ? ' <span class="pill warn">Provisional</span>' : '') + '</h3><span class="small muted">' + real.length + ' de ' + (S.games || []).length + ' juegos' + (sg && sg.any ? ' + secretos' : '') + '</span></div><div class="stack" style="gap:0">' +
     rank.map(function (r) {
-      return '<button class="rk-row" data-act="gRow" data-e="' + r.id + '">' + medal(r.pts ? r.pos : null) + eAv(r.id, 'sm') + '<span class="grow"><b>' + eName(r.id) + '</b><small class="muted" style="display:block">' + r.played + (r.played === 1 ? ' juego' : ' juegos') + (r.gold || r.silver || r.bronze ? ' · ' + [r.gold ? r.gold + ' oro' + (r.gold > 1 ? 's' : '') : '', r.silver ? r.silver + ' plata' + (r.silver > 1 ? 's' : '') : '', r.bronze ? r.bronze + ' bronce' + (r.bronze > 1 ? 's' : '') : ''].filter(Boolean).join(', ') : '') + '</small></span><b class="pts num">' + r.pts + '</b></button>';
+      return '<button class="rk-row" data-act="gRow" data-e="' + r.id + '">' + medal(r.pts ? r.pos : null) + eAv(r.id, 'sm') + '<span class="grow"><b>' + eName(r.id) + '</b><small class="muted" style="display:block">' + [r.played ? r.played + (r.played === 1 ? ' juego' : ' juegos') : '', (function () { var v = r.byGame.find(function (b) { return b.virtual; }); return v ? 'secretos: ' + v.pos + '.º' : ''; })()].filter(Boolean).join(' · ') + (!r.byGame.length ? 'Aún sin puntuar' : '') + (r.gold || r.silver || r.bronze ? ' · ' + [r.gold ? r.gold + ' oro' + (r.gold > 1 ? 's' : '') : '', r.silver ? r.silver + ' plata' + (r.silver > 1 ? 's' : '') : '', r.bronze ? r.bronze + ' bronce' + (r.bronze > 1 ? 's' : '') : ''].filter(Boolean).join(', ') : '') + '</small></span><b class="pts num">' + r.pts + '</b></button>';
     }).join('') + '</div></section>';
   var cb = G.comeback(S);
   if (cb) h += '<section class="card wood small"><p><b>Remontada en marcha:</b> ' + eName(cb.id) + ' ha pasado del ' + cb.from + '.º al ' + cb.to + '.º.</p></section>';
@@ -4159,7 +4197,7 @@ function gameSheet(id) {
   draft = { id: id, entrants: (g.entrants || []).slice(), format: g.format, mode: g.mode || 'order', cat: g.cat, allowDraw: !!g.allowDraw, teamRank: !!g.teamRank };
   openSheet('<h2>Editar juego</h2>' +
     '<div class="field"><label for="g-name">Nombre</label><input id="g-name" value="' + esc(g.name) + '"></div>' +
-    '<div class="grid2"><div class="field"><label for="g-cat">Tipo de prueba</label><select id="g-cat">' + Object.keys(G.CATS).map(function (c) { return '<option value="' + c + '"' + (g.cat === c ? ' selected' : '') + '>' + G.CATS[c] + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grid2"><div class="field"><label for="g-cat">Tipo de prueba</label><select id="g-cat">' + Object.keys(G.CATS).filter(function (c) { return c !== 'secretos'; }).map(function (c) { return '<option value="' + c + '"' + (g.cat === c ? ' selected' : '') + '>' + G.CATS[c] + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label for="g-format">Formato</label><select id="g-format">' + Object.keys(G.FORMATS).map(function (f) { return '<option value="' + f + '"' + (g.format === f ? ' selected' : '') + '>' + G.FORMATS[f] + '</option>'; }).join('') + '</select></div></div>' +
     '<div class="field"><span class="lbl">Si es clasificación, ¿cómo se ordena?</span>' + segHtml('mode', [['order', 'Orden'], ['high', 'Más es mejor'], ['low', 'Menos es mejor']], draft.mode) + '</div>' +
     '<div class="grid2"><div class="field"><label for="g-unit">Unidad</label><input id="g-unit" value="' + esc(g.unit || '') + '" placeholder="puntos, s, m…"></div>' +
@@ -4837,6 +4875,12 @@ function secretsRanking() {
   var pos = 0, last = -1, k = 0; arr.forEach(function (r) { if (r.spy) { r.pos = null; return; } k++; if (r.n !== last) { pos = k; last = r.n; } r.pos = pos; });
   return arr;
 }
+/* Para el ranking de juegos: lo que dice ahora mismo el ranking de secretos (sin el espía) */
+function secretsLiveUpdate() {
+  if (!S || !EGGS.length) return;
+  var c = {}; secretsRanking().forEach(function (r) { if (!r.spy && r.n > 0) c[r.id] = r.n; });
+  S.secretsLive = { counts: c, closed: secretsClosed(), close: secretsCloseIso() };
+}
 function secretsSheet() {
   egg('curioso');
   var f = foundMap(), h = hintsMap(), left = hintsLeft(), closed = secretsClosed(), rk = secretsRanking(), n = foundCount();
@@ -4875,7 +4919,7 @@ function secretsOnView() {
     if (t === 'tiempo') egg('meteo');
     if (t === 'compra') { var c = L.coverage(S.ingredients); if (c.tot && c.done === c.tot && !hasEgg('fumata') && !ui._fumataPend) { ui._fumataPend = true; setTimeout(function () { ui._fumataPend = false; if (!hasEgg('fumata')) fumata(); }, 450); } }
     if (t === 'cuentas' && !hasEgg('claras')) setTimeout(checkClaras, 300);
-    if (t === 'juegos' && !hasEgg('habemus') && G.doneGames(S).length >= 5) setTimeout(function () { if (!hasEgg('habemus')) fumataRaw('¡Habemus liga!', 'Cinco juegos terminados y el ranking ya echa humo. Aquí ya no se rinde nadie: quien no corre, vuela.', 'habemus'); }, 400);
+    if (t === 'juegos' && !hasEgg('habemus') && G.realDone(S).length >= 5) setTimeout(function () { if (!hasEgg('habemus')) fumataRaw('¡Habemus liga!', 'Cinco juegos terminados y el ranking ya echa humo. Aquí ya no se rinde nadie: quien no corre, vuela.', 'habemus'); }, 400);
     if (t === 'juegos') { var gs = S.games || []; if (gs.length && gs.every(function (g) { return G.isDone(S, g); }) && !ui.allDoneShown) checkAllGames(); }
     if (t === 'album' && typeof photoList === 'function' && photoList().length >= 50) egg('album');
     if (t === 'manual') setTimeout(manualEndCheck, 300);
@@ -5299,7 +5343,7 @@ function homeSecrets() {
 }
 function homeGames() {
   var rank = G.ranking(S).filter(function (r) { return r.pts > 0; }).slice(0, 3);
-  var done = G.doneGames(S).length, tot = (S.games || []).length;
+  var done = G.realDone(S).length, tot = (S.games || []).length;
   return '<section class="card home-games"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('trophy') + 'Ranking de juegos</h3><button class="link" data-act="jsub" data-v="ranking">Ranking ' + icon('arrow') + '</button></div>' +
     (rank.length ? '<div class="mini-rank">' + rank.map(function (r) { return '<span class="mr">' + medal(r.pos) + eAv(r.id, 'xs') + '<b>' + eName(r.id) + '</b><small class="num">' + r.pts + ' pts</small></span>'; }).join('') + '</div>'
       : '<p class="small muted">Aún no ha puntuado nadie. El trono está libre y el sábado empieza el hockey.</p>') +
@@ -6022,8 +6066,15 @@ var CLOUD = (function () {
       if (r && r.data) {
         var st = {};
         r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs, keys: x.egg_keys || [] }; });
+        var before = S && S.secretsLive ? JSON.stringify(S.secretsLive.counts) : '';
         if (S) S.stats = st;
-        try { if (st[ui.me] && typeof eggsRestore === 'function' && eggsRestore(st[ui.me].keys)) render(true); } catch (x) {}
+        try {
+          var restored = st[ui.me] && typeof eggsRestore === 'function' && eggsRestore(st[ui.me].keys);
+          if (typeof secretsLiveUpdate === 'function') secretsLiveUpdate();
+          var moved = S && S.secretsLive && JSON.stringify(S.secretsLive.counts) !== before;
+          /* el ranking de juegos se mueve solo cuando cambia el de secretos */
+          if (restored || (moved && before && (ui.tab === 'juegos' || ui.tab === 'inicio') && !document.getElementById('scrim') && !document.querySelector('.egg-reveal'))) render(true);
+        } catch (x) {}
         onPresence();
       }
     }).catch(function () {});
