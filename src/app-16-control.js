@@ -4,6 +4,8 @@
    · Secretos: qué secretos lleva cada uno. Solo ves el nombre de los que tú también has encontrado (sin spoilers).
    Los desplegables recuerdan si están abiertos aunque la app se refresque en directo. */
 function fold(k) { ui.folds = ui.folds || {}; return !!ui.folds[k]; }
+/* El cuerpo se pinta siempre y solo se muestra u oculta: abrir no repinta la pantalla (sin fogonazos) */
+function foldBody(k, html, cls) { return '<div class="fold-body' + (cls ? ' ' + cls : '') + '" data-fold="' + esc(k) + '"' + (fold(k) ? '' : ' hidden') + '>' + html + '</div>'; }
 function foldBtn(k, inner, cls) {
   return '<button class="fold-head' + (cls ? ' ' + cls : '') + '" data-act="fold" data-k="' + esc(k) + '" aria-expanded="' + fold(k) + '">' + inner + '<span class="fold-chev" aria-hidden="true">' + icon('arrow') + '</span></button>';
 }
@@ -19,14 +21,14 @@ function regCardHome() {
   var h = '<section class="card fold-card reg-card">' +
     foldBtn('reg', '<span class="grow"><b class="fold-title">Registro en la finca</b><small class="muted">' + (all ? '¡Todos registrados! La ley, contenta' : 'Faltan ' + pend.length + ' · obligatorio desde los ' + (F.register.minAge || 14) + ' años') + '</small></span>' + stack + '<span class="pill ' + (all ? 'ok' : 'warn') + '">' + done.length + '/' + rp.length + '</span>') +
     '<div class="bar reg-bar"><i style="width:' + Math.round(done.length / rp.length * 100) + '%"></i></div>';
-  if (fold('reg')) {
-    h += '<div class="fold-body">' +
+  {
+    h += foldBody('reg', '' +
       (pend.length ? '<p class="eyebrow">Faltan</p><div class="reg-who">' + pend.map(function (p) { return '<span class="who-chip pend">' + av(p.id, 'xs') + esc(p.name) + '</span>'; }).join('') + '</div>' : '') +
       (done.length ? '<p class="eyebrow">Ya registrados</p><div class="reg-who">' + done.map(function (p) { return '<span class="who-chip ok">' + av(p.id, 'xs') + esc(p.name) + ' ✓</span>'; }).join('') + '</div>' : '') +
       '<div class="row wrap fold-actions">' +
       (pend.length ? '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(regNag(pend)) + '" target="_blank" rel="noopener">' + icon('phone') + 'Recordárselo por WhatsApp</a>' : '') +
       '<button class="btn ghost" data-act="tab" data-tab="finca" data-fsub="info">' + icon('edit') + 'Ir al registro</button></div>' +
-      '<p class="small muted">Cada uno marca su nombre en La Finca cuando ha rellenado el formulario. Lo ve toda la familia.</p></div>';
+      '<p class="small muted">Cada uno marca su nombre en La Finca cuando ha rellenado el formulario. Lo ve toda la familia.</p>');
   }
   return h + '</section>';
 }
@@ -51,20 +53,21 @@ function secretsWho(compact) {
     var keys = keysOf(r.id), k = 'sec-' + r.id, open = fold(k);
     var known = keys.filter(function (x) { return mineF[x]; }), hidden = Math.max(0, r.n - known.length);
     var head = medal(r.pos) + av(r.id, 'sm') + '<span class="grow"><b>' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</b>' + eggDots(keys) + '</span><span class="num">' + r.n + '/' + EGGS.length + '</span>';
-    var body = '';
-    if (open) {
-      body = '<div class="fold-body who-body">' +
+    var body = foldBody(k, '' +
         (known.length ? '<div class="reg-who">' + known.map(function (x) { var e = EGGS.find(function (y) { return y.k === x; }); return '<span class="who-chip ok">' + esc(e ? e.name : x) + '</span>'; }).join('') + '</div>' : '') +
         (hidden ? '<p class="small muted">' + (known.length ? '+ ' : '') + hidden + (hidden === 1 ? ' secreto que tú aún no has encontrado' : ' secretos que tú aún no has encontrado') + '. No hay spoilers: búscalos.</p>' : '') +
-        (!keys.length && r.n ? '<p class="small muted">El detalle aparecerá cuando ' + pname(r.id) + ' vuelva a abrir la app.</p>' : '') + '</div>';
-    }
+        (!keys.length && r.n ? '<p class="small muted">El detalle aparecerá cuando ' + pname(r.id) + ' vuelva a abrir la app.</p>' : ''), 'who-body');
     return '<div class="who-row' + (r.id === ui.me ? ' me' : '') + (open ? ' open' : '') + '">' + foldBtn(k, head, 'who-head') + body + '</div>';
   }).join('') + '</div><p class="small muted">Solo ves el nombre de los secretos que tú también has encontrado. Toca a alguien para ver cuáles lleva.</p>';
 }
 Object.assign(A, {
   fold: function (el) {
-    ui.folds = ui.folds || {}; var k = el.dataset.k; ui.folds[k] = !ui.folds[k];
-    if (document.querySelector('.sheet .who-list') && /^sec-/.test(k)) { closeSheet(); setTimeout(secretsSheet, 40); return; }
-    render(true);
+    ui.folds = ui.folds || {}; var k = el.dataset.k, open = !ui.folds[k]; ui.folds[k] = open;
+    /* se cambia solo ese desplegable (en Inicio y, si está abierta, en la hoja): nada se repinta */
+    document.querySelectorAll('[data-act="fold"][data-k="' + k + '"]').forEach(function (b) {
+      b.setAttribute('aria-expanded', open);
+      var row = b.closest('.who-row'); if (row) row.classList.toggle('open', open);
+    });
+    document.querySelectorAll('.fold-body[data-fold="' + k + '"]').forEach(function (d) { d.hidden = !open; });
   }
 });

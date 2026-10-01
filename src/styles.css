@@ -1048,3 +1048,4 @@ img, svg, canvas { max-width: 100%; }
 .egg-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; max-width: 220px; }
 .egg-dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 28%, transparent); }
 .egg-dots i.on { background: var(--accent); }
+.fold-body[hidden] { display: none !important; }
