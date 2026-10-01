@@ -1030,6 +1030,42 @@ img, svg, canvas { max-width: 100%; }
 .nav button span { white-space: nowrap; }
 @media (max-width: 400px) { .nav button { font-size: .54rem; } .nav-in { border-radius: 20px; } }
 
+/* ---------- v0.7.7 · Desplegables «cómo vamos» (registro y secretos) ---------- */
+.fold-head { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; cursor: pointer; border-radius: 12px; -webkit-tap-highlight-color: transparent; }
+.fold-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.fold-head .grow { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fold-head .fold-title { font-family: var(--font-display); font-size: 1.02rem; font-weight: 800; }
+.fold-head small { line-height: 1.3; }
+.fold-chev { display: inline-flex; flex: none; color: var(--muted); transition: transform .25s ease; transform: rotate(90deg); }
+.fold-chev .ico { width: 18px; height: 18px; }
+.fold-head[aria-expanded="true"] .fold-chev { transform: rotate(-90deg); color: var(--accent); }
+.fold-body { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; animation: foldIn .25s ease; }
+@keyframes foldIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.fold-sub { border-top: 1px solid var(--line, rgba(0,0,0,.08)); padding-top: 10px; margin-top: 2px; border-radius: 0; }
+.fold-actions { gap: 8px; }
+.fold-card { gap: 10px; }
+.reg-bar { height: 6px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+.reg-bar i { display: block; height: 100%; background: var(--ok, #3f7a4a); border-radius: inherit; transition: width .5s ease; }
+.av-stack { display: inline-flex; flex: none; padding-left: 8px; }
+.av-stack .avs-i { margin-left: -8px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface, #fff); filter: grayscale(1); opacity: .55; display: inline-flex; }
+.av-stack .avs-i.ok { filter: none; opacity: 1; }
+@media (max-width: 420px) { .av-stack { display: none; } }
+.reg-who { display: flex; flex-wrap: wrap; gap: 6px; }
+.who-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; font-size: .85rem; font-weight: 700; background: var(--surface-2); }
+.who-chip.ok { background: color-mix(in srgb, var(--ok, #3f7a4a) 14%, transparent); color: var(--ok, #3f7a4a); }
+.who-chip.pend { background: var(--warn-soft); }
+.reg-who .who-chip:not(:has(.av)) { padding-left: 10px; }
+.who-list { display: flex; flex-direction: column; gap: 2px; }
+.who-row { border-radius: 12px; padding: 2px 8px; }
+.who-row.me { background: var(--accent-soft); }
+.who-row.open { background: var(--surface-2); }
+.who-row.me.open { background: var(--accent-soft); }
+.who-head .num { font-weight: 800; flex: none; }
+.who-body { padding: 0 0 10px 0; }
+.egg-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; max-width: 220px; }
+.egg-dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 28%, transparent); }
+.egg-dots i.on { background: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -2874,7 +2910,8 @@ function message(html, ms) {
   var m = document.createElement('div'); m.className = 'egg-msg'; m.setAttribute('role', 'status');
   m.innerHTML = '<div class="inner">' + html + '<span class="egg-tap">Toca para cerrar</span></div>';
   var gone = false, close = function () { if (gone) return; gone = true; m.style.transition = 'opacity .35s'; m.style.opacity = 0; setTimeout(function () { m.remove(); }, 350); };
-  m.addEventListener('click', function (e) { e.stopPropagation(); close(); });
+  var born = Date.now();
+  m.addEventListener('click', function (e) { e.stopPropagation(); if (Date.now() - born < 1100) return; close(); });
   document.body.appendChild(m); setTimeout(close, ms || 4200);
 }
 function confetti(ms) {
@@ -3030,7 +3067,7 @@ function fumataRaw(title, text, k) {
 }
 function extraOmnes() {
   var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
-  eggCard('omnes', 'Toc, toc…', 'Has llamado 5 veces a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
+  eggCard('omnes', 'Toc, toc…', 'Has llamado a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
   setTimeout(function () { v.remove(); }, 4400);
 }
 function abueloMode() {
@@ -3038,9 +3075,10 @@ function abueloMode() {
   eggToast('abuelo', ui.prefs.size === 'xl' ? 'Letra de abuelo: todo en grande, sin gafas. Toca 3 veces otra vez para volver.' : 'Letra normal. ¿Alguien ha visto mis gafas?');
 }
 var tapCount = {}, tapTimer = {};
-var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 5, sun: 5, disco: 3, podio: 3, abumeter: 3 };
+var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 1, sun: 5, disco: 3, podio: 3, abumeter: 3 };
 function eggTap(k, el) {
   var need = EGG_TAPS[k]; if (!need) return false;
+  if (k === 'logo' && hasEgg('omnes')) return false;   /* una vez descubierto, la casita vuelve a ser el botón de Inicio */
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
   tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2400);
   if (el && tapCount[k] >= 2 && tapCount[k] < need) { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {} }
@@ -4297,7 +4335,7 @@ function buildEggs() {
     { k: 'foto', name: 'Primera foto', how: 'Subir una foto al álbum', hint: 'Sonría, por favor', more: 'La cámara de arriba → Subir fotos' },
     { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Un poco de amor para el álbum', more: 'Abre una foto del álbum y toca el corazón' },
     /* Toques escondidos */
-    { k: 'omnes', name: 'Extra omnes', how: 'Tocar 5 veces seguidas el logo', hint: 'El logo guarda un secreto', more: 'La casita de arriba a la izquierda o el título grande de Inicio: 5 toques rápidos' },
+    { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'La casa esconde algo', more: 'Toca la casita de arriba a la izquierda o el título grande de Inicio' },
     { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años', more: 'En la pestaña Familia, toca su foto 5 veces seguidas' },
     { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño esconde algo', more: 'En Comidas, toca 3 veces «Menú ' + b + '»' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas' },
@@ -4380,9 +4418,7 @@ function secretsSheet() {
     '<p>' + (closed ? '<b>El ranking se cerró</b> el ' + esc(fmtClose()) + '. Lo que descubras ahora ya no suma.' : 'El ranking se cierra el <b>' + esc(fmtClose()) + '</b> (2 horas antes sonará una alarma). Quien los consiga todos se lleva el trofeo <b>Guardián de los Secretos</b> en la gala.') + '</p></div>' +
     '<div class="sec-me"><div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small">' + (mine && mine.n ? '<b>' + mine.pos + '.º</b> en el ranking' : 'Aún sin estrenar') + '<br><span class="muted">' + left + (left === 1 ? ' pista extra' : ' pistas extra') + ' de ' + SECRETS_HINTS + '. Úsalas con cabeza</span></span></div>' +
     '<div class="bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div></div>';
-  html += '<p class="eyebrow">Ranking de cazasecretos</p><div class="sec-rank">' + rk.map(function (r) {
-    return '<div class="sec-row' + (r.id === ui.me ? ' me' : '') + '">' + medal(r.pos) + av(r.id, 'sm') + '<b class="grow">' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</b><span class="num">' + r.n + '/' + EGGS.length + '</span></div>';
-  }).join('') + '<p class="small muted">' + (rk.length < 2 ? 'Aquí saldrá toda la familia en cuanto empiecen a descubrir secretos. ' : 'Se actualiza cada minuto. ') + 'Solo se ve cuántos lleva cada uno, nunca cuáles.</p></div>';
+  html += '<p class="eyebrow">Ranking de cazasecretos</p><div class="sec-rank">' + (typeof secretsWho === 'function' ? secretsWho() : '') + '<p class="small muted">Se actualiza cada minuto.</p></div>';
   html += '<p class="eyebrow">Tus secretos</p><div class="stack">' + EGGS.map(function (e) {
     var ok = f[e.k], hint = h[e.k];
     return '<div class="row sec-egg' + (ok ? ' ok' : '') + '"><span class="av sm" style="background:' + (ok ? 'var(--accent)' : 'var(--surface-2)') + ';color:' + (ok ? '#fff' : 'var(--muted)') + '">' + (ok ? '✓' : '?') + '</span><span class="grow"><b>' + (ok ? esc(e.name) : '???') + '</b><span class="small muted" style="display:block">' + esc(ok ? e.how : 'Pista: ' + e.hint) + '</span>' +
@@ -4714,7 +4750,8 @@ function homeSecrets() {
   return '<section class="card home-secrets"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('search') + 'Secretos de la casa</h3><button class="link" data-act="secrets">Ver ' + icon('arrow') + '</button></div>' +
     '<div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small muted">' + (n ? 'Vas bien. Chitón.' : 'Hay ' + EGGS.length + ' escondidos por la app. Nadie te va a decir dónde.') + '<br>El ranking se cierra el ' + esc(fmtClose()) + '.</span></div>' +
     '<div class="bar sec-bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div>' +
-    (rk.length ? '<div class="mini-rank">' + rk.map(function (r) { return '<span class="mr">' + medal(r.pos) + av(r.id, 'xs') + '<b>' + esc(person(r.id).name) + '</b><small class="num">' + r.n + '</small></span>'; }).join('') + '</div>' : '') + '</section>';
+    (rk.length ? '<div class="mini-rank">' + rk.map(function (r) { return '<span class="mr">' + medal(r.pos) + av(r.id, 'xs') + '<b>' + esc(person(r.id).name) + '</b><small class="num">' + r.n + '</small></span>'; }).join('') + '</div>' : '') +
+    (typeof secretsWho === 'function' ? foldBtn('secwho', '<span class="grow"><b class="fold-title">Quién lleva cuáles</b><small class="muted">Sin spoilers: solo ves los que tú también tienes</small></span>', 'fold-sub') + (fold('secwho') ? '<div class="fold-body">' + secretsWho() + '</div>' : '') : '') + '</section>';
 }
 function homeGames() {
   var rank = G.ranking(S).filter(function (r) { return r.pts > 0; }).slice(0, 3);
@@ -4741,6 +4778,7 @@ VIEWS.inicio = function () {
   h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();
+  if (typeof regCardHome === 'function') h += regCardHome();
   h += manualCardHome();
   h += homeSecrets();
   h += homeGames();
@@ -4827,6 +4865,77 @@ Object.assign(A, {
     toast('Idea borrada');
   },
   ideasAll: function () { ideasSheet(); }
+});
+
+/* ===================== Cómo vamos: desplegables compartidos =====================
+   Dos cosas que todos ven para que todos sean conscientes, sin añadir pantallas nuevas:
+   · Registro en la finca: quién lo ha hecho y quién falta (con recordatorio por WhatsApp).
+   · Secretos: qué secretos lleva cada uno. Solo ves el nombre de los que tú también has encontrado (sin spoilers).
+   Los desplegables recuerdan si están abiertos aunque la app se refresque en directo. */
+function fold(k) { ui.folds = ui.folds || {}; return !!ui.folds[k]; }
+function foldBtn(k, inner, cls) {
+  return '<button class="fold-head' + (cls ? ' ' + cls : '') + '" data-act="fold" data-k="' + esc(k) + '" aria-expanded="' + fold(k) + '">' + inner + '<span class="fold-chev" aria-hidden="true">' + icon('arrow') + '</span></button>';
+}
+
+/* ---------- Registro en la finca ---------- */
+function regCardHome() {
+  var F = S.finca || {}; if (!F.register || typeof regPeople !== 'function') return '';
+  var rp = regPeople(); if (!rp.length) return '';
+  var done = rp.filter(function (p) { return regDone(p.id); }), pend = rp.filter(function (p) { return !regDone(p.id); }), all = !pend.length;
+  var stack = '<span class="av-stack">' + rp.slice().sort(function (a, b) { return regDone(b.id) - regDone(a.id); }).map(function (p) {
+    return '<span class="avs-i' + (regDone(p.id) ? ' ok' : '') + '">' + av(p.id, 'xs') + '</span>';
+  }).join('') + '</span>';
+  var h = '<section class="card fold-card reg-card">' +
+    foldBtn('reg', '<span class="grow"><b class="fold-title">Registro en la finca</b><small class="muted">' + (all ? '¡Todos registrados! La ley, contenta' : 'Faltan ' + pend.length + ' · obligatorio desde los ' + (F.register.minAge || 14) + ' años') + '</small></span>' + stack + '<span class="pill ' + (all ? 'ok' : 'warn') + '">' + done.length + '/' + rp.length + '</span>') +
+    '<div class="bar reg-bar"><i style="width:' + Math.round(done.length / rp.length * 100) + '%"></i></div>';
+  if (fold('reg')) {
+    h += '<div class="fold-body">' +
+      (pend.length ? '<p class="eyebrow">Faltan</p><div class="reg-who">' + pend.map(function (p) { return '<span class="who-chip pend">' + av(p.id, 'xs') + esc(p.name) + '</span>'; }).join('') + '</div>' : '') +
+      (done.length ? '<p class="eyebrow">Ya registrados</p><div class="reg-who">' + done.map(function (p) { return '<span class="who-chip ok">' + av(p.id, 'xs') + esc(p.name) + ' ✓</span>'; }).join('') + '</div>' : '') +
+      '<div class="row wrap fold-actions">' +
+      (pend.length ? '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(regNag(pend)) + '" target="_blank" rel="noopener">' + icon('bell') + 'Recordárselo por WhatsApp</a>' : '') +
+      '<button class="btn ghost" data-act="tab" data-tab="finca" data-fsub="info">' + icon('edit') + 'Ir al registro</button></div>' +
+      '<p class="small muted">Cada uno marca su nombre en La Finca cuando ha rellenado el formulario. Lo ve toda la familia.</p></div>';
+  }
+  return h + '</section>';
+}
+function regNag(pend) {
+  var F = S.finca || {}, names = pend.map(function (p) { return p.name; });
+  var list = names.length > 1 ? names.slice(0, -1).join(', ') + ' y ' + names[names.length - 1] : names[0];
+  return '¡Hola! ' + list + ': os falta registraros en la web de la finca (es obligatorio y son 3 minutos con el DNI a mano): ' + F.register.url +
+    ' Cuando lo hagáis, marcadlo en la app, que os estamos vigilando con cariño. Casa Rural 2026';
+}
+
+/* ---------- Secretos: quién lleva cuáles ---------- */
+function rankedKeys() { var f = foundMap(), c = secretsClose().getTime(); return EGGS.filter(function (e) { return f[e.k] && new Date(f[e.k]).getTime() < c; }).map(function (e) { return e.k; }); }
+function keysOf(pid) { if (pid === ui.me) return rankedKeys(); var st = (S.stats || {})[pid]; return (st && st.keys) || []; }
+function eggDots(keys) {
+  var has = {}; keys.forEach(function (k) { has[k] = 1; });
+  return '<span class="egg-dots" aria-hidden="true">' + EGGS.map(function (e) { return '<i' + (has[e.k] ? ' class="on"' : '') + '></i>'; }).join('') + '</span>';
+}
+function secretsWho(compact) {
+  var rk = secretsRanking().filter(function (r) { return r.n > 0; }), mineF = foundMap();
+  if (!rk.length) return '<p class="small muted">Nadie ha encontrado ninguno todavía. Empieza tú, anda.</p>';
+  return '<div class="who-list">' + rk.map(function (r) {
+    var keys = keysOf(r.id), k = 'sec-' + r.id, open = fold(k);
+    var known = keys.filter(function (x) { return mineF[x]; }), hidden = Math.max(0, r.n - known.length);
+    var head = medal(r.pos) + av(r.id, 'sm') + '<span class="grow"><b>' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</b>' + eggDots(keys) + '</span><span class="num">' + r.n + '/' + EGGS.length + '</span>';
+    var body = '';
+    if (open) {
+      body = '<div class="fold-body who-body">' +
+        (known.length ? '<div class="reg-who">' + known.map(function (x) { var e = EGGS.find(function (y) { return y.k === x; }); return '<span class="who-chip ok">' + esc(e ? e.name : x) + '</span>'; }).join('') + '</div>' : '') +
+        (hidden ? '<p class="small muted">' + (known.length ? '+ ' : '') + hidden + (hidden === 1 ? ' secreto que tú aún no has encontrado' : ' secretos que tú aún no has encontrado') + '. No hay spoilers: búscalos.</p>' : '') +
+        (!keys.length && r.n ? '<p class="small muted">El detalle aparecerá cuando ' + pname(r.id) + ' vuelva a abrir la app.</p>' : '') + '</div>';
+    }
+    return '<div class="who-row' + (r.id === ui.me ? ' me' : '') + (open ? ' open' : '') + '">' + foldBtn(k, head, 'who-head') + body + '</div>';
+  }).join('') + '</div><p class="small muted">Solo ves el nombre de los secretos que tú también has encontrado. Toca a alguien para ver cuáles lleva.</p>';
+}
+Object.assign(A, {
+  fold: function (el) {
+    ui.folds = ui.folds || {}; var k = el.dataset.k; ui.folds[k] = !ui.folds[k];
+    if (document.querySelector('.sheet .who-list') && /^sec-/.test(k)) { closeSheet(); setTimeout(secretsSheet, 40); return; }
+    render(true);
+  }
 });
 
 /* ===================== Modo nube (Supabase) =====================
@@ -5002,13 +5111,13 @@ var CLOUD = (function () {
     document.addEventListener('visibilitychange', function () { if (!document.hidden) { ping(); ch.track({ pid: ui.me, at: new Date().toISOString() }); } });
   }
   function ping() {
-    var eg = 0; try { eg = rankedCount(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg, p_ver: 2 }).then(function () {
-      return client().from('presence').select('person_id,last_seen,visits,minutes,eggs');
+    var eg = 0, ks = []; try { eg = rankedCount(); ks = rankedKeys(); } catch (e) {}
+    client().rpc('ping', { p_eggs: eg, p_ver: 3, p_keys: ks }).then(function () {
+      return client().from('presence').select('person_id,last_seen,visits,minutes,eggs,egg_keys');
     }).then(function (r) {
       if (r && r.data) {
         var st = {};
-        r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs }; });
+        r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs, keys: x.egg_keys || [] }; });
         if (S) S.stats = st; onPresence();
       }
     }).catch(function () {});
