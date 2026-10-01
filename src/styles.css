@@ -1152,3 +1152,16 @@ img, svg, canvas { max-width: 100%; }
 .plan-room.k-bath .pdots { margin-top: 2px; }
 @keyframes spyBlink { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, #F2C65A 40%, transparent); } }
 .code-pop:not(:has(svg)) { font-size: 34px; }
+/* ---------- «Sube tus fotos»: la cámara de arriba se explica sola ---------- */
+.cam-btn.cam-cta { width: auto; height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 11px; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--on-accent, #fff); font-weight: 800; font-size: .88rem; white-space: nowrap;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); animation: camPulse 2.8s ease-in-out infinite; }
+.cam-btn.cam-cta .ico { width: 20px; height: 20px; flex: none; }
+.cam-btn.cam-cta .cam-txt b { font-weight: 800; }
+.cam-btn.cam-cta[aria-current="page"] { animation: none; box-shadow: none; filter: brightness(.92); }
+@keyframes camPulse { 0%, 100% { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent), 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); } }
+/* en móviles estrechos: «Fotos» (corto pero claro) */
+@media (max-width: 560px) { .cam-btn.cam-cta .cam-txt { font-size: 0; } .cam-btn.cam-cta .cam-txt::after { content: "Sube fotos"; font-size: .8rem; } .cam-btn.cam-cta { padding: 0 11px 0 9px; gap: 5px; } }
+@media (max-width: 420px) { .cam-btn.cam-cta .cam-txt::after { content: "Fotos"; } }
+@media (max-width: 360px) { .cam-btn.cam-cta .cam-txt { display: none; } .cam-btn.cam-cta { padding: 0 10px; } }
+@media (prefers-reduced-motion: reduce) { .cam-btn.cam-cta { animation: none; } }

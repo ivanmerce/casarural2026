@@ -270,7 +270,7 @@ function renderTop() {
   $top.innerHTML =
     '<button class="wordmark" data-act="logo" aria-label="' + esc(S.trip.name) + ', ir a inicio">' + wordmarkHtml(S.trip.name, tripEyebrow()) + '</button>' +
     '<span class="sp"></span>' +
-    '<button class="icon-btn cam-btn" data-act="tab" data-tab="album" aria-label="Álbum de fotos"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '</button>' +
+    '<button class="cam-btn cam-cta" data-act="tab" data-tab="album" aria-label="Sube tus fotos al álbum"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '<span class="cam-txt"><b>Sube</b> tus fotos</span></button>' +
     '<span id="onlineSlot">' + presencePill() + '</span>' +
     '<button class="me-btn" data-act="menu" aria-label="Quién eres y más opciones">' + av(p.id, 'sm') + '<span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1"><span style="font-weight:700;font-size:.9rem">' + esc(p.name) + '</span><span class="role">' + ROLE[p.role] + '</span></span></button>';
 }
