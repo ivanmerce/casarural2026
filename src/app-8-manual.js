@@ -13,7 +13,7 @@ VIEWS.manual = function () {
   var steps = [
     ['Entra', 'Con <b>tu email</b> (los peques, con su <b>usuario</b>) y el <b>código de la familia</b>. Justo después <b>eliges tu propio código</b> de 6 cifras: ya solo entrarás con ese.', null],
     ['Regístrate en la finca', 'Obligatorio por ley desde los 14 años: <b>La Finca → Práctico</b>, «Rellenar el formulario de la finca» (uno por persona) y luego <b>marca tu nombre</b>.', 'finca', 'info'],
-    ['Mira dónde duermes', '<b>La Finca → Dormir</b>: el plano de las tres casas, tu habitación y quién duerme en cada una.', 'finca', 'dormir'],
+    ['Mira dónde duermes', '<b>La Finca → Dormir</b>: el plano de las tres casas, tu habitación, quién duerme en cada una y <b>fotos de cada estancia</b> (toca cualquiera).', 'finca', 'dormir'],
     ['Revisa tus días', '<b>Familia → Quién viene</b>: ya están apuntados. Si <b>cambia algo</b>, toca el día (<b>✓</b> viene · <b>✕</b> no). Los padres lo cambian por toda su familia.', 'familia', 'dias'],
     ['Pídete la compra', '<b>Compra → «Sin dueño»</b> → <b>«Me lo pido»</b>. Cuando lo compres, en «Lo nuestro» apunta el <b>precio real</b>: sin él no cuenta en Cuentas.', 'compra']
   ];
@@ -24,7 +24,7 @@ VIEWS.manual = function () {
     ['trophy', 'Juegos y ranking', 'Sin horarios: elegid el que apetezca. Cada juego tiene su <b>ficha</b> (individual o por equipos, pasos, cómo se gana y cómo se apunta). Los editores apuntan resultados (con flechas para corregir el orden) y el <b>ranking</b> se actualiza solo.', 'juegos'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.', 'juegos'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores.', 'album'],
-    ['house', 'La Finca', '<b>Dormir</b> (plano y habitaciones), <b>Práctico</b> (Wi-Fi, registro, normas, si se va la luz, antes de irnos) y <b>Compras</b> (tiendas del pueblo; el domingo solo abre una).', 'finca', 'info'],
+    ['house', 'La Finca', '<b>Dormir</b> (plano, habitaciones y fotos), <b>Práctico</b> (Wi-Fi, registro, normas, si se va la luz, antes de irnos) y <b>Compras</b> (tiendas del pueblo; el domingo solo abre una).', 'finca', 'info'],
     ['users', 'Familia', 'Quién viene cada día y las personas de cada familia.', 'familia', 'dias'],
     ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa las pagan <b>' + esc(payer.name) + '</b>, fuera del reparto (si invitan a algo, se descuenta del bote). ' : '') + 'El resto, entre hermanos y compañía <b>a proporción de personas y comidas</b>, y la app dice <b>quién paga a quién</b>.', 'cuentas'],
     ['bulb', 'Buzón de ideas', 'La plataforma es <b>de todos</b>: propón juegos, comidas o cambios en Inicio → <b>Buzón de ideas</b> y apoya con <b>+1</b> las que te gusten.', 'inicio']

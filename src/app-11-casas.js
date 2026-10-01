@@ -38,6 +38,84 @@ function famGroups(list) {
   return Object.keys(by).map(function (f) { return esc(by[f].join(' y ')); }).join(' · ');
 }
 
+/* ---------- Fotos de las estancias (de la web de la finca: fincalapedrera.com/es/apartamentos) ----------
+   r: estancias del plano a las que corresponde. maybe: la web no dice cuál de las habitaciones iguales es */
+var PICS_BASE = 'https://bstzopqtffxraovwppes.supabase.co/storage/v1/object/public/finca-images/appartementen/';
+var ROOM_PICS = {
+  cezanne: [
+    { f: 'cezanne-2', c: 'Salón con chimenea', r: ['cz-liv'] },
+    { f: 'cezanne-3', c: 'Comedor, en el salón', r: ['cz-liv'] },
+    { f: 'cezanne-8', c: 'Cocina', r: ['cz-kit'] },
+    { f: 'cezanne-4', c: 'Una de las dos habitaciones dobles', r: ['cz-d1', 'cz-d2'], maybe: 1 },
+    { f: 'cezanne-6', c: 'La otra habitación doble', r: ['cz-d1', 'cz-d2'], maybe: 1 },
+    { f: 'cezanne-7', c: 'Baño', r: ['cz-bath'] },
+    { f: 'cezanne-1', c: 'El balcón de Cézanne, desde fuera' },
+    { f: 'cezanne-5', c: 'Detalles de la casa' },
+    { f: 'cezanne-9', c: 'Más detalles' }
+  ],
+  gustave: [
+    { f: 'gustave-1', c: 'Habitación de 2 camas', r: ['gu-2'] },
+    { f: 'gustave-2', c: 'Habitación de 2 camas, otro ángulo', r: ['gu-2'] },
+    { f: 'gustave-3', c: 'Habitación de 3 camas', r: ['gu-3'] },
+    { f: 'gustave-4', c: 'Un rincón de Gustave' }
+  ],
+  phileine: [
+    { f: 'phileine-3', c: 'Salón', r: ['ph-liv'] },
+    { f: 'phileine-4', c: 'Comedor (aquí comemos todos)', r: ['ph-din'] },
+    { f: 'phileine-5', c: 'Cocina', r: ['ph-kit'] },
+    { f: 'phileine-6', c: 'Una de las dos habitaciones dobles', r: ['ph-2a', 'ph-2b'], maybe: 1 },
+    { f: 'phileine-7', c: 'La otra habitación doble', r: ['ph-2a', 'ph-2b'], maybe: 1 },
+    { f: 'phileine-8', c: 'Una de las dos individuales', r: ['ph-1a', 'ph-1b'], maybe: 1 },
+    { f: 'phileine-9', c: 'La otra individual', r: ['ph-1a', 'ph-1b'], maybe: 1 },
+    { f: 'phileine-10', c: 'Baño', r: ['ph-bath'] },
+    { f: 'phileine-1', c: 'El jardín y la casa' },
+    { f: 'phileine-2', c: 'La terraza de Phileine' }
+  ]
+};
+function picUrl(p) { return PICS_BASE + p.f + '.jpg'; }
+function picsFor(key) {   /* 'all', una casa o una estancia */
+  var R = roomsCfg(), out = [];
+  (R ? R.houses : []).forEach(function (hs) {
+    (ROOM_PICS[hs.id] || []).forEach(function (p) {
+      if (key === 'all' || key === hs.id || (p.r && p.r.indexOf(key) >= 0)) out.push({ url: picUrl(p), cap: p.c, house: hs.name, maybe: !!p.maybe && key !== 'all' && key !== hs.id });
+    });
+  });
+  return out;
+}
+var rpv = null;
+document.addEventListener('keydown', function (e) { if (!rpv || !document.getElementById('viewer')) return; if (e.key === 'ArrowRight') A.rpNext(); else if (e.key === 'ArrowLeft') A.rpPrev(); else if (e.key === 'Escape') picsClose(); });
+function picsOpen(key, title, i) {
+  var list = picsFor(key);
+  if (!list.length) { message('<div class="code-pop">📷</div><h2>Sin fotos de aquí</h2><p>La web de la finca no tiene foto de ' + esc(title || 'esta estancia') + '. Tocará descubrirla en directo el viernes.</p>'); return; }
+  closeSheet();
+  rpv = { list: list, i: i || 0, title: title };
+  var el = document.createElement('div'); el.className = 'viewer rp-viewer'; el.id = 'viewer'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Fotos: ' + (title || 'la finca'));
+  el.innerHTML = '<div class="vw-top"><span class="vw-who"></span><button class="icon-btn" data-act="rpClose" aria-label="Cerrar">' + icon('x') + '</button></div><div class="vw-stage"><button class="vw-nav prev" data-act="rpPrev" aria-label="Anterior">' + icon('back') + '</button><div class="vw-img"></div><button class="vw-nav next" data-act="rpNext" aria-label="Siguiente">' + icon('arrow') + '</button></div><div class="vw-bot"></div>';
+  document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('viewer');
+  var sx = null; el.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', function (e) { if (sx == null) return; var dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) { if (dx < 0) A.rpNext(); else A.rpPrev(); } sx = null; });
+  picsRender();
+}
+function picsRender() {
+  var el = document.getElementById('viewer'); if (!el || !rpv) return;
+  var p = rpv.list[rpv.i];
+  el.querySelector('.vw-who').innerHTML = '<span><b>' + esc(rpv.title || 'Las casas') + '</b><small>' + esc(p.house) + ' · ' + (rpv.i + 1) + '/' + rpv.list.length + '</small></span>';
+  el.querySelector('.vw-img').innerHTML = '<img src="' + p.url + '" alt="' + esc(p.house + ': ' + p.cap) + '" referrerpolicy="no-referrer">';
+  el.querySelector('.vw-bot').innerHTML = '<p class="vw-cap">' + esc(p.cap) + '</p>' + (p.maybe ? '<p class="vw-note">Son iguales y la web de la finca no dice cuál es cuál: la tuya es una de estas.</p>' : '') +
+    (rpv.list.length > 1 ? '<div class="rp-thumbs">' + rpv.list.map(function (x, k) { return '<button class="rp-th' + (k === rpv.i ? ' on' : '') + '" data-act="rpGo" data-i="' + k + '" aria-label="Foto ' + (k + 1) + ': ' + esc(x.cap) + '"><img src="' + x.url + '" alt="" loading="lazy" referrerpolicy="no-referrer"></button>'; }).join('') + '</div>' : '') +
+    '<p class="vw-src">Fotos: web de la finca</p>';
+  el.querySelector('.prev').disabled = rpv.i === 0; el.querySelector('.next').disabled = rpv.i >= rpv.list.length - 1;
+  var on = el.querySelector('.rp-th.on'); if (on && on.scrollIntoView) try { on.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) {}
+  [rpv.list[rpv.i + 1], rpv.list[rpv.i - 1]].forEach(function (x) { if (x) { var im = new Image(); im.src = x.url; } });
+}
+function picsClose() { var el = document.getElementById('viewer'); if (el) el.remove(); document.body.style.overflow = ''; rpv = null; if (el) overlayDone(); }
+function camBadge(id) { return picsFor(id).length ? '<span class="room-cam" aria-hidden="true">' + icon('camera') + '</span>' : ''; }
+function picStrip(rid, title) {
+  var ps = picsFor(rid); if (!ps.length) return '';
+  return '<div class="rp-strip">' + ps.map(function (p, k) { return '<button class="rp-sth" data-act="roomPics" data-id="' + rid + '" data-i="' + k + '" aria-label="Ver foto: ' + esc(p.cap) + '"><img src="' + p.url + '" alt="" loading="lazy" referrerpolicy="no-referrer"></button>'; }).join('') + '</div>' +
+    (ps.some(function (p) { return p.maybe; }) ? '<p class="small muted">Las habitaciones gemelas salen juntas: la web de la finca no dice cuál es cuál.</p>' : '');
+}
+
 function casasHtml() {
   var R = roomsCfg();
   var h = '';
@@ -48,6 +126,7 @@ function casasHtml() {
     (fr.length ? '<p class="small">Libres: ' + fr.map(function (r) { return '<button class="chip mini" data-act="roomOpen" data-id="' + r.id + '">' + esc(roomLabel(r.id)) + ' · ' + (r.beds - bedsUsed(r.id)) + (r.beds - bedsUsed(r.id) === 1 ? ' cama' : ' camas') + '</button>'; }).join(' ') + '</p>' : '') +
     '<p class="small muted">Se elige por orden de llegada al móvil: toca la habitación y «Nos la quedamos».</p></section>';
   /* plano */
+  h += '<div class="row wrap plan-tools"><button class="btn" data-act="roomPics" data-id="all">' + icon('camera') + 'Ver fotos de las casas</button><span class="small muted">o toca cualquier estancia del plano</span></div>';
   h += '<div class="plan-wrap"><div class="plan" style="aspect-ratio:' + PW + '/' + Math.round(PH * 1.35) + '">';
   R.houses.forEach(function (hs) {
     h += '<div class="plan-house" style="left:' + pct(hs.x, PW) + ';top:' + pct(hs.y, PH) + ';width:' + pct(hs.w, PW) + ';height:' + pct(hs.h, PH) + ';--hc:' + hs.color + '"><span class="plan-hname">' + esc(hs.name) + '</span></div>';
@@ -57,21 +136,21 @@ function casasHtml() {
     if (r.kind === 'bath') {
       var bp = roomPeople(r.id), spyHere = bp.length ? '<span class="pdots">' + bp.map(function (p) { return '<span class="pdot">' + av(p.id, 'xs') + '</span>'; }).join('') + '</span>' : '';
       if (isSpy()) { h += '<button class="plan-room k-bath spy-pick' + (roomOf(me().id) === r.id ? ' mine' : '') + '" style="' + style + '" data-act="spyBath" data-id="' + r.id + '" aria-label="Dormir en ' + esc(roomLabel(r.id)) + '"><span>' + esc(r.name) + '</span>' + spyHere + '</button>'; return; }
-      h += '<div class="plan-room k-bath" style="' + style + '"><span>' + esc(r.name) + '</span>' + spyHere + '</div>'; return;
+      h += '<button class="plan-room k-bath pics" style="' + style + '" data-act="roomPics" data-id="' + r.id + '" aria-label="Fotos: ' + esc(roomLabel(r.id)) + '"><span>' + esc(r.name) + '</span>' + spyHere + camBadge(r.id) + '</button>'; return;
     }
-    if (r.kind !== 'bed') { h += '<div class="plan-room k-' + r.kind + '" style="' + style + '"><span>' + esc(r.name) + '</span></div>'; return; }
+    if (r.kind !== 'bed') { h += '<button class="plan-room pics k-' + r.kind + '" style="' + style + '" data-act="roomPics" data-id="' + r.id + '" aria-label="Fotos: ' + esc(roomLabel(r.id)) + '"><span>' + esc(r.name) + '</span>' + camBadge(r.id) + '</button>'; return; }
     var ps = roomPeople(r.id), used = ps.filter(usesBed).length, mine = roomOf(me().id) === r.id, crib = ps.some(function (p) { return !usesBed(p); });
     var dots = ps.map(function (p) { return '<span class="pdot' + (usesBed(p) ? '' : ' baby') + '">' + av(p.id, 'xs') + '</span>'; }).join('');
     for (var i = used; i < r.beds; i++) dots += '<span class="pdot free" aria-hidden="true"></span>';
     h += '<button class="plan-room bed' + (mine ? ' mine' : '') + (used >= r.beds ? ' full' : used ? '' : ' empty') + '" style="' + style + '" data-act="roomOpen" data-id="' + r.id + '" aria-label="' + esc(roomLabel(r.id)) + ': ' + used + ' de ' + r.beds + ' camas">' +
-      '<span class="plan-rname">' + esc(r.name) + '</span><span class="pdots">' + dots + '</span></button>';
+      '<span class="plan-rname">' + esc(r.name) + '</span><span class="pdots">' + dots + '</span>' + camBadge(r.id) + '</button>';
   });
   h += '<span class="plan-note">' + esc(R.note || '') + '</span></div></div>';
   h += '<div class="plan-legend small"><span><i class="lg-free"></i>Cama libre</span><span><i class="lg-mine"></i>Tu habitación</span><span>' + icon('baby') + 'Cuna: no ocupa cama</span></div>';
   /* listado por casa */
   R.houses.forEach(function (hs) {
     var rs = R.list.filter(function (r) { return r.home === hs.id && r.kind === 'bed'; });
-    h += '<section class="card casa-list" style="--hc:' + hs.color + '"><div class="card-head"><h3 class="row" style="gap:8px"><i class="hdot"></i>' + esc(hs.name) + '</h3><span class="small muted">' + esc(hs.text || '') + '</span></div>' +
+    h += '<section class="card casa-list" style="--hc:' + hs.color + '"><div class="card-head"><h3 class="row" style="gap:8px"><i class="hdot"></i>' + esc(hs.name) + '</h3><button class="link" data-act="roomPics" data-id="' + hs.id + '">' + icon('camera') + 'Fotos</button></div>' + (hs.text ? '<p class="small muted casa-text">' + esc(hs.text) + '</p>' : '') +
       rs.map(function (r) {
         var ps = roomPeople(r.id), used = ps.filter(usesBed).length;
         return '<button class="row room-row" data-act="roomOpen" data-id="' + r.id + '"><span class="grow"><b>' + esc(r.name) + '</b><small class="muted"> · ' + r.beds + (r.beds === 1 ? ' cama' : ' camas') + '</small><span class="room-who">' +
@@ -86,7 +165,7 @@ function roomSheet(rid) {
   var r = roomById(rid); if (!r) return;
   var hs = houseById(r.home), ps = roomPeople(rid), used = ps.filter(usesBed).length, left = r.beds - used;
   var h = '<div class="row" style="gap:10px"><span class="room-badge" style="--hc:' + hs.color + '">' + esc(hs.name) + '</span><h2 class="grow" style="margin:0">' + esc(r.name) + '</h2></div>' +
-    '<p class="small muted">' + r.beds + (r.beds === 1 ? ' cama' : ' camas') + ' · ' + (left > 0 ? left + (left === 1 ? ' libre' : ' libres') : 'completa') + '</p>';
+    '<p class="small muted">' + r.beds + (r.beds === 1 ? ' cama' : ' camas') + ' · ' + (left > 0 ? left + (left === 1 ? ' libre' : ' libres') : 'completa') + '</p>' + picStrip(rid);
   h += '<div class="stack" style="gap:6px">' + (ps.length ? ps.map(function (p) {
     return '<div class="row room-occ">' + av(p.id, 'sm') + '<span class="grow"><b>' + esc(p.name) + '</b>' + (usesBed(p) ? '' : ' <small class="muted">en cuna</small>') + '</span>' +
       (canRoomFor(p.id) ? '<button class="btn ghost" data-act="roomOut" data-p="' + p.id + '" data-r="' + rid + '">' + icon('x') + 'Quitar</button>' : '') + '</div>';
@@ -109,6 +188,14 @@ function roomSheet(rid) {
 }
 Object.assign(A, {
   roomOpen: function (el) { roomSheet(el.dataset.id); },
+  roomPics: function (el) {
+    var id = el.dataset.id, r = roomById(id), hs = houseById(id);
+    picsOpen(id, id === 'all' ? 'Las casas' : r ? roomLabel(id) : hs ? hs.name : '', +el.dataset.i || 0);
+  },
+  rpClose: function () { picsClose(); },
+  rpPrev: function () { if (rpv && rpv.i > 0) { rpv.i--; picsRender(); } },
+  rpNext: function () { if (rpv && rpv.i < rpv.list.length - 1) { rpv.i++; picsRender(); } },
+  rpGo: function (el) { if (rpv) { rpv.i = +el.dataset.i; picsRender(); } },
   spyBath: function (el) {
     if (!isSpy()) return; var rid = el.dataset.id, r = roomById(rid); if (!r || r.kind !== 'bath') return;
     S.roomAssign = S.roomAssign || {}; S.roomAssign[me().id] = rid; save(); render(true);
