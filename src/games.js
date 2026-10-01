@@ -359,6 +359,7 @@ var G = (function () {
     { key: 'hockey', name: 'Partido de hockey', cat: 'deporte', format: 'teams', icon: 'stick', rules: 'Dos tiempos de 10 minutos. Stick por debajo de la cintura.', points: [8, 4], allowDraw: true },
     { key: 'futbol', name: 'Partido de fútbol', cat: 'deporte', format: 'teams', icon: 'ball', rules: 'Dos tiempos de 10 minutos. Los peques pueden tirar desde donde quieran.', points: [8, 4], allowDraw: true },
     { key: 'escondite', name: 'Escondite', cat: 'escondite', format: 'ranking', mode: 'order', icon: 'ghost', rules: 'Apunta el orden en que os van encontrando: el primero de la lista es el último en ser encontrado (el mejor escondido).' },
+    { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'low', unit: 's', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando. Sin manos, se balancea para tumbar latas del suelo. Gana el más rápido.' },
     { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'high', unit: 'm', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos (en metros).' },
     { key: 'sprint', name: 'Sprint de 30 metros', cat: 'velocidad', format: 'ranking', mode: 'low', unit: 's', icon: 'bolt', rules: 'Tiempo en segundos. Los peques salen con ventaja.' },
     { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'high', unit: 'aciertos', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
