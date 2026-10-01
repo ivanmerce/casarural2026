@@ -122,7 +122,7 @@ function startHero() {
   var names = S ? S.people : Array.from({ length: 12 }, function (_, i) { return { kind: i % 4 ? 'adulto' : 'menor' }; });
   /* cada nodo es una persona de la familia: si hay foto, su cara */
   var withFaces = names.some(function (p) { return p.avatar; });
-  var narrow = W < 520, X0 = withFaces ? (narrow ? 0.62 : 0.56) : 0.45, YMAX = withFaces ? (narrow ? 0.42 : 0.56) : 1, KR = narrow ? 0.78 : 1;
+  var narrow = W < 520, X0 = withFaces ? (narrow ? 0.62 : 0.56) : 0.45, YMAX = withFaces ? (narrow ? 0.42 : W >= 900 ? 0.46 : 0.56) : 1, KR = narrow ? 0.78 : 1;
   var nodes = names.map(function (p, i) {
     var n = { x: W * (X0 + (1 - X0) * Math.random()), y: H * (withFaces ? 0.06 + (YMAX - 0.1) * Math.random() : Math.random()), vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22, r: p.kind === 'bebe' ? 2.4 : p.kind === 'menor' ? 3 : 3.6 };
     if (p.avatar) { n.img = new Image(); n.img.src = p.avatar; n.R = Math.round((p.kind === 'bebe' ? 12 : p.kind === 'menor' ? 14 : 16) * KR); }

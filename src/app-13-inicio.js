@@ -69,11 +69,13 @@ VIEWS.inicio = function () {
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
   h += homePayments();
+  h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();
   h += manualCardHome();
   h += homeSecrets();
   h += homeGames();
   if (typeof ideasCard === 'function') h += ideasCard();
+  h += '</div>';
   return h;
 };
