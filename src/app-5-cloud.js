@@ -182,7 +182,9 @@ var CLOUD = (function () {
       if (r && r.data) {
         var st = {};
         r.data.forEach(function (x) { api.presence.lastSeen[x.person_id] = x.last_seen; st[x.person_id] = { visits: x.visits, minutes: x.minutes, eggs: x.eggs, keys: x.egg_keys || [] }; });
-        if (S) S.stats = st; onPresence();
+        if (S) S.stats = st;
+        try { if (st[ui.me] && typeof eggsRestore === 'function' && eggsRestore(st[ui.me].keys)) render(true); } catch (x) {}
+        onPresence();
       }
     }).catch(function () {});
   }

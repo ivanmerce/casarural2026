@@ -46,6 +46,7 @@ function eggRole(pid) {
   if (pid === e.bday) return 'bday';
   if (pid === e.baby) return 'baby';
   if ((e.grand || []).indexOf(pid) >= 0) return 'grand';
+  if (typeof isSpy === 'function' && isSpy(pid)) return 'spy';
   return null;
 }
 function nameOf(pid, fb) { var p = person(pid); return p ? p.name : (fb || ''); }

@@ -315,7 +315,7 @@ function checkFumata() {
 }
 function checkClaras() {
   var lg = L.ledger(S, false);
-  if (lg.total > 0 && !lg.tx.length) { if (!hasEgg('claras')) setTimeout(function () { eggCard('claras', 'Cuentas claras', 'Nadie le debe nada a nadie. Haz captura, que esto no vuelve a pasar.'); }, 300); }
+  if (lg.total > 0 && !hasEgg('claras')) setTimeout(function () { if (!hasEgg('claras')) eggCard('claras', 'Cuentas claras', lg.tx.length ? 'Ya hay ' + L.money(lg.total) + ' apuntados y la app sabe quién paga a quién. Cuentas claras y el chocolate espeso.' : 'Nadie le debe nada a nadie. Haz captura, que esto no vuelve a pasar.'); }, 300);
 }
 var marcOn = false, popped = 0;
 function marcMode() {
@@ -407,6 +407,13 @@ function fumataRaw(title, text, k) {
   })(t0);
   setTimeout(function () { if (k) eggCard(k, title, text); else message('<h2>' + title + '</h2><p>' + text + '</p>', 4200); }, 600);
 }
+function tortillaDebate(sin) {
+  eggCard('tortilla', sin ? 'Sin cebolla. Valiente.' : 'Con cebolla. Como Dios manda.', sin ? 'Acabas de abrir el debate que separa familias desde 1817. Media mesa te mira mal; la otra media te invita a cenar.' : 'Acabas de abrir el debate que separa familias desde 1817. Que no se entere el bando de «sin», que el finde es largo.', '<div class="torti" aria-hidden="true">🥚🧅🥔</div>');
+}
+function spyCaught() {
+  var me_ = me(), self = me_ && me_.spy;
+  eggCard('cazaesp', self ? 'Agente, no se autoespíe' : '¡Te pillé, espía!', self ? 'Tocarse a uno mismo tres veces no es espionaje, es aburrimiento. Vuelva a su baño.' : 'Has pinchado al Espía tres veces. No ha confesado nada, pero ha dejado caer el bigote. Identidad: CLASIFICADA.', '<div class="torti" aria-hidden="true">🕵️</div>');
+}
 function extraOmnes() {
   eggCard('omnes', 'Toc, toc…', 'Has llamado a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
 }
@@ -415,7 +422,7 @@ function abueloMode() {
   eggToast('abuelo', ui.prefs.size === 'xl' ? 'Letra de abuelo: todo en grande, sin gafas. Toca 3 veces otra vez para volver.' : 'Letra normal. ¿Alguien ha visto mis gafas?');
 }
 var tapCount = {}, tapTimer = {};
-var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 1, sun: 5, disco: 3, podio: 3, abumeter: 3 };
+var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 1, sun: 5, disco: 3, podio: 3, abumeter: 3, spy: 3 };
 function eggTap(k, el) {
   var need = EGG_TAPS[k]; if (!need) return false;
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
@@ -423,7 +430,7 @@ function eggTap(k, el) {
   if (el && tapCount[k] >= 2 && tapCount[k] < need) { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {} }
   if (tapCount[k] >= need) {
     tapCount[k] = 0;
-    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else if (k === 'abumeter') abuMeterFx(); else abueloMode();
+    if (k === 'bday') bdayParty(); else if (k === 'baby') marcMode(); else if (k === 'logo') extraOmnes(); else if (k === 'sun') sunDance(); else if (k === 'disco') discoMode(); else if (k === 'podio') himno(); else if (k === 'abumeter') abuMeterFx(); else if (k === 'spy') spyCaught(); else abueloMode();
     return true;
   }
   return false;
@@ -791,7 +798,13 @@ function bindEvents() {
     var eg = e.target.closest('[data-egg]');
     if (eg && S && eggTap(eg.dataset.egg, eg)) { e.preventDefault(); return; }
     var t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
-    if (S && KID_BLOCK[t.dataset.act] && isKid() && !(isSpy() && /^idea/.test(t.dataset.act))) { e.preventDefault(); kidNope(); return; }
+    if (S && KID_BLOCK[t.dataset.act] && isKid() && !(isSpy() && /^idea/.test(t.dataset.act))) {
+      e.preventDefault();
+      /* el modo lector no quita secretos: intentarlo también cuenta */
+      var ke = { conf: 'dias', togAtt: 'dias', confFam: 'dias', vote: 'apunto', aVote: 'jurado', aPick: 'jurado', phLike: 'corazon', phUpload: 'foto' }[t.dataset.act];
+      if (ke && !hasEgg(ke)) { egg(ke); return; }
+      kidNope(); return;
+    }
     var fn = A[t.dataset.act]; if (fn) { e.preventDefault(); fn(t, e); }
   });
   document.addEventListener('change', function (e) { var t = e.target.closest('[data-change]'); if (t && C[t.dataset.change]) C[t.dataset.change](t); });
@@ -800,6 +813,7 @@ function bindEvents() {
     if (t.id === 'f-name') { clearTimeout(dupT); dupT = setTimeout(dupWarn, 250); }
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
     if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
+    if (t.dataset.input === 'search' && /\b(con|sin) cebolla\b/i.test(t.value) && !ui._tortiOn) { ui._tortiOn = true; setTimeout(function () { ui._tortiOn = false; }, 4000); tortillaDebate(/sin/i.test(t.value)); }
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
     if (t.dataset.input === 'glass') { ui.prefs.glass = t.value / 100; savePrefs(); applyPrefs(); }
   });

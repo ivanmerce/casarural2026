@@ -13,43 +13,46 @@ function buildEggs() {
   var g = ((S.trip.eggs && S.trip.eggs.grand) || []).map(function (id) { return nameOf(id); }).filter(Boolean).join(' o a ');
   var b = babyName(), c = bdayName();
   EGGS = [
-    /* Para empezar: conocer la app */
-    { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'El primer secreto es saber que hay secretos', more: 'Ya lo tienes: abrir esta lista' },
-    { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'Quien lee las instrucciones hasta el final…', more: 'Inicio → Manual de uso, y baja hasta abajo del todo' },
-    { k: 'dias', name: 'Presente', how: 'Tocar uno de tus días en Familia', hint: 'Pasar lista', more: 'Pestaña Familia → Quién viene: toca uno de tus días' },
-    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, ni los abuelos ven el tiempo', more: 'Pestaña La Finca → Práctico → toca el Wi-Fi' },
-    { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Mira al cielo… desde la app', more: 'En Inicio, la tarjeta del tiempo → Detalle' },
-    { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'Apaga la luz', more: 'Toca tu nombre arriba a la derecha y busca el tema' },
-    { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'Los planes también se quieren', more: 'En Planes, el corazón de cualquier actividad' },
-    { k: 'ojeador', name: 'Ojeador', how: 'Abrir un marcador desde Planes', hint: 'Algunos planes esconden un marcador', more: 'En Planes, busca «Marcador» en una actividad con juego' },
-    { k: 'jurado', name: 'Jurado popular', how: 'Votar en un premio', hint: 'Tu voto cuenta', more: 'Juegos → Premios → uno que se vote' },
-    { k: 'foto', name: 'Primera foto', how: 'Subir una foto al álbum', hint: 'Sonría, por favor', more: 'La cámara de arriba → Subir fotos' },
-    { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Un poco de amor para el álbum', more: 'Abre una foto del álbum y toca el corazón' },
+    /* Para empezar: conocer la app.  hint = pista que ve todo el mundo · more = pista extra (se gasta) */
+    { k: 'curioso', name: 'Curiosidad', how: 'Abrir los Secretos de la casa', hint: 'La curiosidad mató al gato… pero a ti te da puntos', more: 'Ya lo tienes: abrir esta lista' },
+    { k: 'manual', name: 'Empollón', how: 'Llegar hasta el final del Manual de uso', hint: 'El saber no ocupa lugar, pero sí scroll', more: 'Inicio → Manual de uso, y baja hasta el final del todo' },
+    { k: 'dias', name: 'Presente', how: 'Tocar uno de tus días en Familia', hint: 'Quien no se apunta, no come. Pasa lista', more: 'Pestaña Familia → Quién viene: toca uno de tus días' },
+    { k: 'wifi', name: 'Conectados', how: 'Copiar la contraseña del Wi-Fi de la finca', hint: 'Sin esto, en el campo solo hay vacas y cobertura de una raya', more: 'La Finca → Práctico → toca el Wi-Fi para copiar la contraseña' },
+    { k: 'meteo', name: 'Hombre del tiempo', how: 'Abrir el detalle de El tiempo', hint: 'Cielo empedrado, suelo mojado… ¿o no? Compruébalo', more: 'En Inicio, la tarjeta del tiempo → Detalle' },
+    { k: 'noche', name: 'El lado oscuro', how: 'Activar el modo oscuro', hint: 'De noche, todos los gatos son pardos (y la app también puede)', more: 'Toca tu foto arriba a la derecha y cambia el tema' },
+    { k: 'apunto', name: 'Me apunto', how: 'Dar un corazón a un plan', hint: 'A quien buen plan se arrima, buena sombra le cobija', more: 'En Planes, el corazón de cualquier actividad' },
+    { k: 'ojeador', name: 'Ojeador', how: 'Abrir un marcador desde Planes', hint: 'Algunos planes esconden un marcador. Quien busca, encuentra', more: 'En Planes, busca «Marcador» en una actividad con juego' },
+    { k: 'jurado', name: 'Jurado popular', how: 'Votar en un premio', hint: 'Más vale un voto en mano que cien en la gala', more: 'Juegos → Premios → uno que se vote' },
+    { k: 'foto', name: 'Primera foto', how: 'Subir una foto al álbum (o intentarlo)', hint: 'Una imagen vale más que mil palabras. Sonría, por favor', more: 'La cámara de arriba → Subir fotos' },
+    { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Obras son amores… y corazones en el álbum', more: 'Abre una foto del álbum y toca el corazón' },
     /* Toques escondidos */
-    { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'La casa esconde algo', more: 'Toca la casita de arriba a la izquierda o el título grande de Inicio' },
-    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años', more: 'En la pestaña Familia, toca su foto 5 veces seguidas' },
-    { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño esconde algo', more: 'En Comidas, toca 3 veces «Menú ' + b + '»' },
-    { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas' },
-    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Los abuelos ven de maravilla… con ayuda', more: 'En la pestaña Familia, toca 3 veces la foto de un abuelo' },
-    { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Si llueve, pídeselo al cielo', more: 'En Inicio, el título «El tiempo en la finca»' },
-    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar', more: 'En Inicio, los números de la cuenta atrás' },
-    { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música', more: 'Juegos → Ranking, el primero del podio' },
-    { k: 'abumetro', name: 'Abuelómetro al rojo', how: 'Tocar 3 veces el Abuelómetro', hint: 'Hay un medidor de abuelos', more: 'Cuentas → El rincón de los abuelos' },
+    { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'Llamad y se os abrirá. Bueno, más o menos', more: 'En Inicio, toca la casita de arriba a la izquierda o el título grande' },
+    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo)' },
+    { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño de la casa esconde algo. A la tercera va la vencida', more: 'En Comidas, toca 3 veces «Menú ' + b + '» (o su foto)' },
+    { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc… y así hasta quince', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas, rápido' },
+    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo)' },
+    { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Al mal tiempo, buena cara… y cinco toques', more: 'En Inicio, toca 5 veces el título «El tiempo en la finca»' },
+    { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar. A la tercera…', more: 'En Inicio, toca 3 veces los números de la cuenta atrás (en la finca, el «¡Ya estamos en la finca!»)' },
+    { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música, aunque el trono esté vacío', more: 'Juegos → Ranking: toca 3 veces el podio (el primero, o el hueco)' },
+    { k: 'abumetro', name: 'Abuelómetro al rojo', how: 'Tocar 3 veces el Abuelómetro', hint: 'Hay un medidor de abuelos. Se calienta si lo tocas', more: 'Cuentas → El rincón de los abuelos → toca 3 veces el Abuelómetro' },
+    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos)' },
     /* Palabras mágicas */
-    { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Una palabra en latín, en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
-    { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra (o pedirse la bebida)', hint: 'Algo para brindar', more: 'En el buscador de Compra, lo que se dice al brindar' },
+    { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Lo que se dice cuando sale humo blanco. En latín y en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
+    { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra (o pedirse la bebida)', hint: 'Lo que se dice al brindar. Agua que no has de beber…', more: 'En el buscador de Compra, lo que se dice al brindar' },
+    { k: 'tortilla', name: 'El gran debate', how: 'Buscar «con cebolla» o «sin cebolla» en la compra', hint: 'La pregunta que rompe familias desde tiempos inmemoriales', more: 'En el buscador de Compra: ¿la tortilla, con o sin…?' },
     /* A su hora */
-    { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A deshoras', more: 'Cuando todos duermen…' },
+    { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A quien madruga Dios le ayuda. A quien trasnocha, la app', more: 'Abre la app de madrugada, cuando todos duermen' },
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números de ' + c, more: 'Mañana o noche, cuando el reloj marque cuatro unos' },
+    { k: 'siesta', name: 'Siesta sagrada', how: 'Dejar la app abierta 4 minutos sin tocar nada', hint: 'Comer sin siesta, campana sin badajo', more: 'Deja la app abierta en pantalla y no la toques durante 4 minutos' },
     { k: 'zero', name: '¡Ya estamos aquí!', how: 'Abrir la app cuando ya estamos en la finca', hint: 'Cuando la cuenta atrás llega a cero', more: 'Abre la app durante el finde' },
-    { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuanta más familia, mejor', more: 'Mira arriba quién está conectado: hacen falta 6 a la vez' },
+    { k: 'quorum', name: 'Habemus quórum', how: 'Coincidir 6 o más personas conectadas a la vez', hint: 'Cuantos más seamos, más reiremos. Y más conectados', more: 'Mira arriba quién está conectado: hacen falta 6 a la vez (¿una cena con móviles?)' },
     /* Cuando pasa algo en la familia */
-    { k: 'fumata', name: 'Habemus compra', how: 'Ver la lista de la compra completa', hint: 'Cuando no quede nada sin dueño…', more: 'Entra en Compra cuando todos los productos tengan dueño' },
-    { k: 'claras', name: 'Cuentas claras', how: 'Ver la liquidación a cero con gastos apuntados', hint: 'Nadie debe nada a nadie', more: 'Entra en Cuentas cuando ya no quede ninguna transferencia pendiente' },
-    { k: 'trophy', name: 'Campeón', how: 'Ver el trofeo de un campeón', hint: 'Solo puede quedar uno', more: 'Cuando acabe una eliminatoria, abre el juego y toca «Ver trofeo»' },
-    { k: 'habemus', name: 'Habemus campeón', how: 'Entrar en Juegos con todos los juegos terminados', hint: 'Cuando no quede ni un juego por jugar', more: 'El último día, pásate por Juegos' },
-    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando', more: 'Juegos → Premios → Gala de premios, hasta la última' },
-    { k: 'album', name: 'Paparazzi en serie', how: 'Ver el álbum con 50 fotos o más', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún', more: 'Entre todos, llegad a 50 fotos en el álbum' }
+    { k: 'fumata', name: 'Habemus compra', how: 'Ver la lista de la compra completa', hint: 'Cuando no quede nada sin dueño… sale humo blanco', more: 'Entra en Compra cuando todos los productos tengan dueño' },
+    { k: 'claras', name: 'Cuentas claras', how: 'Mirar las Cuentas cuando ya hay gastos apuntados', hint: 'Cuentas claras y el chocolate espeso', more: 'Cuando alguien apunte el primer gasto o precio real, pásate por Cuentas' },
+    { k: 'trophy', name: 'Campeón', how: 'Ver el trofeo de un campeón', hint: 'Solo puede quedar uno… y tiene trofeo', more: 'Cuando acabe la eliminatoria de ping-pong, abre el juego y toca «Trofeo»' },
+    { k: 'habemus', name: 'Habemus liga', how: 'Entrar en Juegos con 5 juegos ya terminados', hint: 'No se ganó Zamora en una hora, ni el ranking en un juego', more: 'Cuando haya 5 juegos terminados, pásate por Juegos' },
+    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando. Hasta el final, como en el cine', more: 'Juegos → Premios → Gala de premios, hasta la última' },
+    { k: 'album', name: 'Paparazzi en serie', how: 'Ver el álbum con 50 fotos o más', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún', more: 'Entre todos, llegad a 50 fotos en el álbum y ábrelo' }
   ];
 }
 
@@ -76,6 +79,28 @@ function egg(k, quiet) {
   return true;
 }
 
+/* Red de seguridad: lo que la nube sabe que ya encontraste vuelve a este móvil (otro dispositivo, caché borrada…).
+   Nunca se pierde ninguno: la nube solo suma (la base de datos une las listas, no las sustituye) */
+var EGG_RESTORED_AT = '2026-10-01T00:00:00.000Z';
+function eggsRestore(keys) {
+  if (!keys || !keys.length || !ui.me) return 0;
+  var f = foundMap(), add = 0;
+  keys.forEach(function (k) { if (!f[k] && EGGS.some(function (e) { return e.k === k; })) { f[k] = EGG_RESTORED_AT; add++; } });
+  if (add) { writeJ(eggKey(), '_eggs', f); if (add > 1 || !ui._restoredOnce) toast(add === 1 ? 'Recuperado 1 secreto que ya tenías' : 'Recuperados ' + add + ' secretos que ya tenías'); ui._restoredOnce = true; }
+  return add;
+}
+/* Siesta: 4 minutos con la app abierta y sin tocar nada */
+var lastTouch = Date.now();
+['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (ev) { window.addEventListener(ev, function () { lastTouch = Date.now(); }, { passive: true }); });
+setInterval(function () {
+  try { if (!S || !EGGS.length || document.hidden) { lastTouch = Math.max(lastTouch, Date.now() - 1000); return; } } catch (e) { return; }
+  if (Date.now() - lastTouch > 4 * 60000 && !hasEgg('siesta')) { lastTouch = Date.now(); eggToast('siesta', 'Cuatro minutos sin tocar nada. O te has quedado frito o estás meditando. En ambos casos: respeto.'); }
+}, 15000);
+/* Rango según cuántos llevas: sale en la tarjeta cuando subes de nivel */
+var EGG_RANKS = [[1, 'Becario del cotilleo'], [5, 'Fisgón de pueblo'], [10, 'Detective de la finca'], [15, 'Sherlock de la comarca'], [20, 'Agente del CNI familiar'], [26, 'Maestro del Cónclave'], [32, 'Leyenda de la casa']];
+function eggRank(n) { var r = null; EGG_RANKS.forEach(function (x) { if (n >= x[0]) r = x[1]; }); return r; }
+function eggRankUp(n) { return EGG_RANKS.some(function (x) { return x[0] === n; }) ? eggRank(n) : null; }
+
 /* ===== La revelación: una tarjeta grande, con fuegos, anillo de progreso y en cola (nunca se pisan) ===== */
 var revealQ = [], revealOn = false;
 var revealCur = null;
@@ -97,17 +122,19 @@ function revealNext() {
     '<div class="rv-seal"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="rv-track" cx="50" cy="50" r="46"/><circle class="rv-ring" cx="50" cy="50" r="46" style="stroke-dasharray:' + C.toFixed(1) + ';stroke-dashoffset:' + from.toFixed(1) + '"/></svg>' +
       '<div class="rv-core">' + (trophy ? icon('trophy') : '<b class="num">' + n + '</b><small>de ' + N + '</small>') + '</div></div>' +
     '<span class="egg-badge' + (rep ? ' again' : '') + '">' + (trophy ? 'Los ' + N + ' de ' + N : rep ? 'Este ya era tuyo' : 'Secreto desbloqueado') + '</span>' +
-    (o.top ? '<div class="rv-top">' + o.top + '</div>' : '') +
+    (o.top ? '<div class="rv-top">' + o.top + '</div>' : (!trophy && it.e && typeof secretStyle === 'function' && secretStyle(it.e.k).emo ? '<div class="rv-sticker" aria-hidden="true">' + secretStyle(it.e.k).emo + '</div>' : '')) +
     '<h2>' + (trophy ? 'Guardián de los Secretos' : o.title) + '</h2>' +
     '<p>' + (trophy ? 'Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.' : o.text) + '</p>' +
     (quip && quip !== o.text ? '<p class="rv-quip">' + esc(quip) + '</p>' : '') +
     (it.e && it.e.name !== o.title ? '<small class="rv-name">Secreto «' + esc(it.e.name) + '»</small>' : '') +
+    (!rep && !trophy && eggRankUp(n) ? '<div class="rv-rank">' + icon('star') + '<span>Nuevo rango: <b>' + esc(eggRankUp(n)) + '</b></span></div>' : '') +
     '<div class="rv-actions"><button class="btn primary" data-rv="ok">¡Toma ya!</button><button class="btn ghost" data-rv="see">Mis secretos</button></div>' +
     '<small class="egg-hush">' + (rep ? 'Ya lo tenías: no suma otra vez, pero mola igual' : secretsClosed() ? 'El ranking ya está cerrado: este no suma' : 'Chitón: que cada uno encuentre los suyos') + '</small></div>';
   document.body.appendChild(m);
   var show = function () { if (m.classList.contains('in')) return; var r = m.querySelector('.rv-ring'); if (r) r.style.strokeDashoffset = to.toFixed(1); m.classList.add('in'); };
   requestAnimationFrame(function () { requestAnimationFrame(show); }); setTimeout(show, 120);
   try { if (typeof playSecretFx === 'function') playSecretFx(it.e ? it.e.k : '', trophy); else fireworks(4600, 7); } catch (x) {}
+  try { if (typeof tada === 'function') tada(trophy || (!rep && eggRankUp(n))); } catch (x) {}
   if (navigator.vibrate) try { navigator.vibrate(trophy ? [20, 60, 20, 60, 40] : [14, 50, 14]); } catch (x) {}
   var born = Date.now(), gone = false, tm;
   function close(then) {
@@ -158,7 +185,7 @@ function secretsSheet() {
   var html = '<h2>Secretos de la casa</h2>' +
     '<div class="card wood small sec-mission"><p><b>Tu misión:</b> desbloquear los ' + EGGS.length + ' secretos <b>sin contárselo a nadie</b>. Cada uno tiene los suyos y están repartidos por toda la app.</p>' +
     '<p>' + (closed ? '<b>El ranking se cerró</b> el ' + esc(fmtClose()) + '. Lo que descubras ahora ya no suma.' : 'El ranking se cierra el <b>' + esc(fmtClose()) + '</b> (2 horas antes sonará una alarma). Quien los consiga todos se lleva el trofeo <b>Guardián de los Secretos</b> en la gala.') + '</p></div>' +
-    '<div class="sec-me"><div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small">' + (mine && mine.n ? '<b>' + mine.pos + '.º</b> en el ranking' : 'Aún sin estrenar') + '<br><span class="muted">' + left + (left === 1 ? ' pista extra' : ' pistas extra') + ' de ' + SECRETS_HINTS + '. Úsalas con cabeza</span></span></div>' +
+    '<div class="sec-me"><div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small">' + (mine && mine.n ? (mine.pos ? '<b>' + mine.pos + '.º</b> en el ranking' : '<b>Fuera de concurso</b>') + (eggRank(n) ? ' · <b>' + esc(eggRank(n)) + '</b>' : '') : 'Aún sin estrenar') + '<br><span class="muted">' + left + (left === 1 ? ' pista extra' : ' pistas extra') + ' de ' + SECRETS_HINTS + '. Úsalas con cabeza</span></span></div>' +
     '<div class="bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div></div>';
   html += '<p class="eyebrow">Ranking de cazasecretos</p><div class="sec-rank">' + (typeof secretsWho === 'function' ? secretsWho() : '') + '<p class="small muted">Se actualiza cada minuto.</p></div>';
   html += '<p class="eyebrow">Tus secretos</p><div class="stack">' + EGGS.map(function (e) {
@@ -188,8 +215,9 @@ function secretsOnView() {
     var t = ui.tab;
     if (t === 'tiempo') egg('meteo');
     if (t === 'compra') { var c = L.coverage(S.ingredients); if (c.tot && c.done === c.tot && !hasEgg('fumata') && !ui._fumataPend) { ui._fumataPend = true; setTimeout(function () { ui._fumataPend = false; if (!hasEgg('fumata')) fumata(); }, 450); } }
-    if (t === 'cuentas') { var lg = L.ledger(S, false); if (lg.total > 0 && !lg.tx.length && !hasEgg('claras')) setTimeout(checkClaras, 300); }
-    if (t === 'juegos' && !hasEgg('habemus')) { var gs = S.games || []; if (gs.length && gs.every(function (g) { return G.isDone(S, g); })) { ui.allDoneShown = false; checkAllGames(); } }
+    if (t === 'cuentas' && !hasEgg('claras')) setTimeout(checkClaras, 300);
+    if (t === 'juegos' && !hasEgg('habemus') && G.doneGames(S).length >= 5) setTimeout(function () { if (!hasEgg('habemus')) fumataRaw('¡Habemus liga!', 'Cinco juegos terminados y el ranking ya echa humo. Aquí ya no se rinde nadie: quien no corre, vuela.', 'habemus'); }, 400);
+    if (t === 'juegos') { var gs = S.games || []; if (gs.length && gs.every(function (g) { return G.isDone(S, g); }) && !ui.allDoneShown) checkAllGames(); }
     if (t === 'album' && typeof photoList === 'function' && photoList().length >= 50) egg('album');
     if (t === 'manual') setTimeout(manualEndCheck, 300);
   } catch (e) {}

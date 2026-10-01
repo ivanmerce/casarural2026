@@ -129,38 +129,41 @@ function smokeFx(delay) {
 function secretStyle(k) {
   var b = typeof babyName === 'function' ? babyName() : 'el peque', c = typeof bdayName === 'function' ? bdayName() : 'el cumpleañero';
   var M = {
-    curioso:  { fx: ['rocket', 'fireworks'], quip: 'El primer paso para encontrar secretos es saber que existen. Vas fino.' },
-    manual:   { fx: ['emoji:📚 🤓 ✏️', 'cannons'], quip: 'Has leído el manual hasta el final. Eres oficialmente la única persona de la familia que lo ha hecho.' },
-    dias:     { fx: ['emoji:✅ 🙋 📅', 'fireworks'], quip: 'Presente. Nunca pasar lista había sido tan emocionante.' },
-    wifi:     { fx: ['emoji:📶 ⚡ 📱', 'stars'], quip: 'Conectado. Ahora ya puedes ignorar a la familia con total comodidad.' },
-    meteo:    { fx: ['sun', 'emoji:☀️ ⛅ 🌈'], quip: 'Nuevo hombre del tiempo oficial. Si llueve, te pediremos explicaciones.' },
-    noche:    { fx: ['stars', 'emoji:🌙 ⭐'], quip: 'Bienvenido al lado oscuro. Aquí no hay galletas, pero se ve todo muy elegante.' },
-    apunto:   { fx: ['rise:❤️ 💖 💗', 'cannons'], quip: 'Le has dado amor a un plan. El plan, emocionado, te lo agradece.' },
-    ojeador:  { fx: ['emoji:🔭 👀 📋', 'fireworks'], quip: 'Ves marcadores donde los demás solo ven planes. Ojo de halcón.' },
-    jurado:   { fx: ['emoji:⚖️ 🗳️ 🏅', 'cannons'], quip: 'Tu voto cuenta. Cuenta uno, vale, pero cuenta.' },
-    foto:     { fx: ['emoji:📸 ✨ 🎞️', 'cannons'], quip: 'Primera foto al álbum. El paparazzi de la familia ha llegado.' },
-    corazon:  { fx: ['rise:❤️ 💕 💘 💞', 'fireworks'], quip: 'Repartes corazones por el álbum como si fueran gratis. Lo son.' },
-    omnes:    { fx: ['rocket', 'fireworks', 'cannons'], quip: 'Toc, toc… ¿Quién es? Nadie. Están todos en la nave jugando al ping-pong.' },
-    bday:     { fx: ['emoji:🎂 🎉 🎈 🎁', 'cannons', 'rocket'], quip: 'Cumplir años mola. Cumplirlos en una casa rural con toda la familia, más.' },
-    baby:     { fx: ['rise:🫧 🫧 🍼'], quip: b + ' manda: la app se llena de burbujas. Explótalas antes de que escapen.' },
-    pop:      { fx: ['emoji:🫧 🎈 💥', 'cannons'], quip: '15 burbujas. ' + b + ' te ficha como canguro oficial del finde.' },
-    abuelo:   { fx: ['emoji:👓 🔍 👴 👵'], quip: 'Letra grande, como en el periódico de los domingos. Sin gafas, que ya no hacen falta.' },
-    sol:      { fx: ['sun', 'emoji:☀️ 😎 🕶️'], quip: 'Petición enviada al cielo. Si llueve, la culpa es del hombre del tiempo.' },
-    disco:    { fx: ['emoji:🪩 🕺 💃 🎶', 'cannons'], quip: 'Cuando la cuenta atrás se aburre, se va de discoteca.' },
-    himno:    { fx: ['emoji:🎺 🎶 👑', 'fireworks', 'rocket'], quip: 'Música para el número 1. Que no se le suba, que todavía queda finde.' },
-    abumetro: { fx: ['emoji:🔥 🌡️ 👵 👴'], quip: 'El abuelómetro echa humo. Acepta sobornos: un vermut, por ejemplo.' },
-    papa:     { fx: ['smoke', 'emoji:🕊️ ⛪'], quip: 'Habemus papam. Y si no, habemus lista de la compra, que también vale.' },
-    salud:    { fx: ['emoji:🥂 🍾 🍷 🍻', 'cannons'], quip: 'Chin chin. Por ' + c + ' y por quien friegue los vasos.' },
-    buho:     { fx: ['stars', 'emoji:🦉 🌙'], quip: 'Despierto a estas horas… Mañana hay hockey. A dormir, búho.' },
-    deseo:    { fx: ['stars', 'emoji:✨ 🌠 🙏'], quip: '11:11: pide un deseo. Que no sea «que no llueva», que ese ya está pedido.' },
-    zero:     { fx: ['rocket', 'fireworks', 'cannons'], quip: '¡Ya estamos aquí! Que empiece lo bueno.' },
-    quorum:   { fx: ['emoji:👨‍👩‍👧‍👦 🎉 📱', 'fireworks'], quip: 'Seis o más conectados a la vez. Esto ya es una reunión familiar en toda regla.' },
-    fumata:   { fx: ['smoke', 'emoji:🛒 🥖 🧀'], quip: 'Fumata blanca: toda la compra tiene dueño. Esta familia no pasará hambre.' },
-    claras:   { fx: ['emoji:💶 🪙 💰', 'cannons'], quip: 'Nadie le debe nada a nadie. Haz captura, que esto no vuelve a pasar.' },
-    trophy:   { fx: ['emoji:🏆 🥇 👑', 'fireworks', 'rocket'], quip: 'Solo puede quedar uno… y lo estás viendo.' },
-    habemus:  { fx: ['rocket', 'fireworks', 'cannons'], quip: 'Todos los juegos terminados. Habemus campeón.' },
-    gala:     { fx: ['emoji:🎬 🌟 🏆 🎞️', 'fireworks'], quip: 'Has visto la gala hasta el final. Los Óscar de la familia te dan las gracias.' },
-    album:    { fx: ['emoji:📸 🖼️ 🤳', 'cannons'], quip: 'Cincuenta fotos o más. Ya tenemos material para chantajear a todos hasta el año que viene.' }
+    curioso:  { emo: '🔍', fx: ['rocket', 'fireworks'], quip: 'La curiosidad mató al gato, pero a ti te acaba de dar el primer punto. Miau.' },
+    manual:   { emo: '🤓', fx: ['emoji:📚 🤓 ✏️', 'cannons'], quip: 'Te has leído el manual entero. Eres oficialmente la única persona de la familia que lo ha hecho. Enmárcalo.' },
+    dias:     { emo: '🙋', fx: ['emoji:✅ 🙋 📅', 'fireworks'], quip: '¡Presente! Quien no se apunta, no come. Y tú, comer, comerás.' },
+    wifi:     { emo: '📶', fx: ['emoji:📶 ⚡ 📱', 'stars'], quip: 'Conectado. Ahora puedes ignorar a la familia con cobertura completa. Las vacas no tienen Wi-Fi; tú sí.' },
+    meteo:    { emo: '⛅', fx: ['sun', 'emoji:☀️ ⛅ 🌈'], quip: 'Nuevo hombre del tiempo oficial. Si llueve, las quejas van a tu nombre.' },
+    noche:    { emo: '🌚', fx: ['stars', 'emoji:🌙 ⭐'], quip: 'Bienvenido al lado oscuro. No hay galletas, pero de noche todos los gatos son pardos y la app, elegantísima.' },
+    apunto:   { emo: '💘', fx: ['rise:❤️ 💖 💗', 'cannons'], quip: 'Le has dado amor a un plan. El plan, emocionado, ha llamado a su madre para contárselo.' },
+    ojeador:  { emo: '🔭', fx: ['emoji:🔭 👀 📋', 'fireworks'], quip: 'Ves marcadores donde los demás solo ven planes. Ojo de halcón, nariz de sabueso.' },
+    jurado:   { emo: '🗳️', fx: ['emoji:⚖️ 🗳️ 🏅', 'cannons'], quip: 'Tu voto cuenta. Cuenta uno, vale, pero cuenta. Y no aceptes sobornos por debajo de una croqueta.' },
+    foto:     { emo: '📸', fx: ['emoji:📸 ✨ 🎞️', 'cannons'], quip: 'El paparazzi de la familia ha llegado. Que nadie se rasque la nariz en público a partir de ahora.' },
+    corazon:  { emo: '💖', fx: ['rise:❤️ 💕 💘 💞', 'fireworks'], quip: 'Obras son amores. Y corazones en el álbum, también. Repartes amor como si fuera gratis. (Lo es.)' },
+    omnes:    { emo: '🚪', fx: ['rocket', 'fireworks', 'cannons'], quip: 'Toc, toc… ¿Quién es? Nadie. Están todos en la nave jugando al ping-pong y discutiendo el saque.' },
+    bday:     { emo: '🎂', fx: ['emoji:🎂 🎉 🎈 🎁', 'cannons', 'rocket'], quip: 'Cumplir años mola. Cumplirlos con toda la familia en una casa rural, más. Que cumplas muchos… pero no todos este finde.' },
+    baby:     { emo: '🍼', fx: ['rise:🫧 🫧 🍼'], quip: b + ' manda y la app obedece: burbujas para todos. Explótalas antes de que escapen.' },
+    pop:      { emo: '🫧', fx: ['emoji:🫧 🎈 💥', 'cannons'], quip: 'Quince burbujas. ' + b + ' te ficha como canguro oficial del finde. Sin sueldo, con babas.' },
+    abuelo:   { emo: '👓', fx: ['emoji:👓 🔍 👴 👵'], quip: 'Más sabe el diablo por viejo que por diablo. Y con esta letra, hasta lee sin gafas.' },
+    sol:      { emo: '🌞', fx: ['sun', 'emoji:☀️ 😎 🕶️'], quip: 'Petición enviada al cielo. Al mal tiempo, buena cara; si llueve, la culpa es del hombre del tiempo.' },
+    disco:    { emo: '🪩', fx: ['emoji:🪩 🕺 💃 🎶', 'cannons'], quip: 'Cuando la cuenta atrás se aburre, se va de discoteca. Mueve el esqueleto, que no te ve nadie.' },
+    himno:    { emo: '🎺', fx: ['emoji:🎺 🎶 👑', 'fireworks', 'rocket'], quip: 'Música para el número 1. Que no se le suba, que hasta el rabo todo es toro.' },
+    abumetro: { emo: '🌡️', fx: ['emoji:🔥 🌡️ 👵 👴'], quip: 'El abuelómetro echa humo. Acepta sobornos: un vermut con aceitunas, por ejemplo.' },
+    cazaesp:  { emo: '🕵️', fx: ['emoji:🕵️ 🔎 🥸 🗝️', 'smoke', 'cannons'], quip: 'Espía pinchado. No ha soltado prenda, pero se le ha caído el bigote postizo. Seguimos investigando.' },
+    papa:     { emo: '🕊️', fx: ['smoke', 'emoji:🕊️ ⛪'], quip: 'Habemus papam. Y si no, habemus lista de la compra, que para esta familia es casi lo mismo.' },
+    salud:    { emo: '🥂', fx: ['emoji:🥂 🍾 🍷 🍻', 'cannons'], quip: 'Chin chin. Por ' + c + ' y por quien friegue los vasos (que nunca es el mismo que brinda).' },
+    tortilla: { emo: '🍳', fx: ['emoji:🥚 🧅 🥔 🍳', 'cannons'], quip: 'Has destapado el debate más antiguo de la cocina española. Esta noche, en la sobremesa: votación a mano alzada.' },
+    buho:     { emo: '🦉', fx: ['stars', 'emoji:🦉 🌙'], quip: 'A quien madruga Dios le ayuda; a quien trasnocha, la app. Mañana hay hockey, búho.' },
+    deseo:    { emo: '🌠', fx: ['stars', 'emoji:✨ 🌠 🙏'], quip: '11:11: pide un deseo. Que no sea «que no llueva», que ese ya lo ha pedido la abuela tres veces.' },
+    siesta:   { emo: '😴', fx: ['rise:💤 😴 🛌', 'stars'], quip: 'Comer sin siesta es campana sin badajo. Has dado la talla: cuatro minutos sin mover un dedo.' },
+    zero:     { emo: '🏡', fx: ['rocket', 'fireworks', 'cannons'], quip: '¡Ya estamos aquí! Maletas fuera, zapatillas puestas y que empiece lo bueno.' },
+    quorum:   { emo: '👨‍👩‍👧‍👦', fx: ['emoji:👨‍👩‍👧‍👦 🎉 📱', 'fireworks'], quip: 'Seis o más conectados a la vez. Cuantos más seamos, más reiremos (y más se gastará la batería).' },
+    fumata:   { emo: '🛒', fx: ['smoke', 'emoji:🛒 🥖 🧀'], quip: 'Fumata blanca: toda la compra tiene dueño. Barriga llena, corazón contento.' },
+    claras:   { emo: '🧾', fx: ['emoji:💶 🪙 💰', 'cannons'], quip: 'Cuentas claras y el chocolate espeso. Aquí no se escapa ni un céntimo (ni una onza).' },
+    trophy:   { emo: '🏆', fx: ['emoji:🏆 🥇 👑', 'fireworks', 'rocket'], quip: 'Solo puede quedar uno… y lo estás viendo. Aplausos, foto y vuelta de honor por la nave.' },
+    habemus:  { emo: '📊', fx: ['rocket', 'fireworks', 'cannons'], quip: 'Cinco juegos terminados: el ranking ya echa humo. No se ganó Zamora en una hora, pero esto va lanzado.' },
+    gala:     { emo: '🎬', fx: ['emoji:🎬 🌟 🏆 🎞️', 'fireworks'], quip: 'Has visto la gala hasta el final. Los Óscar de la familia te dan las gracias (y piden que no reveles el final).' },
+    album:    { emo: '🖼️', fx: ['emoji:📸 🖼️ 🤳', 'cannons'], quip: 'Cincuenta fotos o más. Ya tenemos material para chantajear a todos hasta el año que viene.' }
   };
   return M[k] || { fx: ['fireworks', 'cannons'], quip: 'Un secreto más para la colección. Chitón.' };
 }
@@ -179,4 +182,18 @@ function playSecretFx(k, trophy) {
     else if (f.indexOf('rise:') === 0) emojiFx(f.slice(5).split(' '), 'rise', d + 100);
     d += 350;
   });
+}
+
+/* «¡Tachán!»: sonido corto al desbloquear; más largo si subes de rango o es el trofeo */
+function tada(big) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    var notes = big ? [[523, 0], [659, .1], [784, .2], [1047, .32], [1319, .46]] : [[784, 0], [1047, .12], [1568, .26]];
+    notes.forEach(function (n) {
+      var t = actx.currentTime + n[1], o = actx.createOscillator(), gn = actx.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(n[0], t);
+      gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(0.09, t + 0.015); gn.gain.exponentialRampToValueAtTime(0.0001, t + (big ? 0.35 : 0.28));
+      o.connect(gn); gn.connect(actx.destination); o.start(t); o.stop(t + 0.4);
+    });
+  } catch (e) {}
 }

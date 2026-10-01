@@ -248,7 +248,7 @@ function rankingView() {
   var rank = G.ranking(S), done = G.doneGames(S);
   if (!done.length) {
     var nx = (S.games || [])[0];
-    return '<div class="empty">' + icon('podium') + '<b>El podio está vacío</b><span>En cuanto termine el primer juego aparecen aquí los puntos. Se admiten apuestas.</span></div>' + (nx ? '<button class="btn block" data-act="jsub" data-v="juegos">Ver los juegos</button>' : '');
+    return '<div class="empty"><span data-egg="podio" class="podio-empty">' + icon('podium') + '</span><b>El podio está vacío</b><span>En cuanto termine el primer juego aparecen aquí los puntos. Se admiten apuestas.</span></div>' + (nx ? '<button class="btn block" data-act="jsub" data-v="juegos">Ver los juegos</button>' : '');
   }
   var top = [2, 1, 3].map(function (p) { return rank.filter(function (r) { return r.pos === p && r.pts > 0; }); });
   var h = '<section class="podium-wrap"><div class="podium">' + top.map(function (list, i) {

@@ -165,5 +165,6 @@ Object.assign(C, {
 });
 document.addEventListener('keydown', function (e) { if (!viewer) return; if (e.key === 'ArrowRight') A.vwNext(); else if (e.key === 'ArrowLeft') A.vwPrev(); else if (e.key === 'Escape') viewerClose(); });
 A.phNope = function () {
+  if (typeof hasEgg === 'function' && !hasEgg('foto')) { egg('foto'); return; }   /* intentarlo también cuenta */
   message('<div class="code-pop">' + icon('camera') + '</div><h2>' + (isSpy() ? 'Modo espía' : 'Modo explorador') + '</h2><p>' + (isSpy() ? 'Un buen espía hace fotos… pero no las publica. Aquí puedes ver el álbum entero; las fotos las suben los de la familia.' : 'Puedes ver todas las fotos del álbum. Para subir las tuyas, pásaselas a tus padres y que las suban ellos.') + '</p>');
 };

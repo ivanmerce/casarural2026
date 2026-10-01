@@ -1223,3 +1223,13 @@ img, svg, canvas { max-width: 100%; }
 .vw-src { font-size: .72rem; text-align: center; color: #A89990; margin: 0; }
 .rp-viewer .vw-cap { font-weight: 700; font-size: 1.08rem; margin: 0; }
 @media (max-width: 400px) { .plan-wrap, .rp-strip { margin-left: -12px; margin-right: -12px; padding-left: 12px; padding-right: 12px; } }
+
+/* v0.7.30 · Secretos: pegatina gigante, rango y extras */
+.egg-reveal .rv-sticker { font-size: min(22vw, 92px); line-height: 1; margin: -6px 0 2px; filter: drop-shadow(0 8px 18px rgba(0,0,0,.35)); animation: rvSticker 1.1s .3s cubic-bezier(.2, 1.7, .35, 1) both, rvWobble 2.6s 1.5s ease-in-out infinite; transform-origin: 50% 80%; }
+@keyframes rvSticker { 0% { transform: scale(0) rotate(-40deg); opacity: 0; } 60% { transform: scale(1.25) rotate(8deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+@keyframes rvWobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg) scale(1.04); } 75% { transform: rotate(7deg) scale(1.04); } }
+.egg-reveal .rv-rank { display: inline-flex; align-items: center; gap: 8px; margin: 2px auto 0; padding: 8px 14px; border-radius: 999px; background: linear-gradient(90deg, #F2C65A, #E8A33C); color: #2A1608; font-weight: 700; font-size: .92rem; box-shadow: 0 6px 18px rgba(242, 198, 90, .35); animation: rvPop .7s .8s cubic-bezier(.2, 1.6, .4, 1) both; }
+.egg-reveal .rv-rank .ico { width: 18px; height: 18px; }
+.egg-reveal .torti { font-size: min(18vw, 76px); line-height: 1; letter-spacing: .05em; }
+.podio-empty { display: inline-grid; place-items: center; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .egg-reveal .rv-sticker { animation: none; } }

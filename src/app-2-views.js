@@ -35,7 +35,7 @@ VIEWS.inicio = function () {
     h += '<div class="count" id="count" data-egg="disco"><div><b id="cd-d">' + c.d + '</b><span>días</span></div><div><b id="cd-h">' + c.h + '</b><span>horas</span></div><div><b id="cd-m">' + c.m + '</b><span>min</span></div><div><b id="cd-s">' + c.s + '</b><span>seg</span></div></div>' +
       '<p class="small muted" style="margin-top:10px">Para la llegada del ' + esc(S.days[0].long.toLowerCase()) + ' a las ' + esc(S.trip.arrival) + '</p>';
   } else if (c.phase === 'during') {
-    h += '<p class="live">¡Ya estamos en la finca!</p>';
+    h += '<p class="live" data-egg="disco">¡Ya estamos en la finca!</p>';
   } else {
     h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   }
