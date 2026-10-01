@@ -3670,8 +3670,10 @@ function gHasAny(g) {
   return (g.matches || []).some(function (m) { return m.w || m.sa != null || m.sb != null; });
 }
 function gStatus(g) { return G.isDone(S, g) ? 'fin' : gHasAny(g) ? 'vivo' : 'prox'; }
-var GST = { prox: ['Próximo', ''], vivo: ['En juego', 'red live'], fin: ['Terminado', 'ok'] };
-function gWhen(g) { var d = g.day && dayOf(g.day); return (d ? d.short : 'Cuando queráis') + (g.time ? ' · ' + g.time : ''); }
+var GST = { prox: ['Por jugar', ''], vivo: ['En juego', 'red live'], fin: ['Terminado', 'ok'] };
+function gWhen(g) { return (G.CATS[g.cat] || 'Juego') + ' · cuando queráis'; }   /* sin calendario: se juega lo que apetezca, cuando apetezca */
+function todayTripDay() { var d = new Date(), k = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); return S.days.some(function (x) { return x.k === k; }) ? k : null; }
+var CAT_ORDER_G = ['deporte', 'velocidad', 'ingenio', 'escondite', 'mini', 'mesa'];
 function ensureGame(g) {
   if (g.format === 'bracket' && !g.rounds) { g.rounds = G.makeBracket(g.entrants || []); G.advance(g); }
   if (g.format === 'teams') { g.teams = g.teams || []; g.matches = g.matches || []; }
@@ -3690,14 +3692,13 @@ function compCard() {
   var rank = G.ranking(S), leader = rank.filter(function (r) { return r.pos === 1 && r.pts > 0; });
   var live = (S.games || []).filter(function (g) { return gStatus(g) === 'vivo'; });
   var now = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  var next = (S.games || []).filter(function (g) { return gStatus(g) === 'prox' && g.day; }).sort(function (a, b) { return (a.day + a.time).localeCompare(b.day + b.time); })
-    .filter(function (g) { return (g.day + ' ' + (g.time || '00:00')) >= now; })[0] || (S.games || []).filter(function (g) { return gStatus(g) === 'prox'; })[0];
+  var next = (S.games || []).filter(function (g) { return gStatus(g) === 'prox'; })[0];
   var done = G.doneGames(S).length, tot = (S.games || []).length;
   return '<section class="card comp-card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('trophy') + 'Competición</h3><button class="link" data-act="tab" data-tab="juegos">Juegos ' + icon('arrow') + '</button></div>' +
     (leader.length ? '<button class="leader" data-act="jsub" data-v="ranking">' + eAv(leader[0].id, 'sm') + '<span class="grow"><span class="eyebrow">Líder del finde</span><b>' + leader.map(function (l) { return eName(l.id); }).join(' y ') + '</b></span><span class="big num">' + leader[0].pts + '</span><small class="muted">pts</small></button>'
       : '<p class="small muted">Nadie ha puntuado todavía. El trono está libre.</p>') +
     (live.length ? live.map(function (g) { return '<button class="game-mini" data-act="gOpen" data-id="' + g.id + '">' + gIcon(g) + '<span class="grow"><b>' + esc(g.name) + '</b><small class="muted">' + gWhen(g) + '</small></span><span class="pill red live">En juego</span></button>'; }).join('')
-      : next ? '<button class="game-mini" data-act="gOpen" data-id="' + next.id + '">' + gIcon(next) + '<span class="grow"><b>' + esc(next.name) + '</b><small class="muted">Próximo · ' + gWhen(next) + '</small></span>' + icon('arrow') + '</button>' : '') +
+      : next ? '<button class="game-mini" data-act="gOpen" data-id="' + next.id + '">' + gIcon(next) + '<span class="grow"><b>' + esc(next.name) + '</b><small class="muted">Por jugar · ' + gWhen(next) + '</small></span>' + icon('arrow') + '</button>' : '') +
     '<div class="progress" aria-label="Juegos terminados"><i style="width:' + (tot ? Math.round(done / tot * 100) : 0) + '%"></i></div><p class="small muted">' + done + ' de ' + tot + ' juegos terminados · ' + G.awards(S).filter(function (a) { return a.winners.length; }).length + ' premios en juego</p></section>';
 }
 
@@ -3713,16 +3714,14 @@ VIEWS.juegos = function () {
 };
 
 function gamesList() {
-  var gs = (S.games || []).slice().sort(function (a, b) { return ((a.day || '9') + (a.time || '')).localeCompare((b.day || '9') + (b.time || '')) || (a.sort || 0) - (b.sort || 0); });
+  /* Sin días ni horas: en juego, por jugar (por tipo) y terminados. Se elige el que apetezca */
+  var gs = (S.games || []).slice().sort(function (a, b) { return (CAT_ORDER_G.indexOf(a.cat) - CAT_ORDER_G.indexOf(b.cat)) || (a.sort || 0) - (b.sort || 0) || a.name.localeCompare(b.name, 'es'); });
   if (!gs.length) return '<div class="empty">' + icon('games') + '<b>Sin juegos todavía</b><span>Pulsa + y crea el primero. El sofá no cuenta como deporte.</span></div>' + (can('edit') ? '<button class="fab" data-act="gNew" aria-label="Añadir juego">' + icon('plus') + '</button>' : '');
-  var h = '', groups = {};
-  gs.forEach(function (g) { var k = g.day || 'x'; (groups[k] = groups[k] || []).push(g); });
-  var live = gs.filter(function (g) { return gStatus(g) === 'vivo'; });
+  var h = '<p class="small muted games-free">Sin horarios: elegid el que os apetezca en cada momento. Tocad uno para empezar a apuntar.</p>';
+  var live = gs.filter(function (g) { return gStatus(g) === 'vivo'; }), todo = gs.filter(function (g) { return gStatus(g) === 'prox'; }), fin = gs.filter(function (g) { return gStatus(g) === 'fin'; });
   if (live.length) h += '<p class="eyebrow live-label"><span class="live-dot" aria-hidden="true"></span> En juego ahora</p>' + live.map(gameCard).join('');
-  S.days.concat([{ k: 'x', long: 'Cuando queráis' }]).forEach(function (d) {
-    var list = (groups[d.k] || []).filter(function (g) { return gStatus(g) !== 'vivo'; }); if (!list.length) return;
-    h += '<p class="eyebrow">' + esc(d.long) + '</p>' + list.map(gameCard).join('');
-  });
+  if (todo.length) h += '<p class="eyebrow">Por jugar · ' + todo.length + '</p>' + todo.map(gameCard).join('');
+  if (fin.length) h += '<p class="eyebrow">Terminados · ' + fin.length + '</p>' + fin.map(gameCard).join('');
   h += '<section class="card wood small"><h3>Cómo se puntúa</h3><p>Cada juego reparte puntos según el puesto (se puede cambiar en cada juego). El ranking global suma todo. Si hay empate a puntos, manda quien tenga más oros, luego platas y luego bronces.</p><p class="muted">Todos compiten por su cuenta. ' + esc((S.comp && S.comp.duos || []).map(function (d) { return d.name; }).join(', ')) + (S.comp && S.comp.duos && S.comp.duos.length ? ' compiten en pareja: si ganan, ganan los dos.' : '') + '</p></section>';
   if (can('edit')) h += '<button class="fab" data-act="gNew" aria-label="Añadir juego">' + icon('plus') + '</button>';
   return h;
@@ -3986,12 +3985,11 @@ function gameSheet(id) {
     '<div class="grid2"><div class="field"><label for="g-unit">Unidad</label><input id="g-unit" value="' + esc(g.unit || '') + '" placeholder="puntos, s, m…"></div>' +
     '<div class="field"><span class="lbl">Empates en partidos</span>' + segHtml('allowDraw', [['1', 'Sí'], ['', 'No']], draft.allowDraw ? '1' : '') + '</div></div>' +
     '<div class="field"><span class="lbl">Equipos: ¿cómo se decide?</span>' + segHtml('teamRank', [['', 'Partidos'], ['1', 'Orden de llegada']], draft.teamRank ? '1' : '') + '</div>' +
-    '<div class="grid2"><div class="field"><label for="g-day">Día</label><select id="g-day"><option value="">Cuando queráis</option>' + S.days.map(function (d) { return '<option value="' + d.k + '"' + (g.day === d.k ? ' selected' : '') + '>' + esc(d.long) + '</option>'; }).join('') + '</select></div>' +
-    '<div class="field"><label for="g-time">Hora</label><input id="g-time" type="time" value="' + esc(g.time || '') + '"></div></div>' +
+
     '<div class="field"><label for="g-where">Dónde</label><input id="g-where" value="' + esc(g.where || '') + '"></div>' +
     '<div class="field"><label for="g-points">Puntos por puesto (1.º, 2.º, 3.º…)</label><input id="g-points" inputmode="numeric" value="' + esc((g.points && g.points.length ? g.points : G.DEFAULT_POINTS).join(', ')) + '"></div>' +
     '<div class="field"><label for="g-part">Puntos por participar (resto)</label><input id="g-part" inputmode="numeric" value="' + (g.part != null ? g.part : 1) + '"></div>' +
-    '<div class="field"><span class="lbl">Quién juega · <span id="g-count">' + draft.entrants.length + '</span></span><div class="row wrap"><button type="button" class="chip" data-act="gPickAll" data-v="all">Todos</button><button type="button" class="chip" data-act="gPickAll" data-v="day">Los que están ese día</button><button type="button" class="chip" data-act="gPickAll" data-v="none">Nadie</button></div>' + pickList('gPick', id, draft.entrants, 'entrants') + '</div>' +
+    '<div class="field"><span class="lbl">Quién juega · <span id="g-count">' + draft.entrants.length + '</span></span><div class="row wrap"><button type="button" class="chip" data-act="gPickAll" data-v="all">Todos</button><button type="button" class="chip" data-act="gPickAll" data-v="day">Los que están hoy</button><button type="button" class="chip" data-act="gPickAll" data-v="none">Nadie</button></div>' + pickList('gPick', id, draft.entrants, 'entrants') + '</div>' +
     '<div class="field"><label for="g-rules">Reglas</label><textarea id="g-rules">' + esc(g.rules || '') + '</textarea></div>' +
     '<div class="field"><label for="g-needs">Material que hace falta</label><input id="g-needs" value="' + esc(g.needs || '') + '"></div>' +
     '<div class="sheet-actions"><button class="btn primary" data-act="gSave">Guardar</button><button class="btn danger" data-act="gDel" data-id="' + id + '">' + icon('trash') + 'Borrar juego</button></div>');
@@ -4002,7 +4000,7 @@ function saveGame() {
   var fmt = val('g-format'), changedFmt = fmt !== g.format, oldE = (g.entrants || []).join(','), newE = draft.entrants.join(',');
   if (changedFmt && gHasAny(g) && !draft.confirmFmt) { draft.confirmFmt = true; toast('Cambiar el formato borra los resultados de este juego. Pulsa Guardar otra vez para confirmarlo'); return; }
   g.name = name; g.cat = val('g-cat'); g.mode = draft.mode; g.unit = val('g-unit').trim() || null; g.allowDraw = !!draft.allowDraw; g.teamRank = !!draft.teamRank;
-  g.day = val('g-day') || null; g.time = val('g-time') || null; g.where = val('g-where').trim(); g.rules = val('g-rules').trim(); g.needs = val('g-needs').trim();
+  g.day = null; g.time = null; g.where = val('g-where').trim(); g.rules = val('g-rules').trim(); g.needs = val('g-needs').trim();
   var pts = val('g-points').split(/[^\d]+/).filter(Boolean).map(Number); g.points = pts.length ? pts : null;
   var part = parseInt(val('g-part'), 10); g.part = isNaN(part) ? 1 : part;
   g.entrants = draft.entrants.slice();
@@ -4086,7 +4084,7 @@ Object.assign(A, {
     el.classList.toggle('on', k < 0); el.setAttribute('aria-pressed', k < 0); var c = document.getElementById('g-count'); if (c) c.textContent = draft.entrants.length;
   },
   gPickAll: function (el) {
-    var v = el.dataset.v; draft.entrants = v === 'all' ? G.entrantIds(S) : v === 'day' ? G.presentList(S, val('g-day') || null) : [];
+    var v = el.dataset.v; draft.entrants = v === 'all' ? G.entrantIds(S) : v === 'day' ? G.presentList(S, todayTripDay()) : [];
     document.querySelectorAll('[data-act=gPick]').forEach(function (b) { var on = draft.entrants.indexOf(b.dataset.e) >= 0; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
     var c = document.getElementById('g-count'); if (c) c.textContent = draft.entrants.length;
   },
