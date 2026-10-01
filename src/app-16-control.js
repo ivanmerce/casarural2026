@@ -52,7 +52,7 @@ function secretsWho(compact) {
   return '<div class="who-list">' + rk.map(function (r) {
     var keys = keysOf(r.id), k = 'sec-' + r.id, open = fold(k);
     var known = keys.filter(function (x) { return mineF[x]; }), hidden = Math.max(0, r.n - known.length);
-    var head = (r.spy ? '<span class="medal spy" title="Fuera de concurso">' + icon('search') + '</span>' : medal(r.pos)) + av(r.id, 'sm') + '<span class="grow"><b>' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + (r.spy ? ' <small class="muted">· fuera de concurso</small>' : '') + '</b>' + eggDots(keys) + '</span><span class="num">' + r.n + '/' + EGGS.length + '</span>';
+    var head = (r.spy ? '<span class="medal spy" title="Fuera de concurso">' + icon('search') + '</span>' : medal(r.pos)) + av(r.id, 'sm') + '<span class="grow"><b>' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + (r.spy ? ' <small class="muted">· fuera de concurso</small>' : '') + '</b>' + (me().role === 'admin' || r.id === ui.me ? eggDots(keys) : '') + '</span><span class="num">' + r.n + '/' + EGGS.length + '</span>';
     var body = foldBody(k, '' +
         (known.length ? '<div class="reg-who">' + known.map(function (x) { var e = EGGS.find(function (y) { return y.k === x; }); return '<span class="who-chip ok">' + esc(e ? e.name : x) + '</span>'; }).join('') + '</div>' : '') +
         (hidden ? '<p class="small muted">' + (known.length ? '+ ' : '') + hidden + (hidden === 1 ? ' secreto que tú aún no has encontrado' : ' secretos que tú aún no has encontrado') + '. No hay spoilers: búscalos.</p>' : '') +
