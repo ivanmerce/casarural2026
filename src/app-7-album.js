@@ -25,6 +25,7 @@ function thumbImg(ph, cls) {
   return u ? '<img src="' + u + '" alt="' + esc(ph.caption || 'Foto de ' + nameOf(ph.by)) + '" loading="lazy" decoding="async"' + (cls ? ' class="' + cls + '"' : '') + '>' : '<span class="ph-wait" aria-hidden="true"></span>';
 }
 function uploadBtn(cls, label) {
+  if (typeof isKid === 'function' && isKid()) return '';
   return '<label class="btn ' + (cls || 'primary') + '" for="ph-in-' + (cls || 'p') + '" style="cursor:pointer">' + icon('camera') + (label || 'Subir fotos') + '</label><input id="ph-in-' + (cls || 'p') + '" type="file" accept="image/*" multiple hidden data-change="phUpload">';
 }
 

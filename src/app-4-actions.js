@@ -396,7 +396,6 @@ var tapCount = {}, tapTimer = {};
 var EGG_TAPS = { bday: 5, baby: 3, grand: 3, logo: 1, sun: 5, disco: 3, podio: 3, abumeter: 3 };
 function eggTap(k, el) {
   var need = EGG_TAPS[k]; if (!need) return false;
-  if (k === 'logo' && hasEgg('omnes')) return false;   /* una vez descubierto, la casita vuelve a ser el botón de Inicio */
   tapCount[k] = (tapCount[k] || 0) + 1; clearTimeout(tapTimer[k]);
   tapTimer[k] = setTimeout(function () { tapCount[k] = 0; }, 2400);
   if (el && tapCount[k] >= 2 && tapCount[k] < need) { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); if (navigator.vibrate) try { navigator.vibrate(8); } catch (x) {} }
@@ -412,7 +411,8 @@ function eggTap(k, el) {
 var A = {
   tab: function (el) { ui.mealFilter = null; if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
   goSheet: function (el) { closeSheet(); if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; go(el.dataset.tab); },
-  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); else { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); toast('Toc, toc… Sigue sin abrir nadie: están todos en la nave'); } } },
+  /* la casita: fuera de Inicio te lleva a Inicio; en Inicio, siempre llama a la puerta (con su secreto) */
+  logo: function (el) { if (ui.tab !== 'inicio') { go('inicio'); return; } eggTap('logo', el); },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
   day: function (el) { ui.day = el.dataset.day; render(true); },
@@ -768,6 +768,7 @@ function bindEvents() {
     var eg = e.target.closest('[data-egg]');
     if (eg && S && eggTap(eg.dataset.egg, eg)) { e.preventDefault(); return; }
     var t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
+    if (S && KID_BLOCK[t.dataset.act] && isKid()) { e.preventDefault(); kidNope(); return; }
     var fn = A[t.dataset.act]; if (fn) { e.preventDefault(); fn(t, e); }
   });
   document.addEventListener('change', function (e) { var t = e.target.closest('[data-change]'); if (t && C[t.dataset.change]) C[t.dataset.change](t); });

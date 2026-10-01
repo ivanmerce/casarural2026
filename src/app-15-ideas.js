@@ -19,7 +19,7 @@ function ideasCard() {
   var list = ideasSorted(), top = list.slice(0, 3);
   return '<section class="card ideas-card"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('bulb') + 'Buzón de ideas</h3>' + (list.length ? '<button class="link" data-act="ideasAll">Todas (' + list.length + ') ' + icon('arrow') + '</button>' : '') + '</div>' +
     '<p class="small">La plataforma es <b>de todos</b>. ¿Un juego nuevo, quitar otro, una comida, un cambio en la app? Escríbelo aquí y apoya con <b>+1</b> lo que te guste. ' + esc(orgName()) + ' lo va moldeando.</p>' +
-    '<div class="idea-new"><textarea id="idea-text" rows="2" maxlength="400" placeholder="Mi idea es…"></textarea><button class="btn primary" data-act="ideaAdd">' + icon('plus') + 'Enviar</button></div>' +
+    (isKid() ? '<p class="small muted">¿Tienes una idea? Cuéntasela a tus padres y que la apunten aquí.</p>' : '<div class="idea-new"><textarea id="idea-text" rows="2" maxlength="400" placeholder="Mi idea es…"></textarea><button class="btn primary" data-act="ideaAdd">' + icon('plus') + 'Enviar</button></div>') +
     (top.length ? '<div class="stack ideas-list">' + top.map(ideaRow).join('') + '</div>' : '<p class="small muted">Todavía no hay ninguna. Estrénalo, que no muerde.</p>') + '</section>';
 }
 function ideasSheet() {

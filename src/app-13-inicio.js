@@ -23,6 +23,11 @@ function homePayments() {
 /* Tus primeros pasos: lo que cada uno tiene que hacer en el momento cero */
 function firstSteps() {
   var m = me(), steps = [];
+  if (isKid()) {
+    return '<section class="card first-steps kid-steps"><div class="card-head"><h3>Modo explorador</h3><span class="pill">Peques</span></div>' +
+      '<p class="small">Puedes verlo todo: dónde dormimos, el menú, los juegos y el ranking. Tu misión: <b>encontrar los ' + EGGS.length + ' secretos</b> antes que nadie. ¿Cambiar cosas? Eso, mejor que lo hagan tus padres.</p>' +
+      '<button class="btn primary" data-act="secrets">' + icon('search') + 'Ver mis secretos</button></section>';
+  }
   var F = S.finca || {}, minAge = (F.register && F.register.minAge) || 14;
   var needsReg = F.register && (m.age != null ? m.age >= minAge : m.kind === 'adulto');
   if (needsReg) steps.push({ ok: typeof regDone === 'function' && regDone(m.id), t: 'Regístrate en la web de la finca', s: 'Obligatorio por ley desde los ' + minAge + ' años', tab: 'finca', sub: 'info' });

@@ -1093,3 +1093,5 @@ img, svg, canvas { max-width: 100%; }
   .egg-reveal .inner, .rv-seal, .rv-ring { transition-duration: .01s !important; }
   .egg-reveal .inner::before { animation: none; }
 }
+.rv-quip { color: #FFD9A8 !important; font-style: italic; font-weight: 600 !important; font-size: .95rem !important; animation: rvUp .5s .6s ease both; }
+.egg-badge.again { background: #4CC9F0; }
