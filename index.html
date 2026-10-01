@@ -1169,19 +1169,25 @@ img, svg, canvas { max-width: 100%; }
 .plan-room.k-bath .pdots { margin-top: 2px; }
 @keyframes spyBlink { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, #F2C65A 40%, transparent); } }
 .code-pop:not(:has(svg)) { font-size: 34px; }
-/* ---------- «Sube tus fotos»: la cámara de arriba se explica sola ---------- */
-.cam-btn.cam-cta { width: auto; height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 11px; border-radius: 999px; border: 0;
-  background: var(--accent); color: var(--on-accent, #fff); font-weight: 800; font-size: .88rem; white-space: nowrap;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); animation: camPulse 2.8s ease-in-out infinite; }
-.cam-btn.cam-cta .ico { width: 20px; height: 20px; flex: none; }
-.cam-btn.cam-cta .cam-txt b { font-weight: 800; }
-.cam-btn.cam-cta[aria-current="page"] { animation: none; box-shadow: none; filter: brightness(.92); }
-@keyframes camPulse { 0%, 100% { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent), 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); } }
-/* en móviles estrechos: «Fotos» (corto pero claro) */
-@media (max-width: 560px) { .cam-btn.cam-cta .cam-txt { font-size: 0; } .cam-btn.cam-cta .cam-txt::after { content: "Sube fotos"; font-size: .8rem; } .cam-btn.cam-cta { padding: 0 11px 0 9px; gap: 5px; } }
-@media (max-width: 420px) { .cam-btn.cam-cta .cam-txt::after { content: "Fotos"; } }
-@media (max-width: 360px) { .cam-btn.cam-cta .cam-txt { display: none; } .cam-btn.cam-cta { padding: 0 10px; } }
-@media (prefers-reduced-motion: reduce) { .cam-btn.cam-cta { animation: none; } }
+/* ---------- Barra superior y barra inferior: nunca se solapan (v0.7.28) ---------- */
+.topbar > * { flex: none; }
+.topbar > .sp { flex: 1 1 0; min-width: 0; }
+.wm-txt b, .wm-txt small, .me-btn span, .online-pill { white-space: nowrap; }
+.cam-btn { color: var(--accent); }
+.cam-btn .ico { width: 22px; height: 22px; }
+/* pasos de encaje (los pone fitChrome() midiendo): 1 sin nombre, 2 sin caras, 3 marca compacta, 4 solo el logo */
+.topbar.fit1 .me-btn > span:last-child { display: none !important; }
+.topbar.fit1 .me-btn { padding-right: 4px; }
+.topbar.fit2 .online-pill .avs { display: none; }
+.topbar.fit3 .wm-txt small { display: none; }
+.topbar.fit3 .wm-txt b { font-size: 1.1rem; }
+.topbar.fit4 .wm-txt { display: none; }
+.nav button { min-width: 0; overflow: hidden; }
+.nav button span { white-space: nowrap; }
+.nav.nav-tight button { font-size: .6rem; letter-spacing: -.02em; gap: 2px; }
+.nav.nav-icons button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nav.nav-icons button .ico { width: 26px; height: 26px; }
+.nav.nav-icons button[aria-current="page"] .ico { transform: none; }
 
 /* v0.7.27 · Ficha de cada juego y reordenar puestos */
 .g-ficha { display: flex; flex-direction: column; gap: 10px; }
@@ -2167,15 +2173,29 @@ function renderTop() {
   $top.innerHTML =
     '<button class="wordmark" data-act="logo" aria-label="' + esc(S.trip.name) + ', ir a inicio">' + wordmarkHtml(S.trip.name, tripEyebrow()) + '</button>' +
     '<span class="sp"></span>' +
-    '<button class="cam-btn cam-cta" data-act="tab" data-tab="album" aria-label="Sube tus fotos al álbum"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '<span class="cam-txt"><b>Sube</b> tus fotos</span></button>' +
+    '<button class="icon-btn cam-btn" data-act="tab" data-tab="album" aria-label="Sube tus fotos al álbum" title="Sube tus fotos"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '</button>' +
     '<span id="onlineSlot">' + presencePill() + '</span>' +
     '<button class="me-btn" data-act="menu" aria-label="Quién eres y más opciones">' + av(p.id, 'sm') + '<span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1"><span style="font-weight:700;font-size:.9rem">' + esc(p.name) + '</span><span class="role">' + ROLE[p.role] + '</span></span></button>';
 }
 function renderNav() {
   $nav.innerHTML = '<div class="nav-in">' + TABS.map(function (t) {
-    return '<button data-act="tab" data-tab="' + t.k + '"' + (ui.tab === t.k ? ' aria-current="page"' : '') + '>' + icon(t.i) + '<span>' + t.t + '</span></button>';
+    return '<button data-act="tab" data-tab="' + t.k + '" aria-label="' + t.t + '"' + (ui.tab === t.k ? ' aria-current="page"' : '') + '>' + icon(t.i) + '<span>' + t.t + '</span></button>';
   }).join('') + '</div>';
 }
+/* Encaje a prueba de pantallas estrechas y de letra grande (zoom de texto del móvil):
+   se mide de verdad y, si algo no cabe, se va simplificando por pasos. Nunca se solapa nada */
+var FIT_TOP = ['fit1', 'fit2', 'fit3', 'fit4'], FIT_NAV = ['nav-tight', 'nav-icons'];
+function navOverflows() { return [].some.call($nav.querySelectorAll('.nav-in button'), function (b) { var s = b.querySelector('span'); return s && s.offsetWidth && s.offsetWidth > b.clientWidth - 4; }); }
+function topOverflows() { return $top.scrollWidth > $top.clientWidth + 1; }
+function fitChrome() {
+  if (!$top || !$nav) return;
+  FIT_TOP.forEach(function (c) { $top.classList.remove(c); });
+  for (var i = 0; i < FIT_TOP.length && topOverflows(); i++) $top.classList.add(FIT_TOP[i]);
+  FIT_NAV.forEach(function (c) { $nav.classList.remove(c); });
+  for (var j = 0; j < FIT_NAV.length && navOverflows(); j++) $nav.classList.add(FIT_NAV[j]);
+}
+var fitT; window.addEventListener('resize', function () { clearTimeout(fitT); fitT = setTimeout(fitChrome, 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitChrome(); });
 var VIEWS = {};
 var afterRender = [];
 function render(keepScroll) {
@@ -2184,7 +2204,7 @@ function render(keepScroll) {
   afterRender = [];
   var fn = VIEWS[ui.tab] || VIEWS.inicio;
   $main.innerHTML = '<div class="view" data-view="' + ui.tab + '">' + fn() + '</div>';
-  renderTop(); renderNav();
+  renderTop(); renderNav(); fitChrome();
   afterRender.forEach(function (f) { f(); });
   if (keepScroll) window.scrollTo(0, y);
   if (typeof secretsOnView === 'function') secretsOnView();
@@ -2605,7 +2625,7 @@ function whoList() {
 }
 var lastOnlineCount = 0;
 function onPresence() {
-  var t = document.getElementById('onlineSlot'); if (t) { var ph = presencePill(); if (t._h !== ph) { t.innerHTML = ph; t._h = ph; } }   /* sin repintar si no cambia: el popover no parpadea */
+  var t = document.getElementById('onlineSlot'); if (t) { var ph = presencePill(); if (t._h !== ph) { t.innerHTML = ph; t._h = ph; if (typeof fitChrome === "function") fitChrome(); } }   /* sin repintar si no cambia: el popover no parpadea */
   var c = document.getElementById('presenceCard'); if (c) c.outerHTML = presenceCard();
   var w = document.getElementById('whoSheet'); if (w) w.innerHTML = whoList();
   var n = onlineIds().length;
