@@ -1,35 +1,73 @@
-/* ===================== Gala de premios v2 =====================
-   Más corta (ráfagas de 3 premios y solo lo gordo a solas), con fiesta de fondo (pompas, confeti, cohetes),
-   música propia (sintetizada, sin derechos de autor), avance automático y modo presentación a pantalla completa. */
+/* ===================== Gala de premios v3 =====================
+   Corta y para todos: UNA estatuilla por persona (la suya, la más suya), en ráfagas de 3, y el podio al final en una
+   sola pantalla. Fiesta de fondo (pompas, confeti, cohetes), un efecto distinto en cada desvelado, varias melodías propias
+   (sintetizadas, sin derechos), avance automático y modo presentación a pantalla completa. Unos 3 minutos. */
 
-var GALA_STAR = { cumple: 1, espia: 1, estrella: 1, guardian: 1 };   /* premios que se desvelan a solas (además del podio) */
-var GALA_TIME = { intro: 7, group: 4, burst0: 3.5, burst1: 10, award0: 3.5, award1: 8, podium1: 10, ad: 6, teaser: 7, photos: 12, final: 11, credits: 27 };
+var GALA_TIME = { intro: 6, burst0: 2.6, burst1: 7.5, podStep0: 2.2, podStep1: 3.2, podEnd: 7, ad: 5, teaser: 6, photos: 8, final: 9, credits: 16 };
+var GALA_PODIUM = { oro: 1, plata: 1, bronce: 1 };
+
+/* ---------- La estatuilla de cada uno ----------
+   De todos los premios que tiene una persona, el más «suyo»: el que comparte con menos gente y aún no ha salido. */
+function galaPicks(list) {
+  var t = {}, byId = {}, e = S.trip.eggs || {};
+  list.forEach(function (a) { byId[a.id] = a; });
+  var people = S.people.concat(S.spies || []);
+  people.forEach(function (p) { t[p.id] = []; });
+  list.forEach(function (a) { if (GALA_PODIUM[a.id]) return; var seen = {}; a.winners.forEach(function (w) { G.peopleOf(S, w).forEach(function (pid) { if (t[pid] && !seen[pid]) { seen[pid] = 1; t[pid].push(a); } }); }); });
+  var used = {}, out = [], mi = Math.floor(Math.random() * GALA_MENTIONS.length);
+  /* primero los que solo tienen una opción, para que nadie se quede sin la suya */
+  people.slice().sort(function (x, y) { return t[x.id].length - t[y.id].length; }).forEach(function (p) {
+    var fixed = p.id === e.bday ? byId.cumple : p.id === e.baby ? byId.mascota : p.spy ? byId.espia : null;
+    var opts = t[p.id].filter(function (a) { return (used[a.id] || 0) < 2; }).sort(function (a, b) { return (used[a.id] || 0) - (used[b.id] || 0) || personalness(a) - personalness(b); });
+    /* si su premio ya ha salido dos veces, una mención especial solo para él (así no se repite) */
+    var a = fixed || opts[0] || (t[p.id].length ? galaMention(p.id, mi++) : byId.estrella) || galaMention(p.id, mi++);
+    used[a.id] = (used[a.id] || 0) + 1;
+    out.push({ pid: p.id, a: a });
+  });
+  function personalness(a) { var n = 0; a.winners.forEach(function (w) { n += G.peopleOf(S, w).length; }); return n; }
+  /* orden del espectáculo: mezclados, el espía por en medio y el cumpleañero cerrando las ráfagas */
+  var bday = out.filter(function (x) { return x.pid === e.bday; }), spy = out.filter(function (x) { return (person(x.pid) || {}).spy; });
+  var rest = shuffled(out.filter(function (x) { return bday.indexOf(x) < 0 && spy.indexOf(x) < 0; }));
+  if (spy.length) rest.splice(Math.min(rest.length, 4), 0, spy[0]);
+  return rest.concat(bday);
+}
+
+/* Menciones especiales: títulos cariñosos para que nadie repita estatuilla */
+var GALA_MENTIONS = [
+  ['Sonrisa del Finde', 'smile', 'Ni la lluvia ni el ping-pong le han quitado la sonrisa. Ni una vez.'],
+  ['Corazón Culé', 'heart', 'Más culé que un Barça-Madrid en el Camp Nou. Visca el Barça y visca la familia.'],
+  ['Abrazo de Oso', 'users', 'Sus abrazos deberían venderse en farmacias.'],
+  ['Alma de la Sobremesa', 'meals', 'Cuando se levanta de la mesa, la sobremesa se acaba. Así de claro.'],
+  ['Buen Rollo Certificado', 'check', 'Certificado oficial: 100 % buen rollo, 0 % dramas.'],
+  ['Estrella del Selfie', 'camera', 'Sale bien en todas las fotos. Todas. Es sospechoso.'],
+  ['Risa Contagiosa', 'smile', 'Se ríe y nos reímos todos. Es un superpoder.'],
+  ['Mejor Fichaje del Finde', 'star', 'Si esto fuera el Barça, ya tendría contrato hasta 2030.']
+];
+function galaMention(pid, k) { var m = GALA_MENTIONS[k % GALA_MENTIONS.length]; GALA_QUIP['m-' + m[0]] = m[2]; return { id: 'm-' + m[0], icon: m[1], name: 'Mención especial: ' + m[0], desc: '', winners: [pid], why: '' }; }
 
 /* ---------- Guion ---------- */
 function galaSlides(trailer, awardsList) {
-  if (trailer) return [{ t: 'intro', trailer: true }, { t: 'ad', ad: GALA_ADS[0] }, { t: 'teaser' }, { t: 'ad', ad: GALA_ADS[3] }, { t: 'final', trailer: true }];
+  if (trailer) return [{ t: 'intro', trailer: true }, { t: 'ad', ad: GALA_ADS[0] }, { t: 'teaser' }, { t: 'final', trailer: true }];
   var list = (awardsList || G.awards(S)).filter(function (a) { return a.winners.length; });
-  var slides = [{ t: 'intro' }], bursts = 0, ads = 0;
-  function adMaybe() { if ((bursts === 3 || bursts === 6) && ads < 2) slides.push({ t: 'ad', ad: GALA_ADS[(ads++ * 3 + Math.floor(Math.random() * 3)) % GALA_ADS.length] }); }
-  ['casa', 'juegos', 'publico', 'extra'].forEach(function (gk) {
-    var it = list.filter(function (a) { return a.group === gk && ['oro', 'plata', 'bronce'].indexOf(a.id) < 0; });
-    if (!it.length) return;
-    var minor = it.filter(function (a) { return !GALA_STAR[a.id]; }), star = it.filter(function (a) { return GALA_STAR[a.id]; });
-    for (var i = 0; i < minor.length; i += 3) { slides.push({ t: 'burst', g: gk, items: minor.slice(i, i + 3) }); bursts++; adMaybe(); }
-    star.forEach(function (a) { slides.push({ t: 'award', a: a }); });
-  });
+  var picks = galaPicks(list), slides = [{ t: 'intro', n: picks.length }];
+  /* ráfagas de 3 (si sobra uno solo, se va con la anterior) */
+  var groups = []; for (var i = 0; i < picks.length; i += 3) groups.push(picks.slice(i, i + 3));
+  if (groups.length > 1 && groups[groups.length - 1].length === 1) groups[groups.length - 2] = groups[groups.length - 2].concat(groups.pop());
+  groups.forEach(function (g, k) { slides.push({ t: 'burst', items: g, song: k % 2 ? 2 : 1 }); if (k === 1) slides.push({ t: 'ad', ad: rnd(GALA_ADS) }); });
   if (typeof photoList === 'function' && photoList().length >= 3) slides.push({ t: 'photos' });
   var pod = ['bronce', 'plata', 'oro'].map(function (id) { return list.find(function (a) { return a.id === id; }); }).filter(Boolean);
-  if (pod.length) { slides.push({ t: 'group', g: 'podio' }); pod.forEach(function (a) { slides.push({ t: 'award', a: a, podium: true }); }); }
-  slides.push({ t: 'final' }, { t: 'credits' });
+  if (pod.length) slides.push({ t: 'podium', pods: pod, song: 3 });
+  slides.push({ t: 'final', picks: picks }, { t: 'credits' });
   return slides;
 }
 function galaMinutes(slides) {
-  var s = 0; slides.forEach(function (x) { s += x.t === 'burst' ? GALA_TIME.burst0 + GALA_TIME.burst1 + 2 : x.t === 'award' ? GALA_TIME.award0 + (x.podium ? GALA_TIME.podium1 : GALA_TIME.award1) + 2 : GALA_TIME[x.t] || 6; });
+  var s = 0; slides.forEach(function (x) { s += x.t === 'burst' ? GALA_TIME.burst0 + GALA_TIME.burst1 + 1.6 : x.t === 'podium' ? x.pods.length * (GALA_TIME.podStep0 + GALA_TIME.podStep1) + GALA_TIME.podEnd : GALA_TIME[x.t] || 5; });
   return Math.max(1, Math.round(s / 60));
 }
 
 /* ---------- Pantallas ---------- */
+var GALA_ENTER = ['flip', 'zoom', 'drop', 'spin', 'slide'];
+var GALA_ASK = ['¿Qué se lleva…?', 'Para ti, este sobre…', 'A ver, a ver…', 'Lo que todos sospechábamos…', 'Redoble, por favor…', '¿Adivináis?'];
 function winnersHtml(a, size) { return a.winners.map(function (w) { return '<span class="gw">' + eAv(w, size || 'xl') + '<b>' + eName(w) + '</b></span>'; }).join(''); }
 function galaRender() {
   var el = document.getElementById('gala'); if (!el || !gala) return;
@@ -37,118 +75,155 @@ function galaRender() {
   el.classList.toggle('is-ad', s.t === 'ad'); el.dataset.slide = s.t;
   if (s.t === 'intro') inner = '<div class="gala-curtain" aria-hidden="true"><i></i><i></i></div><span class="eyebrow">' + esc(S.trip.name) + (gala.rehearsal ? ' · ensayo' : gala.sim ? ' · simulación' : '') + '</span><h1 class="gala-title xl">' + (s.trailer ? 'Próximamente' : 'Gala de premios') + '</h1>' +
     (s.trailer ? '<p>La gran noche llega el <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>'
-      : '<p>Silencio en la sala. Apagad los móviles… bueno, este no.</p><p class="small">' + gala.slides.filter(function (x) { return x.t === 'award' || x.t === 'burst'; }).reduce(function (n, x) { return n + (x.items ? x.items.length : 1); }, 0) + ' premios · unos ' + galaMinutes(gala.slides) + ' minutos · cero modestia</p>' +
-        '<div class="gala-start"><button class="btn primary big-btn" data-act="galaGo" data-auto="1">' + icon('play') + 'Empezar (avanza sola)</button><button class="btn" data-act="galaGo">Empezar paso a paso</button></div>');
-  else if (s.t === 'group') inner = '<span class="eyebrow">Lo que todos esperabais</span><h1 class="gala-title xl">El podio</h1><p>Tres puestos. Una familia. Cero rencores (bueno, alguno).</p>';
-  else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p><p class="small">Volvemos en 3, 2, 1…</p>';
-  else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">' + G.awards(S).length + ' premios. Una noche.</h1><p>Habrá lágrimas, discursos de 30 segundos (cronometrados) y algún que otro «yo no he sido». Nadie se queda sin estatuilla.</p>';
+      : '<p>Una estatuilla para cada uno. Nadie se va de vacío.</p><p class="small">' + s.n + ' estatuillas + el podio · unos ' + galaMinutes(gala.slides) + ' minutos · cero modestia</p>' +
+        '<div class="gala-start"><button class="btn primary big-btn" data-act="galaGo" data-auto="1">' + icon('play') + 'Empezar (avanza sola)</button><button class="btn" data-act="galaGo">Paso a paso</button></div>');
+  else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p>';
+  else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">Una estatuilla para cada uno</h1><p>Sobres, redoble, discursos de 30 segundos y un podio que va a dar que hablar.</p>';
   else if (s.t === 'burst') {
-    inner = '<span class="eyebrow">' + esc(G.GROUPS[s.g] || 'Premios') + ' · ráfaga</span><div class="gala-burst" style="--n:' + s.items.length + '">' + s.items.map(function (a, k) {
-      return '<div class="gb' + (rv === true ? ' on' : '') + '" style="--d:' + (k * .55) + 's"><span class="gb-ico">' + icon(a.icon || 'star') + '</span><b class="gb-name">' + esc(a.name) + '</b>' +
-        (rv === true ? '<div class="gb-win">' + winnersHtml(a, a.winners.length > 2 ? 'sm' : 'md') + '</div><small class="gb-quip">' + esc(GALA_QUIP[a.id] || a.why || '') + '</small>' : '<small class="gb-desc">' + esc(a.desc) + '</small><span class="gb-env" aria-hidden="true"></span>') + '</div>';
-    }).join('') + '</div>' + (rv === true ? '' : '<p class="gala-drum' + (rv === 'wait' ? ' rolling' : '') + '">' + esc(pickOne(GALA_DRUM, s.g + gala.i)) + '</p>');
-  } else if (s.t === 'award') {
-    var a = s.a;
-    inner = '<span class="gala-ico">' + icon(a.icon || 'star') + '</span><span class="eyebrow">' + (s.podium ? 'El podio' : esc(G.GROUPS[a.group] || 'Premio')) + '</span><h1 class="gala-title">' + esc(a.name) + '</h1>' +
-      (rv === true ? '<div class="gala-win">' + winnersHtml(a) + '</div>' + (a.why ? '<p class="gala-why">' + esc(a.why) + '</p>' : '') + (GALA_QUIP[a.id] ? '<p class="gala-quip">' + esc(GALA_QUIP[a.id]) + '</p>' : '') +
-        (a.fact ? '<p class="gala-fact">' + esc(a.fact) + '</p>' : a.winners.length === 1 && !gala.sim && galaFact(a.winners[0]) ? '<p class="gala-fact">' + esc(galaFact(a.winners[0])) + '</p>' : '') +
-        '<button class="btn gala-speech" data-act="galaSpeech">🎤 Discurso (30 s)</button>'
-        : '<p>' + esc(a.desc) + '</p><div class="gala-env' + (rv === 'wait' ? ' opening' : '') + '" aria-hidden="true"><i></i></div><p class="gala-drum' + (rv === 'wait' ? ' rolling' : '') + '">' + esc(pickOne(GALA_DRUM, a.id + gala.i)) + '</p>');
+    inner = '<span class="eyebrow">' + esc(pickOne(GALA_ASK, gala.i)) + '</span><div class="gala-burst" style="--n:' + s.items.length + '">' + s.items.map(function (x, k) {
+      var a = x.a, fx = GALA_ENTER[(gala.i + k) % GALA_ENTER.length];
+      return '<div class="gb fx-' + fx + (rv === true ? ' on' : '') + '" style="--d:' + (k * .5) + 's"><span class="gb-av">' + av(x.pid, 'xl') + '</span><b class="gb-who">' + pname(x.pid) + '</b>' +
+        (rv === true ? '<span class="gb-ico">' + icon(a.icon || 'star') + '</span><b class="gb-name">' + esc(a.name) + '</b><small class="gb-quip">' + esc(GALA_QUIP[a.id] || a.why || '') + '</small>'
+          : '<span class="gb-env' + (rv === 'wait' ? ' opening' : '') + '" aria-hidden="true"></span>') + '</div>';
+    }).join('') + '</div>' + (rv === true ? '' : '<p class="gala-drum' + (rv === 'wait' ? ' rolling' : '') + '">' + esc(pickOne(GALA_DRUM, gala.i)) + '</p>');
+  } else if (s.t === 'podium') {
+    var step = typeof rv === 'number' ? rv : 0, order = { bronce: 3, plata: 2, oro: 1 };
+    inner = '<span class="eyebrow">Lo que todos esperabais</span><h1 class="gala-title">El podio</h1><div class="gala-podium">' + ['plata', 'oro', 'bronce'].map(function (id) {
+      var a = s.pods.find(function (x) { return x.id === id; }); if (!a) return '';
+      var k = s.pods.indexOf(a), on = step > k;
+      return '<div class="gp gp-' + id + (on ? ' on' : '') + '"><div class="gp-who">' + (on ? winnersHtml(a, 'lg') + '<small class="gp-pts">' + esc(a.why || '') + '</small>' : '<span class="gp-q">?</span>') + '</div><div class="gp-block"><b>' + order[id] + '</b></div></div>';
+    }).join('') + '</div>' + (step >= s.pods.length ? '<p class="gala-quip">' + esc(GALA_QUIP.oro) + '</p><button class="btn gala-speech" data-act="galaSpeech">🎤 Discurso del campeón (30 s)</button>' : '<p class="gala-drum' + (gala.podWait ? ' rolling' : '') + '">' + ['Tercer puesto…', 'Segundo puesto…', 'Y el campeón del finde es…'][step] + '</p>');
   } else if (s.t === 'photos') {
     var ps = photoList().slice().sort(function () { return Math.random() - .5; }).slice(0, 12);
-    inner = '<span class="eyebrow">Mientras el jurado delibera…</span><h1 class="gala-title">Momentos del finde</h1><div class="gala-photos">' + ps.map(function (p, k) { var u = PHOTOS.url(p.thumb) || PHOTOS.url(p.path); return u ? '<img src="' + u + '" alt="" style="--d:' + (k * .25) + 's;--r:' + ((k % 2 ? 1 : -1) * (2 + k % 4)) + 'deg">' : ''; }).join('') + '</div>';
+    inner = '<span class="eyebrow">Mientras el jurado delibera…</span><h1 class="gala-title">Momentos del finde</h1><div class="gala-photos">' + ps.map(function (p, k) { var u = PHOTOS.url(p.thumb) || PHOTOS.url(p.path); return u ? '<img src="' + u + '" alt="" style="--d:' + (k * .2) + 's;--r:' + ((k % 2 ? 1 : -1) * (2 + k % 4)) + 'deg">' : ''; }).join('') + '</div>';
     if (typeof PHOTOS !== 'undefined' && PHOTOS.ensure) PHOTOS.ensure(ps.map(function (p) { return p.thumb; })).then(function (ch) { if (ch && gala && gala.slides[gala.i] === s) galaRender(); });
   } else if (s.t === 'final') {
     if (s.trailer) inner = '<span class="eyebrow">' + esc(galaWhen()) + '</span><h1 class="gala-title">No te lo pierdas</h1><p>Trae palomitas, pañuelos y el discurso preparado. Por si acaso.</p>';
-    else {
-      var t = gala.sim ? simTally(gala.list) : G.tally(S), names = {}; (gala.list || G.awards(S)).forEach(function (x) { names[x.id] = x.name; });
-      inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p, k) { return '<div class="ga" style="--d:' + (k * .08) + 's">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (x) { return esc(names[x] || x); }).join(' · ') + '</small></div>'; }).join('') + '</div>';
-    }
+    else inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + s.picks.map(function (x, k) { return '<div class="ga" style="--d:' + (k * .07) + 's">' + av(x.pid, 'md') + '<b>' + pname(x.pid) + '</b><small>' + esc(x.a.name) + '</small></div>'; }).join('') + '</div>';
   } else if (s.t === 'credits') inner = galaCredits();
   el.querySelector('.gala-in').innerHTML = inner;
   el.querySelector('.gala-count').textContent = (gala.i + 1) + ' / ' + gala.slides.length;
   el.querySelector('[data-act=galaPrev]').disabled = gala.i === 0;
-  var waiting = (s.t === 'award' || s.t === 'burst') && rv !== true;
-  el.querySelector('.gala-ctl [data-act=galaNext]').innerHTML = waiting ? 'Abrir ' + (s.t === 'burst' ? 'los sobres' : 'el sobre') : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
+  var waiting = (s.t === 'burst' && rv !== true) || (s.t === 'podium' && (typeof rv !== 'number' || rv < s.pods.length));
+  el.querySelector('.gala-ctl [data-act=galaNext]').innerHTML = waiting ? (s.t === 'podium' ? 'Desvelar' : 'Abrir los sobres') : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
   el.querySelector('[data-act=galaAuto]').classList.toggle('on', !!gala.auto);
   el.querySelector('[data-act=galaMusic]').classList.toggle('on', !!gala.music);
   galaFxMood(s);
+  if (gala.music && s.song != null && GM && GM.song !== s.song) galaMusicSong(s.song);
   galaAutoArm();
 }
 
+/* ---------- Un efecto distinto cada vez ---------- */
+var GALA_FX = [
+  function () { try { rocketFx(0); rocketFx(450); } catch (x) {} },
+  function () { try { cannonsFx(0); } catch (x) {} },
+  function () { try { emojiFx(['🎉', '🥳', '🎊', '✨'], 'rain', 0, 34); } catch (x) {} },
+  function () { try { starsFx(0); } catch (x) {} },
+  function () { try { emojiFx(['🏆', '🥇', '👏', '🙌'], 'rise', 0, 30); } catch (x) {} },
+  function () { try { fireworks(3200, 6); } catch (x) {} },
+  function () { try { emojiFx(['😂', '🤣', '😎', '🤩'], 'rain', 0, 30); } catch (x) {} },
+  function () { try { smokeFx(0); emojiFx(['🕊️', '💫'], 'rise', 300, 20); } catch (x) {} }
+];
+function galaFxRandom(k) { GALA_FX[(gala.fxI = ((gala.fxI || 0) + 1 + (k || 0)) % GALA_FX.length)](); }
+
 /* ---------- Avanzar (a mano o sola) ---------- */
 function galaReveal() {
-  var s = gala.slides[gala.i]; if (gala.revealed) return;
-  gala.revealed = 'wait'; galaMusicDuck(true); drumroll(s.podium); galaRender();
+  var s = gala.slides[gala.i];
+  if (s.t === 'podium') {
+    var step = typeof gala.revealed === 'number' ? gala.revealed : 0; if (gala.podWait || step >= s.pods.length) return;
+    gala.podWait = true; gala.revealed = step; galaMusicDuck(true); drumroll(step === s.pods.length - 1); galaRender();
+    setTimeout(function () {
+      if (!gala || gala.slides[gala.i] !== s) return;
+      gala.podWait = false; gala.revealed = step + 1; galaMusicDuck(false); galaRender();
+      var gold = s.pods[step].id === 'oro';
+      applause(gold ? 3.4 : 2); confetti(gold ? 4200 : 2200); galaFxBurstAt('.gp-' + s.pods[step].id);
+      if (gold) { fanfare(); try { fireworks(5600, 14); cannonsFx(200); rocketFx(400); emojiFx(['🏆', '👑', '✨', '🥇'], 'rain', 700, 40); } catch (x) {} } else galaFxRandom();
+    }, step === s.pods.length - 1 ? 2400 : 1600);
+    return;
+  }
+  if (gala.revealed) return;
+  gala.revealed = 'wait'; galaMusicDuck(true); drumroll(false); galaRender();
   setTimeout(function () {
     if (!gala || gala.slides[gala.i] !== s) return;
     gala.revealed = true; galaMusicDuck(false); galaRender();
-    applause(s.podium ? 3.2 : 2.2); confetti(s.podium ? 3800 : 2400);
-    if (s.t === 'burst') { [0, 550, 1100].forEach(function (d, k) { setTimeout(function () { galaFxBurstAt('.gb:nth-child(' + (k + 1) + ')'); }, d + 350); }); }
-    else { galaFxBurstAt('.gala-win'); try { rocketFx(200); } catch (x) {} }
-    if (s.podium) { try { fireworks(5200, s.a.id === 'oro' ? 14 : 7); cannonsFx(300); } catch (x) {} if (s.a.id === 'oro') { fanfare(); try { emojiFx(['🏆', '👑', '✨', '🥇', '🎉'], 'rain', 600, 40); } catch (x) {} } }
+    applause(2); confetti(2000);
+    s.items.forEach(function (x, k) { setTimeout(function () { galaFxBurstAt('.gb:nth-child(' + (k + 1) + ')'); }, k * 500 + 300); });
+    galaFxRandom(gala.i);
     if (navigator.vibrate) try { navigator.vibrate([30, 40, 30]); } catch (x) {}
-  }, s.podium ? 2400 : 1500);
+  }, 1300);
 }
 function galaStep(dir) {
   if (!gala) return; clearTimeout(gala.timer);
   var s = gala.slides[gala.i];
-  if (dir > 0 && (s.t === 'award' || s.t === 'burst') && gala.revealed !== true) { if (!gala.revealed) galaReveal(); return; }
+  var pending = (s.t === 'burst' && gala.revealed !== true) || (s.t === 'podium' && (typeof gala.revealed !== 'number' || gala.revealed < s.pods.length));
+  if (dir > 0 && pending) { galaReveal(); return; }
   if (dir > 0 && gala.i >= gala.slides.length - 1) { var wasSim = gala.sim; galaClose(); if (!wasSim) egg('gala'); return; }
   if (dir < 0 && !gala.i) return;
   gala.i += dir; var n = gala.slides[gala.i];
-  gala.revealed = dir < 0 && (n.t === 'award' || n.t === 'burst');
+  gala.podWait = false;
+  gala.revealed = dir < 0 ? (n.t === 'podium' ? n.pods.length : n.t === 'burst') : (n.t === 'podium' ? 0 : false);
   clearInterval(speechT); var mic = document.querySelector('.gala-mic'); if (mic) mic.remove();
   galaRender();
-  if (n.t === 'final' && !gala.trailer) { confetti(3200); applause(3); try { rocketFx(0); rocketFx(700); } catch (x) {} }
-  if (n.t === 'group') { try { fireworks(3000, 5); } catch (x) {} }
+  if (n.t === 'final' && !gala.trailer) { confetti(3400); applause(3); try { rocketFx(0); rocketFx(600); cannonsFx(300); } catch (x) {} }
   if (gala.i === gala.slides.length - 1 && !gala.sim) egg('gala');
 }
 function galaAutoArm() {
   if (!gala) return; clearTimeout(gala.timer); var bar = document.querySelector('.gala-prog i');
-  if (!gala.auto || gala.paused || document.querySelector('.gala-mic')) { if (bar) bar.style.transition = 'none', bar.style.width = '0'; return; }
+  var stop = function () { if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; } };
+  if (!gala.auto || gala.paused || document.querySelector('.gala-mic')) return stop();
   var s = gala.slides[gala.i], rv = gala.revealed, sec;
-  if (s.t === 'intro' && !gala.trailer && gala.i === 0 && !gala.started) return;   /* espera al botón «Empezar» */
+  if (s.t === 'intro' && !gala.trailer && gala.i === 0 && !gala.started) return stop();
   if (s.t === 'burst') sec = rv === true ? GALA_TIME.burst1 : rv ? 0 : GALA_TIME.burst0;
-  else if (s.t === 'award') sec = rv === true ? (s.podium ? GALA_TIME.podium1 : GALA_TIME.award1) : rv ? 0 : GALA_TIME.award0;
-  else sec = GALA_TIME[s.t] || 6;
-  if (!sec) return;
-  if (s.t === 'credits' && gala.i === gala.slides.length - 1) { if (bar) bar.style.width = '0'; return; }   /* al final, se queda en los créditos */
+  else if (s.t === 'podium') { if (gala.podWait) return stop(); var st = typeof rv === 'number' ? rv : 0; sec = st >= s.pods.length ? GALA_TIME.podEnd : st === 0 ? GALA_TIME.podStep0 : GALA_TIME.podStep1; }
+  else sec = GALA_TIME[s.t] || 5;
+  if (!sec) return stop();
+  if (s.t === 'credits' && gala.i === gala.slides.length - 1) return stop();
   if (bar) { bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth; bar.style.transition = 'width ' + sec + 's linear'; bar.style.width = '100%'; }
   gala.timer = setTimeout(function () { galaStep(1); }, sec * 1000);
 }
 
-/* ---------- Música de fondo (sintetizada aquí mismo: alegre, suave y sin derechos) ---------- */
+/* ---------- Música de fondo: cuatro melodías propias, una por momento ---------- */
+var GALA_SONGS = [
+  { bpm: 112, ch: [[60, 64, 67], [55, 59, 62], [57, 60, 64], [53, 57, 60]], mel: [76, 79, 81, 79, 76, 74, 72, 74, 76, 74, 72, 67, 69, 72, 74, 76], lead: 'triangle' },   /* entrada: alegre */
+  { bpm: 124, ch: [[57, 60, 64], [62, 65, 69], [55, 59, 62], [60, 64, 67]], mel: [69, 72, 76, 72, 74, 77, 74, 72, 71, 74, 79, 74, 72, 76, 79, 81], lead: 'square', disco: 1 },   /* ráfagas: disco */
+  { bpm: 132, ch: [[62, 66, 69], [59, 62, 66], [55, 59, 62], [57, 61, 64]], mel: [74, 78, 81, 78, 76, 74, 71, 74, 79, 78, 76, 74, 73, 76, 81, 76], lead: 'sawtooth', swing: 1 },   /* ráfagas: fiesta */
+  { bpm: 88, ch: [[62, 65, 69], [58, 62, 65], [53, 57, 60], [60, 64, 67]], mel: [74, 77, 81, 79, 77, 76, 74, 72, 74, 77, 82, 81, 79, 77, 76, 74], lead: 'triangle', epic: 1 }   /* podio: épica */
+];
 var GM = null;
-function galaMusicStart() {
+function galaMusicStart(song) {
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume();
     if (GM) return;
-    var master = actx.createGain(), lp = actx.createBiquadFilter(); master.gain.value = 0.0001; lp.type = 'lowpass'; lp.frequency.value = 3200;
-    master.connect(lp); lp.connect(actx.destination); master.gain.exponentialRampToValueAtTime(0.16, actx.currentTime + 1.5);
-    var bpm = 116, beat = 60 / bpm, step = beat / 2, chords = [[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]], i = 0, next = actx.currentTime + .1;
+    var S0 = GALA_SONGS[song || 0], master = actx.createGain(), lp = actx.createBiquadFilter(); master.gain.value = 0.0001; lp.type = 'lowpass'; lp.frequency.value = S0.epic ? 2400 : 3400;
+    master.connect(lp); lp.connect(actx.destination); master.gain.exponentialRampToValueAtTime(0.15, actx.currentTime + 1.2);
+    var beat = 60 / S0.bpm, step = beat / 2, i = 0, next = actx.currentTime + .08;
     var noise = actx.createBuffer(1, actx.sampleRate * .05, actx.sampleRate), nd = noise.getChannelData(0); for (var k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1;
     function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
     function note(m, t, d, type, vol) { var o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.setValueAtTime(hz(m), t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .02); }
     function hat(t, vol) { var src = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(); src.buffer = noise; f.type = 'highpass'; f.frequency.value = 7000; g.gain.value = vol; src.connect(f); f.connect(g); g.connect(master); src.start(t); }
     function kick(t) { var o = actx.createOscillator(), g = actx.createGain(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(45, t + .12); g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(0.0001, t + .16); o.connect(g); g.connect(master); o.start(t); o.stop(t + .18); }
-    var mel = [72, 74, 76, 79, 76, 74, 72, 67, 69, 72, 74, 72, 71, 67, 69, 71];
+    function clap(t) { var src = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(); src.buffer = noise; f.type = 'bandpass'; f.frequency.value = 1500; g.gain.setValueAtTime(.25, t); g.gain.exponentialRampToValueAtTime(0.0001, t + .12); src.connect(f); f.connect(g); g.connect(master); src.start(t); }
     var iv = setInterval(function () {
       while (next < actx.currentTime + .25) {
-        var bar = Math.floor(i / 8) % 4, pos = i % 8, ch = chords[bar];
-        if (pos === 0 || pos === 4) { note(ch[0] - 24, next, beat * 1.6, 'triangle', .22); kick(next); }
-        if (pos === 2 || pos === 6) note(ch[0] - 12, next, beat * .7, 'triangle', .12);
-        note(ch[pos % 3] + 12, next, step * .9, 'sine', .05);
-        if (pos % 2) hat(next, .05); if (pos === 2 || pos === 6) hat(next, .1);
-        if (i % 2 === 0 && Math.floor(i / 32) % 2 === 1) note(mel[(i / 2) % mel.length], next, step * 1.7, 'square', .028);
+        var bar = Math.floor(i / 8) % 4, pos = i % 8, ch = S0.ch[bar], tt = next + (S0.swing && pos % 2 ? step * .18 : 0);
+        if (S0.epic) { if (pos === 0) { ch.forEach(function (m) { note(m, tt, beat * 3.8, 'sawtooth', .025); }); note(ch[0] - 24, tt, beat * 3.6, 'triangle', .25); kick(tt); } if (pos === 4) kick(tt); if (pos % 2 === 0) note(ch[(pos / 2) % 3] + 12, tt, step * 1.8, 'triangle', .05); }
+        else {
+          if (pos === 0 || pos === 4 || (S0.disco && pos % 2 === 0)) kick(tt);
+          if (S0.disco) note(ch[0] - (pos % 2 ? 12 : 24), tt, step * .9, 'triangle', .16);
+          else { if (pos === 0 || pos === 4) note(ch[0] - 24, tt, beat * 1.6, 'triangle', .22); if (pos === 2 || pos === 6) note(ch[0] - 12, tt, beat * .7, 'triangle', .12); }
+          note(ch[pos % 3] + 12, tt, step * .9, 'sine', .045);
+          if (pos % 2) hat(tt, S0.disco ? .09 : .05); if (pos === 2 || pos === 6) clap(tt);
+        }
+        if (i % 2 === 0 && Math.floor(i / 32) % 2 === 1) note(S0.mel[(i / 2) % S0.mel.length], tt, step * 1.7, S0.lead, S0.lead === 'sawtooth' ? .018 : .028);
         next += step; i++;
       }
     }, 90);
-    GM = { master: master, iv: iv };
+    GM = { master: master, iv: iv, song: song || 0 };
   } catch (e) {}
 }
-function galaMusicStop() { if (!GM) return; try { var m = GM.master; m.gain.cancelScheduledValues(actx.currentTime); m.gain.setTargetAtTime(0.0001, actx.currentTime, .3); var iv = GM.iv; setTimeout(function () { clearInterval(iv); try { m.disconnect(); } catch (x) {} }, 1200); } catch (e) {} GM = null; }
-function galaMusicDuck(on) { if (!GM) return; try { GM.master.gain.setTargetAtTime(on ? 0.04 : 0.16, actx.currentTime, .25); } catch (e) {} }
+function galaMusicStop() { if (!GM) return; try { var m = GM.master; m.gain.cancelScheduledValues(actx.currentTime); m.gain.setTargetAtTime(0.0001, actx.currentTime, .25); var iv = GM.iv; setTimeout(function () { clearInterval(iv); try { m.disconnect(); } catch (x) {} }, 1000); } catch (e) {} GM = null; }
+function galaMusicSong(k) { galaMusicStop(); setTimeout(function () { if (gala && gala.music && !GM) galaMusicStart(k); }, 450); }
+function galaMusicDuck(on) { if (!GM) return; try { GM.master.gain.setTargetAtTime(on ? 0.035 : 0.15, actx.currentTime, .2); } catch (e) {} }
 
 /* ---------- Fiesta de fondo: pompas, confeti flotando y cohetes que cruzan ---------- */
 var GFX = null;
@@ -191,9 +266,9 @@ function galaFxStart() {
 }
 function galaFxMood(s) {
   if (!GFX) return;
-  var m = { intro: { bubbles: .8, confetti: .6, rockets: .5 }, ad: { bubbles: .2, confetti: 0, rockets: 0 }, burst: { bubbles: .5, confetti: .5, rockets: .3 }, award: { bubbles: .5, confetti: .4, rockets: .3 },
-    group: { bubbles: 1, confetti: 1, rockets: 1 }, photos: { bubbles: .9, confetti: .3, rockets: 0 }, final: { bubbles: 1, confetti: 1.4, rockets: 1.2 }, credits: { bubbles: .6, confetti: .6, rockets: .4 } }[s.t] || { bubbles: .5, confetti: .4, rockets: .25 };
-  if (s.podium && gala.revealed === true) m = { bubbles: 1, confetti: 1.6, rockets: 1.5 };
+  var m = { intro: { bubbles: .8, confetti: .6, rockets: .5 }, ad: { bubbles: .2, confetti: 0, rockets: 0 }, burst: { bubbles: .6, confetti: .6, rockets: .4 },
+    podium: { bubbles: .8, confetti: .8, rockets: .8 }, photos: { bubbles: .9, confetti: .3, rockets: 0 }, final: { bubbles: 1, confetti: 1.4, rockets: 1.2 }, credits: { bubbles: .6, confetti: .6, rockets: .4 } }[s.t] || { bubbles: .5, confetti: .4, rockets: .25 };
+  if (s.t === 'podium' && gala.revealed >= s.pods.length) m = { bubbles: 1, confetti: 1.6, rockets: 1.6 };
   GFX.mood(m);
 }
 function galaFxBurstAt(sel) {
@@ -232,7 +307,7 @@ function galaOpen(mode) {
     '<div class="gala-ctl"><div class="gala-prog" aria-hidden="true"><i></i></div><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
   document.body.appendChild(el); document.body.style.overflow = 'hidden'; document.body.classList.add('gala-on'); overlayPush('gala');
   el.addEventListener('pointermove', galaPoke); el.addEventListener('pointerdown', galaPoke);
-  galaFxStart(); galaMusicStart(); galaRender(); try { fanfare(); } catch (e) {}
+  galaFxStart(); galaMusicStart(0); galaRender(); try { fanfare(); } catch (e) {}
 }
 function galaClose(fromNav) {
   clearInterval(speechT); if (gala) clearTimeout(gala.timer); galaMusicStop(); if (GFX) { GFX.stop(); GFX = null; }
@@ -254,8 +329,8 @@ Object.assign(A, {
     if (gala.i === 0 && !gala.started && !gala.trailer) gala.started = true;
     gala.paused = false; galaStep(1);
   },
-  galaAuto: function () { if (!gala) return; gala.auto = !gala.auto; gala.started = true; toast(gala.auto ? 'Avance automático: la gala va sola (toca para pausar)' : 'Avance manual'); galaRender(); },
-  galaMusic: function () { if (!gala) return; gala.music = !gala.music; if (gala.music) galaMusicStart(); else galaMusicStop(); galaRender(); },
+  galaAuto: function () { if (!gala) return; gala.auto = !gala.auto; gala.started = true; gala.paused = false; toast(gala.auto ? 'Avance automático: la gala va sola (toca para pausar)' : 'Avance manual'); galaRender(); },
+  galaMusic: function () { if (!gala) return; gala.music = !gala.music; if (gala.music) galaMusicStart((gala.slides[gala.i] || {}).song || 0); else galaMusicStop(); galaRender(); },
   galaPresent: function () { galaPresent(); }
 });
 document.addEventListener('fullscreenchange', function () { var el = document.getElementById('gala'); if (el && !document.fullscreenElement) el.classList.remove('present'); });
