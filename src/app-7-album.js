@@ -25,7 +25,7 @@ function thumbImg(ph, cls) {
   return u ? '<img src="' + u + '" alt="' + esc(ph.caption || 'Foto de ' + nameOf(ph.by)) + '" loading="lazy" decoding="async"' + (cls ? ' class="' + cls + '"' : '') + '>' : '<span class="ph-wait" aria-hidden="true"></span>';
 }
 function uploadBtn(cls, label) {
-  if (typeof isKid === 'function' && isKid()) return '';
+  if (typeof isKid === 'function' && isKid()) return '<button class="btn ' + (cls || 'primary') + '" data-act="phNope">' + icon('camera') + (label || 'Subir fotos') + '</button>';
   return '<label class="btn ' + (cls || 'primary') + '" for="ph-in-' + (cls || 'p') + '" style="cursor:pointer">' + icon('camera') + (label || 'Subir fotos') + '</label><input id="ph-in-' + (cls || 'p') + '" type="file" accept="image/*" multiple hidden data-change="phUpload">';
 }
 
@@ -164,3 +164,6 @@ Object.assign(C, {
   }
 });
 document.addEventListener('keydown', function (e) { if (!viewer) return; if (e.key === 'ArrowRight') A.vwNext(); else if (e.key === 'ArrowLeft') A.vwPrev(); else if (e.key === 'Escape') viewerClose(); });
+A.phNope = function () {
+  message('<div class="code-pop">' + icon('camera') + '</div><h2>' + (isSpy() ? 'Modo espía' : 'Modo explorador') + '</h2><p>' + (isSpy() ? 'Un buen espía hace fotos… pero no las publica. Aquí puedes ver el álbum entero; las fotos las suben los de la familia.' : 'Puedes ver todas las fotos del álbum. Para subir las tuyas, pásaselas a tus padres y que las suban ellos.') + '</p>');
+};

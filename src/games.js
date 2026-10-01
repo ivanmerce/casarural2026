@@ -10,7 +10,7 @@ var G = (function () {
   function r2(x) { return Math.round(x * 100) / 100; }
   function comp(S) { return S.comp || { duos: [] }; }
   function duos(S) { return comp(S).duos || []; }
-  function person(S, id) { return S.people.find(function (p) { return p.id === id; }); }
+  function person(S, id) { return S.people.find(function (p) { return p.id === id; }) || (S.spies || []).find(function (p) { return p.id === id; }); }
   function duoOf(S, pid) { return duos(S).find(function (d) { return d.members.indexOf(pid) >= 0; }); }
 
   /* ---------- Participantes ---------- */
@@ -270,6 +270,9 @@ var G = (function () {
     { id: 'duo', group: 'juegos', icon: 'users', name: 'Dúo Dinámico', desc: 'La mejor pareja que compite junta.',
       auto: function (S, c) { var cand = c.rank.filter(function (r) { return r.played && entrant(S, r.id) && entrant(S, r.id).duo; }); if (!cand.length) return null; return { winners: [cand[0].id], why: cand[0].pts + ' puntos entre los dos' }; } },
     /* --- La casa: todo lo que pasa en la plataforma --- */
+    /* --- Premio especial: el espía (que no opta a ningún otro) --- */
+    { id: 'espia', group: 'casa', icon: 'search', name: 'Agente Secreto del Año', desc: 'Premio especial para el espía que se coló en la plataforma, lo trasteó todo y nos chivó lo que había que mejorar. Fuera de concurso en todo lo demás.',
+      auto: function (S) { var sp = S.spies || []; return sp.length ? { winners: sp.map(function (p) { return p.id; }), why: 'Por colarse sin que nadie supiera quién era' } : null; } },
     { id: 'derroche', group: 'casa', icon: 'coins', name: 'Los Más Derrochadores', desc: 'Quienes pagan la casa rural (y la tasa turística).',
       auto: function (S) { var p = S.house && S.house.payer; if (!p) return null; var t = typeof L !== 'undefined' ? L.tax(S).withExemption : 0; return { winners: [F(p)], why: 'La casa (' + money(S.house.total) + ')' + (S.tax && S.tax.payer === p && t ? ' y la tasa (' + money(t) + ')' : '') }; } },
     { id: 'carrito', group: 'casa', icon: 'cart', name: 'Reyes del Carrito', desc: 'La familia que más productos se ha pedido de la lista de la compra.',
@@ -344,7 +347,7 @@ var G = (function () {
     return membersOf(S, wid);
   }
   function tally(S) {
-    var t = {}; S.people.forEach(function (p) { t[p.id] = []; });
+    var t = {}; S.people.concat(S.spies || []).forEach(function (p) { t[p.id] = []; });
     awards(S).forEach(function (a) { var seen = {}; a.winners.forEach(function (w) { peopleOf(S, w).forEach(function (pid) { if (t[pid] && !seen[pid]) { seen[pid] = 1; t[pid].push(a.id); } }); }); });
     return t;
   }

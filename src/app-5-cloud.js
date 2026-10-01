@@ -29,6 +29,7 @@ var CLOUD = (function () {
   function fromDb(d) {
     var spyRows = d.people.filter(function (r) { return r.family_id === SPY_FAM; });
     SPIES = spyRows.map(function (r) { return { id: r.id, name: r.name, family: r.family_id, kind: r.kind, role: r.role, attends: false, note: r.note, avatar: r.avatar, spy: true }; });
+    var spiesForS = SPIES;
     d = Object.assign({}, d, { people: d.people.filter(function (r) { return r.family_id !== SPY_FAM; }), families: d.families.filter(function (f) { return f.id !== SPY_FAM; }) });
     var kv = {}; d.app_config.forEach(function (r) { kv[r.key] = r.value; });
     var st = d.settings[0] || {};
@@ -43,7 +44,7 @@ var CLOUD = (function () {
       version: 'cloud', trip: kv.trip || {}, days: kv.days || [], slots: SLOTS,
       families: d.families.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, short: r.short, color: r.color, note: r.note }; }),
       people: d.people.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, family: r.family_id, age: r.age, approx: r.age_approx, kind: r.kind, role: r.role, email: r.email, login: r.login || null, attends: r.attends_default, pend: r.pending, note: r.note, sort: r.sort, avatar: r.avatar }; }),
-      pendingPeople: [],
+      pendingPeople: [], spies: spiesForS,
       homes: d.homes.map(function (r) { return { id: r.id, name: r.name, beds: r.beds, free: r.free, rooms: r.rooms, note: r.note, proposal: r.proposal || [] }; }),
       meals: d.meals.map(function (r) { return { id: r.id, day: r.day, slot: r.slot, time: hm(r.time_override), mode: r.mode, title: r.title, dishes: r.dishes || [], cook: r.cook_family_id, marc: r.marc_menu, notes: r.notes, star: r.star }; }),
       ingredients: d.ingredients.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, cat: r.category, qty: num(r.qty), unit: r.unit, qtyEst: r.qty_estimated, family: r.family_id, status: r.status, split: r.split, cost: num(r.cost), est: num(r.est_cost), per: r.per_diners, sug: r.suggested, note: r.note, buy: r.buy_at || null, sort: r.sort, meals: im[r.id] || [] }; }),
@@ -256,7 +257,11 @@ var CLOUD = (function () {
       });
     }).catch(function (e) { started = false; loginView('No he podido entrar: ' + esc(e.message || 'error de conexión')); });
   }
-  var started = false, codeFlow = false;
+  var started = false, codeFlow = false, loginCode = null;
+  /* Aviso grande (no un toast que se pierde): por qué no vale ese código y qué hacer */
+  function codePopup(title, text) { message('<div class="code-pop">' + icon('shield') + '</div><h2>' + title + '</h2><p>' + text + '</p>'); }
+  api.codeIsLogin = function (c) { return !!loginCode && c === loginCode; };
+  api.codePopup = codePopup;
   function go2() { if (started) return; started = true; afterSession(); }
   api.boot = function () {
     loginView();
@@ -287,16 +292,23 @@ var CLOUD = (function () {
           if (d && d.error !== 'no_user') setTimeout(function () { var c = document.getElementById('lg-code'); if (c) c.focus(); }, 80);
           return;
         }
-        mustChange = !!d.must_change; started = false; go2();
+        mustChange = !!d.must_change; loginCode = mustChange ? code : null; started = false; go2();
       }).catch(function () { codeFlow = false; if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } toast('No he podido entrar. Revisa la conexión'); });
   };
   api.setCode = function () {
     var a = (val('cs-1') || '').replace(/\D/g, ''), b = (val('cs-2') || '').replace(/\D/g, '');
-    if (a.length !== 6) { toast('Tiene que tener 6 cifras'); return; }
-    if (a !== b) { toast('Los dos códigos no coinciden. Repítelo'); clearPin('cs-2', true); return; }
+    if (a.length !== 6) { codePopup('Faltan cifras', 'Tu código tiene que tener <b>6 cifras</b>.'); return; }
+    if (api.codeIsLogin(a)) { codePopup('Ese no vale', 'Es el <b>código de la familia</b>, el que sirve solo para entrar la primera vez. Elige uno <b>nuevo y solo tuyo</b>.'); clearPin('cs-2'); clearPin('cs-1', true); return; }
+    if (a !== b) { codePopup('No coinciden', 'Los dos códigos tienen que ser iguales. Vuelve a escribirlo en la segunda fila.'); clearPin('cs-2', true); return; }
     client().rpc('set_my_code', { p_code: a }).then(check).then(function (r) {
       var m = { formato: 'Tiene que tener 6 cifras', igual_familia: 'Ese es el código de la familia: elige otro', facil: 'Demasiado fácil de adivinar: elige otro', sin_sesion: 'Tu sesión ha caducado. Vuelve a entrar' };
-      if (r.data !== 'ok') { toast(m[r.data] || 'No he podido guardarlo'); clearPin('cs-2'); clearPin('cs-1', true); return; }
+      if (r.data !== 'ok') {
+        var pm = { igual_familia: ['Ese no vale', 'Es el <b>código de la familia</b>, el que sirve solo para entrar la primera vez. Elige uno <b>nuevo y solo tuyo</b>.'],
+          facil: ['Demasiado fácil', 'Nada de 123456 ni seis cifras iguales: cualquiera lo adivinaría. Prueba con otro.'], formato: ['Faltan cifras', 'Tu código tiene que tener <b>6 cifras</b>.'] };
+        if (pm[r.data]) codePopup(pm[r.data][0], pm[r.data][1]); else toast(m[r.data] || 'No he podido guardarlo');
+        if (r.data !== 'sin_sesion') { clearPin('cs-2'); clearPin('cs-1', true); }
+        return;
+      }
       var done = api._afterCode; api._afterCode = null;
       toast('¡Listo! Tu código está guardado. La próxima vez: tu email y ese código');
       if (done) { shell('<section class="card login-card"><h1 class="login-title">Entrando<i>…</i></h1></section>'); done(); } else { closeSheet(); }
@@ -388,7 +400,10 @@ document.addEventListener('input', function (e) {
   var v = t.value.replace(/\D/g, '').slice(0, 6); if (v !== t.value) t.value = v; paintPin(t);
   if (v.length < 6) return;
   if (t.id === 'lg-code') { if ((val('lg-email') || '').trim()) { t.blur(); A.cloudLogin(); } else { var em = document.getElementById('lg-email'); if (em) em.focus(); toast('Escribe también tu email'); } }
-  else if (t.id === 'cs-1') { var n = document.getElementById('cs-2'); if (n) n.focus(); }
+  else if (t.id === 'cs-1') {
+    if (CLOUD.codeIsLogin && CLOUD.codeIsLogin(v)) { t.blur(); CLOUD.codePopup('Ese no vale', 'Es el <b>código de la familia</b>, el que sirve solo para entrar la primera vez. Elige uno <b>nuevo y solo tuyo</b>.'); clearPin('cs-1'); setTimeout(function () { var c = document.getElementById('cs-1'); if (c) c.focus(); }, 300); return; }
+    var n = document.getElementById('cs-2'); if (n) n.focus();
+  }
   else if (t.id === 'cs-2') { t.blur(); A.cloudSetCode(); }
 });
 document.addEventListener('focusin', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('pin-in')) paintPin(t); });

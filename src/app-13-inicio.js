@@ -55,7 +55,7 @@ function homeSecrets() {
   return '<section class="card home-secrets"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('search') + 'Secretos de la casa</h3><button class="link" data-act="secrets">Ver ' + icon('arrow') + '</button></div>' +
     '<div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small muted">' + (n ? 'Vas bien. Chitón.' : 'Hay ' + EGGS.length + ' escondidos por la app. Nadie te va a decir dónde.') + '<br>El ranking se cierra el ' + esc(fmtClose()) + '.</span></div>' +
     '<div class="bar sec-bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div>' +
-    (rk.length ? '<div class="mini-rank">' + rk.map(function (r) { return '<span class="mr">' + medal(r.pos) + av(r.id, 'xs') + '<b>' + esc(person(r.id).name) + '</b><small class="num">' + r.n + '</small></span>'; }).join('') + '</div>' : '') +
+    (rk.length ? '<div class="mini-rank">' + rk.map(function (r) { return '<span class="mr">' + (r.spy ? '<span class="medal spy" title="Fuera de concurso">' + icon('search') + '</span>' : medal(r.pos)) + av(r.id, 'xs') + '<b>' + esc(person(r.id).name) + '</b><small class="num">' + r.n + '</small></span>'; }).join('') + '</div>' : '') +
     (typeof secretsWho === 'function' ? foldBtn('secwho', '<span class="grow"><b class="fold-title">Quién lleva cuáles</b><small class="muted">Sin spoilers: solo ves los que tú también tienes</small></span>', 'fold-sub') + foldBody('secwho', secretsWho()) : '') + '</section>';
 }
 function homeGames() {

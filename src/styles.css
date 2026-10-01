@@ -1124,3 +1124,7 @@ img, svg, canvas { max-width: 100%; }
 #print-list .pl-qty { white-space: nowrap; font-weight: 700; width: 90px; }
 #print-list .pl-meta { color: #555; font-size: 9.5pt; width: 38%; }
 #print-list .pl-foot { margin-top: 14px; font-size: 9pt; color: #777; }
+.code-pop { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; margin: 0 auto 4px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: #fff; }
+.code-pop .ico { width: 32px; height: 32px; }
+.medal.spy { background: #23262f; color: #F2C65A; display: inline-grid; place-items: center; }
+.medal.spy .ico { width: 14px; height: 14px; }

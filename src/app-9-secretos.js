@@ -143,11 +143,12 @@ function hintsLeft() { return Math.max(0, SECRETS_HINTS - Object.keys(hintsMap()
 /* ----- Ranking (la nube solo sabe cuántos lleva cada uno) ----- */
 function secretsRanking() {
   var st = S.stats || {}, rows = {};
-  Object.keys(st).forEach(function (pid) { if (person(pid) && !isSpy(pid) && (st[pid].eggs || 0) > 0) rows[pid] = st[pid].eggs; });
-  if (!isSpy(ui.me)) rows[ui.me] = rankedCount();   /* lo mío, siempre al día desde este dispositivo */
-  var arr = Object.keys(rows).map(function (pid) { return { id: pid, n: Math.min(rows[pid], EGGS.length) }; }).filter(function (r) { return r.n > 0 || r.id === ui.me; });
+  Object.keys(st).forEach(function (pid) { if (person(pid) && (st[pid].eggs || 0) > 0) rows[pid] = st[pid].eggs; });
+  rows[ui.me] = rankedCount();   /* lo mío, siempre al día desde este dispositivo */
+  var arr = Object.keys(rows).map(function (pid) { return { id: pid, n: Math.min(rows[pid], EGGS.length), spy: isSpy(pid) }; }).filter(function (r) { return r.n > 0 || r.id === ui.me; });
   arr.sort(function (a, b) { return b.n - a.n || String(pname(a.id)).localeCompare(String(pname(b.id))); });
-  var pos = 0, last = -1; arr.forEach(function (r, i) { if (r.n !== last) { pos = i + 1; last = r.n; } r.pos = pos; });
+  /* los puestos (y las medallas) solo cuentan a la familia: el espía sale, pero fuera de concurso */
+  var pos = 0, last = -1, k = 0; arr.forEach(function (r) { if (r.spy) { r.pos = null; return; } k++; if (r.n !== last) { pos = k; last = r.n; } r.pos = pos; });
   return arr;
 }
 function secretsSheet() {
