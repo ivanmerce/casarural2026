@@ -142,6 +142,7 @@ p { margin: 0; }
 
 main { padding: 0 16px; }
 .view { display: flex; flex-direction: column; gap: 16px; animation: viewIn .3s ease backwards; }
+.home-flow { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 @keyframes viewIn { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .view-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-top: 18px; }
 .view-head p { margin-top: 4px; }
@@ -979,11 +980,14 @@ a.fact { color: inherit; text-decoration: none; }
   .topbar { padding-left: max(32px, calc(50% - 560px)); padding-right: max(32px, calc(50% - 560px)); }
   main { padding: 0 32px; }
   .view:not([data-view="inicio"]) { max-width: 880px; width: 100%; margin: 0 auto; }
-  .view[data-view="inicio"] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 18px; }
-  .view[data-view="inicio"] > .hero, .view[data-view="inicio"] > .alert, .view[data-view="inicio"] > .sec-banner { grid-column: 1 / -1; }
-  .view[data-view="inicio"] > * { margin-top: 0; }
+  /* Inicio en el ordenador: dos columnas tipo «masonry» (cada tarjeta ocupa lo que mide, sin huecos) */
+  .view[data-view="inicio"] { gap: 18px; }
+  .home-flow { display: block; columns: 2; column-gap: 18px; }
+  .home-flow > * { width: 100%; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; margin: 0 0 18px; }
   .hero { padding: 28px 32px; }
-  .count { max-width: 560px; }
+  .count { max-width: none; gap: 12px; }
+  .count div { padding: 14px 6px; }
+  .count b { font-size: 2.3rem; }
   .nav-in { max-width: 760px; }
   .fab { right: max(32px, calc(50% - 560px)); }
   .scrim { align-items: center; }
@@ -1016,8 +1020,8 @@ a.fact { color: inherit; text-decoration: none; }
 /* Apaisado en pantallas medianas (tablet tumbada): Inicio a dos columnas también */
 @media (orientation: landscape) and (min-width: 900px) and (max-width: 1079px) {
   .app { max-width: 1000px; }
-  .view[data-view="inicio"] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; }
-  .view[data-view="inicio"] > .hero, .view[data-view="inicio"] > .alert, .view[data-view="inicio"] > .sec-banner { grid-column: 1 / -1; }
+  .home-flow { display: block; columns: 2; column-gap: 16px; }
+  .home-flow > * { width: 100%; break-inside: avoid; -webkit-column-break-inside: avoid; page-break-inside: avoid; margin: 0 0 16px; }
 }
 /* Nada se sale de lado */
 body { overflow-x: clip; }
@@ -2114,7 +2118,7 @@ function startHero() {
   var names = S ? S.people : Array.from({ length: 12 }, function (_, i) { return { kind: i % 4 ? 'adulto' : 'menor' }; });
   /* cada nodo es una persona de la familia: si hay foto, su cara */
   var withFaces = names.some(function (p) { return p.avatar; });
-  var narrow = W < 520, X0 = withFaces ? (narrow ? 0.62 : 0.56) : 0.45, YMAX = withFaces ? (narrow ? 0.42 : 0.56) : 1, KR = narrow ? 0.78 : 1;
+  var narrow = W < 520, X0 = withFaces ? (narrow ? 0.62 : 0.56) : 0.45, YMAX = withFaces ? (narrow ? 0.42 : W >= 900 ? 0.46 : 0.56) : 1, KR = narrow ? 0.78 : 1;
   var nodes = names.map(function (p, i) {
     var n = { x: W * (X0 + (1 - X0) * Math.random()), y: H * (withFaces ? 0.06 + (YMAX - 0.1) * Math.random() : Math.random()), vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22, r: p.kind === 'bebe' ? 2.4 : p.kind === 'menor' ? 3 : 3.6 };
     if (p.avatar) { n.img = new Image(); n.img.src = p.avatar; n.R = Math.round((p.kind === 'bebe' ? 12 : p.kind === 'menor' ? 14 : 16) * KR); }
@@ -4734,12 +4738,14 @@ VIEWS.inicio = function () {
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
   h += homePayments();
+  h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();
   h += manualCardHome();
   h += homeSecrets();
   h += homeGames();
   if (typeof ideasCard === 'function') h += ideasCard();
+  h += '</div>';
   return h;
 };
 
