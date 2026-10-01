@@ -1067,6 +1067,50 @@ img, svg, canvas { max-width: 100%; }
 .egg-dots i.on { background: var(--accent); }
 .fold-body[hidden] { display: none !important; }
 
+/* ---------- v0.7.11 · Revelación de secretos: grande, fluida y en cola ---------- */
+.reveal-veil { z-index: 79; background: radial-gradient(120% 90% at 50% 45%, rgba(40, 8, 16, .55), rgba(10, 6, 8, .78)); -webkit-backdrop-filter: blur(6px) saturate(1.2); backdrop-filter: blur(6px) saturate(1.2); animation: rvFade .35s ease both; }
+.reveal-veil.out { animation: rvFadeOut .38s ease both; }
+.egg-reveal { z-index: 82; }
+.egg-reveal .inner { position: relative; width: min(420px, 100%); gap: 10px; padding: 26px 22px 18px; border-radius: 28px; overflow: hidden; isolation: isolate;
+  background: linear-gradient(180deg, rgba(36, 18, 22, .96), rgba(18, 12, 14, .96)); border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .04) inset, 0 0 80px color-mix(in srgb, var(--accent) 35%, transparent);
+  animation: none; opacity: 0; transform: translateY(18px) scale(.86); filter: blur(6px);
+  transition: opacity .42s ease, transform .6s cubic-bezier(.2, 1.35, .4, 1), filter .42s ease; }
+.egg-reveal.in .inner { opacity: 1; transform: none; filter: none; }
+.egg-reveal.out .inner { opacity: 0; transform: translateY(-10px) scale(.94); filter: blur(4px); transition-duration: .32s; }
+/* destello que barre la tarjeta al aparecer */
+.egg-reveal .inner::before { content: ""; position: absolute; inset: -40% -60%; z-index: -1; background: conic-gradient(from 0deg, transparent 0 70%, color-mix(in srgb, var(--accent) 55%, #FFD166) 80%, transparent 90%); animation: rvSpin 3.2s linear infinite; opacity: .35; }
+.egg-reveal .inner::after { content: ""; position: absolute; inset: 2px; z-index: -1; border-radius: 26px; background: linear-gradient(180deg, rgba(36, 18, 22, .98), rgba(18, 12, 14, .98)); }
+.rv-seal { position: relative; width: 112px; height: 112px; margin: 2px auto 4px; transform: scale(.6); opacity: 0; transition: transform .7s .12s cubic-bezier(.2, 1.6, .4, 1), opacity .3s .12s; }
+.egg-reveal.in .rv-seal { transform: none; opacity: 1; }
+.rv-seal svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.rv-seal circle { fill: none; stroke-width: 7; }
+.rv-track { stroke: rgba(255, 255, 255, .1); }
+.rv-ring { stroke: var(--gold, #E8B64A); stroke-linecap: round; transition: stroke-dashoffset 1.2s .45s cubic-bezier(.3, .9, .3, 1); filter: drop-shadow(0 0 8px rgba(232, 182, 74, .6)); }
+.rv-core { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: #fff; }
+.rv-core b { font-family: var(--font-display); font-size: 2.6rem; font-weight: 800; line-height: 1; }
+.rv-core small { color: #BFB3AD; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.rv-core .ico { width: 46px; height: 46px; color: var(--gold, #E8B64A); }
+.egg-reveal .egg-badge { animation: rvPop .5s .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+.egg-reveal h2 { animation: rvUp .5s .45s ease both; }
+.egg-reveal p { animation: rvUp .5s .55s ease both; }
+.egg-reveal .rv-top { animation: rvPop .6s .25s cubic-bezier(.2, 1.6, .4, 1) both; }
+.egg-reveal .rv-top .eleven { font-size: min(30vw, 140px) !important; line-height: .9; }
+.rv-name { color: #D9CFC9; font-weight: 700; font-size: .85rem; }
+.rv-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 6px; animation: rvUp .5s .65s ease both; }
+.rv-actions .btn { min-height: 44px; }
+.rv-actions .btn.ghost { color: #F1E9E4; border-color: rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .06); }
+.egg-reveal.is-trophy .inner { box-shadow: 0 30px 90px rgba(0, 0, 0, .55), 0 0 110px rgba(232, 182, 74, .45); }
+@keyframes rvFade { from { opacity: 0; } }
+@keyframes rvFadeOut { to { opacity: 0; } }
+@keyframes rvSpin { to { transform: rotate(360deg); } }
+@keyframes rvPop { from { opacity: 0; transform: scale(.6); } }
+@keyframes rvUp { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) {
+  .egg-reveal .inner, .rv-seal, .rv-ring { transition-duration: .01s !important; }
+  .egg-reveal .inner::before { animation: none; }
+}
+
 </style>
 </head>
 <body>
@@ -2985,7 +3029,9 @@ function checkClaras() {
 var marcOn = false, popped = 0;
 function marcMode() {
   if (marcOn) return; marcOn = true; popped = 0;
-  eggToast('baby', 'Modo ' + esc(babyName()) + ': ¡explota las burbujas antes de que se escapen! (Hay premio si llegas a 15)');
+  eggThen('baby', 'Modo ' + esc(babyName()), '¡Explota las burbujas antes de que se escapen! Si llegas a 15, hay premio.', marcBubbles);
+}
+function marcBubbles() {
   var end = Date.now() + 14000;
   var iv = setInterval(function () {
     if (Date.now() > end) { clearInterval(iv); marcOn = false; return; }
@@ -3049,12 +3095,14 @@ function himno() {
 var discoOn = false;
 function discoMode() {
   if (discoOn) return; discoOn = true;
+  eggThen('disco', '¡Modo discoteca!', '9 segundos de fiesta. Si alguien te mira raro, di que es la app.', discoGo);
+}
+function discoGo() {
   document.documentElement.classList.add('disco');
   var fx = document.createElement('div'); fx.className = 'disco-fx'; fx.setAttribute('aria-hidden', 'true');
   fx.innerHTML = '<div class="beams"></div><div class="beams b2"></div><div class="ball"></div>';
   document.body.appendChild(fx);
   if (navigator.vibrate) try { navigator.vibrate([60, 60, 60, 60, 120]); } catch (e) {}
-  eggToast('disco', '¡Modo discoteca! 9 segundos de fiesta. Si alguien te mira raro, di que es la app.');
   setTimeout(function () { document.documentElement.classList.remove('disco'); fx.classList.add('out'); setTimeout(function () { fx.remove(); }, 500); discoOn = false; }, 9000);
 }
 function fumataRaw(title, text, k) {
@@ -3069,9 +3117,7 @@ function fumataRaw(title, text, k) {
   setTimeout(function () { if (k) eggCard(k, title, text); else message('<h2>' + title + '</h2><p>' + text + '</p>', 4200); }, 600);
 }
 function extraOmnes() {
-  var v = document.createElement('div'); v.className = 'egg-veil'; document.body.appendChild(v);
   eggCard('omnes', 'Toc, toc…', 'Has llamado a la puerta de la casita. No abre nadie: están todos en la nave jugando al ping-pong.');
-  setTimeout(function () { v.remove(); }, 4400);
 }
 function abueloMode() {
   ui.prefs.size = ui.prefs.size === 'xl' ? 'm' : 'xl'; savePrefs(); applyPrefs(); render(true);
@@ -3097,7 +3143,7 @@ function eggTap(k, el) {
 var A = {
   tab: function (el) { ui.mealFilter = null; if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; if (el.dataset.tab === 'juegos') { ui.game = null; ui.jsub = null; } go(el.dataset.tab); },
   goSheet: function (el) { closeSheet(); if (el.dataset.fsub) ui.fsub = el.dataset.fsub; if (el.dataset.msub) ui.msub = el.dataset.msub; go(el.dataset.tab); },
-  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); } },
+  logo: function (el) { if (!eggTap('logo', el)) { if (ui.tab !== 'inicio') go('inicio'); else { el.classList.remove('egg-poke'); void el.offsetWidth; el.classList.add('egg-poke'); toast('Toc, toc… Sigue sin abrir nadie: están todos en la nave'); } } },
   menu: function () { menuSheet(); },
   close: function () { closeSheet(); },
   day: function (el) { ui.day = el.dataset.day; render(true); },
@@ -4381,22 +4427,67 @@ function egg(k, quiet) {
   var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
   f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
   var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
-  if (all && !late) setTimeout(function () { fireworks(7000, 14); message('<div class="trophy">' + icon('trophy') + '</div><span class="egg-badge">Los ' + EGGS.length + ' de ' + EGGS.length + '</span><h2>Guardián de los Secretos</h2><p>Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.</p>', 5200); }, quiet ? 4800 : 300);
-  else if (!quiet) setTimeout(function () { fireworks(3000, 3); toast('<b>¡Secreto desbloqueado!</b> «' + esc(e.name) + '» · ' + n + ' de ' + EGGS.length + (late ? ' (el ranking ya está cerrado)' : '. Chitón'), 'Ver', secretsSheet); }, 250);
+  /* los secretos «silenciosos» (sin efecto propio) también tienen su gran momento */
+  if (!quiet) revealSecret(e, { title: e.name, text: 'Lo has encontrado: ' + e.how.charAt(0).toLowerCase() + e.how.slice(1) + '.' });
+  if (all && !late) revealSecret(null, { trophy: true });
   try { if (window.CLOUD && CLOUD.pingNow) CLOUD.pingNow(); } catch (x) {}
   return true;
 }
-/* Un secreto con efecto: una sola tarjeta, al momento, que se entiende */
-function eggBadge(isNew) { return isNew ? '<span class="egg-badge">Secreto desbloqueado · ' + foundCount() + ' de ' + EGGS.length + '</span>' : ''; }
+
+/* ===== La revelación: una tarjeta grande, con fuegos, anillo de progreso y en cola (nunca se pisan) ===== */
+var revealQ = [], revealOn = false;
+function revealSecret(e, o) { revealQ.push({ e: e, o: o || {}, n: foundCount() }); if (!revealOn) { revealOn = true; setTimeout(revealNext, 60); } }
+function revealNext() {
+  var it = revealQ.shift(); if (!it) { revealOn = false; return; }
+  document.querySelectorAll('.egg-msg').forEach(function (x) { x.remove(); });
+  var o = it.o, n = it.n, N = EGGS.length, trophy = !!o.trophy;
+  var C = 2 * Math.PI * 46, from = C * (1 - Math.max(0, n - 1) / N), to = C * (1 - n / N);
+  var veil = document.createElement('div'); veil.className = 'egg-veil reveal-veil'; document.body.appendChild(veil);
+  var m = document.createElement('div'); m.className = 'egg-msg egg-reveal' + (trophy ? ' is-trophy' : ''); m.setAttribute('role', 'dialog'); m.setAttribute('aria-live', 'assertive');
+  m.innerHTML = '<div class="inner">' +
+    '<div class="rv-seal"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="rv-track" cx="50" cy="50" r="46"/><circle class="rv-ring" cx="50" cy="50" r="46" style="stroke-dasharray:' + C.toFixed(1) + ';stroke-dashoffset:' + from.toFixed(1) + '"/></svg>' +
+      '<div class="rv-core">' + (trophy ? icon('trophy') : '<b class="num">' + n + '</b><small>de ' + N + '</small>') + '</div></div>' +
+    '<span class="egg-badge">' + (trophy ? 'Los ' + N + ' de ' + N : 'Secreto desbloqueado') + '</span>' +
+    (o.top ? '<div class="rv-top">' + o.top + '</div>' : '') +
+    '<h2>' + (trophy ? 'Guardián de los Secretos' : o.title) + '</h2>' +
+    '<p>' + (trophy ? 'Los has encontrado todos. Trofeo asegurado en la gala… y ni una palabra a nadie, que te conocemos.' : o.text) + '</p>' +
+    (it.e && it.e.name !== o.title ? '<small class="rv-name">«' + esc(it.e.name) + '»</small>' : '') +
+    '<div class="rv-actions"><button class="btn primary" data-rv="ok">¡Toma ya!</button><button class="btn ghost" data-rv="see">Mis secretos</button></div>' +
+    '<small class="egg-hush">' + (secretsClosed() ? 'El ranking ya está cerrado: este no suma' : 'Chitón: que cada uno encuentre los suyos') + '</small></div>';
+  document.body.appendChild(m);
+  var show = function () { if (m.classList.contains('in')) return; var r = m.querySelector('.rv-ring'); if (r) r.style.strokeDashoffset = to.toFixed(1); m.classList.add('in'); };
+  requestAnimationFrame(function () { requestAnimationFrame(show); }); setTimeout(show, 120);
+  try { fireworks(trophy ? 7000 : 4600, trophy ? 14 : 7); } catch (x) {}
+  if (navigator.vibrate) try { navigator.vibrate(trophy ? [20, 60, 20, 60, 40] : [14, 50, 14]); } catch (x) {}
+  var born = Date.now(), gone = false, tm;
+  function close(then) {
+    if (gone) return; gone = true; clearTimeout(tm);
+    m.classList.add('out'); veil.classList.add('out');
+    setTimeout(function () { m.remove(); veil.remove(); if (then) then(); if (o.after) try { o.after(); } catch (x) {} setTimeout(revealNext, revealQ.length ? 220 : 0); }, 380);
+  }
+  m.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-rv]'); ev.stopPropagation();
+    if (b && b.dataset.rv === 'see') { close(function () { if (typeof secretsSheet === 'function') secretsSheet(); }); return; }
+    if (b || Date.now() - born > 1200) close();
+  });
+  tm = setTimeout(close, trophy ? 9000 : 6500);
+}
+/* Un secreto con efecto: si es nuevo, revelación completa; si ya lo tenías, solo el efecto con su frase */
 function eggCard(k, title, text, top, ms) {
-  var isNew = egg(k, true);
-  if (isNew) fireworks(4200, 6);
-  message((top || '') + eggBadge(isNew) + '<h2>' + title + '</h2><p>' + text + '</p>' + (isNew ? '<small class="egg-hush">Chitón: que cada uno encuentre los suyos</small>' : ''), ms || 4600);
+  var isNew = egg(k, true), e = EGGS.find(function (x) { return x.k === k; });
+  if (isNew) revealSecret(e, { title: title, text: text, top: top });
+  else message((top || '') + '<h2>' + title + '</h2><p>' + text + '</p>', ms || 4200);
+}
+/* Secreto con efecto interactivo (burbujas, discoteca…): primero la revelación y, al cerrarla, el efecto */
+function eggThen(k, title, text, fn) {
+  var isNew = egg(k, true), e = EGGS.find(function (x) { return x.k === k; });
+  if (isNew) revealSecret(e, { title: title, text: text, after: fn });
+  else { fn(); toast(text); }
 }
 function eggToast(k, text) {
-  var isNew = egg(k, true);
-  if (isNew) fireworks(3000, 3);
-  toast((isNew ? '<b>¡Secreto ' + foundCount() + ' de ' + EGGS.length + '!</b> ' : '') + text, isNew ? 'Ver' : null, isNew ? secretsSheet : null);
+  var isNew = egg(k, true), e = EGGS.find(function (x) { return x.k === k; });
+  if (isNew) revealSecret(e, { title: e ? e.name : '¡Secreto!', text: text });
+  else toast(text);
 }
 
 /* ----- Pistas extra: 3 por persona en total ----- */
