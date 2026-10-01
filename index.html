@@ -1145,6 +1145,24 @@ img, svg, canvas { max-width: 100%; }
 .code-pop .ico { width: 32px; height: 32px; }
 .medal.spy { background: #23262f; color: #F2C65A; display: inline-grid; place-items: center; }
 .medal.spy .ico { width: 14px; height: 14px; }
+/* ---------- Conectados: popover al pasar el ratón ---------- */
+.online-wrap { position: relative; display: inline-flex; }
+.online-pop { position: absolute; top: calc(100% + 10px); right: 50%; transform: translate(50%, -6px) scale(.97); transform-origin: top center; z-index: 40;
+  min-width: 220px; max-width: 280px; padding: 12px; border-radius: 18px; display: grid; gap: 6px; text-align: left;
+  background: color-mix(in srgb, var(--bg, #F6F1EE) 96%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: 0 18px 50px rgba(20, 10, 8, .18); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .18s ease, transform .22s cubic-bezier(.2, 1.3, .4, 1), visibility 0s .2s; }
+.online-pop::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; transform: translateX(-50%) rotate(45deg); background: inherit; border-left: 1px solid color-mix(in srgb, var(--ink) 10%, transparent); border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent); }
+@media (hover: hover) {
+  .online-wrap:hover .online-pop, .online-wrap:focus-within .online-pop { opacity: 1; visibility: visible; transform: translate(50%, 0) scale(1); transition-delay: 0s; }
+}
+.op-head { display: flex; align-items: center; gap: 8px; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-bottom: 4px; }
+.op-row { display: flex; align-items: center; gap: 10px; padding: 3px 2px; animation: opIn .25s ease both; }
+.op-row:nth-child(3) { animation-delay: .03s; } .op-row:nth-child(4) { animation-delay: .06s; } .op-row:nth-child(5) { animation-delay: .09s; } .op-row:nth-child(6) { animation-delay: .12s; }
+.op-name { font-weight: 700; } .op-name small { color: var(--muted); font-weight: 600; }
+.op-foot { font-size: .72rem; color: var(--muted); border-top: 1px solid var(--glass-line, rgba(0,0,0,.08)); padding-top: 6px; margin-top: 2px; }
+@keyframes opIn { from { opacity: 0; transform: translateY(-3px); } }
+@media (max-width: 1079px) { .online-pop { right: 0; transform: translate(0, -6px) scale(.97); } .online-pop::before { left: auto; right: 34px; } }
+@media (max-width: 1079px) and (hover: hover) { .online-wrap:hover .online-pop, .online-wrap:focus-within .online-pop { transform: translate(0, 0) scale(1); } }
 
 </style>
 </head>
@@ -2520,10 +2538,14 @@ function timeAgo(iso) {
   var d = Math.round(s / 86400); return 'hace ' + d + (d === 1 ? ' día' : ' días');
 }
 function presencePill() {
-  var ids = onlineIds();
-  return '<button class="online-pill" data-act="whoOnline" aria-label="' + ids.length + ' conectados ahora">' +
-    '<span class="live-dot" aria-hidden="true"></span><span class="avs">' + ids.slice(0, 3).map(function (id) { return av(id, 'xs'); }).join('') + '</span>' +
-    '<b class="num">' + ids.length + '</b></button>';
+  var ids = onlineIds(), noTip = function (h) { return h.replace(/ title="[^"]*"/g, ''); };
+  /* al pasar el ratón (o con el foco del teclado) se despliega quién está; en el móvil, el toque abre la lista completa */
+  var pop = '<span class="online-pop" role="tooltip"><span class="op-head"><span class="live-dot" aria-hidden="true"></span>' + (ids.length === 1 ? '1 persona conectada' : ids.length + ' personas conectadas') + '</span>' +
+    ids.map(function (id) { var p = person(id) || {}; return '<span class="op-row">' + noTip(av(id, 'sm')) + '<span class="op-name">' + esc(p.name || '') + (id === ui.me ? ' <small>(tú)</small>' : '') + (p.spy ? ' <small>· de incógnito</small>' : '') + '</span></span>'; }).join('') +
+    '<span class="op-foot">Toca para ver quién ha pasado por aquí</span></span>';
+  return '<span class="online-wrap"><button class="online-pill" data-act="whoOnline" aria-label="' + ids.length + ' conectados ahora">' +
+    '<span class="live-dot" aria-hidden="true"></span><span class="avs">' + ids.slice(0, 3).map(function (id) { return noTip(av(id, 'xs')); }).join('') + '</span>' +
+    '<b class="num">' + ids.length + '</b></button>' + pop + '</span>';
 }
 function presenceCard() {
   var ids = onlineIds(), pd = presenceData();
@@ -2547,7 +2569,7 @@ function whoList() {
 }
 var lastOnlineCount = 0;
 function onPresence() {
-  var t = document.getElementById('onlineSlot'); if (t) t.innerHTML = presencePill();
+  var t = document.getElementById('onlineSlot'); if (t) { var ph = presencePill(); if (t._h !== ph) { t.innerHTML = ph; t._h = ph; } }   /* sin repintar si no cambia: el popover no parpadea */
   var c = document.getElementById('presenceCard'); if (c) c.outerHTML = presenceCard();
   var w = document.getElementById('whoSheet'); if (w) w.innerHTML = whoList();
   var n = onlineIds().length;
