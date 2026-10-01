@@ -4,7 +4,7 @@
 var G = (function () {
   var DEFAULT_POINTS = [10, 8, 6, 5, 4, 3, 2, 1];
   var CATS = { deporte: 'Deporte', velocidad: 'Velocidad', ingenio: 'Ingenio', escondite: 'Escondite', mini: 'Minijuego', mesa: 'Mesa' };
-  var FORMATS = { bracket: 'Eliminatoria', league: 'Liguilla', teams: 'Por equipos', ranking: 'Clasificación' };
+  var FORMATS = { bracket: 'Eliminatoria 1 contra 1', league: 'Liguilla', teams: 'Por equipos', ranking: 'Individual' };
   var MODES = { order: 'Orden de llegada', high: 'Más es mejor', low: 'Menos es mejor' };
 
   function r2(x) { return Math.round(x * 100) / 100; }
@@ -362,16 +362,11 @@ var G = (function () {
     { key: 'ruleta', name: 'La ruleta de globos', cat: 'deporte', format: 'teams', teamRank: true, icon: 'shuffle', points: [8, 4], rules: 'Dos equipos en círculo, globos de agua en el centro. La botella-ruleta elige quién lanza (sin moverse) a uno del otro equipo; los demás huyen. Gana el equipo del último que quede.' },
     { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'low', unit: 's', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando. Sin manos, se balancea para tumbar latas del suelo. Gana el más rápido.' },
     { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'high', unit: 'm', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos (en metros).' },
-    { key: 'sprint', name: 'Sprint de 30 metros', cat: 'velocidad', format: 'ranking', mode: 'low', unit: 's', icon: 'bolt', rules: 'Tiempo en segundos. Los peques salen con ventaja.' },
     { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'high', unit: 'aciertos', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
-    { key: 'zapatilla', name: 'Lanzamiento de zapatilla', cat: 'mini', format: 'ranking', mode: 'high', unit: 'm', icon: 'shoe', rules: 'Tres intentos, cuenta el mejor. Metros medidos a pasos.' },
-    { key: 'ppt', name: 'Piedra, papel o tijera', cat: 'ingenio', format: 'bracket', icon: 'hand', rules: 'Al mejor de 3. Sin trampas de última hora.' },
     { key: 'pañuelo', name: 'El pañuelo', cat: 'velocidad', format: 'teams', icon: 'flag', rules: 'Dos equipos numerados. El que se lleva el pañuelo suma un punto.', points: [8, 4], allowDraw: true },
     { key: 'sillas', name: 'Sillas musicales', cat: 'mini', format: 'ranking', mode: 'order', icon: 'music', rules: 'Apunta en orden inverso: el primero es el que se queda con la última silla.' },
     { key: 'nerf', name: 'Nerf: atrapa la bandera', cat: 'deporte', format: 'teams', icon: 'flag', rules: 'Dos equipos con su bandera. Si te dan, a tu base a recargar. Gana quien lleve la bandera rival a su campo.', points: [10, 5], allowDraw: false },
     { key: 'gimcana', name: 'Gimcana', cat: 'velocidad', format: 'teams', teamRank: true, icon: 'search', rules: 'Pistas, pruebas y adivinanzas. Apunta el orden de llegada de los equipos.', points: [10, 7] },
-    { key: 'peso', name: 'Adivina el peso', cat: 'mini', format: 'ranking', mode: 'low', unit: 'g de error', icon: 'flame', rules: 'Cada uno dice un peso; se mira la etiqueta. Apunta los gramos de error: gana quien menos se equivoca.' },
-    { key: 'canasta', name: 'Canasta de papel', cat: 'mini', format: 'ranking', mode: 'high', unit: 'canastas', icon: 'ball', rules: 'Bolas de papel a una papelera, 5 tiros cada uno.' },
     { key: 'sonidos', name: '¡Caliente, caliente! La acción secreta', cat: 'ingenio', format: 'teams', teamRank: true, icon: 'music', points: [8, 5, 3], rules: 'Equipos de 4. Uno sale; los rivales escriben una acción secreta. Sus 3 compañeros solo pueden guiarle con sonidos de «bien» o «mal». 5 minutos. Gana quien lo logra más rápido.' },
     { key: 'libre', name: 'Juego nuevo', cat: 'mini', format: 'ranking', mode: 'order', icon: 'star', rules: '' }
   ];

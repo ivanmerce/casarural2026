@@ -50,7 +50,7 @@ function whoList() {
 }
 var lastOnlineCount = 0;
 function onPresence() {
-  var t = document.getElementById('onlineSlot'); if (t) { var ph = presencePill(); if (t._h !== ph) { t.innerHTML = ph; t._h = ph; } }   /* sin repintar si no cambia: el popover no parpadea */
+  var t = document.getElementById('onlineSlot'); if (t) { var ph = presencePill(); if (t._h !== ph) { t.innerHTML = ph; t._h = ph; if (typeof fitChrome === "function") fitChrome(); } }   /* sin repintar si no cambia: el popover no parpadea */
   var c = document.getElementById('presenceCard'); if (c) c.outerHTML = presenceCard();
   var w = document.getElementById('whoSheet'); if (w) w.innerHTML = whoList();
   var n = onlineIds().length;

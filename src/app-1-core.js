@@ -164,6 +164,8 @@ var IC = {
   flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
   minus: '<path d="M5 12h14"/>',
+up: '<path d="M6 15l6-6 6 6"/>',
+down: '<path d="M6 9l6 6 6-6"/>',
   back: '<path d="M19 12H5M11 18l-6-6 6-6"/>',
   play: '<path d="M7 4.5v15l12-7.5z"/>',
   shuffle: '<path d="M3 7h3.5c4 0 5.5 10 10 10H21M3 17h3.5c1.6 0 2.8-1.6 3.8-3.5M14 10.5C15 8.6 16.2 7 17.8 7H21"/><path d="m18 4 3 3-3 3M18 14l3 3-3 3"/>',
@@ -270,15 +272,29 @@ function renderTop() {
   $top.innerHTML =
     '<button class="wordmark" data-act="logo" aria-label="' + esc(S.trip.name) + ', ir a inicio">' + wordmarkHtml(S.trip.name, tripEyebrow()) + '</button>' +
     '<span class="sp"></span>' +
-    '<button class="cam-btn cam-cta" data-act="tab" data-tab="album" aria-label="Sube tus fotos al álbum"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '<span class="cam-txt"><b>Sube</b> tus fotos</span></button>' +
+    '<button class="icon-btn cam-btn" data-act="tab" data-tab="album" aria-label="Sube tus fotos al álbum" title="Sube tus fotos"' + (ui.tab === 'album' ? ' aria-current="page"' : '') + '>' + icon('camera') + '</button>' +
     '<span id="onlineSlot">' + presencePill() + '</span>' +
     '<button class="me-btn" data-act="menu" aria-label="Quién eres y más opciones">' + av(p.id, 'sm') + '<span style="display:flex;flex-direction:column;align-items:flex-start;line-height:1.1"><span style="font-weight:700;font-size:.9rem">' + esc(p.name) + '</span><span class="role">' + ROLE[p.role] + '</span></span></button>';
 }
 function renderNav() {
   $nav.innerHTML = '<div class="nav-in">' + TABS.map(function (t) {
-    return '<button data-act="tab" data-tab="' + t.k + '"' + (ui.tab === t.k ? ' aria-current="page"' : '') + '>' + icon(t.i) + '<span>' + t.t + '</span></button>';
+    return '<button data-act="tab" data-tab="' + t.k + '" aria-label="' + t.t + '"' + (ui.tab === t.k ? ' aria-current="page"' : '') + '>' + icon(t.i) + '<span>' + t.t + '</span></button>';
   }).join('') + '</div>';
 }
+/* Encaje a prueba de pantallas estrechas y de letra grande (zoom de texto del móvil):
+   se mide de verdad y, si algo no cabe, se va simplificando por pasos. Nunca se solapa nada */
+var FIT_TOP = ['fit1', 'fit2', 'fit3', 'fit4'], FIT_NAV = ['nav-tight', 'nav-icons'];
+function navOverflows() { return [].some.call($nav.querySelectorAll('.nav-in button'), function (b) { var s = b.querySelector('span'); return s && s.offsetWidth && s.offsetWidth > b.clientWidth - 4; }); }
+function topOverflows() { return $top.scrollWidth > $top.clientWidth + 1; }
+function fitChrome() {
+  if (!$top || !$nav) return;
+  FIT_TOP.forEach(function (c) { $top.classList.remove(c); });
+  for (var i = 0; i < FIT_TOP.length && topOverflows(); i++) $top.classList.add(FIT_TOP[i]);
+  FIT_NAV.forEach(function (c) { $nav.classList.remove(c); });
+  for (var j = 0; j < FIT_NAV.length && navOverflows(); j++) $nav.classList.add(FIT_NAV[j]);
+}
+var fitT; window.addEventListener('resize', function () { clearTimeout(fitT); fitT = setTimeout(fitChrome, 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitChrome(); });
 var VIEWS = {};
 var afterRender = [];
 function render(keepScroll) {
@@ -287,7 +303,7 @@ function render(keepScroll) {
   afterRender = [];
   var fn = VIEWS[ui.tab] || VIEWS.inicio;
   $main.innerHTML = '<div class="view" data-view="' + ui.tab + '">' + fn() + '</div>';
-  renderTop(); renderNav();
+  renderTop(); renderNav(); fitChrome();
   afterRender.forEach(function (f) { f(); });
   if (keepScroll) window.scrollTo(0, y);
   if (typeof secretsOnView === 'function') secretsOnView();

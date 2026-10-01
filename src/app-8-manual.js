@@ -21,7 +21,7 @@ VIEWS.manual = function () {
     ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con la casilla de <b>precio real</b>. Al tocar un producto podéis decidir si se compra <b>antes de ir</b> o <b>allí</b>; entonces aparecen los filtros para verlo de un vistazo.', 'compra'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Si alguien no come ese día, toca los comensales: las cantidades se ajustan solas.', 'comidas'],
     ['plans', 'Planes', 'El planning de cada día, con plan B si llueve. Dale al corazón a lo que te apetezca.', 'planes'],
-    ['trophy', 'Juegos y ranking', 'Hockey, ping-pong, Nerf, la gimcana de los pekes y minijuegos cada día. Los editores apuntan resultados y el <b>ranking</b> se actualiza solo.', 'juegos'],
+    ['trophy', 'Juegos y ranking', 'Sin horarios: elegid el que apetezca. Cada juego tiene su <b>ficha</b> (individual o por equipos, pasos, cómo se gana y cómo se apunta). Los editores apuntan resultados (con flechas para corregir el orden) y el <b>ranking</b> se actualiza solo.', 'juegos'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.', 'juegos'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores.', 'album'],
     ['house', 'La Finca', '<b>Dormir</b> (plano y habitaciones), <b>Práctico</b> (Wi-Fi, registro, normas, si se va la luz, antes de irnos) y <b>Compras</b> (tiendas del pueblo; el domingo solo abre una).', 'finca', 'info'],

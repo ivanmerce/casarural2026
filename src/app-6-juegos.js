@@ -39,6 +39,42 @@ function gPointsText(g) {
 }
 function medal(pos) { return pos === 1 ? '<span class="medal g">1</span>' : pos === 2 ? '<span class="medal s">2</span>' : pos === 3 ? '<span class="medal b">3</span>' : '<span class="medal">' + (pos || '–') + '</span>'; }
 
+/* ---------- Ficha: modalidad, cómo se gana, cómo se apunta ---------- */
+function gModal(g) {
+  var n = (g.entrants || []).length;
+  if (g.format === 'bracket') return 'Individual · eliminatoria 1 contra 1';
+  if (g.format === 'league') return 'Individual · todos contra todos';
+  if (g.format === 'teams') { var T = (g.teams || []).length || g.teamsN || 2; return 'Por equipos · ' + T + ' equipos' + (n ? ' de ' + (Math.floor(n / T) === Math.ceil(n / T) ? Math.floor(n / T) : Math.floor(n / T) + '-' + Math.ceil(n / T)) : ''); }
+  return 'Individual · cada uno por su cuenta';
+}
+function gWinText(g) {
+  if (g.win) return g.win;
+  var u = g.unit || 'puntos';
+  if (g.format === 'bracket') return 'Gana quien gana la final. Quien cae en semis o antes, queda según la ronda.';
+  if (g.format === 'league') return 'Gana quien más puntos suma en la tabla (victoria 3, empate 1).';
+  if (g.format === 'teams') return g.teamRank ? 'Gana el equipo que queda primero.' : 'Gana el equipo que gana más partidos.';
+  if (g.mode === 'high') return 'Gana quien consigue más (' + u + ').';
+  if (g.mode === 'low') return 'Gana quien consigue menos (' + u + ').';
+  return 'Gana el primero de la lista.';
+}
+function gScoreText(g) {
+  if (g.score) return g.score;
+  if (g.format === 'bracket') return 'Pulsa «Sortear cuadro». En cada partido, suma con + y – y pulsa «Terminar», o toca el nombre del ganador. El cuadro avanza solo.';
+  if (g.format === 'league') return 'En cada partido, suma con + y – y pulsa «Terminar», o toca el nombre del ganador. La tabla se ordena sola.';
+  if (g.format === 'teams') return 'Pulsa «Sortear» (equipos equilibrados por edades; toca a alguien para cambiarle de equipo). ' + (g.teamRank ? 'Al acabar, toca los equipos en orden: primero el ganador. Con las flechas se corrige el orden.' : 'Suma los goles con + y – y pulsa «Terminar», o toca el equipo ganador. ¿Revancha? «Otro partido».');
+  if (g.mode === 'high' || g.mode === 'low') return 'Escribe el resultado de cada uno (' + (g.unit || 'puntos') + '). La clasificación se ordena sola; si dos empatan, comparten puesto.';
+  return 'Toca a cada uno en orden: primero el ganador, luego el segundo… Con las flechas se corrige el orden.';
+}
+function gFicha(g) {
+  var how = g.how && g.how.length ? g.how : (g.rules ? [g.rules] : []);
+  return '<section class="card g-ficha"><dl class="g-dl">' +
+    '<div><dt>' + icon('users') + 'Modalidad</dt><dd>' + esc(gModal(g)) + ' · ' + (g.entrants || []).length + ' jugadores</dd></div>' +
+    '<div><dt>' + icon('trophy') + 'Cómo se gana</dt><dd>' + esc(gWinText(g)) + '</dd></div>' +
+    '<div><dt>' + icon('star') + 'Puntos</dt><dd>' + gPointsText(g) + (g.format === 'teams' ? ' · cada jugador del equipo se lleva los puntos de su puesto' : '') + '</dd></div></dl>' +
+    (how.length ? '<details class="rules how" open><summary>Cómo se juega</summary>' + (how.length > 1 ? '<ol class="how-list">' + how.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' : '<p class="small">' + esc(how[0]) + '</p>') + '</details>' : '') +
+    '<p class="small g-score">' + icon('edit') + '<span><b>Cómo se apunta:</b> ' + esc(gScoreText(g)) + '</span></p></section>';
+}
+
 /* ---------- Tarjeta de Inicio ---------- */
 function compCard() {
   var rank = G.ranking(S), leader = rank.filter(function (r) { return r.pos === 1 && r.pts > 0; });
@@ -99,8 +135,8 @@ function gameView(g) {
   var h = '<div class="g-top"><button class="icon-btn" data-act="gBack" aria-label="Volver a juegos">' + icon('back') + '</button><div class="grow"><span class="eyebrow">' + esc(G.CATS[g.cat] || '') + ' · ' + G.FORMATS[g.format] + '</span><h2>' + esc(g.name) + '</h2></div>' +
     (ed ? '<button class="icon-btn" data-act="gEdit" data-id="' + g.id + '" aria-label="Editar juego">' + icon('edit') + '</button>' : '') + '</div>';
   h += '<div class="facts"><span class="pill ' + GST[st][1] + '">' + GST[st][0] + '</span><span class="fact">' + icon('clock') + gWhen(g) + '</span>' + (g.where ? '<span class="fact">' + icon('pin') + esc(g.where) + '</span>' : '') + '<span class="fact">' + icon('users') + (g.entrants || []).length + '</span></div>';
+  h += gFicha(g);
   if (g.needs) h += '<p class="small needs">' + icon('umbrella') + '<span><b>Material:</b> ' + esc(g.needs) + '</span></p>';
-  if (g.rules) h += '<details class="rules"><summary>Reglas</summary><p class="small">' + esc(g.rules) + '</p></details>';
   if (act) h += '<button class="link small" data-act="tab" data-tab="planes">En el planning: ' + esc(dayOf(act.day).short) + ' ' + act.start + ' · ' + esc(act.title) + ' ' + icon('arrow') + '</button>';
   if (!ed) h += '<p class="small pill pend" style="white-space:normal">Modo lector: ves los resultados en directo. Los apuntan los editores.</p>';
 
@@ -169,8 +205,8 @@ function teamsHtml(g, ed) {
   if (teams.length < 2) return h;
   if (g.teamRank) {
     var ord = g.order || [];
-    h += '<section class="card"><h3>Orden de llegada</h3><p class="small muted">' + (ed ? 'Toca los equipos según terminan: el primero que toques es el ganador.' : 'Así van.') + '</p><div class="stack" style="gap:8px">' +
-      teams.map(function (t, i) { var p = ord.indexOf(t.id); return '<button class="order-btn tc' + (i % 4 + 1) + (p >= 0 ? ' placed' : '') + '" data-act="gTeamOrder" data-g="' + g.id + '" data-t="' + t.id + '"' + (ed ? '' : ' disabled') + '>' + (p >= 0 ? medal(p + 1) : '<span class="medal">·</span>') + '<b class="grow">' + esc(t.name) + '</b><span class="avs">' + t.members.slice(0, 5).map(function (id) { return eAv(id, 'xs'); }).join('') + '</span></button>'; }).join('') + '</div></section>';
+    h += '<section class="card"><h3>Orden de llegada</h3><p class="small muted">' + (ed ? 'Toca los equipos según terminan: el primero que toques es el ganador (el último se coloca solo). Tócalo otra vez para quitarlo.' : 'Así van.') + '</p><div class="stack" style="gap:8px">' +
+      teams.map(function (t, i) { return { t: t, i: i, p: ord.indexOf(t.id) }; }).sort(function (a, b) { return (a.p < 0 ? 99 : a.p) - (b.p < 0 ? 99 : b.p) || a.i - b.i; }).map(function (x) { var t = x.t, i = x.i, p = x.p; return '<div class="ord-li"><button class="order-btn tc' + (i % 4 + 1) + (p >= 0 ? ' placed' : '') + '" data-act="gTeamOrder" data-g="' + g.id + '" data-t="' + t.id + '"' + (ed ? '' : ' disabled') + '>' + (p >= 0 ? medal(p + 1) : '<span class="medal">·</span>') + '<b class="grow">' + esc(t.name) + '</b><span class="avs">' + t.members.slice(0, 5).map(function (id) { return eAv(id, 'xs'); }).join('') + '</span></button>' + (ed && p >= 0 && ord.length > 1 ? mvBtns(g.id, 't', t.id, p, ord.length) : '') + '</div>'; }).join('') + '</div></section>';
     return h;
   }
   var names = {}; teams.forEach(function (t) { names[t.id] = esc(t.name); });
@@ -178,12 +214,15 @@ function teamsHtml(g, ed) {
   if (ed) h += '<button class="btn ghost" data-act="gAddMatch" data-id="' + g.id + '">' + icon('plus') + 'Otro partido (revancha)</button>';
   return h;
 }
+function mvBtns(gid, kind, id, i, n) {
+  return '<span class="ord-mv"><button class="icon-btn sm" data-act="gMove" data-g="' + gid + '" data-' + kind + '="' + id + '" data-d="-1" aria-label="Subir un puesto"' + (i ? '' : ' disabled') + '>' + icon('up') + '</button><button class="icon-btn sm" data-act="gMove" data-g="' + gid + '" data-' + kind + '="' + id + '" data-d="1" aria-label="Bajar un puesto"' + (i < n - 1 ? '' : ' disabled') + '>' + icon('down') + '</button></span>';
+}
 function rankingInputHtml(g, ed) {
   var mode = g.mode || 'order', ents = g.entrants || [];
   if (mode === 'order') {
     var ord = (g.order || []).filter(function (id) { return ents.indexOf(id) >= 0; }), rest = ents.filter(function (id) { return ord.indexOf(id) < 0; });
     var h = '<section class="card"><h3>' + (g.cat === 'escondite' ? 'Mejor escondidos' : 'Clasificación') + '</h3><p class="small muted">' + (ed ? (g.cat === 'escondite' ? 'Apunta primero al ÚLTIMO en aparecer: es el mejor escondido. Luego el penúltimo, y así.' : 'Toca a cada uno en orden: primero, segundo, tercero…') : 'Así va la clasificación.') + '</p>';
-    if (ord.length) h += '<ol class="order-list">' + ord.map(function (id, i) { return '<li><button class="order-btn placed" data-act="gOrder" data-g="' + g.id + '" data-e="' + id + '"' + (ed ? '' : ' disabled') + '>' + medal(i + 1) + eAv(id, 'sm') + '<b class="grow">' + eName(id) + '</b>' + (ed ? icon('x') : '') + '</button></li>'; }).join('') + '</ol>';
+    if (ord.length) h += '<ol class="order-list">' + ord.map(function (id, i) { return '<li class="ord-li"><button class="order-btn placed" data-act="gOrder" data-g="' + g.id + '" data-e="' + id + '"' + (ed ? ' aria-label="Quitar a ' + esc(eText(id)) + ' de la lista"' : ' disabled') + '>' + medal(i + 1) + eAv(id, 'sm') + '<b class="grow">' + eName(id) + '</b>' + (ed ? icon('x') : '') + '</button>' + (ed ? mvBtns(g.id, 'e', id, i, ord.length) : '') + '</li>'; }).join('') + '</ol>';
     if (rest.length) h += '<span class="eyebrow">' + (ord.length ? 'Faltan' : 'Participantes') + '</span><div class="pick-grid">' + rest.map(function (id) { return '<button class="pick" data-act="gOrder" data-g="' + g.id + '" data-e="' + id + '"' + (ed ? '' : ' disabled') + '>' + eAv(id, 'md') + '<span>' + eName(id) + '</span></button>'; }).join('') + '</div>';
     if (ed && ord.length) h += '<div class="row wrap"><button class="btn ghost" data-act="gOrderUndo" data-g="' + g.id + '">' + icon('undo') + 'Deshacer</button><button class="btn ghost" data-act="gOrderClear" data-g="' + g.id + '">Borrar orden</button></div>';
     return h + '</section>';
@@ -342,7 +381,8 @@ function gameSheet(id) {
     '<div class="field"><label for="g-points">Puntos por puesto (1.º, 2.º, 3.º…)</label><input id="g-points" inputmode="numeric" value="' + esc((g.points && g.points.length ? g.points : G.DEFAULT_POINTS).join(', ')) + '"></div>' +
     '<div class="field"><label for="g-part">Puntos por participar (resto)</label><input id="g-part" inputmode="numeric" value="' + (g.part != null ? g.part : 1) + '"></div>' +
     '<div class="field"><span class="lbl">Quién juega · <span id="g-count">' + draft.entrants.length + '</span></span><div class="row wrap"><button type="button" class="chip" data-act="gPickAll" data-v="all">Todos</button><button type="button" class="chip" data-act="gPickAll" data-v="day">Los que están hoy</button><button type="button" class="chip" data-act="gPickAll" data-v="none">Nadie</button></div>' + pickList('gPick', id, draft.entrants, 'entrants') + '</div>' +
-    '<div class="field"><label for="g-rules">Reglas</label><textarea id="g-rules">' + esc(g.rules || '') + '</textarea></div>' +
+    '<div class="field"><label for="g-rules">Cómo se juega (un paso por línea)</label><textarea id="g-rules" rows="7">' + esc((g.how && g.how.length ? g.how : g.rules ? [g.rules] : []).join('\n')) + '</textarea></div>' +
+    '<div class="field"><label for="g-win">Cómo se gana</label><input id="g-win" value="' + esc(g.win || '') + '" placeholder="' + esc(gWinText(Object.assign({}, g, { win: null }))) + '"></div>' +
     '<div class="field"><label for="g-needs">Material que hace falta</label><input id="g-needs" value="' + esc(g.needs || '') + '"></div>' +
     '<div class="sheet-actions"><button class="btn primary" data-act="gSave">Guardar</button><button class="btn danger" data-act="gDel" data-id="' + id + '">' + icon('trash') + 'Borrar juego</button></div>');
 }
@@ -352,7 +392,7 @@ function saveGame() {
   var fmt = val('g-format'), changedFmt = fmt !== g.format, oldE = (g.entrants || []).join(','), newE = draft.entrants.join(',');
   if (changedFmt && gHasAny(g) && !draft.confirmFmt) { draft.confirmFmt = true; toast('Cambiar el formato borra los resultados de este juego. Pulsa Guardar otra vez para confirmarlo'); return; }
   g.name = name; g.cat = val('g-cat'); g.mode = draft.mode; g.unit = val('g-unit').trim() || null; g.allowDraw = !!draft.allowDraw; g.teamRank = !!draft.teamRank;
-  g.day = null; g.time = null; g.where = val('g-where').trim(); g.rules = val('g-rules').trim(); g.needs = val('g-needs').trim();
+  g.day = null; g.time = null; g.where = val('g-where').trim(); var steps = val('g-rules').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); g.how = steps; g.rules = steps.join(' '); g.win = val('g-win').trim() || null; g.needs = val('g-needs').trim();
   var pts = val('g-points').split(/[^\d]+/).filter(Boolean).map(Number); g.points = pts.length ? pts : null;
   var part = parseInt(val('g-part'), 10); g.part = isNaN(part) ? 1 : part;
   g.entrants = draft.entrants.slice();
@@ -378,7 +418,7 @@ function createGame(key) {
   var t = G.TEMPLATES.find(function (x) { return x.key === key; }); if (!t) return;
   var today = new Date().toISOString().slice(0, 10), day = S.days.some(function (d) { return d.k === today; }) ? today : null;
   var g = { id: uid('g'), sort: (S.games || []).length + 1, name: t.name, cat: t.cat, format: t.format, icon: t.icon, day: day, time: null, where: '', rules: t.rules || '', needs: '', entrants: G.presentList(S, day) };
-  ['mode', 'unit', 'points', 'allowDraw'].forEach(function (k) { if (t[k] != null) g[k] = t[k]; });
+  ['mode', 'unit', 'points', 'allowDraw', 'teamRank', 'teamsN'].forEach(function (k) { if (t[k] != null) g[k] = t[k]; });
   S.games = S.games || []; S.games.push(ensureGame(g));
   save(); closeSheet(); ui.game = g.id; ui.jsub = 'juegos'; render(); window.scrollTo(0, 0); gameSheet(g.id);
 }
@@ -462,6 +502,7 @@ Object.assign(A, {
   gOrder: function (el) {
     if (!gGuard()) return; var g = gById(el.dataset.g), id = el.dataset.e, before = champOf(g); g.order = g.order || [];
     var k = g.order.indexOf(id); if (k >= 0) g.order.splice(k, 1); else g.order.push(id);
+    if (k < 0) { var left = (g.entrants || []).filter(function (x) { return g.order.indexOf(x) < 0; }); if (left.length === 1 && g.order.length > 1) g.order.push(left[0]); }   /* el último se coloca solo */
     if (k < 0 && navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
     afterResult(g, before);
   },
@@ -473,12 +514,18 @@ Object.assign(A, {
   gTeamOrder: function (el) {
     if (!gGuard()) return; var g = gById(el.dataset.g), id = el.dataset.t, before = champOf(g); g.order = g.order || [];
     var k = g.order.indexOf(id); if (k >= 0) g.order.splice(k, 1); else g.order.push(id);
+    if (k < 0) { var left = (g.teams || []).filter(function (t) { return g.order.indexOf(t.id) < 0; }); if (left.length === 1) g.order.push(left[0].id); }   /* el último equipo se coloca solo */
     afterResult(g, before);
+  },
+  gMove: function (el) {
+    if (!gGuard()) return; var g = gById(el.dataset.g), id = el.dataset.e || el.dataset.t, d = +el.dataset.d, o = g.order || [], i = o.indexOf(id), j = i + d;
+    if (i < 0 || j < 0 || j >= o.length) return; var before = champOf(g);
+    o[i] = o[j]; o[j] = id; afterResult(g, before);
   },
   gShuffleTeams: function (el) {
     if (!gGuard()) return; var g = gById(el.dataset.id);
     if ((g.matches || []).some(function (m) { return m.w || m.sa != null; }) && !el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = 'Hay resultados: toca otra vez para sortear'; return; }
-    var n = Math.max(2, (g.teams || []).length || (g.teamRank ? 4 : 2)), names = (g.teams || []).map(function (t) { return t.name; });
+    var n = Math.max(2, (g.teams || []).length || g.teamsN || 2), names = (g.teams || []).map(function (t) { return t.name; });
     g.teams = G.balancedTeams(S, g.entrants || [], n); g.teams.forEach(function (t, i) { if (names[i]) t.name = names[i]; });
     if (!g.teamRank) g.matches = G.roundRobin(g.teams.map(function (t) { return t.id; })); else g.order = [];
     save(); render(true); toast('Equipos sorteados y equilibrados por edades');

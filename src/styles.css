@@ -1152,16 +1152,40 @@ img, svg, canvas { max-width: 100%; }
 .plan-room.k-bath .pdots { margin-top: 2px; }
 @keyframes spyBlink { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, #F2C65A 40%, transparent); } }
 .code-pop:not(:has(svg)) { font-size: 34px; }
-/* ---------- «Sube tus fotos»: la cámara de arriba se explica sola ---------- */
-.cam-btn.cam-cta { width: auto; height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 11px; border-radius: 999px; border: 0;
-  background: var(--accent); color: var(--on-accent, #fff); font-weight: 800; font-size: .88rem; white-space: nowrap;
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); animation: camPulse 2.8s ease-in-out infinite; }
-.cam-btn.cam-cta .ico { width: 20px; height: 20px; flex: none; }
-.cam-btn.cam-cta .cam-txt b { font-weight: 800; }
-.cam-btn.cam-cta[aria-current="page"] { animation: none; box-shadow: none; filter: brightness(.92); }
-@keyframes camPulse { 0%, 100% { box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 30%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent), 0 6px 18px color-mix(in srgb, var(--accent) 35%, transparent); } }
-/* en móviles estrechos: «Fotos» (corto pero claro) */
-@media (max-width: 560px) { .cam-btn.cam-cta .cam-txt { font-size: 0; } .cam-btn.cam-cta .cam-txt::after { content: "Sube fotos"; font-size: .8rem; } .cam-btn.cam-cta { padding: 0 11px 0 9px; gap: 5px; } }
-@media (max-width: 420px) { .cam-btn.cam-cta .cam-txt::after { content: "Fotos"; } }
-@media (max-width: 360px) { .cam-btn.cam-cta .cam-txt { display: none; } .cam-btn.cam-cta { padding: 0 10px; } }
-@media (prefers-reduced-motion: reduce) { .cam-btn.cam-cta { animation: none; } }
+/* ---------- Barra superior y barra inferior: nunca se solapan (v0.7.28) ---------- */
+.topbar > * { flex: none; }
+.topbar > .sp { flex: 1 1 0; min-width: 0; }
+.wm-txt b, .wm-txt small, .me-btn span, .online-pill { white-space: nowrap; }
+.cam-btn { color: var(--accent); }
+.cam-btn .ico { width: 22px; height: 22px; }
+/* pasos de encaje (los pone fitChrome() midiendo): 1 sin nombre, 2 sin caras, 3 marca compacta, 4 solo el logo */
+.topbar.fit1 .me-btn > span:last-child { display: none !important; }
+.topbar.fit1 .me-btn { padding-right: 4px; }
+.topbar.fit2 .online-pill .avs { display: none; }
+.topbar.fit3 .wm-txt small { display: none; }
+.topbar.fit3 .wm-txt b { font-size: 1.1rem; }
+.topbar.fit4 .wm-txt { display: none; }
+.nav button { min-width: 0; overflow: hidden; }
+.nav button span { white-space: nowrap; }
+.nav.nav-tight button { font-size: .6rem; letter-spacing: -.02em; gap: 2px; }
+.nav.nav-icons button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nav.nav-icons button .ico { width: 26px; height: 26px; }
+.nav.nav-icons button[aria-current="page"] .ico { transform: none; }
+
+/* v0.7.27 · Ficha de cada juego y reordenar puestos */
+.g-ficha { display: flex; flex-direction: column; gap: 10px; }
+.g-dl { margin: 0; display: grid; gap: 8px; }
+.g-dl > div { display: grid; grid-template-columns: minmax(118px, 30%) 1fr; gap: 10px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.g-dl dt { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.g-dl dt .ico { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.g-dl dd { margin: 0; font-size: .98rem; line-height: 1.4; }
+.how-list { margin: 6px 0 0; padding-left: 0; list-style: none; counter-reset: how; display: flex; flex-direction: column; gap: 8px; }
+.how-list li { counter-increment: how; position: relative; padding-left: 36px; line-height: 1.45; font-size: .97rem; }
+.how-list li::before { content: counter(how); position: absolute; left: 0; top: -1px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .85rem; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.g-score { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--ok) 10%, transparent); }
+.g-score .ico { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--ok); }
+.ord-li { display: flex; align-items: center; gap: 6px; }
+.ord-li > .order-btn { flex: 1; min-width: 0; }
+.ord-mv { display: flex; flex-direction: column; gap: 4px; flex: none; }
+.ord-mv .icon-btn:disabled { opacity: .3; }
+@media (max-width: 420px) { .g-dl > div { grid-template-columns: 1fr; gap: 2px; } }
