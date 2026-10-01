@@ -4895,7 +4895,7 @@ function regCardHome() {
       (pend.length ? '<p class="eyebrow">Faltan</p><div class="reg-who">' + pend.map(function (p) { return '<span class="who-chip pend">' + av(p.id, 'xs') + esc(p.name) + '</span>'; }).join('') + '</div>' : '') +
       (done.length ? '<p class="eyebrow">Ya registrados</p><div class="reg-who">' + done.map(function (p) { return '<span class="who-chip ok">' + av(p.id, 'xs') + esc(p.name) + ' ✓</span>'; }).join('') + '</div>' : '') +
       '<div class="row wrap fold-actions">' +
-      (pend.length ? '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(regNag(pend)) + '" target="_blank" rel="noopener">' + icon('bell') + 'Recordárselo por WhatsApp</a>' : '') +
+      (pend.length ? '<a class="btn" href="https://wa.me/?text=' + encodeURIComponent(regNag(pend)) + '" target="_blank" rel="noopener">' + icon('phone') + 'Recordárselo por WhatsApp</a>' : '') +
       '<button class="btn ghost" data-act="tab" data-tab="finca" data-fsub="info">' + icon('edit') + 'Ir al registro</button></div>' +
       '<p class="small muted">Cada uno marca su nombre en La Finca cuando ha rellenado el formulario. Lo ve toda la familia.</p></div>';
   }
