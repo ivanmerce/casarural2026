@@ -263,6 +263,33 @@ var L = (function () {
     return f.w ? f[f.w] : null;
   }
 
-  return { gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  /* Productos parecidos: para avisar antes de duplicar la compra.
+     Normaliza (minúsculas, sin acentos ni paréntesis), quita palabras vacías y compara raíces. */
+  var STOP = { de: 1, del: 1, la: 1, las: 1, el: 1, los: 1, y: 1, con: 1, para: 1, en: 1, al: 1, a: 1, un: 1, una: 1, extra: 1, tipo: 1, o: 1 };
+  function stems(name) {
+    var s = String(name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\([^)]*\)/g, ' ').replace(/[^a-z0-9ñ ]+/g, ' ');
+    return s.split(/\s+/).filter(function (w) { return w && !STOP[w] && w.length >= 3 && !/^\d+$/.test(w); })
+      .map(function (w) { return w.replace(/s$/, '').replace(/[aeo]$/, ''); });
+  }
+  function lev1(a, b) {   /* ¿distancia de edición ≤ 1? (erratas tipo «butifara») */
+    if (a === b) return true; if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 5) return false;
+    var i = 0, j = 0, d = 0;
+    while (i < a.length && j < b.length) { if (a[i] === b[j]) { i++; j++; continue; } if (++d > 1) return false; if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; } }
+    return d + (a.length - i) + (b.length - j) <= 1;
+  }
+  function similarItems(items, name, excludeId) {
+    var A = stems(name); if (!A.length) return [];
+    var out = [];
+    (items || []).forEach(function (it) {
+      if (it.id === excludeId) return;
+      var B = stems(it.name); if (!B.length) return;
+      var inter = A.filter(function (a) { return B.some(function (b) { return lev1(a, b); }); }).length;
+      var score = inter / Math.min(A.length, B.length), head = lev1(A[0], B[0]);
+      var same = A.join(' ') === B.join(' ');
+      if (same || score >= .67 || (head && score >= .5)) out.push({ item: it, same: same, score: same ? 2 : score });
+    });
+    return out.sort(function (x, y) { return y.score - x.score; });
+  }
+  return { similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;

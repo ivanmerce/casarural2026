@@ -14,11 +14,11 @@ function famOptions(cur, allowNone) {
 /* ---------- Ingrediente ---------- */
 function itemSheet(id) {
   var i = id ? S.ingredients.find(function (x) { return x.id === id; }) : { id: null, name: '', cat: 'fresco', qty: 1, unit: 'u', meals: ui.mealFilter ? [ui.mealFilter] : [], family: ui.fam && ui.fam !== 'all' ? ui.fam : me().family, status: 'pendiente', cost: null, split: 'comun', note: '' };
-  draft = { id: i.id, status: i.status, split: i.split || 'comun', meals: i.meals.slice(), buy: i.buy || '' };
+  draft = { id: i.id, status: i.status, split: i.split || 'comun', meals: i.meals.slice(), buy: i.buy || '', name0: i.name || '', dupOk: false };
   var dis = can('edit') ? '' : ' disabled';
   openSheet(
     '<h2>' + (id ? 'Ingrediente' : 'Nuevo ingrediente') + '</h2>' + roNote() +
-    '<div class="field"><label for="f-name">Nombre</label><input id="f-name" value="' + esc(i.name) + '"' + dis + ' placeholder="Ej.: Butifarras"></div>' +
+    '<div class="field"><label for="f-name">Nombre</label><input id="f-name" value="' + esc(i.name) + '"' + dis + ' placeholder="Ej.: Butifarras"><div id="dup-warn" aria-live="polite"></div></div>' +
     '<div class="grid2"><div class="field"><label for="f-qty">Cantidad</label><input id="f-qty" inputmode="decimal" value="' + L.n(i.qty) + '"' + dis + '></div><div class="field"><label for="f-unit">Unidad</label><input id="f-unit" value="' + esc(i.unit) + '"' + dis + '></div></div>' +
     '<div class="grid2"><div class="field"><label for="f-cat">Categoría</label><select id="f-cat"' + dis + '>' + Object.keys(CATS).map(function (c) { return '<option value="' + c + '"' + (i.cat === c ? ' selected' : '') + '>' + CATS[c] + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label for="f-fam">Lo compra</label><select id="f-fam"' + dis + '>' + famOptions(i.family, true) + '</select></div></div>' +
@@ -36,8 +36,30 @@ function itemSheet(id) {
     (can('edit') ? '<div class="sheet-actions"><button class="btn primary" data-act="saveItem">Guardar</button>' + (id ? '<button class="btn" data-act="dupItem" data-id="' + id + '">' + icon('copy') + 'Duplicar</button><button class="btn danger" data-act="delItem" data-id="' + id + '">' + icon('trash') + 'Borrar</button>' : '') + '</div>' : '<button class="btn block" data-act="close">Cerrar</button>')
   );
 }
+/* ---------- Aviso de duplicados: que nadie compre dos veces lo mismo ---------- */
+var dupT;
+function dupMatches() { var n = val('f-name').trim(); if (!n || (draft.id && n === draft.name0)) return []; return L.similarItems(S.ingredients, n, draft.id).slice(0, 3); }
+function dupWarn() {
+  var box = document.getElementById('dup-warn'); if (!box) return;
+  var m = dupMatches(); draft.dupOk = false; var b = document.querySelector('[data-act=saveItem]'); if (b) b.textContent = 'Guardar';
+  if (!m.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="dup-warn"><p class="small"><b>' + (m[0].same ? '¡Ojo! Esto ya está en la lista.' : 'Ojo: puede que ya esté en la lista.') + '</b> Revísalo antes de añadirlo, que no queremos comprarlo dos veces.</p>' +
+    m.map(function (x) {
+      var it = x.item, f = fam(it.family);
+      var who = it.status === 'casa' ? 'viene de casa' + (f ? ' (' + esc(f.name) + ')' : '') : f ? 'ya tiene dueño: <b>' + esc(f.name) + '</b>' : 'todavía sin dueño';
+      var ms = (it.meals || []).map(function (mid) { var ml = meal(mid); return ml ? esc(dayOf(ml.day).short) + ' ' + slotName(ml.slot).toLowerCase() : ''; }).filter(Boolean).join(', ');
+      return '<div class="dup-row"><span class="grow"><b>' + esc(it.name) + '</b> · ' + L.n(it.qty) + ' ' + esc(it.unit) + '<small class="muted" style="display:block">' + who + (ms ? ' · ' + ms : '') + '</small></span><button type="button" class="btn ghost" data-act="dupSee" data-id="' + it.id + '">Ver</button></div>';
+    }).join('') + '</div>';
+}
 function saveItem() {
   var name = val('f-name').trim(); if (!name) { toast('Ponle nombre al ingrediente'); return; }
+  if (!draft.dupOk && dupMatches().length) {
+    dupWarn(); draft.dupOk = true;
+    var b = document.querySelector('[data-act=saveItem]'); if (b) b.textContent = 'No es lo mismo: guardar';
+    var w = document.getElementById('dup-warn'); if (w && w.scrollIntoView) w.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    toast('Ya hay algo parecido en la lista. Si no es lo mismo, vuelve a tocar Guardar');
+    return;
+  }
   var o = draft.id ? S.ingredients.find(function (x) { return x.id === draft.id; }) : { id: uid('i'), est: null };
   o.name = name; o.qty = numVal('f-qty') || 1; o.unit = val('f-unit').trim() || 'u'; o.cat = val('f-cat'); o.family = val('f-fam') || null;
   o.status = draft.status; o.split = draft.split; o.meals = draft.meals; o.note = val('f-note').trim(); o.buy = draft.buy || null;
@@ -487,6 +509,7 @@ var A = {
   howToggle: function () { ui.howClosed = !ui.howClosed; saveUi(); render(true); },
   newItem: function () { if (guard('edit')) itemSheet(null); },
   saveItem: saveItem,
+  dupSee: function (el) { var id = el.dataset.id; closeSheet(); setTimeout(function () { itemSheet(id); }, 80); },
   dupItem: function (el) {
     var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; });
     var c = clone(i); c.id = uid('i'); c.name = i.name + ' (copia)'; c.status = 'pendiente'; c.cost = null;
@@ -774,6 +797,7 @@ function bindEvents() {
   document.addEventListener('change', function (e) { var t = e.target.closest('[data-change]'); if (t && C[t.dataset.change]) C[t.dataset.change](t); });
   document.addEventListener('input', function (e) {
     var t = e.target;
+    if (t.id === 'f-name') { clearTimeout(dupT); dupT = setTimeout(dupWarn, 250); }
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
     if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }

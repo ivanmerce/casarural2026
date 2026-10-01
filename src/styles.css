@@ -1096,3 +1096,7 @@ img, svg, canvas { max-width: 100%; }
 .rv-quip { color: #FFD9A8 !important; font-style: italic; font-weight: 600 !important; font-size: .95rem !important; animation: rvUp .5s .6s ease both; }
 .egg-badge.again { background: #4CC9F0; }
 .spy-steps, .spy-card { background: linear-gradient(180deg, color-mix(in srgb, #1f2235 10%, var(--glass)), var(--glass)); border-color: color-mix(in srgb, #3a3f58 35%, transparent); }
+/* aviso de producto repetido en la compra */
+.dup-warn { margin-top: 8px; padding: 10px 12px; border-radius: 14px; background: var(--warn-soft); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); display: grid; gap: 6px; animation: rvUp .25s ease both; }
+.dup-row { display: flex; align-items: center; gap: 10px; padding-top: 6px; border-top: 1px solid color-mix(in srgb, var(--warn) 20%, transparent); }
+.dup-row .btn { min-height: 36px; padding: 4px 12px; flex: none; }
