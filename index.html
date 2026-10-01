@@ -5082,7 +5082,7 @@ function casasHtml() {
     var dots = ps.map(function (p) { return '<span class="pdot' + (usesBed(p) ? '' : ' baby') + '">' + av(p.id, 'xs') + '</span>'; }).join('');
     for (var i = used; i < r.beds; i++) dots += '<span class="pdot free" aria-hidden="true"></span>';
     h += '<button class="plan-room bed' + (mine ? ' mine' : '') + (used >= r.beds ? ' full' : used ? '' : ' empty') + '" style="' + style + '" data-act="roomOpen" data-id="' + r.id + '" aria-label="' + esc(roomLabel(r.id)) + ': ' + used + ' de ' + r.beds + ' camas">' +
-      '<span class="plan-rname">' + esc(r.name) + '</span><span class="pdots">' + dots + '</span>' + camBadge(r.id) + '</button>';
+      '<span class="plan-rname">' + esc(r.name) + '</span><span class="pdots">' + dots + '</span></button>';   /* sin cámara: el plano de las habitaciones es pequeño; sus fotos salen al tocarlas */
   });
   h += '<span class="plan-note">' + esc(R.note || '') + '</span></div></div>';
   h += '<div class="plan-legend small"><span><i class="lg-free"></i>Cama libre</span><span><i class="lg-mine"></i>Tu habitación</span><span>' + icon('baby') + 'Cuna: no ocupa cama</span></div>';
