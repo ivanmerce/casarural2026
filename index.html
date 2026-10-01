@@ -1183,6 +1183,24 @@ img, svg, canvas { max-width: 100%; }
 @media (max-width: 360px) { .cam-btn.cam-cta .cam-txt { display: none; } .cam-btn.cam-cta { padding: 0 10px; } }
 @media (prefers-reduced-motion: reduce) { .cam-btn.cam-cta { animation: none; } }
 
+/* v0.7.27 · Ficha de cada juego y reordenar puestos */
+.g-ficha { display: flex; flex-direction: column; gap: 10px; }
+.g-dl { margin: 0; display: grid; gap: 8px; }
+.g-dl > div { display: grid; grid-template-columns: minmax(118px, 30%) 1fr; gap: 10px; align-items: baseline; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.g-dl dt { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.g-dl dt .ico { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.g-dl dd { margin: 0; font-size: .98rem; line-height: 1.4; }
+.how-list { margin: 6px 0 0; padding-left: 0; list-style: none; counter-reset: how; display: flex; flex-direction: column; gap: 8px; }
+.how-list li { counter-increment: how; position: relative; padding-left: 36px; line-height: 1.45; font-size: .97rem; }
+.how-list li::before { content: counter(how); position: absolute; left: 0; top: -1px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .85rem; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.g-score { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--ok) 10%, transparent); }
+.g-score .ico { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--ok); }
+.ord-li { display: flex; align-items: center; gap: 6px; }
+.ord-li > .order-btn { flex: 1; min-width: 0; }
+.ord-mv { display: flex; flex-direction: column; gap: 4px; flex: none; }
+.ord-mv .icon-btn:disabled { opacity: .3; }
+@media (max-width: 420px) { .g-dl > div { grid-template-columns: 1fr; gap: 2px; } }
+
 </style>
 </head>
 <body>
@@ -1496,7 +1514,7 @@ if (typeof module !== 'undefined') module.exports = L;
 var G = (function () {
   var DEFAULT_POINTS = [10, 8, 6, 5, 4, 3, 2, 1];
   var CATS = { deporte: 'Deporte', velocidad: 'Velocidad', ingenio: 'Ingenio', escondite: 'Escondite', mini: 'Minijuego', mesa: 'Mesa' };
-  var FORMATS = { bracket: 'Eliminatoria', league: 'Liguilla', teams: 'Por equipos', ranking: 'Clasificación' };
+  var FORMATS = { bracket: 'Eliminatoria 1 contra 1', league: 'Liguilla', teams: 'Por equipos', ranking: 'Individual' };
   var MODES = { order: 'Orden de llegada', high: 'Más es mejor', low: 'Menos es mejor' };
 
   function r2(x) { return Math.round(x * 100) / 100; }
@@ -1854,16 +1872,11 @@ var G = (function () {
     { key: 'ruleta', name: 'La ruleta de globos', cat: 'deporte', format: 'teams', teamRank: true, icon: 'shuffle', points: [8, 4], rules: 'Dos equipos en círculo, globos de agua en el centro. La botella-ruleta elige quién lanza (sin moverse) a uno del otro equipo; los demás huyen. Gana el equipo del último que quede.' },
     { key: 'pendulo', name: 'El péndulo salchichero', cat: 'mini', format: 'ranking', mode: 'low', unit: 's', icon: 'flag', rules: 'Cordel a la cintura con una salchicha colgando. Sin manos, se balancea para tumbar latas del suelo. Gana el más rápido.' },
     { key: 'grito', name: '¡AAAAH! El grito infinito', cat: 'velocidad', format: 'ranking', mode: 'high', unit: 'm', icon: 'megaphone', rules: 'Correr gritando sin parar, de un solo grito. Donde se acaba el grito, se mide. Gana quien llega más lejos (en metros).' },
-    { key: 'sprint', name: 'Sprint de 30 metros', cat: 'velocidad', format: 'ranking', mode: 'low', unit: 's', icon: 'bolt', rules: 'Tiempo en segundos. Los peques salen con ventaja.' },
     { key: 'quiz', name: 'Quiz', cat: 'ingenio', format: 'ranking', mode: 'high', unit: 'aciertos', icon: 'bulb', rules: 'Una pregunta cada vez. Gana quien más acierta.' },
-    { key: 'zapatilla', name: 'Lanzamiento de zapatilla', cat: 'mini', format: 'ranking', mode: 'high', unit: 'm', icon: 'shoe', rules: 'Tres intentos, cuenta el mejor. Metros medidos a pasos.' },
-    { key: 'ppt', name: 'Piedra, papel o tijera', cat: 'ingenio', format: 'bracket', icon: 'hand', rules: 'Al mejor de 3. Sin trampas de última hora.' },
     { key: 'pañuelo', name: 'El pañuelo', cat: 'velocidad', format: 'teams', icon: 'flag', rules: 'Dos equipos numerados. El que se lleva el pañuelo suma un punto.', points: [8, 4], allowDraw: true },
     { key: 'sillas', name: 'Sillas musicales', cat: 'mini', format: 'ranking', mode: 'order', icon: 'music', rules: 'Apunta en orden inverso: el primero es el que se queda con la última silla.' },
     { key: 'nerf', name: 'Nerf: atrapa la bandera', cat: 'deporte', format: 'teams', icon: 'flag', rules: 'Dos equipos con su bandera. Si te dan, a tu base a recargar. Gana quien lleve la bandera rival a su campo.', points: [10, 5], allowDraw: false },
     { key: 'gimcana', name: 'Gimcana', cat: 'velocidad', format: 'teams', teamRank: true, icon: 'search', rules: 'Pistas, pruebas y adivinanzas. Apunta el orden de llegada de los equipos.', points: [10, 7] },
-    { key: 'peso', name: 'Adivina el peso', cat: 'mini', format: 'ranking', mode: 'low', unit: 'g de error', icon: 'flame', rules: 'Cada uno dice un peso; se mira la etiqueta. Apunta los gramos de error: gana quien menos se equivoca.' },
-    { key: 'canasta', name: 'Canasta de papel', cat: 'mini', format: 'ranking', mode: 'high', unit: 'canastas', icon: 'ball', rules: 'Bolas de papel a una papelera, 5 tiros cada uno.' },
     { key: 'sonidos', name: '¡Caliente, caliente! La acción secreta', cat: 'ingenio', format: 'teams', teamRank: true, icon: 'music', points: [8, 5, 3], rules: 'Equipos de 4. Uno sale; los rivales escriben una acción secreta. Sus 3 compañeros solo pueden guiarle con sonidos de «bien» o «mal». 5 minutos. Gana quien lo logra más rápido.' },
     { key: 'libre', name: 'Juego nuevo', cat: 'mini', format: 'ranking', mode: 'order', icon: 'star', rules: '' }
   ];
@@ -2046,6 +2059,8 @@ var IC = {
   flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
   minus: '<path d="M5 12h14"/>',
+up: '<path d="M6 15l6-6 6 6"/>',
+down: '<path d="M6 9l6 6 6-6"/>',
   back: '<path d="M19 12H5M11 18l-6-6 6-6"/>',
   play: '<path d="M7 4.5v15l12-7.5z"/>',
   shuffle: '<path d="M3 7h3.5c4 0 5.5 10 10 10H21M3 17h3.5c1.6 0 2.8-1.6 3.8-3.5M14 10.5C15 8.6 16.2 7 17.8 7H21"/><path d="m18 4 3 3-3 3M18 14l3 3-3 3"/>',
@@ -3730,6 +3745,42 @@ function gPointsText(g) {
 }
 function medal(pos) { return pos === 1 ? '<span class="medal g">1</span>' : pos === 2 ? '<span class="medal s">2</span>' : pos === 3 ? '<span class="medal b">3</span>' : '<span class="medal">' + (pos || '–') + '</span>'; }
 
+/* ---------- Ficha: modalidad, cómo se gana, cómo se apunta ---------- */
+function gModal(g) {
+  var n = (g.entrants || []).length;
+  if (g.format === 'bracket') return 'Individual · eliminatoria 1 contra 1';
+  if (g.format === 'league') return 'Individual · todos contra todos';
+  if (g.format === 'teams') { var T = (g.teams || []).length || g.teamsN || 2; return 'Por equipos · ' + T + ' equipos' + (n ? ' de ' + (Math.floor(n / T) === Math.ceil(n / T) ? Math.floor(n / T) : Math.floor(n / T) + '-' + Math.ceil(n / T)) : ''); }
+  return 'Individual · cada uno por su cuenta';
+}
+function gWinText(g) {
+  if (g.win) return g.win;
+  var u = g.unit || 'puntos';
+  if (g.format === 'bracket') return 'Gana quien gana la final. Quien cae en semis o antes, queda según la ronda.';
+  if (g.format === 'league') return 'Gana quien más puntos suma en la tabla (victoria 3, empate 1).';
+  if (g.format === 'teams') return g.teamRank ? 'Gana el equipo que queda primero.' : 'Gana el equipo que gana más partidos.';
+  if (g.mode === 'high') return 'Gana quien consigue más (' + u + ').';
+  if (g.mode === 'low') return 'Gana quien consigue menos (' + u + ').';
+  return 'Gana el primero de la lista.';
+}
+function gScoreText(g) {
+  if (g.score) return g.score;
+  if (g.format === 'bracket') return 'Pulsa «Sortear cuadro». En cada partido, suma con + y – y pulsa «Terminar», o toca el nombre del ganador. El cuadro avanza solo.';
+  if (g.format === 'league') return 'En cada partido, suma con + y – y pulsa «Terminar», o toca el nombre del ganador. La tabla se ordena sola.';
+  if (g.format === 'teams') return 'Pulsa «Sortear» (equipos equilibrados por edades; toca a alguien para cambiarle de equipo). ' + (g.teamRank ? 'Al acabar, toca los equipos en orden: primero el ganador. Con las flechas se corrige el orden.' : 'Suma los goles con + y – y pulsa «Terminar», o toca el equipo ganador. ¿Revancha? «Otro partido».');
+  if (g.mode === 'high' || g.mode === 'low') return 'Escribe el resultado de cada uno (' + (g.unit || 'puntos') + '). La clasificación se ordena sola; si dos empatan, comparten puesto.';
+  return 'Toca a cada uno en orden: primero el ganador, luego el segundo… Con las flechas se corrige el orden.';
+}
+function gFicha(g) {
+  var how = g.how && g.how.length ? g.how : (g.rules ? [g.rules] : []);
+  return '<section class="card g-ficha"><dl class="g-dl">' +
+    '<div><dt>' + icon('users') + 'Modalidad</dt><dd>' + esc(gModal(g)) + ' · ' + (g.entrants || []).length + ' jugadores</dd></div>' +
+    '<div><dt>' + icon('trophy') + 'Cómo se gana</dt><dd>' + esc(gWinText(g)) + '</dd></div>' +
+    '<div><dt>' + icon('star') + 'Puntos</dt><dd>' + gPointsText(g) + (g.format === 'teams' ? ' · cada jugador del equipo se lleva los puntos de su puesto' : '') + '</dd></div></dl>' +
+    (how.length ? '<details class="rules how" open><summary>Cómo se juega</summary>' + (how.length > 1 ? '<ol class="how-list">' + how.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ol>' : '<p class="small">' + esc(how[0]) + '</p>') + '</details>' : '') +
+    '<p class="small g-score">' + icon('edit') + '<span><b>Cómo se apunta:</b> ' + esc(gScoreText(g)) + '</span></p></section>';
+}
+
 /* ---------- Tarjeta de Inicio ---------- */
 function compCard() {
   var rank = G.ranking(S), leader = rank.filter(function (r) { return r.pos === 1 && r.pts > 0; });
@@ -3790,8 +3841,8 @@ function gameView(g) {
   var h = '<div class="g-top"><button class="icon-btn" data-act="gBack" aria-label="Volver a juegos">' + icon('back') + '</button><div class="grow"><span class="eyebrow">' + esc(G.CATS[g.cat] || '') + ' · ' + G.FORMATS[g.format] + '</span><h2>' + esc(g.name) + '</h2></div>' +
     (ed ? '<button class="icon-btn" data-act="gEdit" data-id="' + g.id + '" aria-label="Editar juego">' + icon('edit') + '</button>' : '') + '</div>';
   h += '<div class="facts"><span class="pill ' + GST[st][1] + '">' + GST[st][0] + '</span><span class="fact">' + icon('clock') + gWhen(g) + '</span>' + (g.where ? '<span class="fact">' + icon('pin') + esc(g.where) + '</span>' : '') + '<span class="fact">' + icon('users') + (g.entrants || []).length + '</span></div>';
+  h += gFicha(g);
   if (g.needs) h += '<p class="small needs">' + icon('umbrella') + '<span><b>Material:</b> ' + esc(g.needs) + '</span></p>';
-  if (g.rules) h += '<details class="rules"><summary>Reglas</summary><p class="small">' + esc(g.rules) + '</p></details>';
   if (act) h += '<button class="link small" data-act="tab" data-tab="planes">En el planning: ' + esc(dayOf(act.day).short) + ' ' + act.start + ' · ' + esc(act.title) + ' ' + icon('arrow') + '</button>';
   if (!ed) h += '<p class="small pill pend" style="white-space:normal">Modo lector: ves los resultados en directo. Los apuntan los editores.</p>';
 
@@ -3860,8 +3911,8 @@ function teamsHtml(g, ed) {
   if (teams.length < 2) return h;
   if (g.teamRank) {
     var ord = g.order || [];
-    h += '<section class="card"><h3>Orden de llegada</h3><p class="small muted">' + (ed ? 'Toca los equipos según terminan: el primero que toques es el ganador.' : 'Así van.') + '</p><div class="stack" style="gap:8px">' +
-      teams.map(function (t, i) { var p = ord.indexOf(t.id); return '<button class="order-btn tc' + (i % 4 + 1) + (p >= 0 ? ' placed' : '') + '" data-act="gTeamOrder" data-g="' + g.id + '" data-t="' + t.id + '"' + (ed ? '' : ' disabled') + '>' + (p >= 0 ? medal(p + 1) : '<span class="medal">·</span>') + '<b class="grow">' + esc(t.name) + '</b><span class="avs">' + t.members.slice(0, 5).map(function (id) { return eAv(id, 'xs'); }).join('') + '</span></button>'; }).join('') + '</div></section>';
+    h += '<section class="card"><h3>Orden de llegada</h3><p class="small muted">' + (ed ? 'Toca los equipos según terminan: el primero que toques es el ganador (el último se coloca solo). Tócalo otra vez para quitarlo.' : 'Así van.') + '</p><div class="stack" style="gap:8px">' +
+      teams.map(function (t, i) { return { t: t, i: i, p: ord.indexOf(t.id) }; }).sort(function (a, b) { return (a.p < 0 ? 99 : a.p) - (b.p < 0 ? 99 : b.p) || a.i - b.i; }).map(function (x) { var t = x.t, i = x.i, p = x.p; return '<div class="ord-li"><button class="order-btn tc' + (i % 4 + 1) + (p >= 0 ? ' placed' : '') + '" data-act="gTeamOrder" data-g="' + g.id + '" data-t="' + t.id + '"' + (ed ? '' : ' disabled') + '>' + (p >= 0 ? medal(p + 1) : '<span class="medal">·</span>') + '<b class="grow">' + esc(t.name) + '</b><span class="avs">' + t.members.slice(0, 5).map(function (id) { return eAv(id, 'xs'); }).join('') + '</span></button>' + (ed && p >= 0 && ord.length > 1 ? mvBtns(g.id, 't', t.id, p, ord.length) : '') + '</div>'; }).join('') + '</div></section>';
     return h;
   }
   var names = {}; teams.forEach(function (t) { names[t.id] = esc(t.name); });
@@ -3869,12 +3920,15 @@ function teamsHtml(g, ed) {
   if (ed) h += '<button class="btn ghost" data-act="gAddMatch" data-id="' + g.id + '">' + icon('plus') + 'Otro partido (revancha)</button>';
   return h;
 }
+function mvBtns(gid, kind, id, i, n) {
+  return '<span class="ord-mv"><button class="icon-btn sm" data-act="gMove" data-g="' + gid + '" data-' + kind + '="' + id + '" data-d="-1" aria-label="Subir un puesto"' + (i ? '' : ' disabled') + '>' + icon('up') + '</button><button class="icon-btn sm" data-act="gMove" data-g="' + gid + '" data-' + kind + '="' + id + '" data-d="1" aria-label="Bajar un puesto"' + (i < n - 1 ? '' : ' disabled') + '>' + icon('down') + '</button></span>';
+}
 function rankingInputHtml(g, ed) {
   var mode = g.mode || 'order', ents = g.entrants || [];
   if (mode === 'order') {
     var ord = (g.order || []).filter(function (id) { return ents.indexOf(id) >= 0; }), rest = ents.filter(function (id) { return ord.indexOf(id) < 0; });
     var h = '<section class="card"><h3>' + (g.cat === 'escondite' ? 'Mejor escondidos' : 'Clasificación') + '</h3><p class="small muted">' + (ed ? (g.cat === 'escondite' ? 'Apunta primero al ÚLTIMO en aparecer: es el mejor escondido. Luego el penúltimo, y así.' : 'Toca a cada uno en orden: primero, segundo, tercero…') : 'Así va la clasificación.') + '</p>';
-    if (ord.length) h += '<ol class="order-list">' + ord.map(function (id, i) { return '<li><button class="order-btn placed" data-act="gOrder" data-g="' + g.id + '" data-e="' + id + '"' + (ed ? '' : ' disabled') + '>' + medal(i + 1) + eAv(id, 'sm') + '<b class="grow">' + eName(id) + '</b>' + (ed ? icon('x') : '') + '</button></li>'; }).join('') + '</ol>';
+    if (ord.length) h += '<ol class="order-list">' + ord.map(function (id, i) { return '<li class="ord-li"><button class="order-btn placed" data-act="gOrder" data-g="' + g.id + '" data-e="' + id + '"' + (ed ? ' aria-label="Quitar a ' + esc(eText(id)) + ' de la lista"' : ' disabled') + '>' + medal(i + 1) + eAv(id, 'sm') + '<b class="grow">' + eName(id) + '</b>' + (ed ? icon('x') : '') + '</button>' + (ed ? mvBtns(g.id, 'e', id, i, ord.length) : '') + '</li>'; }).join('') + '</ol>';
     if (rest.length) h += '<span class="eyebrow">' + (ord.length ? 'Faltan' : 'Participantes') + '</span><div class="pick-grid">' + rest.map(function (id) { return '<button class="pick" data-act="gOrder" data-g="' + g.id + '" data-e="' + id + '"' + (ed ? '' : ' disabled') + '>' + eAv(id, 'md') + '<span>' + eName(id) + '</span></button>'; }).join('') + '</div>';
     if (ed && ord.length) h += '<div class="row wrap"><button class="btn ghost" data-act="gOrderUndo" data-g="' + g.id + '">' + icon('undo') + 'Deshacer</button><button class="btn ghost" data-act="gOrderClear" data-g="' + g.id + '">Borrar orden</button></div>';
     return h + '</section>';
@@ -4033,7 +4087,8 @@ function gameSheet(id) {
     '<div class="field"><label for="g-points">Puntos por puesto (1.º, 2.º, 3.º…)</label><input id="g-points" inputmode="numeric" value="' + esc((g.points && g.points.length ? g.points : G.DEFAULT_POINTS).join(', ')) + '"></div>' +
     '<div class="field"><label for="g-part">Puntos por participar (resto)</label><input id="g-part" inputmode="numeric" value="' + (g.part != null ? g.part : 1) + '"></div>' +
     '<div class="field"><span class="lbl">Quién juega · <span id="g-count">' + draft.entrants.length + '</span></span><div class="row wrap"><button type="button" class="chip" data-act="gPickAll" data-v="all">Todos</button><button type="button" class="chip" data-act="gPickAll" data-v="day">Los que están hoy</button><button type="button" class="chip" data-act="gPickAll" data-v="none">Nadie</button></div>' + pickList('gPick', id, draft.entrants, 'entrants') + '</div>' +
-    '<div class="field"><label for="g-rules">Reglas</label><textarea id="g-rules">' + esc(g.rules || '') + '</textarea></div>' +
+    '<div class="field"><label for="g-rules">Cómo se juega (un paso por línea)</label><textarea id="g-rules" rows="7">' + esc((g.how && g.how.length ? g.how : g.rules ? [g.rules] : []).join('\n')) + '</textarea></div>' +
+    '<div class="field"><label for="g-win">Cómo se gana</label><input id="g-win" value="' + esc(g.win || '') + '" placeholder="' + esc(gWinText(Object.assign({}, g, { win: null }))) + '"></div>' +
     '<div class="field"><label for="g-needs">Material que hace falta</label><input id="g-needs" value="' + esc(g.needs || '') + '"></div>' +
     '<div class="sheet-actions"><button class="btn primary" data-act="gSave">Guardar</button><button class="btn danger" data-act="gDel" data-id="' + id + '">' + icon('trash') + 'Borrar juego</button></div>');
 }
@@ -4043,7 +4098,7 @@ function saveGame() {
   var fmt = val('g-format'), changedFmt = fmt !== g.format, oldE = (g.entrants || []).join(','), newE = draft.entrants.join(',');
   if (changedFmt && gHasAny(g) && !draft.confirmFmt) { draft.confirmFmt = true; toast('Cambiar el formato borra los resultados de este juego. Pulsa Guardar otra vez para confirmarlo'); return; }
   g.name = name; g.cat = val('g-cat'); g.mode = draft.mode; g.unit = val('g-unit').trim() || null; g.allowDraw = !!draft.allowDraw; g.teamRank = !!draft.teamRank;
-  g.day = null; g.time = null; g.where = val('g-where').trim(); g.rules = val('g-rules').trim(); g.needs = val('g-needs').trim();
+  g.day = null; g.time = null; g.where = val('g-where').trim(); var steps = val('g-rules').split('\n').map(function (x) { return x.trim(); }).filter(Boolean); g.how = steps; g.rules = steps.join(' '); g.win = val('g-win').trim() || null; g.needs = val('g-needs').trim();
   var pts = val('g-points').split(/[^\d]+/).filter(Boolean).map(Number); g.points = pts.length ? pts : null;
   var part = parseInt(val('g-part'), 10); g.part = isNaN(part) ? 1 : part;
   g.entrants = draft.entrants.slice();
@@ -4069,7 +4124,7 @@ function createGame(key) {
   var t = G.TEMPLATES.find(function (x) { return x.key === key; }); if (!t) return;
   var today = new Date().toISOString().slice(0, 10), day = S.days.some(function (d) { return d.k === today; }) ? today : null;
   var g = { id: uid('g'), sort: (S.games || []).length + 1, name: t.name, cat: t.cat, format: t.format, icon: t.icon, day: day, time: null, where: '', rules: t.rules || '', needs: '', entrants: G.presentList(S, day) };
-  ['mode', 'unit', 'points', 'allowDraw'].forEach(function (k) { if (t[k] != null) g[k] = t[k]; });
+  ['mode', 'unit', 'points', 'allowDraw', 'teamRank', 'teamsN'].forEach(function (k) { if (t[k] != null) g[k] = t[k]; });
   S.games = S.games || []; S.games.push(ensureGame(g));
   save(); closeSheet(); ui.game = g.id; ui.jsub = 'juegos'; render(); window.scrollTo(0, 0); gameSheet(g.id);
 }
@@ -4153,6 +4208,7 @@ Object.assign(A, {
   gOrder: function (el) {
     if (!gGuard()) return; var g = gById(el.dataset.g), id = el.dataset.e, before = champOf(g); g.order = g.order || [];
     var k = g.order.indexOf(id); if (k >= 0) g.order.splice(k, 1); else g.order.push(id);
+    if (k < 0) { var left = (g.entrants || []).filter(function (x) { return g.order.indexOf(x) < 0; }); if (left.length === 1 && g.order.length > 1) g.order.push(left[0]); }   /* el último se coloca solo */
     if (k < 0 && navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
     afterResult(g, before);
   },
@@ -4164,12 +4220,18 @@ Object.assign(A, {
   gTeamOrder: function (el) {
     if (!gGuard()) return; var g = gById(el.dataset.g), id = el.dataset.t, before = champOf(g); g.order = g.order || [];
     var k = g.order.indexOf(id); if (k >= 0) g.order.splice(k, 1); else g.order.push(id);
+    if (k < 0) { var left = (g.teams || []).filter(function (t) { return g.order.indexOf(t.id) < 0; }); if (left.length === 1) g.order.push(left[0].id); }   /* el último equipo se coloca solo */
     afterResult(g, before);
+  },
+  gMove: function (el) {
+    if (!gGuard()) return; var g = gById(el.dataset.g), id = el.dataset.e || el.dataset.t, d = +el.dataset.d, o = g.order || [], i = o.indexOf(id), j = i + d;
+    if (i < 0 || j < 0 || j >= o.length) return; var before = champOf(g);
+    o[i] = o[j]; o[j] = id; afterResult(g, before);
   },
   gShuffleTeams: function (el) {
     if (!gGuard()) return; var g = gById(el.dataset.id);
     if ((g.matches || []).some(function (m) { return m.w || m.sa != null; }) && !el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = 'Hay resultados: toca otra vez para sortear'; return; }
-    var n = Math.max(2, (g.teams || []).length || (g.teamRank ? 4 : 2)), names = (g.teams || []).map(function (t) { return t.name; });
+    var n = Math.max(2, (g.teams || []).length || g.teamsN || 2), names = (g.teams || []).map(function (t) { return t.name; });
     g.teams = G.balancedTeams(S, g.entrants || [], n); g.teams.forEach(function (t, i) { if (names[i]) t.name = names[i]; });
     if (!g.teamRank) g.matches = G.roundRobin(g.teams.map(function (t) { return t.id; })); else g.order = [];
     save(); render(true); toast('Equipos sorteados y equilibrados por edades');
@@ -4463,7 +4525,7 @@ VIEWS.manual = function () {
     ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con la casilla de <b>precio real</b>. Al tocar un producto podéis decidir si se compra <b>antes de ir</b> o <b>allí</b>; entonces aparecen los filtros para verlo de un vistazo.', 'compra'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Si alguien no come ese día, toca los comensales: las cantidades se ajustan solas.', 'comidas'],
     ['plans', 'Planes', 'El planning de cada día, con plan B si llueve. Dale al corazón a lo que te apetezca.', 'planes'],
-    ['trophy', 'Juegos y ranking', 'Hockey, ping-pong, Nerf, la gimcana de los pekes y minijuegos cada día. Los editores apuntan resultados y el <b>ranking</b> se actualiza solo.', 'juegos'],
+    ['trophy', 'Juegos y ranking', 'Sin horarios: elegid el que apetezca. Cada juego tiene su <b>ficha</b> (individual o por equipos, pasos, cómo se gana y cómo se apunta). Los editores apuntan resultados (con flechas para corregir el orden) y el <b>ranking</b> se actualiza solo.', 'juegos'],
     ['star', 'Premios y gala', 'Más de 30 premios: muchos salen solos y otros <b>los vota todo el mundo</b> (Juegos → Premios). El último día, <b>Gala de premios</b>.', 'juegos'],
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores.', 'album'],
     ['house', 'La Finca', '<b>Dormir</b> (plano y habitaciones), <b>Práctico</b> (Wi-Fi, registro, normas, si se va la luz, antes de irnos) y <b>Compras</b> (tiendas del pueblo; el domingo solo abre una).', 'finca', 'info'],
