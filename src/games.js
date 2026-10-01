@@ -352,6 +352,13 @@ var G = (function () {
       if (d.winners && d.winners.length) { res = { winners: d.winners.slice(), why: d.why || 'Decisión del jurado' }; source = 'manual'; }
       out.push({ id: a.id, group: a.group, icon: a.icon, name: a.name, desc: a.desc, vote: !!a.vote, winners: res ? res.winners : [], why: res ? res.why : '', source: source });
     });
+    /* Estrella invitada: nadie se queda sin estatuilla (los que vienen y aún no tienen ninguna) */
+    if (!(data.estrella && data.estrella.hidden)) {
+      var got = {}; out.forEach(function (a) { a.winners.forEach(function (w) { peopleOf(S, w).forEach(function (pid) { got[pid] = 1; }); }); });
+      Object.keys(data).forEach(function (k) { var d = data[k]; if (d && d.custom && !d.hidden) (d.winners || []).forEach(function (w) { peopleOf(S, w).forEach(function (pid) { got[pid] = 1; }); }); });
+      var lonely = S.people.filter(function (p) { return !got[p.id] && (p.attends || presentOn(S, entrantOf(S, p.id))); }).map(function (p) { return p.id; });
+      if (lonely.length) out.push({ id: 'estrella', group: 'casa', icon: 'star', name: 'Estrella Invitada', desc: 'Para quien aún no tenía estatuilla: porque sin ti, esta familia no estaría completa (ni la foto de familia).', vote: false, winners: lonely, why: 'Por venir, reír y dejarse querer', source: 'auto' });
+    }
     Object.keys(data).forEach(function (k) {
       var d = data[k]; if (!d || !d.custom || d.hidden) return;
       out.push({ id: k, group: 'extra', icon: d.icon || 'star', name: d.name || 'Premio especial', desc: d.desc || '', vote: false, winners: (d.winners || []).slice(), why: d.why || '', source: 'manual', custom: true });

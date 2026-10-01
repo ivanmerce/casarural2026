@@ -51,7 +51,7 @@ function buildEggs() {
     { k: 'claras', name: 'Cuentas claras', how: 'Mirar las Cuentas cuando ya hay gastos apuntados', hint: 'Cuentas claras y el chocolate espeso', more: 'Cuando alguien apunte el primer gasto o precio real, pásate por Cuentas' },
     { k: 'trophy', name: 'Campeón', how: 'Ver el trofeo de un campeón', hint: 'Solo puede quedar uno… y tiene trofeo', more: 'Cuando acabe la eliminatoria de ping-pong, abre el juego y toca «Trofeo»' },
     { k: 'habemus', name: 'Habemus liga', how: 'Entrar en Juegos con 5 juegos ya terminados', hint: 'No se ganó Zamora en una hora, ni el ranking en un juego', more: 'Cuando haya 5 juegos terminados, pásate por Juegos' },
-    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala de premios hasta el final', hint: 'Hay una gala esperando. Hasta el final, como en el cine', more: 'Juegos → Premios → Gala de premios, hasta la última' },
+    { k: 'gala', name: 'Noche de los Óscar', how: 'Ver la gala (o su tráiler) hasta el final', hint: 'Hay una gala esperando… o al menos su tráiler. Hasta el final, como en el cine', more: 'Juegos → Premios → «Ver el tráiler» (o la gala), hasta la última pantalla' },
     { k: 'album', name: 'Paparazzi en serie', how: 'Ver el álbum con 50 fotos o más', hint: 'Una imagen vale más que mil palabras. Cincuenta, más aún', more: 'Entre todos, llegad a 50 fotos en el álbum y ábrelo' }
   ];
 }

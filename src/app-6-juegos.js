@@ -282,7 +282,9 @@ function premiosView() {
   var list = G.awards(S), withW = list.filter(function (a) { return a.winners.length; }), t = G.tally(S);
   var prized = S.people.filter(function (p) { return t[p.id].length; }), none = S.people.filter(function (p) { return !t[p.id].length && (p.attends || G.presentOn(S, G.entrantOf(S, p.id))); });
   var h = '<section class="card gala-card"><span class="eyebrow">La noche de los premios</span><h3>Gala de premios</h3><p class="small">' + withW.length + ' premios con ganador · ' + prized.length + ' de ' + S.people.length + ' personas premiadas.</p>' +
-    '<button class="btn primary block big-btn" data-act="galaStart"' + (withW.length ? '' : ' disabled') + '>' + icon('play') + 'Empezar la gala</button>' +
+    (galaOpenNow() ? '<button class="btn primary block big-btn" data-act="galaStart" data-mode="gala"' + (withW.length ? '' : ' disabled') + '>' + icon('play') + 'Empezar la gala</button>'
+      : '<p class="small gala-date">' + icon('clock') + '<span>Se estrena el <b>' + esc(galaWhen()) + '</b>, con los premios ya decididos. Hasta entonces, sin spoilers.</span></p><button class="btn primary block big-btn" data-act="galaStart" data-mode="trailer">' + icon('play') + 'Ver el tráiler</button>' +
+        (can('access') ? '<button class="btn block" data-act="galaStart" data-mode="rehearsal">' + icon('eye') + 'Ensayo completo (spoilers: solo tú)</button>' : '')) +
     (none.length ? '<p class="small muted">Aún sin premio: ' + none.map(function (p) { return esc(p.name); }).join(', ') + '. ' + (can('edit') ? 'Crea un premio especial para que nadie se quede sin estatuilla.' : '') + '</p>' : '<p class="small">Todo el mundo tiene al menos un premio. Así se hace.</p>') +
     (can('edit') ? '<button class="btn block" data-act="aNew">' + icon('plus') + 'Premio especial</button>' : '') + '</section>';
   ['podio', 'juegos', 'casa', 'publico', 'extra'].forEach(function (gk) {
@@ -316,45 +318,142 @@ function pickList(act, id, selected, kind) {
   return '<div class="pick-grid">' + opts.map(function (o) { var on = selected.indexOf(o) >= 0; return '<button type="button" class="pick' + (on ? ' on' : '') + '" data-act="' + act + '" data-id="' + id + '" data-e="' + o + '" aria-pressed="' + on + '">' + eAv(o, 'md') + '<span>' + eName(o) + '</span></button>'; }).join('') + '</div>';
 }
 
-/* ---------- Gala ---------- */
+/* ---------- Gala ----------
+   Se estrena a una hora (por defecto, el domingo por la noche, cuando ya se han jugado casi todos los juegos).
+   Antes de esa hora: el tráiler (sin spoilers) para todos y el ensayo completo solo para el admin. */
 var gala = null;
-function galaSlides() {
+var GALA_AT = '2026-10-11T22:00:00+02:00';
+function galaAtIso() { return (S.trip && S.trip.galaAt) || GALA_AT; }
+function galaOpenNow() { return Date.now() >= new Date(galaAtIso()).getTime(); }
+function galaWhen() { var k = galaAtIso().slice(0, 10), d = dayOf(k); return (d && d.long ? d.long.toLowerCase() : 'domingo') + ' a las ' + galaAtIso().slice(11, 16); }
+function pickOne(arr, seed) { var h = 0, s = String(seed || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return arr[Math.abs(h) % arr.length]; }
+
+/* Lo que dice el presentador antes de abrir el sobre */
+var GALA_DRUM = [
+  'Y el premio es para…', 'Abrimos el sobre… (nadie lo ha abierto antes, lo juramos)', 'Redoble de tambor… más fuerte… ¡MÁS!',
+  'El jurado ha deliberado durante horas (unos cuatro minutos)…', 'Ojo, que este viene con polémica…', 'Silencio en la sala. Tú también, abuelo…',
+  'Que se apaguen las luces… bueno, las de la cocina no…', 'Los sobres los ha custodiado un notario muy serio. Con chupete…'
+];
+/* La coletilla de cada premio, después de desvelarlo */
+var GALA_QUIP = {
+  oro: 'Que alguien le traiga un trono. Y un cojín, que el trono es de piedra.', plata: 'A un pelo del oro. El pelo, eso sí, lo tiene el de arriba.', bronce: 'Bronce: el metal de los que lo dieron todo… y un poco más.',
+  rayo: 'Tan rápido que ni la foto le pilla. Esta es de archivo.', cerebro: 'Piensa tanto que le humea la cabeza. O es la barbacoa.', fantasma: 'Le seguimos buscando. Si alguien le ve, que le dé la estatuilla.',
+  raqueta: 'Ping, pong y a la vitrina.', fenix: 'De las cenizas al podio. Ni el Real Madrid remonta así.', invencibles: 'Invictos. Hasta el año que viene, que se repartan bien los equipos.',
+  poulidor: 'Siempre segundo, nunca olvidado. Te queremos igual, campeón moral.', todoterreno: 'Si había un juego, allí estaba. Si había dos, en los dos.', coubertin: 'Lo importante es participar. Y tú has participado muchísimo.',
+  revelacion: 'La cantera viene pisando fuerte. Los mayores, a temblar.', hierro: 'Los abuelos no se oxidan. Ni se rinden. Ni se callan.', duo: 'Dos mejor que uno. Sobre todo si uno lleva pañal.',
+  espia: 'Nadie sabe quién es. Nadie sabe cómo entró. Pero todos sabemos que lo ha tocado todo.', derroche: 'Sin ellos no hay casa, ni piscina, ni gala. Aplauso largo, que se lo han ganado.',
+  carrito: 'Si hay que comprar, se compra. Y si no hay que comprar, también.', tarjeta: 'Su tarjeta ha pedido la baja voluntaria.', despensa: 'Trajo media casa en el maletero. La otra media, en la baca.',
+  chef: 'Tres estrellas Michelín. Bueno, tres estrellas de la familia, que valen más.', banco: 'Banco de la casa: sin comisiones, sin intereses y sin quejarse (mucho).', mecenas: 'El arte necesita mecenas. Y la barbacoa, también.',
+  maestro: 'Si no fuera por esta persona, seguiríamos en el sofá decidiendo qué hacer.', fiestero: 'Se apunta a un bombardeo. Y luego pregunta a qué hora es.', omnipresente: 'Ha venido todos los días. Del primero al último. Sin excusas.',
+  enganchado: 'Su pantalla pide vacaciones. Y su batería, un abogado.', cazador: 'Ha encontrado secretos que ni el que los escondió recordaba.', guardian: 'Todos los secretos. Ni uno se le ha escapado. Ni uno ha contado. Dicen.',
+  paparazzi: 'Si no hay foto, no ha pasado. Gracias a esta persona, ha pasado todo.', fotaza: 'La foto del año. Va directa al salón de los abuelos.', cumple: '¡Cumpleaños feliz! Todos de pie, que esto se canta.',
+  mascota: 'El más pequeño, el más grande. Sin discusión.', fairplay: 'Gana sin presumir y pierde sin enfadarse. Una especie en peligro de extinción.', creativo: 'Ideas locas, todas. Ideas malas, ninguna. Bueno, alguna.',
+  animador: 'Sin voz, pero feliz. Mañana, infusión de miel y limón.', risas: 'Nos ha dolido la barriga de reír. Que alguien le dé su propio programa.', pinche: 'Friega, recoge, pela patatas y encima sonríe. ¿Se puede clonar?',
+  estrella: 'Porque una familia no está completa sin ti. Ni la foto, ni la mesa, ni las risas.'
+};
+/* Pausas publicitarias entre premios (anuncios de mentira) */
+var GALA_ADS = [
+  ['RAQUETA PLUS', '¿Cansado de perder al ping-pong? Raqueta Plus: ahora con excusas incluidas. «Era el sol», «la mesa está torcida»…'],
+  ['ABUELÓMETRO PRO', 'Mide en tiempo real cuánto invitan los abuelos. Funciona con pilas y con un vermut.'],
+  ['SALCHICHA EXPRESS', 'La única salchicha que llega a la boca sin manos. Bueno, casi. Pruébala en el péndulo.'],
+  ['TORTILLA SIN DEBATE', 'Por fin una tortilla que no divide familias: mitad con cebolla, mitad sin. La paz mundial empieza aquí.'],
+  ['MODO SIESTA', 'Desconecte. Reconecte. Vuelva a desconectar. Comer sin siesta es campana sin badajo.'],
+  ['CAZASECRETOS ACADEMY', 'Aprenda a encontrar los 35 secretos en un fin de semana. Matrícula: un chivatazo.']
+];
+/* Un dato real de cada premiado, sacado de la app (nada inventado) */
+function galaFact(wid) {
+  var ids = typeof G.peopleOf === 'function' ? G.peopleOf(S, wid) : [wid]; if (!ids.length || ids.length > 2) return '';
+  var pid = ids.filter(function (x) { var p = person(x); return p && p.kind !== 'bebe'; })[0] || ids[0];
+  var st = (S.stats || {})[pid] || {}, photos = (S.photos || []).filter(function (p) { return p.by === pid; }).length;
+  var hearts = Object.keys(S.votes || {}).filter(function (a) { return (S.votes[a] || []).indexOf(pid) >= 0; }).length;
+  var r = G.ranking(S).find(function (x) { return G.membersOf(S, x.id).indexOf(pid) >= 0; });
+  var f = [];
+  if (st.eggs) f.push([st.eggs * 2, st.eggs + (st.eggs === 1 ? ' secreto encontrado' : ' secretos encontrados') + (st.eggs >= 15 ? '. Sospechoso' : '')]);
+  if (st.minutes) f.push([st.minutes / 6, st.minutes + ' minutos con la app abierta' + (st.minutes >= 60 ? '. Su móvil pide vacaciones' : '')]);
+  if (photos) f.push([photos * 3, photos + (photos === 1 ? ' foto subida al álbum' : ' fotos subidas al álbum')]);
+  if (hearts) f.push([hearts * 2, 'se ha apuntado a ' + hearts + (hearts === 1 ? ' plan' : ' planes')]);
+  if (r && r.pts) f.push([r.pts / 3, r.pts + ' puntos y ' + r.pos + '.º en el ranking']);
+  if (!f.length) return '';
+  f.sort(function (a, b) { return b[0] - a[0]; });
+  return 'Dato del jurado: ' + f[0][1] + '.';
+}
+function galaSlides(trailer) {
+  if (trailer) return [{ t: 'intro', trailer: true }, { t: 'ad', ad: GALA_ADS[0] }, { t: 'teaser' }, { t: 'ad', ad: GALA_ADS[3] }, { t: 'final', trailer: true }];
   var list = G.awards(S).filter(function (a) { return a.winners.length; });
-  var order = ['casa', 'juegos', 'publico', 'extra'], slides = [{ t: 'intro' }];
-  order.forEach(function (gk) { var it = list.filter(function (a) { return a.group === gk; }); if (it.length) { slides.push({ t: 'group', g: gk }); it.forEach(function (a) { slides.push({ t: 'award', a: a }); }); } });
+  var order = ['casa', 'juegos', 'publico', 'extra'], slides = [{ t: 'intro' }], n = 0, ad = 0;
+  order.forEach(function (gk) {
+    var it = list.filter(function (a) { return a.group === gk; }); if (!it.length) return;
+    slides.push({ t: 'group', g: gk });
+    it.forEach(function (a) { slides.push({ t: 'award', a: a }); n++; if (n % 5 === 0 && ad < GALA_ADS.length) slides.push({ t: 'ad', ad: GALA_ADS[ad++] }); });
+  });
   var pod = ['bronce', 'plata', 'oro'].map(function (id) { return list.find(function (a) { return a.id === id; }); }).filter(Boolean);
   if (pod.length) { slides.push({ t: 'group', g: 'podio' }); pod.forEach(function (a) { slides.push({ t: 'award', a: a, podium: true }); }); }
-  slides.push({ t: 'final' });
+  slides.push({ t: 'final' }, { t: 'credits' });
   return slides;
+}
+function galaCredits() {
+  var e = S.trip.eggs || {}, host = S.house && S.house.payer, fam = host ? S.families.find(function (f) { return f.id === host; }) : null;
+  var admin = S.people.filter(function (p) { return p.role === 'admin'; }).map(function (p) { return p.name; });
+  var rows = [
+    ['Producción ejecutiva', fam ? fam.name.replace('&', ' y ') + ' (pagan la casa)' : 'Los abuelos'],
+    ['Guion, dirección y app', admin.join(' y ') || 'El organizador'],
+    ['Cumpleañero oficial', nameOf(e.bday, '—')], ['Mascota y notario de los sobres', nameOf(e.baby, '—')],
+    ['Espionaje y control de calidad', (S.spies || []).length ? 'El Espía (identidad: clasificada)' : '—'],
+    ['Reparto', S.people.map(function (p) { return p.name; }).join(' · ')],
+    ['Catering', 'Todos (y quien friegue, más)'], ['Efectos especiales', 'La barbacoa'], ['Banda sonora', 'Los gritos del grito infinito'],
+    ['Ningún miembro de la familia sufrió daños', 'salvo en el orgullo, durante el ping-pong']
+  ];
+  return '<div class="gala-credits"><div class="gc-roll">' + rows.map(function (r) { return '<p><small>' + esc(r[0]) + '</small><b>' + esc(r[1]) + '</b></p>'; }).join('') + '<p class="gc-end"><b>' + esc(S.trip.name) + '</b><small>Nos vemos en la próxima</small></p></div></div>';
 }
 function galaRender() {
   var el = document.getElementById('gala'); if (!el || !gala) return;
   var s = gala.slides[gala.i], inner = '';
-  if (s.t === 'intro') inner = '<span class="eyebrow">' + esc(S.trip.name) + '</span><h1 class="gala-title">Gala de premios</h1><p>Silencio en la sala. Apagad los móviles… bueno, este no.</p><p class="small">' + (gala.slides.filter(function (x) { return x.t === 'award'; }).length) + ' premios</p>';
-  else if (s.t === 'group') inner = '<span class="eyebrow">A continuación</span><h1 class="gala-title">' + esc(G.GROUPS[s.g]) + '</h1>';
+  el.classList.toggle('is-ad', s.t === 'ad');
+  if (s.t === 'intro') inner = '<div class="gala-curtain" aria-hidden="true"><i></i><i></i></div><span class="eyebrow">' + esc(S.trip.name) + (gala.rehearsal ? ' · ensayo' : '') + '</span><h1 class="gala-title">' + (s.trailer ? 'Próximamente' : 'Gala de premios') + '</h1>' +
+    (s.trailer ? '<p>La gran noche llega el <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>' : '<p>Silencio en la sala. Apagad los móviles… bueno, este no.</p><p class="small">' + gala.slides.filter(function (x) { return x.t === 'award'; }).length + ' premios · alfombra roja · cero modestia</p>');
+  else if (s.t === 'group') inner = '<span class="eyebrow">A continuación</span><h1 class="gala-title">' + esc(G.GROUPS[s.g]) + '</h1><p>' + esc({ casa: 'Lo que ha pasado en la casa (y en la app) no se queda en la casa.', juegos: 'Sudor, gritos y alguna trampa legal.', publico: 'Ha votado el pueblo. El pueblo es sabio. A veces.', extra: 'Premios especiales: porque hay cosas que no caben en ninguna categoría.', podio: 'Lo que todos esperabais: el podio del finde.' }[s.g] || '') + '</p>';
+  else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p><p class="small">Volvemos en 3, 2, 1…</p>';
+  else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">' + G.awards(S).length + ' premios. Una noche.</h1><p>Habrá lágrimas, discursos de 30 segundos (cronometrados) y algún que otro «yo no he sido». Nadie se queda sin estatuilla.</p>';
   else if (s.t === 'award') {
-    var a = s.a;
-    inner = '<span class="gala-ico">' + icon(a.icon || 'star') + '</span><span class="eyebrow">' + esc(G.GROUPS[a.group]) + '</span><h1 class="gala-title">' + esc(a.name) + '</h1><p>' + esc(a.desc) + '</p>' +
-      (gala.revealed ? '<div class="gala-win">' + a.winners.map(function (w) { return '<span class="gw">' + eAv(w, 'xl') + '<b>' + eName(w) + '</b></span>'; }).join('') + '</div>' + (a.why ? '<p class="gala-why">' + esc(a.why) + '</p>' : '')
-        : '<p class="gala-drum">Y el premio es para…</p><p class="small">Toca para desvelarlo</p>');
-  } else {
-    var t = G.tally(S), names = {}; G.awards(S).forEach(function (a) { names[a.id] = a.name; });
-    inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p) { return '<div class="ga">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (k) { return esc(names[k]); }).join(' · ') + '</small></div>'; }).join('') + '</div><p class="small">Nos vemos en la próxima escapada.</p>';
-  }
+    var a = s.a, drum = pickOne(GALA_DRUM, a.id + gala.i);
+    inner = '<span class="gala-ico">' + icon(a.icon || 'star') + '</span><span class="eyebrow">' + esc(G.GROUPS[a.group] || 'Premio') + '</span><h1 class="gala-title">' + esc(a.name) + '</h1><p>' + esc(a.desc) + '</p>' +
+      (gala.revealed === true ? '<div class="gala-win">' + a.winners.map(function (w) { return '<span class="gw">' + eAv(w, 'xl') + '<b>' + eName(w) + '</b></span>'; }).join('') + '</div>' +
+        (a.why ? '<p class="gala-why">' + esc(a.why) + '</p>' : '') + (GALA_QUIP[a.id] ? '<p class="gala-quip">' + esc(GALA_QUIP[a.id]) + '</p>' : '') +
+        (a.winners.length === 1 && galaFact(a.winners[0]) ? '<p class="gala-fact">' + esc(galaFact(a.winners[0])) + '</p>' : '') +
+        '<button class="btn gala-speech" data-act="galaSpeech">🎤 Discurso (30 s)</button>'
+        : '<div class="gala-env' + (gala.revealed === 'wait' ? ' opening' : '') + '" aria-hidden="true"><i></i></div><p class="gala-drum' + (gala.revealed === 'wait' ? ' rolling' : '') + '">' + esc(drum) + '</p><p class="small">Toca para abrir el sobre</p>');
+  } else if (s.t === 'final') {
+    if (s.trailer) inner = '<span class="eyebrow">' + esc(galaWhen()) + '</span><h1 class="gala-title">No te lo pierdas</h1><p>Trae palomitas, pañuelos y el discurso preparado. Por si acaso.</p>';
+    else {
+      var t = G.tally(S), names = {}; G.awards(S).forEach(function (a) { names[a.id] = a.name; });
+      inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p) { return '<div class="ga">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (k) { return esc(names[k] || k); }).join(' · ') + '</small></div>'; }).join('') + '</div>';
+    }
+  } else if (s.t === 'credits') inner = galaCredits();
   el.querySelector('.gala-in').innerHTML = inner;
   el.querySelector('.gala-count').textContent = (gala.i + 1) + ' / ' + gala.slides.length;
   el.querySelector('[data-act=galaPrev]').disabled = gala.i === 0;
-  el.querySelector('[data-act=galaNext]').innerHTML = s.t === 'award' && !gala.revealed ? 'Desvelar' : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
+  el.querySelector('.gala-ctl [data-act=galaNext]').innerHTML = s.t === 'award' && gala.revealed !== true ? 'Abrir el sobre' : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
 }
-function drumroll() {
+function drumroll(long) {
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    for (var i = 0; i < 22; i++) {
-      var t = actx.currentTime + i * 0.055, o = actx.createOscillator(), gn = actx.createGain();
+    var n = long ? 44 : 26;
+    for (var i = 0; i < n; i++) {
+      var t = actx.currentTime + i * 0.05, o = actx.createOscillator(), gn = actx.createGain();
       o.type = 'triangle'; o.frequency.setValueAtTime(110 + Math.random() * 30, t);
-      gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(0.12 + i * 0.006, t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+      gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(0.1 + i * (0.12 / n), t + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
       o.connect(gn); gn.connect(actx.destination); o.start(t); o.stop(t + 0.06);
     }
+  } catch (e) {}
+}
+/* Aplausos: ruido filtrado a ráfagas */
+function applause(sec) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    var d = sec || 2.2, len = Math.floor(actx.sampleRate * d), buf = actx.createBuffer(1, len, actx.sampleRate), ch = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) { var env = Math.min(1, i / (actx.sampleRate * .15)) * Math.min(1, (len - i) / (actx.sampleRate * .8)); ch[i] = (Math.random() * 2 - 1) * env * (Math.random() < .35 ? 1 : .25); }
+    var src = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain(); f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = .6; g.gain.value = .22;
+    src.buffer = buf; src.connect(f); f.connect(g); g.connect(actx.destination); src.start();
   } catch (e) {}
 }
 function fanfare() {
@@ -368,14 +467,40 @@ function fanfare() {
     });
   } catch (e) {}
 }
-function galaOpen() {
-  gala = { slides: galaSlides(), i: 0, revealed: false };
-  var el = document.createElement('div'); el.className = 'gala'; el.id = 'gala'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Gala de premios');
-  el.innerHTML = '<div class="gala-spot" aria-hidden="true"></div><button class="gala-x icon-btn" data-act="galaExit" aria-label="Salir de la gala">' + icon('x') + '</button><div class="gala-in" data-act="galaNext" aria-live="polite"></div><div class="gala-ctl"><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
-  document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('gala');
-  galaRender();
+/* La música que corta los discursos largos (como en los Óscar) */
+function playoff() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    [[392, 0], [523, .18], [659, .36], [784, .54], [659, .8], [784, .98], [1047, 1.2]].forEach(function (n) {
+      var t = actx.currentTime + n[1], o = actx.createOscillator(), gn = actx.createGain();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(n[0], t);
+      gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(0.05, t + 0.03); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(gn); gn.connect(actx.destination); o.start(t); o.stop(t + 0.32);
+    });
+  } catch (e) {}
 }
-function galaClose(fromNav) { var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; gala = null; if (el && !fromNav) overlayDone(); }
+var speechT = null;
+function galaSpeech() {
+  var el = document.getElementById('gala'); if (!el) return;
+  var old = el.querySelector('.gala-mic'); if (old) { old.remove(); clearInterval(speechT); }
+  var left = 30, m = document.createElement('div'); m.className = 'gala-mic';
+  m.innerHTML = '<div class="gm-in"><span class="eyebrow">Discurso de agradecimiento</span><b class="gm-n num">30</b><p>Gracias a mi familia, a mi rival de ping-pong y a quien inventó la barbacoa…</p><button class="btn" data-act="galaSpeechEnd">Ya he terminado (milagro)</button></div>';
+  el.appendChild(m);
+  speechT = setInterval(function () {
+    left--; var n = m.querySelector('.gm-n'); if (n) n.textContent = left;
+    if (left <= 5) m.classList.add('hurry');
+    if (left <= 0) { clearInterval(speechT); playoff(); m.querySelector('.gm-in').innerHTML = '<span class="eyebrow">¡Música, maestro!</span><b class="gm-n">🎻</b><p>Se acabó el tiempo. Que la tarta se enfría y el siguiente premiado ya está llorando.</p><button class="btn primary" data-act="galaSpeechEnd">Vale, vale…</button>'; }
+  }, 1000);
+}
+function galaOpen(mode) {
+  var trailer = mode === 'trailer';
+  gala = { slides: galaSlides(trailer), i: 0, revealed: false, trailer: trailer, rehearsal: mode === 'rehearsal' };
+  var el = document.createElement('div'); el.className = 'gala'; el.id = 'gala'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Gala de premios');
+  el.innerHTML = '<div class="gala-spot" aria-hidden="true"></div><div class="gala-spot s2" aria-hidden="true"></div><button class="gala-x icon-btn" data-act="galaExit" aria-label="Salir de la gala">' + icon('x') + '</button><div class="gala-in" data-act="galaNext" aria-live="polite"></div><div class="gala-ctl"><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
+  document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('gala');
+  galaRender(); try { fanfare(); } catch (e) {}
+}
+function galaClose(fromNav) { clearInterval(speechT); var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; gala = null; if (el && !fromNav) overlayDone(); }
 
 /* ---------- Hojas de edición ---------- */
 function gameSheet(id) {
@@ -613,20 +738,24 @@ Object.assign(A, {
     if (!gGuard()) return; S.awardData = S.awardData || {}; var id = uid('aw'); S.awardData[id] = { custom: true, name: 'Premio especial', desc: '', winners: [], icon: 'star' };
     save(); render(true); awardSheet(id);
   },
-  galaStart: function () { galaOpen(); },
+  galaStart: function (el) { galaOpen(el.dataset.mode || (galaOpenNow() ? 'gala' : 'trailer')); },
+  galaSpeech: function () { galaSpeech(); },
+  galaSpeechEnd: function () { clearInterval(speechT); var m = document.querySelector('.gala-mic'); if (m) m.remove(); applause(1.6); },
   galaExit: function () { galaClose(); },
   galaPrev: function () { if (!gala || !gala.i) return; gala.i--; gala.revealed = gala.slides[gala.i].t === 'award'; galaRender(); },
   galaNext: function () {
     if (!gala) return; var s = gala.slides[gala.i];
     if (s.t === 'award' && !gala.revealed) {
-      gala.revealed = 'wait'; drumroll(); var el = document.querySelector('.gala-drum'); if (el) el.classList.add('rolling');
-      setTimeout(function () { if (!gala) return; gala.revealed = true; galaRender(); confetti(s.podium ? 3200 : 1600); if (s.podium && s.a.id === 'oro') fanfare(); }, 1300);
+      gala.revealed = 'wait'; drumroll(s.podium); galaRender();
+      setTimeout(function () { if (!gala) return; gala.revealed = true; galaRender(); applause(s.podium ? 3 : 2); confetti(s.podium ? 3600 : 1800); if (s.podium) { try { fireworks(4200, s.a.id === 'oro' ? 12 : 6); } catch (x) {} } if (s.podium && s.a.id === 'oro') fanfare(); if (navigator.vibrate) try { navigator.vibrate([30, 40, 30]); } catch (x) {} }, s.podium ? 2300 : 1400);
       return;
     }
     if (gala.revealed === 'wait') return;
     if (gala.i >= gala.slides.length - 1) { galaClose(); egg('gala'); return; }
     gala.i++; gala.revealed = false; galaRender();
-    if (gala.i === gala.slides.length - 1) { confetti(3000); egg('gala'); }
+    clearInterval(speechT); var mic = document.querySelector('.gala-mic'); if (mic) mic.remove();
+    if (gala.slides[gala.i].t === 'final' && !gala.trailer) { confetti(3000); applause(3); }
+    if (gala.i === gala.slides.length - 1) egg('gala');
   }
 });
 Object.assign(C, {
