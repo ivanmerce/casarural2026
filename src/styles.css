@@ -1146,3 +1146,9 @@ img, svg, canvas { max-width: 100%; }
 @keyframes opIn { from { opacity: 0; transform: translateY(-3px); } }
 @media (max-width: 1079px) { .online-pop { right: 0; transform: translate(0, -6px) scale(.97); } .online-pop::before { left: auto; right: 34px; } }
 @media (max-width: 1079px) and (hover: hover) { .online-wrap:hover .online-pop, .online-wrap:focus-within .online-pop { transform: translate(0, 0) scale(1); } }
+/* el espía elige… un baño */
+.plan-room.k-bath.spy-pick { cursor: pointer; border: 2px dashed #F2C65A; animation: spyBlink 1.6s ease-in-out infinite; }
+.plan-room.k-bath.spy-pick.mine { animation: none; border-style: solid; background: color-mix(in srgb, #F2C65A 25%, transparent); }
+.plan-room.k-bath .pdots { margin-top: 2px; }
+@keyframes spyBlink { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, #F2C65A 40%, transparent); } }
+.code-pop:not(:has(svg)) { font-size: 34px; }
