@@ -4149,6 +4149,7 @@ function premiosView() {
       : '<p class="small gala-date">' + icon('clock') + '<span>Se estrena el <b>' + esc(galaWhen()) + '</b>, con los premios ya decididos. Hasta entonces, sin spoilers.</span></p><button class="btn primary block big-btn" data-act="galaStart" data-mode="trailer">' + icon('play') + 'Ver el tráiler</button>' +
         (can('access') ? '<button class="btn block" data-act="galaStart" data-mode="rehearsal">' + icon('eye') + 'Ensayo completo (spoilers: solo tú)</button>' : '')) +
     (none.length ? '<p class="small muted">Aún sin premio: ' + none.map(function (p) { return esc(p.name); }).join(', ') + '. ' + (can('edit') ? 'Crea un premio especial para que nadie se quede sin estatuilla.' : '') + '</p>' : '<p class="small">Todo el mundo tiene al menos un premio. Así se hace.</p>') +
+    (can('access') ? '<button class="btn block" data-act="galaStart" data-mode="sim">' + icon('shuffle') + 'Gala de prueba: premios al azar (solo admin)</button><p class="small muted">Reparte los premios al azar para ver cómo queda la gala. No guarda nada ni cambia ningún premio. Cada vez sale distinta.</p>' : '') +
     (can('edit') ? '<button class="btn block" data-act="aNew">' + icon('plus') + 'Premio especial</button>' : '') + '</section>';
   ['podio', 'juegos', 'casa', 'publico', 'extra'].forEach(function (gk) {
     var items = list.filter(function (a) { return a.group === gk; }); if (!items.length) return;
@@ -4199,9 +4200,9 @@ var GALA_DRUM = [
 ];
 /* La coletilla de cada premio, después de desvelarlo */
 var GALA_QUIP = {
-  oro: 'Que alguien le traiga un trono. Y un cojín, que el trono es de piedra.', plata: 'A un pelo del oro. El pelo, eso sí, lo tiene el de arriba.', bronce: 'Bronce: el metal de los que lo dieron todo… y un poco más.',
+  oro: 'Que alguien le traiga un trono. Y un cojín, que el trono es de piedra. Más títulos que el Barça de Guardiola.', plata: 'A un pelo del oro. El pelo, eso sí, lo tiene el de arriba.', bronce: 'Bronce: el metal de los que lo dieron todo… y un poco más.',
   rayo: 'Tan rápido que ni la foto le pilla. Esta es de archivo.', cerebro: 'Piensa tanto que le humea la cabeza. O es la barbacoa.', fantasma: 'Le seguimos buscando. Si alguien le ve, que le dé la estatuilla.',
-  raqueta: 'Ping, pong y a la vitrina.', fenix: 'De las cenizas al podio. Ni el Real Madrid remonta así.', invencibles: 'Invictos. Hasta el año que viene, que se repartan bien los equipos.',
+  raqueta: 'Ping, pong y a la vitrina.', fenix: 'De las cenizas al podio. Una remontada a lo 6-1 al PSG: Camp Nou en pie.', invencibles: 'Invictos. Hasta el año que viene, que se repartan bien los equipos.',
   poulidor: 'Siempre segundo, nunca olvidado. Te queremos igual, campeón moral.', todoterreno: 'Si había un juego, allí estaba. Si había dos, en los dos.', coubertin: 'Lo importante es participar. Y tú has participado muchísimo.',
   revelacion: 'La cantera viene pisando fuerte. Los mayores, a temblar.', hierro: 'Los abuelos no se oxidan. Ni se rinden. Ni se callan.', duo: 'Dos mejor que uno. Sobre todo si uno lleva pañal.',
   espia: 'Nadie sabe quién es. Nadie sabe cómo entró. Pero todos sabemos que lo ha tocado todo.', derroche: 'Sin ellos no hay casa, ni piscina, ni gala. Aplauso largo, que se lo han ganado.',
@@ -4240,9 +4241,9 @@ function galaFact(wid) {
   f.sort(function (a, b) { return b[0] - a[0]; });
   return 'Dato del jurado: ' + f[0][1] + '.';
 }
-function galaSlides(trailer) {
+function galaSlides(trailer, awardsList) {
   if (trailer) return [{ t: 'intro', trailer: true }, { t: 'ad', ad: GALA_ADS[0] }, { t: 'teaser' }, { t: 'ad', ad: GALA_ADS[3] }, { t: 'final', trailer: true }];
-  var list = G.awards(S).filter(function (a) { return a.winners.length; });
+  var list = (awardsList || G.awards(S)).filter(function (a) { return a.winners.length; });
   var order = ['casa', 'juegos', 'publico', 'extra'], slides = [{ t: 'intro' }], n = 0, ad = 0;
   order.forEach(function (gk) {
     var it = list.filter(function (a) { return a.group === gk; }); if (!it.length) return;
@@ -4272,7 +4273,7 @@ function galaRender() {
   var el = document.getElementById('gala'); if (!el || !gala) return;
   var s = gala.slides[gala.i], inner = '';
   el.classList.toggle('is-ad', s.t === 'ad');
-  if (s.t === 'intro') inner = '<div class="gala-curtain" aria-hidden="true"><i></i><i></i></div><span class="eyebrow">' + esc(S.trip.name) + (gala.rehearsal ? ' · ensayo' : '') + '</span><h1 class="gala-title">' + (s.trailer ? 'Próximamente' : 'Gala de premios') + '</h1>' +
+  if (s.t === 'intro') inner = '<div class="gala-curtain" aria-hidden="true"><i></i><i></i></div><span class="eyebrow">' + esc(S.trip.name) + (gala.rehearsal ? ' · ensayo' : gala.sim ? ' · simulación' : '') + '</span><h1 class="gala-title">' + (s.trailer ? 'Próximamente' : 'Gala de premios') + '</h1>' +
     (s.trailer ? '<p>La gran noche llega el <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>' : '<p>Silencio en la sala. Apagad los móviles… bueno, este no.</p><p class="small">' + gala.slides.filter(function (x) { return x.t === 'award'; }).length + ' premios · alfombra roja · cero modestia</p>');
   else if (s.t === 'group') inner = '<span class="eyebrow">A continuación</span><h1 class="gala-title">' + esc(G.GROUPS[s.g]) + '</h1><p>' + esc({ casa: 'Lo que ha pasado en la casa (y en la app) no se queda en la casa.', juegos: 'Sudor, gritos y alguna trampa legal.', publico: 'Ha votado el pueblo. El pueblo es sabio. A veces.', extra: 'Premios especiales: porque hay cosas que no caben en ninguna categoría.', podio: 'Lo que todos esperabais: el podio del finde.' }[s.g] || '') + '</p>';
   else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p><p class="small">Volvemos en 3, 2, 1…</p>';
@@ -4282,13 +4283,13 @@ function galaRender() {
     inner = '<span class="gala-ico">' + icon(a.icon || 'star') + '</span><span class="eyebrow">' + esc(G.GROUPS[a.group] || 'Premio') + '</span><h1 class="gala-title">' + esc(a.name) + '</h1><p>' + esc(a.desc) + '</p>' +
       (gala.revealed === true ? '<div class="gala-win">' + a.winners.map(function (w) { return '<span class="gw">' + eAv(w, 'xl') + '<b>' + eName(w) + '</b></span>'; }).join('') + '</div>' +
         (a.why ? '<p class="gala-why">' + esc(a.why) + '</p>' : '') + (GALA_QUIP[a.id] ? '<p class="gala-quip">' + esc(GALA_QUIP[a.id]) + '</p>' : '') +
-        (a.winners.length === 1 && galaFact(a.winners[0]) ? '<p class="gala-fact">' + esc(galaFact(a.winners[0])) + '</p>' : '') +
+        (a.fact ? '<p class="gala-fact">' + esc(a.fact) + '</p>' : a.winners.length === 1 && !gala.sim && galaFact(a.winners[0]) ? '<p class="gala-fact">' + esc(galaFact(a.winners[0])) + '</p>' : '') +
         '<button class="btn gala-speech" data-act="galaSpeech">🎤 Discurso (30 s)</button>'
         : '<div class="gala-env' + (gala.revealed === 'wait' ? ' opening' : '') + '" aria-hidden="true"><i></i></div><p class="gala-drum' + (gala.revealed === 'wait' ? ' rolling' : '') + '">' + esc(drum) + '</p><p class="small">Toca para abrir el sobre</p>');
   } else if (s.t === 'final') {
     if (s.trailer) inner = '<span class="eyebrow">' + esc(galaWhen()) + '</span><h1 class="gala-title">No te lo pierdas</h1><p>Trae palomitas, pañuelos y el discurso preparado. Por si acaso.</p>';
     else {
-      var t = G.tally(S), names = {}; G.awards(S).forEach(function (a) { names[a.id] = a.name; });
+      var t = gala.sim ? simTally(gala.list) : G.tally(S), names = {}; (gala.list || G.awards(S)).forEach(function (a) { names[a.id] = a.name; });
       inner = '<span class="eyebrow">Habemus premiados</span><h1 class="gala-title">¡Gracias, familia!</h1><div class="gala-all">' + S.people.filter(function (p) { return t[p.id].length; }).map(function (p) { return '<div class="ga">' + av(p.id, 'md') + '<b>' + esc(p.name) + '</b><small>' + t[p.id].map(function (k) { return esc(names[k] || k); }).join(' · ') + '</small></div>'; }).join('') + '</div>';
     }
   } else if (s.t === 'credits') inner = galaCredits();
@@ -4355,9 +4356,44 @@ function galaSpeech() {
     if (left <= 0) { clearInterval(speechT); playoff(); m.querySelector('.gm-in').innerHTML = '<span class="eyebrow">¡Música, maestro!</span><b class="gm-n">🎻</b><p>Se acabó el tiempo. Que la tarta se enfría y el siguiente premiado ya está llorando.</p><button class="btn primary" data-act="galaSpeechEnd">Vale, vale…</button>'; }
   }, 1000);
 }
+/* ---------- Gala de prueba (solo admin): premios repartidos al azar, para ver cómo queda. No guarda nada ---------- */
+function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+function shuffled(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+var SIM_FAM = { derroche: 1, carrito: 1, tarjeta: 1, despensa: 1, chef: 1, banco: 1, mecenas: 1 };
+function simFact() {
+  var n = function (a, b) { return a + Math.floor(Math.random() * (b - a + 1)); };
+  return 'Dato del jurado (simulado): ' + rnd([n(3, 35) + ' secretos encontrados', n(20, 300) + ' minutos con la app abierta. Su móvil pide vacaciones', n(2, 40) + ' fotos subidas al álbum', 'se ha apuntado a ' + n(2, 14) + ' planes', n(10, 80) + ' puntos en el ranking']) + '.';
+}
+function simAwards() {
+  var people = S.people.map(function (p) { return p.id; }), ents = shuffled(G.entrantIds(S)), fams = S.families.map(function (f) { return 'fam:' + f.id; });
+  var duos = G.entrantIds(S).filter(function (e) { return !person(e); }), e = S.trip.eggs || {}, pod = 0;
+  var list = G.awards(S).filter(function (a) { return a.id !== 'estrella'; }).map(function (a) {
+    var w;
+    if (a.id === 'derroche' || a.id === 'espia' || a.id === 'cumple' || a.id === 'mascota') { if (a.winners.length) return Object.assign({}, a); }
+    if (a.id === 'espia') w = (S.spies || []).map(function (p) { return p.id; });
+    else if (a.id === 'cumple' && e.bday) w = [e.bday];
+    else if (a.id === 'mascota' && e.baby) w = [e.baby];
+    else if (SIM_FAM[a.id]) w = [rnd(fams)];
+    else if (a.id === 'oro' || a.id === 'plata' || a.id === 'bronce') w = [ents[{ oro: 0, plata: 1, bronce: 2 }[a.id]]];
+    else if (a.id === 'duo') w = duos.length ? [rnd(duos)] : [];
+    else if (a.id === 'omnipresente' || a.id === 'invencibles') w = shuffled(people).slice(0, 3 + Math.floor(Math.random() * 3));
+    else w = Math.random() < .15 ? shuffled(people).slice(0, 2) : [rnd(people)];
+    var why = a.vote ? (2 + Math.floor(Math.random() * 8)) + ' votos (simulados)' : rnd(['Ganador al azar (simulación)', 'Decisión unánime del jurado (de mentira)', 'Simulación: el bombo lo ha querido así', 'Sorteo ante notario (simulado)']);
+    return Object.assign({}, a, { winners: w.filter(Boolean), why: why, fact: w.length === 1 && !SIM_FAM[a.id] && a.id !== 'espia' ? simFact() : '' });
+  });
+  var t = simTally(list), lonely = S.people.filter(function (p) { return !t[p.id].length; }).map(function (p) { return p.id; });
+  if (lonely.length) list.push({ id: 'estrella', group: 'casa', icon: 'star', name: 'Estrella Invitada', desc: 'Para quien aún no tenía estatuilla: porque sin ti, esta familia no estaría completa (ni la foto de familia).', winners: lonely, why: 'Por venir, reír y dejarse querer', source: 'auto' });
+  return list;
+}
+function simTally(list) {
+  var t = {}; S.people.concat(S.spies || []).forEach(function (p) { t[p.id] = []; });
+  (list || []).forEach(function (a) { var seen = {}; a.winners.forEach(function (w) { G.peopleOf(S, w).forEach(function (pid) { if (t[pid] && !seen[pid]) { seen[pid] = 1; t[pid].push(a.id); } }); }); });
+  return t;
+}
 function galaOpen(mode) {
   var trailer = mode === 'trailer';
-  gala = { slides: galaSlides(trailer), i: 0, revealed: false, trailer: trailer, rehearsal: mode === 'rehearsal' };
+  var sim = mode === 'sim', list = sim ? simAwards() : null;
+  gala = { slides: galaSlides(trailer, list), i: 0, revealed: false, trailer: trailer, rehearsal: mode === 'rehearsal', sim: sim, list: list };
   var el = document.createElement('div'); el.className = 'gala'; el.id = 'gala'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Gala de premios');
   el.innerHTML = '<div class="gala-spot" aria-hidden="true"></div><div class="gala-spot s2" aria-hidden="true"></div><button class="gala-x icon-btn" data-act="galaExit" aria-label="Salir de la gala">' + icon('x') + '</button><div class="gala-in" data-act="galaNext" aria-live="polite"></div><div class="gala-ctl"><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
   document.body.appendChild(el); document.body.style.overflow = 'hidden'; overlayPush('gala');
@@ -4614,11 +4650,11 @@ Object.assign(A, {
       return;
     }
     if (gala.revealed === 'wait') return;
-    if (gala.i >= gala.slides.length - 1) { galaClose(); egg('gala'); return; }
+    if (gala.i >= gala.slides.length - 1) { var wasSim = gala.sim; galaClose(); if (!wasSim) egg('gala'); return; }
     gala.i++; gala.revealed = false; galaRender();
     clearInterval(speechT); var mic = document.querySelector('.gala-mic'); if (mic) mic.remove();
     if (gala.slides[gala.i].t === 'final' && !gala.trailer) { confetti(3000); applause(3); }
-    if (gala.i === gala.slides.length - 1) egg('gala');
+    if (gala.i === gala.slides.length - 1 && !gala.sim) egg('gala');
   }
 });
 Object.assign(C, {
