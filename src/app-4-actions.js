@@ -25,7 +25,7 @@ function itemSheet(id) {
     '<div class="field"><span class="lbl">¿Lo traéis de casa?</span>' + segHtml('status', [['pendiente', 'No, se compra'], ['casa', 'Sí, de casa (0 €)']], draft.status === 'casa' ? 'casa' : 'pendiente', !can('edit')) + '</div>' +
     '<div class="grid2"><div class="field"><label for="f-cost">Precio real (opcional)</label><input id="f-cost" inputmode="decimal" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) + ' estimado' : '0,00') + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '"' + dis + '></div>' +
     '<div class="field"><span class="lbl">Reparto</span>' + segHtml('split', [['comun', 'Común'], ['propio', 'Propio']], draft.split, !can('edit')) + '</div></div>' +
-    '<div class="field"><span class="lbl">Dónde comprarlo</span>' + segHtml('buy', [['antes', 'Antes de ir'], ['alli', 'Allí (pueblo)'], ['', 'Da igual']], draft.buy, !can('edit')) + '</div>' +
+    '<div class="field"><span class="lbl">Dónde comprarlo</span>' + segHtml('buy', [['', 'Sin decidir'], ['antes', 'Antes de ir'], ['alli', 'Allí']], draft.buy, !can('edit')) + '</div>' +
     '<div class="field"><span class="lbl">Para qué comidas</span><div class="att-fam">' + S.meals.map(function (m) {
       return '<button type="button" class="chip" data-act="dmeal" data-id="' + m.id + '" aria-pressed="' + (draft.meals.indexOf(m.id) >= 0) + '"' + dis + '>' + esc(dayOf(m.day).short) + ' · ' + slotName(m.slot) + '</button>';
     }).join('') + '</div></div>' +
@@ -114,7 +114,7 @@ function actSheet(id) {
     '<div class="field"><label for="a-where">Dónde</label><input id="a-where" value="' + esc(a.where) + '"></div>' +
     '<div class="field"><label for="a-travel">Desplazamiento</label><input id="a-travel" value="' + esc(a.travel) + '" placeholder="En la finca"></div>' +
     '<div class="field"><span class="lbl">¿Apta para ' + esc(babyName()) + '?</span>' + segHtml('marc', [['si', 'Sí'], ['adulto', 'Con adulto'], ['no', 'No']], a.marc) + '</div>' +
-    '<div class="field"><label for="a-owner">Responsable</label><select id="a-owner"><option value="">Libre</option>' + S.people.map(function (p) { return '<option value="' + p.id + '"' + (a.owner === p.id ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select></div>' +
+
     '<div class="field"><label for="a-planb">Plan B si llueve</label><input id="a-planb" value="' + esc(a.planB) + '"></div>' +
     '<div class="field"><label for="a-desc">Descripción</label><textarea id="a-desc">' + esc(a.desc) + '</textarea></div>' +
     '<div class="sheet-actions"><button class="btn primary" data-act="saveAct">Guardar</button>' + (id ? '<button class="btn danger" data-act="delAct" data-id="' + id + '">' + icon('trash') + 'Borrar</button>' : '<button class="btn" data-act="close">Cancelar</button>') + '</div>');
@@ -123,7 +123,7 @@ function saveAct() {
   var t = val('a-title').trim(); if (!t) { toast('Ponle un título'); return; }
   var a = draft.id ? S.activities.find(function (x) { return x.id === draft.id; }) : { id: uid('a'), place: 'finca' };
   a.title = t; a.day = val('a-day'); a.start = val('a-start') || '12:00'; a.dur = parseInt(val('a-dur'), 10) || 60; a.age = val('a-age').trim() || 'Todos';
-  a.where = val('a-where').trim(); a.travel = val('a-travel').trim(); a.marc = draft.marc; a.owner = val('a-owner') || null; a.planB = val('a-planb').trim(); a.desc = val('a-desc').trim();
+  a.where = val('a-where').trim(); a.travel = val('a-travel').trim(); a.marc = draft.marc; a.owner = null; a.planB = val('a-planb').trim(); a.desc = val('a-desc').trim();
   if (!draft.id) S.activities.push(a);
   ui.day = a.day; save(); closeSheet(); render(true); toast('Plan guardado');
 }

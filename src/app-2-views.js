@@ -231,8 +231,11 @@ VIEWS.compra = function () {
     '<button class="chip" data-act="fam" data-fam="libre" aria-pressed="' + (f === 'libre') + '">' + icon('basket') + 'Sin dueño <b class="num">' + free.length + '</b></button>' +
     (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro <b class="num">' + mine.length + '</b></button>' : '') +
     '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo</button>' +
-    '<button class="chip" data-act="buyF" data-v="alli" aria-pressed="' + (ui.buyF === 'alli') + '">' + icon('pin') + 'Comprar allí <b class="num">' + all.filter(function (i) { return i.buy === 'alli'; }).length + '</b></button>' +
-    '<button class="chip" data-act="buyF" data-v="antes" aria-pressed="' + (ui.buyF === 'antes') + '">' + icon('car') + 'Antes de ir <b class="num">' + all.filter(function (i) { return i.buy === 'antes'; }).length + '</b></button>' +
+    /* «Allí» / «Antes de ir» solo aparecen cuando alguien lo ha decidido para algún producto */
+    [['alli', 'pin', 'Comprar allí'], ['antes', 'car', 'Antes de ir']].map(function (o) {
+      var n = all.filter(function (i) { return i.buy === o[0]; }).length;
+      return n || ui.buyF === o[0] ? '<button class="chip" data-act="buyF" data-v="' + o[0] + '" aria-pressed="' + (ui.buyF === o[0]) + '">' + icon(o[1]) + o[2] + ' <b class="num">' + n + '</b></button>' : '';
+    }).join('') +
     S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + '</button>'; }).join('') + '</div>';
   if (ui.buyF && S.shopping) h += '<section class="card wood buy-help"><p class="small">' + (ui.buyF === 'alli' ? S.shopping.alli : S.shopping.antes) + '</p></section>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';

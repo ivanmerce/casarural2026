@@ -32,7 +32,7 @@ function actCard(a) {
         '<span class="fact"' + (a.marc === 'no' ? ' style="opacity:.7"' : '') + '>' + icon('baby') + '<span data-egg="baby">' + marcLabel(a.marc) + '</span></span>' +
         '<span class="fact" style="color:var(--ok)">0 €</span></div>' +
       (a.planB ? '<p class="planb">' + icon('umbrella') + '<span><b>Plan B:</b> ' + esc(a.planB) + '</span></p>' : '') +
-      '<div class="row"><span class="small muted grow">Responsable: <b style="color:var(--ink)">' + (a.owner && person(a.owner) ? pname(a.owner) : esc(ownerLabel(a.owner))) + '</b></span>' +
+      '<div class="row"><span class="small muted grow">Todos juntos</span>' +
         (function () { var gm = (S.games || []).find(function (g) { return g.act === a.id; }) || (a.tournament ? (S.games || []).find(function (g) { return g.format === 'bracket'; }) : null); return gm ? '<button class="link" data-act="gOpen" data-id="' + gm.id + '">Marcador ' + icon('arrow') + '</button>' : ''; })() +
         '<button class="vote" data-act="vote" data-id="' + a.id + '" aria-pressed="' + mine + '" aria-label="Me apunto">' + icon('heart') + '<span class="num">' + votes.length + '</span></button></div>' +
     '</article></div>';
