@@ -1141,6 +1141,10 @@ img, svg, canvas { max-width: 100%; }
 #print-list .pl-qty { white-space: nowrap; font-weight: 700; width: 90px; }
 #print-list .pl-meta { color: #555; font-size: 9.5pt; width: 38%; }
 #print-list .pl-foot { margin-top: 14px; font-size: 9pt; color: #777; }
+.code-pop { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; margin: 0 auto 4px; background: color-mix(in srgb, var(--accent) 22%, transparent); color: #fff; }
+.code-pop .ico { width: 32px; height: 32px; }
+.medal.spy { background: #23262f; color: #F2C65A; display: inline-grid; place-items: center; }
+.medal.spy .ico { width: 14px; height: 14px; }
 
 </style>
 </head>
@@ -1461,7 +1465,7 @@ var G = (function () {
   function r2(x) { return Math.round(x * 100) / 100; }
   function comp(S) { return S.comp || { duos: [] }; }
   function duos(S) { return comp(S).duos || []; }
-  function person(S, id) { return S.people.find(function (p) { return p.id === id; }); }
+  function person(S, id) { return S.people.find(function (p) { return p.id === id; }) || (S.spies || []).find(function (p) { return p.id === id; }); }
   function duoOf(S, pid) { return duos(S).find(function (d) { return d.members.indexOf(pid) >= 0; }); }
 
   /* ---------- Participantes ---------- */
@@ -1721,6 +1725,9 @@ var G = (function () {
     { id: 'duo', group: 'juegos', icon: 'users', name: 'Dúo Dinámico', desc: 'La mejor pareja que compite junta.',
       auto: function (S, c) { var cand = c.rank.filter(function (r) { return r.played && entrant(S, r.id) && entrant(S, r.id).duo; }); if (!cand.length) return null; return { winners: [cand[0].id], why: cand[0].pts + ' puntos entre los dos' }; } },
     /* --- La casa: todo lo que pasa en la plataforma --- */
+    /* --- Premio especial: el espía (que no opta a ningún otro) --- */
+    { id: 'espia', group: 'casa', icon: 'search', name: 'Agente Secreto del Año', desc: 'Premio especial para el espía que se coló en la plataforma, lo trasteó todo y nos chivó lo que había que mejorar. Fuera de concurso en todo lo demás.',
+      auto: function (S) { var sp = S.spies || []; return sp.length ? { winners: sp.map(function (p) { return p.id; }), why: 'Por colarse sin que nadie supiera quién era' } : null; } },
     { id: 'derroche', group: 'casa', icon: 'coins', name: 'Los Más Derrochadores', desc: 'Quienes pagan la casa rural (y la tasa turística).',
       auto: function (S) { var p = S.house && S.house.payer; if (!p) return null; var t = typeof L !== 'undefined' ? L.tax(S).withExemption : 0; return { winners: [F(p)], why: 'La casa (' + money(S.house.total) + ')' + (S.tax && S.tax.payer === p && t ? ' y la tasa (' + money(t) + ')' : '') }; } },
     { id: 'carrito', group: 'casa', icon: 'cart', name: 'Reyes del Carrito', desc: 'La familia que más productos se ha pedido de la lista de la compra.',
@@ -1795,7 +1802,7 @@ var G = (function () {
     return membersOf(S, wid);
   }
   function tally(S) {
-    var t = {}; S.people.forEach(function (p) { t[p.id] = []; });
+    var t = {}; S.people.concat(S.spies || []).forEach(function (p) { t[p.id] = []; });
     awards(S).forEach(function (a) { var seen = {}; a.winners.forEach(function (w) { peopleOf(S, w).forEach(function (pid) { if (t[pid] && !seen[pid]) { seen[pid] = 1; t[pid].push(a.id); } }); }); });
     return t;
   }
@@ -2372,13 +2379,13 @@ VIEWS.compra = function () {
   h += '<div class="chips" role="group" aria-label="Qué lista ver">' +
     '<button class="chip" data-act="fam" data-fam="libre" aria-pressed="' + (f === 'libre') + '">' + icon('basket') + 'Sin dueño <b class="num">' + free.length + '</b></button>' +
     (fam(myF) ? '<button class="chip" data-act="fam" data-fam="' + myF + '" aria-pressed="' + (f === myF) + '">' + icon('heart') + 'Lo nuestro <b class="num">' + mine.length + '</b></button>' : '') +
-    '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo</button>' +
+    '<button class="chip" data-act="fam" data-fam="all" aria-pressed="' + (f === 'all') + '">Todo <b class="num">' + all.length + '</b></button>' +
     /* «Allí» / «Antes de ir» solo aparecen cuando alguien lo ha decidido para algún producto */
     [['alli', 'pin', 'Comprar allí'], ['antes', 'car', 'Antes de ir']].map(function (o) {
       var n = all.filter(function (i) { return i.buy === o[0]; }).length;
       return n || ui.buyF === o[0] ? '<button class="chip" data-act="buyF" data-v="' + o[0] + '" aria-pressed="' + (ui.buyF === o[0]) + '">' + icon(o[1]) + o[2] + ' <b class="num">' + n + '</b></button>' : '';
     }).join('') +
-    S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + '</button>'; }).join('') + '</div>';
+    S.families.map(function (x) { return x.id === myF ? '' : '<button class="chip" data-act="fam" data-fam="' + x.id + '" aria-pressed="' + (f === x.id) + '"><i class="fam-dot ' + x.color + '"></i>' + esc(x.name) + ' <b class="num">' + all.filter(function (i) { return i.family === x.id; }).length + '</b></button>'; }).join('') + '</div>';
   if (ui.buyF && S.shopping) h += '<section class="card wood buy-help"><p class="small">' + (ui.buyF === 'alli' ? S.shopping.alli : S.shopping.antes) + '</p></section>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';
   if (ui.mealFilter) {
@@ -4248,7 +4255,7 @@ function thumbImg(ph, cls) {
   return u ? '<img src="' + u + '" alt="' + esc(ph.caption || 'Foto de ' + nameOf(ph.by)) + '" loading="lazy" decoding="async"' + (cls ? ' class="' + cls + '"' : '') + '>' : '<span class="ph-wait" aria-hidden="true"></span>';
 }
 function uploadBtn(cls, label) {
-  if (typeof isKid === 'function' && isKid()) return '';
+  if (typeof isKid === 'function' && isKid()) return '<button class="btn ' + (cls || 'primary') + '" data-act="phNope">' + icon('camera') + (label || 'Subir fotos') + '</button>';
   return '<label class="btn ' + (cls || 'primary') + '" for="ph-in-' + (cls || 'p') + '" style="cursor:pointer">' + icon('camera') + (label || 'Subir fotos') + '</label><input id="ph-in-' + (cls || 'p') + '" type="file" accept="image/*" multiple hidden data-change="phUpload">';
 }
 
@@ -4387,6 +4394,9 @@ Object.assign(C, {
   }
 });
 document.addEventListener('keydown', function (e) { if (!viewer) return; if (e.key === 'ArrowRight') A.vwNext(); else if (e.key === 'ArrowLeft') A.vwPrev(); else if (e.key === 'Escape') viewerClose(); });
+A.phNope = function () {
+  message('<div class="code-pop">' + icon('camera') + '</div><h2>' + (isSpy() ? 'Modo espía' : 'Modo explorador') + '</h2><p>' + (isSpy() ? 'Un buen espía hace fotos… pero no las publica. Aquí puedes ver el álbum entero; las fotos las suben los de la familia.' : 'Puedes ver todas las fotos del álbum. Para subir las tuyas, pásaselas a tus padres y que las suban ellos.') + '</p>');
+};
 
 /* ===================== Manual de uso (dentro de la app) =====================
    Siempre al día: el texto vive en el mismo código que la app. Los datos (horarios, finca…) salen de S.
@@ -4597,11 +4607,12 @@ function hintsLeft() { return Math.max(0, SECRETS_HINTS - Object.keys(hintsMap()
 /* ----- Ranking (la nube solo sabe cuántos lleva cada uno) ----- */
 function secretsRanking() {
   var st = S.stats || {}, rows = {};
-  Object.keys(st).forEach(function (pid) { if (person(pid) && !isSpy(pid) && (st[pid].eggs || 0) > 0) rows[pid] = st[pid].eggs; });
-  if (!isSpy(ui.me)) rows[ui.me] = rankedCount();   /* lo mío, siempre al día desde este dispositivo */
-  var arr = Object.keys(rows).map(function (pid) { return { id: pid, n: Math.min(rows[pid], EGGS.length) }; }).filter(function (r) { return r.n > 0 || r.id === ui.me; });
+  Object.keys(st).forEach(function (pid) { if (person(pid) && (st[pid].eggs || 0) > 0) rows[pid] = st[pid].eggs; });
+  rows[ui.me] = rankedCount();   /* lo mío, siempre al día desde este dispositivo */
+  var arr = Object.keys(rows).map(function (pid) { return { id: pid, n: Math.min(rows[pid], EGGS.length), spy: isSpy(pid) }; }).filter(function (r) { return r.n > 0 || r.id === ui.me; });
   arr.sort(function (a, b) { return b.n - a.n || String(pname(a.id)).localeCompare(String(pname(b.id))); });
-  var pos = 0, last = -1; arr.forEach(function (r, i) { if (r.n !== last) { pos = i + 1; last = r.n; } r.pos = pos; });
+  /* los puestos (y las medallas) solo cuentan a la familia: el espía sale, pero fuera de concurso */
+  var pos = 0, last = -1, k = 0; arr.forEach(function (r) { if (r.spy) { r.pos = null; return; } k++; if (r.n !== last) { pos = k; last = r.n; } r.pos = pos; });
   return arr;
 }
 function secretsSheet() {
@@ -4955,7 +4966,7 @@ function homeSecrets() {
   return '<section class="card home-secrets"><div class="card-head"><h3 class="row" style="gap:8px">' + icon('search') + 'Secretos de la casa</h3><button class="link" data-act="secrets">Ver ' + icon('arrow') + '</button></div>' +
     '<div class="row"><span class="big num">' + n + '<small>/' + EGGS.length + '</small></span><span class="grow small muted">' + (n ? 'Vas bien. Chitón.' : 'Hay ' + EGGS.length + ' escondidos por la app. Nadie te va a decir dónde.') + '<br>El ranking se cierra el ' + esc(fmtClose()) + '.</span></div>' +
     '<div class="bar sec-bar"><i style="width:' + Math.round(n / EGGS.length * 100) + '%"></i></div>' +
-    (rk.length ? '<div class="mini-rank">' + rk.map(function (r) { return '<span class="mr">' + medal(r.pos) + av(r.id, 'xs') + '<b>' + esc(person(r.id).name) + '</b><small class="num">' + r.n + '</small></span>'; }).join('') + '</div>' : '') +
+    (rk.length ? '<div class="mini-rank">' + rk.map(function (r) { return '<span class="mr">' + (r.spy ? '<span class="medal spy" title="Fuera de concurso">' + icon('search') + '</span>' : medal(r.pos)) + av(r.id, 'xs') + '<b>' + esc(person(r.id).name) + '</b><small class="num">' + r.n + '</small></span>'; }).join('') + '</div>' : '') +
     (typeof secretsWho === 'function' ? foldBtn('secwho', '<span class="grow"><b class="fold-title">Quién lleva cuáles</b><small class="muted">Sin spoilers: solo ves los que tú también tienes</small></span>', 'fold-sub') + foldBody('secwho', secretsWho()) : '') + '</section>';
 }
 function homeGames() {
@@ -5126,7 +5137,7 @@ function secretsWho(compact) {
   return '<div class="who-list">' + rk.map(function (r) {
     var keys = keysOf(r.id), k = 'sec-' + r.id, open = fold(k);
     var known = keys.filter(function (x) { return mineF[x]; }), hidden = Math.max(0, r.n - known.length);
-    var head = medal(r.pos) + av(r.id, 'sm') + '<span class="grow"><b>' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + '</b>' + eggDots(keys) + '</span><span class="num">' + r.n + '/' + EGGS.length + '</span>';
+    var head = (r.spy ? '<span class="medal spy" title="Fuera de concurso">' + icon('search') + '</span>' : medal(r.pos)) + av(r.id, 'sm') + '<span class="grow"><b>' + pname(r.id) + (r.id === ui.me ? ' <small class="muted">(tú)</small>' : '') + (r.spy ? ' <small class="muted">· fuera de concurso</small>' : '') + '</b>' + eggDots(keys) + '</span><span class="num">' + r.n + '/' + EGGS.length + '</span>';
     var body = foldBody(k, '' +
         (known.length ? '<div class="reg-who">' + known.map(function (x) { var e = EGGS.find(function (y) { return y.k === x; }); return '<span class="who-chip ok">' + esc(e ? e.name : x) + '</span>'; }).join('') + '</div>' : '') +
         (hidden ? '<p class="small muted">' + (known.length ? '+ ' : '') + hidden + (hidden === 1 ? ' secreto que tú aún no has encontrado' : ' secretos que tú aún no has encontrado') + '. No hay spoilers: búscalos.</p>' : '') +
@@ -5513,6 +5524,7 @@ var CLOUD = (function () {
   function fromDb(d) {
     var spyRows = d.people.filter(function (r) { return r.family_id === SPY_FAM; });
     SPIES = spyRows.map(function (r) { return { id: r.id, name: r.name, family: r.family_id, kind: r.kind, role: r.role, attends: false, note: r.note, avatar: r.avatar, spy: true }; });
+    var spiesForS = SPIES;
     d = Object.assign({}, d, { people: d.people.filter(function (r) { return r.family_id !== SPY_FAM; }), families: d.families.filter(function (f) { return f.id !== SPY_FAM; }) });
     var kv = {}; d.app_config.forEach(function (r) { kv[r.key] = r.value; });
     var st = d.settings[0] || {};
@@ -5527,7 +5539,7 @@ var CLOUD = (function () {
       version: 'cloud', trip: kv.trip || {}, days: kv.days || [], slots: SLOTS,
       families: d.families.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, short: r.short, color: r.color, note: r.note }; }),
       people: d.people.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, family: r.family_id, age: r.age, approx: r.age_approx, kind: r.kind, role: r.role, email: r.email, login: r.login || null, attends: r.attends_default, pend: r.pending, note: r.note, sort: r.sort, avatar: r.avatar }; }),
-      pendingPeople: [],
+      pendingPeople: [], spies: spiesForS,
       homes: d.homes.map(function (r) { return { id: r.id, name: r.name, beds: r.beds, free: r.free, rooms: r.rooms, note: r.note, proposal: r.proposal || [] }; }),
       meals: d.meals.map(function (r) { return { id: r.id, day: r.day, slot: r.slot, time: hm(r.time_override), mode: r.mode, title: r.title, dishes: r.dishes || [], cook: r.cook_family_id, marc: r.marc_menu, notes: r.notes, star: r.star }; }),
       ingredients: d.ingredients.slice().sort(function (a, b) { return a.sort - b.sort; }).map(function (r) { return { id: r.id, name: r.name, cat: r.category, qty: num(r.qty), unit: r.unit, qtyEst: r.qty_estimated, family: r.family_id, status: r.status, split: r.split, cost: num(r.cost), est: num(r.est_cost), per: r.per_diners, sug: r.suggested, note: r.note, buy: r.buy_at || null, sort: r.sort, meals: im[r.id] || [] }; }),
@@ -5740,7 +5752,11 @@ var CLOUD = (function () {
       });
     }).catch(function (e) { started = false; loginView('No he podido entrar: ' + esc(e.message || 'error de conexión')); });
   }
-  var started = false, codeFlow = false;
+  var started = false, codeFlow = false, loginCode = null;
+  /* Aviso grande (no un toast que se pierde): por qué no vale ese código y qué hacer */
+  function codePopup(title, text) { message('<div class="code-pop">' + icon('shield') + '</div><h2>' + title + '</h2><p>' + text + '</p>'); }
+  api.codeIsLogin = function (c) { return !!loginCode && c === loginCode; };
+  api.codePopup = codePopup;
   function go2() { if (started) return; started = true; afterSession(); }
   api.boot = function () {
     loginView();
@@ -5771,16 +5787,23 @@ var CLOUD = (function () {
           if (d && d.error !== 'no_user') setTimeout(function () { var c = document.getElementById('lg-code'); if (c) c.focus(); }, 80);
           return;
         }
-        mustChange = !!d.must_change; started = false; go2();
+        mustChange = !!d.must_change; loginCode = mustChange ? code : null; started = false; go2();
       }).catch(function () { codeFlow = false; if (btn) { btn.disabled = false; btn.textContent = 'Entrar'; } toast('No he podido entrar. Revisa la conexión'); });
   };
   api.setCode = function () {
     var a = (val('cs-1') || '').replace(/\D/g, ''), b = (val('cs-2') || '').replace(/\D/g, '');
-    if (a.length !== 6) { toast('Tiene que tener 6 cifras'); return; }
-    if (a !== b) { toast('Los dos códigos no coinciden. Repítelo'); clearPin('cs-2', true); return; }
+    if (a.length !== 6) { codePopup('Faltan cifras', 'Tu código tiene que tener <b>6 cifras</b>.'); return; }
+    if (api.codeIsLogin(a)) { codePopup('Ese no vale', 'Es el <b>código de la familia</b>, el que sirve solo para entrar la primera vez. Elige uno <b>nuevo y solo tuyo</b>.'); clearPin('cs-2'); clearPin('cs-1', true); return; }
+    if (a !== b) { codePopup('No coinciden', 'Los dos códigos tienen que ser iguales. Vuelve a escribirlo en la segunda fila.'); clearPin('cs-2', true); return; }
     client().rpc('set_my_code', { p_code: a }).then(check).then(function (r) {
       var m = { formato: 'Tiene que tener 6 cifras', igual_familia: 'Ese es el código de la familia: elige otro', facil: 'Demasiado fácil de adivinar: elige otro', sin_sesion: 'Tu sesión ha caducado. Vuelve a entrar' };
-      if (r.data !== 'ok') { toast(m[r.data] || 'No he podido guardarlo'); clearPin('cs-2'); clearPin('cs-1', true); return; }
+      if (r.data !== 'ok') {
+        var pm = { igual_familia: ['Ese no vale', 'Es el <b>código de la familia</b>, el que sirve solo para entrar la primera vez. Elige uno <b>nuevo y solo tuyo</b>.'],
+          facil: ['Demasiado fácil', 'Nada de 123456 ni seis cifras iguales: cualquiera lo adivinaría. Prueba con otro.'], formato: ['Faltan cifras', 'Tu código tiene que tener <b>6 cifras</b>.'] };
+        if (pm[r.data]) codePopup(pm[r.data][0], pm[r.data][1]); else toast(m[r.data] || 'No he podido guardarlo');
+        if (r.data !== 'sin_sesion') { clearPin('cs-2'); clearPin('cs-1', true); }
+        return;
+      }
       var done = api._afterCode; api._afterCode = null;
       toast('¡Listo! Tu código está guardado. La próxima vez: tu email y ese código');
       if (done) { shell('<section class="card login-card"><h1 class="login-title">Entrando<i>…</i></h1></section>'); done(); } else { closeSheet(); }
@@ -5872,7 +5895,10 @@ document.addEventListener('input', function (e) {
   var v = t.value.replace(/\D/g, '').slice(0, 6); if (v !== t.value) t.value = v; paintPin(t);
   if (v.length < 6) return;
   if (t.id === 'lg-code') { if ((val('lg-email') || '').trim()) { t.blur(); A.cloudLogin(); } else { var em = document.getElementById('lg-email'); if (em) em.focus(); toast('Escribe también tu email'); } }
-  else if (t.id === 'cs-1') { var n = document.getElementById('cs-2'); if (n) n.focus(); }
+  else if (t.id === 'cs-1') {
+    if (CLOUD.codeIsLogin && CLOUD.codeIsLogin(v)) { t.blur(); CLOUD.codePopup('Ese no vale', 'Es el <b>código de la familia</b>, el que sirve solo para entrar la primera vez. Elige uno <b>nuevo y solo tuyo</b>.'); clearPin('cs-1'); setTimeout(function () { var c = document.getElementById('cs-1'); if (c) c.focus(); }, 300); return; }
+    var n = document.getElementById('cs-2'); if (n) n.focus();
+  }
   else if (t.id === 'cs-2') { t.blur(); A.cloudSetCode(); }
 });
 document.addEventListener('focusin', function (e) { var t = e.target; if (t && t.classList && t.classList.contains('pin-in')) paintPin(t); });
