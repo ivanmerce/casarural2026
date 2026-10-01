@@ -285,7 +285,11 @@ function renderNav() {
    se mide de verdad y, si algo no cabe, se va simplificando por pasos. Nunca se solapa nada */
 var FIT_TOP = ['fit1', 'fit2', 'fit3', 'fit4'], FIT_NAV = ['nav-tight', 'nav-icons'];
 function navOverflows() { return [].some.call($nav.querySelectorAll('.nav-in button'), function (b) { var s = b.querySelector('span'); return s && s.offsetWidth && s.offsetWidth > b.clientWidth - 4; }); }
-function topOverflows() { return $top.scrollWidth > $top.clientWidth + 1; }
+function topOverflows() {
+  var last = $top.lastElementChild; if (!last) return false;
+  var r = $top.getBoundingClientRect(), pr = parseFloat(getComputedStyle($top).paddingRight) || 0;
+  return $top.scrollWidth > $top.clientWidth + 1 || last.getBoundingClientRect().right > r.right - Math.min(pr, 10) + .5;   /* respeta el margen derecho: nada pegado al borde */
+}
 function fitChrome() {
   if (!$top || !$nav) return;
   FIT_TOP.forEach(function (c) { $top.classList.remove(c); });

@@ -1167,7 +1167,7 @@ img, svg, canvas { max-width: 100%; }
 .topbar.fit4 .wm-txt { display: none; }
 .nav button { min-width: 0; overflow: hidden; }
 .nav button span { white-space: nowrap; }
-.nav.nav-tight button { font-size: .6rem; letter-spacing: -.02em; gap: 2px; }
+.nav.nav-tight button { font-size: .64rem; letter-spacing: -.02em; gap: 2px; }
 .nav.nav-icons button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .nav.nav-icons button .ico { width: 26px; height: 26px; }
 .nav.nav-icons button[aria-current="page"] .ico { transform: none; }
@@ -1189,3 +1189,5 @@ img, svg, canvas { max-width: 100%; }
 .ord-mv { display: flex; flex-direction: column; gap: 4px; flex: none; }
 .ord-mv .icon-btn:disabled { opacity: .3; }
 @media (max-width: 420px) { .g-dl > div { grid-template-columns: 1fr; gap: 2px; } }
+
+@media (max-width: 400px) { .chips { margin-left: -12px; margin-right: -12px; padding-left: 12px; padding-right: 12px; } }
