@@ -283,7 +283,7 @@ function renderNav() {
 }
 /* Encaje a prueba de pantallas estrechas y de letra grande (zoom de texto del móvil):
    se mide de verdad y, si algo no cabe, se va simplificando por pasos. Nunca se solapa nada */
-var FIT_TOP = ['fit1', 'fit2', 'fit3', 'fit4'], FIT_NAV = ['nav-tight', 'nav-icons'];
+var FIT_TOP = ['fit1', 'fit2', 'fit3', 'fit3b', 'fit4'], FIT_NAV = ['nav-tight', 'nav-icons'];
 function navOverflows() { return [].some.call($nav.querySelectorAll('.nav-in button'), function (b) { var s = b.querySelector('span'); return s && s.offsetWidth && s.offsetWidth > b.clientWidth - 4; }); }
 function topOverflows() {
   var last = $top.lastElementChild; if (!last) return false;

@@ -1164,6 +1164,12 @@ img, svg, canvas { max-width: 100%; }
 .topbar.fit2 .online-pill .avs { display: none; }
 .topbar.fit3 .wm-txt small { display: none; }
 .topbar.fit3 .wm-txt b { font-size: 1.1rem; }
+.topbar.fit3b { gap: 5px; }
+.topbar.fit3b .wordmark { gap: 7px; }
+.topbar.fit3b .wordmark .mark { width: 32px; height: 32px; }
+.topbar.fit3b .wm-txt b { font-size: .98rem; letter-spacing: -.035em; }
+.topbar.fit3b .icon-btn.cam-btn { width: 38px; height: 38px; }
+.topbar.fit3b .online-pill { padding: 4px 8px 4px 7px; min-height: 38px; }
 .topbar.fit4 .wm-txt { display: none; }
 .nav button { min-width: 0; overflow: hidden; }
 .nav button span { white-space: nowrap; }
