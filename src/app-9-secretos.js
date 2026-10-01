@@ -104,6 +104,12 @@ function eggRankUp(n) { return EGG_RANKS.some(function (x) { return x[0] === n; 
 /* ===== La revelación: una tarjeta grande, con fuegos, anillo de progreso y en cola (nunca se pisan) ===== */
 var revealQ = [], revealOn = false;
 var revealCur = null;
+function quipEcho(a, b) {
+  var w = function (s) { return String(s).toLowerCase().replace(/<[^>]+>/g, ' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/[a-zñ]{4,}/g) || []; };
+  var A = w(a), B = {}; w(b).forEach(function (x) { B[x] = 1; });
+  if (!A.length) return false; var hit = A.filter(function (x) { return B[x]; }).length;
+  return hit / A.length > .3;
+}
 function revealSecret(e, o) {
   var k = e ? e.k : '_trophy';
   if (revealCur === k || revealQ.some(function (x) { return (x.e ? x.e.k : '_trophy') === k; })) return;   /* el mismo, dos veces: no se apila */
@@ -116,6 +122,7 @@ function revealNext() {
   var o = it.o, n = it.n, N = EGGS.length, trophy = !!o.trophy, rep = !!o.replay;
   var C = 2 * Math.PI * 46, from = C * (1 - Math.max(0, rep ? n : n - 1) / N), to = C * (1 - n / N);
   var quip = !o.noQuip && it.e && typeof secretStyle === 'function' ? secretStyle(it.e.k).quip : '';
+  if (quip && o.text && quipEcho(quip, o.text)) quip = '';   /* si la frase repite lo que ya dice la tarjeta, fuera */
   var veil = document.createElement('div'); veil.className = 'egg-veil reveal-veil'; document.body.appendChild(veil);
   var m = document.createElement('div'); m.className = 'egg-msg egg-reveal' + (trophy ? ' is-trophy' : ''); m.setAttribute('role', 'dialog'); m.setAttribute('aria-live', 'assertive');
   m.innerHTML = '<div class="inner">' +
