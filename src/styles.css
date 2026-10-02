@@ -1467,3 +1467,24 @@ body.gala-on .fx { z-index: 94; }
 .spy-slot textarea { width: 100%; min-height: 70px; }
 
 @keyframes gkIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* v0.7.40 · Gimcana: 10 paradas y 4 pruebas nuevas */
+.gk-letters.n10 b { width: 26px; height: 36px; font-size: 1.05rem; border-radius: 8px; } .gk-letters.n10 { gap: 4px; }
+.gk-word.n10 { gap: 4px; flex-wrap: wrap; justify-content: center; } .gk-word.n10 b { width: 30px; height: 42px; font-size: 1.3rem; border-radius: 9px; } .gk-word i { width: 10px; }
+.gk-tiles button { width: 46px; height: 54px; font-size: 1.5rem; }
+.gk-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.gk-slot { width: 64px; height: 64px; border-radius: 16px; border: 2px dashed rgba(255,255,255,.3); display: grid; place-items: center; color: #A9A4CF; font-family: var(--font-display); }
+.gk-slot .av { width: 56px; height: 56px; }
+.gk-opts button .av { margin-right: 6px; vertical-align: middle; }
+.gk-cipher { display: flex; gap: 8px; } .gk-cipher b { width: 56px; height: 66px; border-radius: 12px; display: grid; place-items: center; font-family: 'Courier New', monospace; font-size: 2.2rem; background: #000; color: #7CF2C4; border: 2px solid #2EC4B6; text-shadow: 0 0 10px #7CF2C4; }
+.gk-track { position: relative; width: 100%; height: 90px; border-radius: 999px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.18); overflow: hidden; cursor: pointer; touch-action: manipulation; }
+.gk-zone { position: absolute; left: 41%; width: 18%; top: 0; bottom: 0; background: radial-gradient(circle, rgba(124,242,196,.55), rgba(124,242,196,.12)); border-left: 2px solid #7CF2C4; border-right: 2px solid #7CF2C4; }
+.gk-ball { position: absolute; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, var(--tc)); box-shadow: 0 0 24px var(--tc); }
+.gk-hit { font-size: 1.8rem; opacity: .25; filter: grayscale(1); } .gk-hit.on { opacity: 1; filter: none; animation: rvSticker .6s both; }
+.gk-mem { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: min(360px, 100%); }
+.gk-card-m { aspect-ratio: 1; border-radius: 14px; border: 0; padding: 0; position: relative; background: transparent; perspective: 600px; }
+.gk-card-m span { position: absolute; inset: 0; border-radius: 14px; display: grid; place-items: center; backface-visibility: hidden; transition: transform .35s; }
+.gk-card-m .back { background: linear-gradient(160deg, var(--tc), #14183A); color: #fff; font-family: var(--font-display); font-size: 1.6rem; }
+.gk-card-m .front { background: #fff; transform: rotateY(180deg); } .gk-card-m .front .av { width: 80%; height: 80%; }
+.gk-card-m.up .back { transform: rotateY(180deg); } .gk-card-m.up .front { transform: none; }
+.gk-card-m.ok .front { box-shadow: 0 0 0 3px #7CF2C4, 0 0 18px #7CF2C4; }

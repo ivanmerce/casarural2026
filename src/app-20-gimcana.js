@@ -58,6 +58,7 @@ function gimState(teamId) { return GIM.teams[teamId] || (GIM.teams[teamId] = { i
 function gimPersist(teamId) { var s = gimState(teamId); s.at = new Date().toISOString(); if (gimKid && gimKid.rehearsal) return Promise.resolve(); return gimSave('team-' + teamId, s).catch(function () { toast('Sin conexión: el progreso se guarda al volver la red'); }); }
 function gimNorm(t) { return String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
 function gimRefresh() { if (document.getElementById('gim-adm')) gimAdmRender(); if (gimKid) gimKidMsgCheck(); }
+function gimItem(t) { return String(t || '').replace(/\{item\}/g, (GIM.content && GIM.content.marcItem) || 'su tesoro'); }
 function gimTime(ms) { var s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); }
 
 /* ---------- Entrada desde la ficha del juego (solo adultos) ---------- */
@@ -96,7 +97,7 @@ function gimAdmRender() {
   el.querySelector('.ga-tabs').innerHTML = '<div class="seg">' + tabs.map(function (t) { return '<button data-act="gimTab" data-v="' + t[0] + '" aria-pressed="' + (gimAdm.tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
   var h = '';
   if (gimAdm.tab === 'panel') {
-    h += '<p class="small muted">Cada guía abre el <b>modo pekes</b> en su móvil con su equipo. Desde aquí ves por dónde van y puedes mandarles un mensaje del Espía.</p>';
+    h += '<p class="small muted">' + (C.master ? '<b>Master del juego: ' + esc(nameOf(C.master)) + '.</b> ' : '') + 'Cada guía abre el <b>modo pekes</b> en su móvil con su equipo. Desde aquí ves por dónde van y puedes mandarles un mensaje del Espía.</p>';
     h += C.teams.map(function (t) {
       var s = GIM.teams[t.id] || {}, n = C.stations.length, done = s.phase === 'done', idx = Math.min(s.idx || 0, n), st = gimRoute(t.id)[Math.min(idx, n - 1)];
       var where = !s.phase || s.phase === 'intro' ? 'Sin empezar' : done ? '¡Cofre abierto!' : idx >= n ? 'En la base, con el cofre' : (idx + 1) + '/' + n + ' · ' + st.name + ' · ' + ({ riddle: 'acertijo', code: 'buscando el sobre', game: 'en la prueba', reward: 'letra conseguida' }[s.phase] || s.phase);
@@ -110,13 +111,14 @@ function gimAdmRender() {
     }).join('');
     h += '<section class="card"><h3>Ensayo</h3><p class="small">Recórrela desde el sofá: modo pekes completo, sin guardar nada y con los códigos a la vista.</p><button class="btn" data-act="gimKidStart" data-t="rojo" data-rehearsal="1">' + icon('eye') + 'Ensayar como Equipo Rojo</button></section>';
   } else if (gimAdm.tab === 'prep') {
+    if (C.quiet) h += '<section class="card alert"><h3>🤫 Zona de silencio</h3><p class="small">' + esc(C.quiet) + '</p></section>';
     h += '<section class="card"><h3>Antes de empezar</h3><ul class="small finca-ul">' +
-      '<li><b>Domingo, antes de la tarta y de día:</b> esconder los 6 sobres TOP SECRET (uno por sitio; vale el mismo para todos los equipos) con una pulsera luminosa.</li>' +
+      '<li><b>Domingo, antes de la tarta y de día:</b> esconder los ' + C.stations.length + ' sobres TOP SECRET (uno por sitio; vale el mismo para todos los equipos) con una pulsera luminosa.</li>' +
       '<li>En cada sobre, escrito bien grande, el <b>código de 3 cifras</b> de ese sitio.</li>' +
-      '<li>El <b>cofre</b> con el tesoro y el candado de 3 cifras en ' + esc(C.base) + '. Combinación: ' + gimSecret(C.lock) + '.</li>' +
+      '<li>El <b>cofre</b> en ' + esc(C.base) + ', con ' + esc(gimItem('{item}')) + ' de ' + esc(babyName()) + ' (¡que no lo eche de menos antes!), el tesoro y el candado de 3 cifras. Combinación: ' + gimSecret(C.lock) + '.</li>' +
       '<li>Una <b>chuleta</b> para ' + esc(((S.trip.eggs && S.trip.eggs.grand) || []).map(function (id) { return nameOf(id); }).join(' y ') || 'los abuelos') + ' con las respuestas (es el comodín del abuelo).</li>' +
       '<li>Linterna o frontal para cada uno. Móviles de los guías <b>cargados</b> y con el volumen alto.</li>' +
-      '<li>La palabra secreta es ' + gimSecret(C.word) + '. Recorrido: unos 45 minutos.</li></ul></section>';
+      '<li>La palabra secreta es ' + gimSecret(C.word) + '. Recorrido: unos 50-60 minutos.</li></ul></section>';
     h += C.stations.map(function (s, i) {
       return '<section class="card ga-st"><div class="ga-st-ph"><img src="' + s.photo + '" alt="" loading="lazy" referrerpolicy="no-referrer"><b>' + (i + 1) + '</b></div><div class="ga-st-b"><h3>' + esc(s.name) + '</h3>' +
         '<p class="small"><b>Dónde esconder:</b> ' + esc(s.hide) + '</p>' +
@@ -153,7 +155,7 @@ function gimSaveContent() { return gimSave('content', GIM.content).catch(functio
 function gimSpyText(slot) {
   var m = GIM.spy && GIM.spy[slot]; if (m && m.text) return m.text;
   var C = GIM.content; if (!C) return '';
-  if (slot === 'intro') return C.intro.join(' ');
+  if (slot === 'intro') return gimItem(C.intro.join(' '));
   if (slot === 'final') return C.final.spy;
   var st = C.stations.find(function (x) { return x.id === slot; }); return st ? st.spy : '';
 }
@@ -223,7 +225,7 @@ function gimKidRender() {
   el.querySelector('.gk-team').innerHTML = '<i></i>' + esc(s.name || t.name) + (gimKid.rehearsal ? ' · ensayo' : '');
   gimGameStop();
   if (s.phase === 'intro') {
-    h = '<div class="gk-spy">' + (SPIES && SPIES[0] ? av(SPIES[0].id, 'xl') : '<span class="gk-emo">🕵️</span>') + '<span class="gk-tag">📡 Mensaje interceptado</span></div><div class="gk-msg">' + gimSay((GIM.spy.intro && GIM.spy.intro.text ? [esc(GIM.spy.intro.text)] : C.intro.map(esc))) + '</div>' +
+    h = '<div class="gk-spy">' + (SPIES && SPIES[0] ? av(SPIES[0].id, 'xl') : '<span class="gk-emo">🕵️</span>') + '<span class="gk-tag">📡 Mensaje interceptado</span></div><div class="gk-msg">' + gimSay((GIM.spy.intro && GIM.spy.intro.text ? [esc(GIM.spy.intro.text)] : C.intro.map(function (l) { return esc(gimItem(l)); }))) + '</div>' +
       (GIM.spy.intro && GIM.spy.intro.audio ? '<button class="btn gk-audio" data-act="gimKidAudio" data-s="intro">🔊 Oír al Espía</button>' : '') +
       '<div class="gk-card"><label for="gk-name"><b>¿Cómo se llama vuestro equipo de agentes?</b></label><input id="gk-name" class="gk-in" maxlength="28" placeholder="' + esc(t.name) + '" value="' + esc(s.name || '') + '"></div>' +
       '<details class="gk-rules"><summary>Las normas del Espía</summary><ol>' + C.rules.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ol></details>' +
@@ -257,19 +259,19 @@ function gimKidRender() {
 }
 function gimLettersHtml(s) {
   var w = GIM.content.word.length; var got = s.letters || [];
-  return '<div class="gk-letters">' + Array.from({ length: w }, function (_, i) { return '<b' + (got[i] ? ' class="on"' : '') + '>' + (got[i] || '?') + '</b>'; }).join('') + '</div>';
+  return '<div class="gk-letters n' + w + '">' + Array.from({ length: w }, function (_, i) { return '<b' + (got[i] ? ' class="on"' : '') + '>' + (got[i] || '?') + '</b>'; }).join('') + '</div>';
 }
 function gimFinalHtml(s) {
   var C = GIM.content, sol = s.solved;
   if (!sol) {
     var tiles = (s.tiles || (s.tiles = shuffled(s.letters.slice()))), pick = s.pick || [];
     return '<div class="gk-step">Misión final</div><h2 class="gk-h">La contraseña</h2><p class="gk-p">' + esc(C.final.riddle) + '</p>' +
-      '<div class="gk-word">' + Array.from({ length: C.word.length }, function (_, i) { return '<b>' + (pick[i] != null ? tiles[pick[i]] : '') + '</b>'; }).join('') + '</div>' +
+      '<div class="gk-word n' + C.word.length + '">' + Array.from({ length: C.word.length }, function (_, i) { return '<b>' + (pick[i] != null ? tiles[pick[i]] : '') + '</b>'; }).join('') + '</div>' +
       '<div class="gk-tiles">' + tiles.map(function (l, i) { return '<button data-act="gimTile" data-i="' + i + '"' + (pick.indexOf(i) >= 0 ? ' disabled' : '') + '>' + esc(l) + '</button>'; }).join('') + '</div><p class="gk-fb" id="gk-fb"></p><button class="btn ghost" data-act="gimTileClear">Borrar</button>';
   }
-  return '<div class="gk-step">¡Contraseña correcta!</div><div class="gk-word ok">' + C.word.split('').map(function (l) { return '<b>' + l + '</b>'; }).join('') + '</div><p class="gk-p">' + esc(C.final.lockText) + '</p>' +
+  return '<div class="gk-step">¡Contraseña correcta!</div><div class="gk-word ok n' + C.word.length + '">' + (C.wordShow || C.word).split('').map(function (l) { return l === ' ' ? '<i></i>' : '<b>' + l + '</b>'; }).join('') + '</div><p class="gk-p">' + esc(C.final.lockText) + '</p>' +
     '<div class="gk-lock">' + C.lock.split('').map(function (d) { return '<b>' + d + '</b>'; }).join('') + '</div>' +
-    '<p class="gk-p">El agente más joven pulsa el botón. ' + esc(bdayName()) + ', tú abres el cofre.</p><button class="gk-red" data-act="gimOpenChest">ABRIR</button>';
+    '<p class="gk-p">' + esc(gimItem(C.final.button || 'El agente más joven pulsa el botón.')) + '</p><button class="gk-red" data-act="gimOpenChest">ABRIR</button>';
 }
 function gimDoneHtml(s) {
   var C = GIM.content, t = gimTeamCfg(gimKid.team);
@@ -311,6 +313,10 @@ function gimGameStart(st, box) {
   if (type === 'quiz') return gimQuiz(g, box);
   if (type === 'shake') return gimShake(g, box);
   if (type === 'simon') return gimSimon(g, box);
+  if (type === 'order') return gimOrder(g, box);
+  if (type === 'cipher') return gimCipher(g, box);
+  if (type === 'timing') return gimTiming(g, box);
+  if (type === 'memory') return gimMemory(g, box);
   box.innerHTML = '<button class="btn primary big-btn" data-act="gimManualWin">¡Superada! (lo confirma el guía)</button>';
 }
 /* 1 · ¿Quién es quién? Fotos de la familia pixeladas que se van aclarando */
@@ -409,6 +415,55 @@ function gimSimon(g, box) {
   grow();
 }
 
+/* 7 · De más pequeño a más grande (edades de la familia) */
+function gimOrder(g, box) {
+  var ids = (g.ids || []).filter(function (id) { return person(id); }), want = ids.slice().sort(function (a, b) { return (person(a).age || 0) - (person(b).age || 0); }), got = [];
+  function draw() {
+    box.innerHTML = '<div class="gk-row">' + want.map(function (_, i) { return '<b class="gk-slot">' + (got[i] ? av(got[i], 'md') : (i + 1) + '.º') + '</b>'; }).join('') + '</div>' +
+      '<div class="gk-opts">' + shuffled(ids.filter(function (id) { return got.indexOf(id) < 0; })).map(function (id) { return '<button data-act="gimOrder" data-id="' + id + '">' + av(id, 'sm') + esc(person(id).name) + '</button>'; }).join('') + '</div><p class="gk-fb" id="gk-fb"></p>';
+  }
+  gimG = { pick: function (id) {
+    if (want[got.length] !== id) { gimFb(pickOne(['¡Ese no toca todavía!', 'Mmm… ¿seguro que es más pequeño?', 'El Espía se ríe por lo bajo'], id + got.length), true); return; }
+    got.push(id); draw(); if (got.length === want.length) { gimFb('¡Ordenados! Del pañal a la cana.'); setTimeout(gimWin, 900); } else gimFb('¡Bien!');
+  } };
+  draw();
+}
+/* 8 · El mensaje cifrado (cada letra es la siguiente del abecedario) */
+function gimCipher(g, box) {
+  box.innerHTML = '<div class="gk-cipher">' + esc(g.secret).split('').map(function (l) { return '<b>' + l + '</b>'; }).join('') + '</div>' +
+    '<p class="gk-p small">Ejemplo: si pone <b>C</b>, en realidad es <b>B</b>. Si pone <b>B</b>, es <b>A</b>.</p>' +
+    '<input id="gk-ci" class="gk-in" autocomplete="off" autocapitalize="characters" placeholder="Mensaje descifrado"><button class="btn primary big-btn" data-act="gimCipher">Comprobar</button><p class="gk-fb" id="gk-fb"></p>';
+  gimG = { check: function () { var v = gimNorm((document.getElementById('gk-ci') || {}).value).replace(/ /g, ''); if (v === gimNorm(g.answer).replace(/ /g, '')) { gimFb('¡Descifrado! Era ' + g.answer + '.'); setTimeout(gimWin, 900); } else gimFb('Eso no. Una letra hacia atrás en el abecedario…', true); } };
+}
+/* 9 · Tiro de precisión: tocar cuando la bola está en la diana */
+function gimTiming(g, box) {
+  var need = g.hits || 3, hits = 0, raf, t0 = performance.now(), speed = 1.25;
+  box.innerHTML = '<div class="gk-track" data-act="gimShot"><i class="gk-zone"></i><b class="gk-ball"></b></div><div class="gk-row">' + Array.from({ length: need }, function (_, i) { return '<b class="gk-hit" data-i="' + i + '">🎯</b>'; }).join('') + '</div><p class="gk-fb" id="gk-fb">¡Tocad cuando la bola esté en la diana!</p>';
+  var ball = box.querySelector('.gk-ball'), pos = 0, me_ = {};
+  gimG = me_;
+  (function f(t) { if (gimG !== me_) return; pos = (Math.sin((t - t0) / 1000 * speed * Math.PI) + 1) / 2; ball.style.left = (pos * 100) + '%'; raf = requestAnimationFrame(f); })(t0);
+  Object.assign(me_, { stop: function () { cancelAnimationFrame(raf); }, shot: function () {
+    var off = Math.abs(pos - .5);
+    if (off < .09) { var h = box.querySelector('.gk-hit[data-i="' + hits + '"]'); if (h) h.classList.add('on'); hits++; speed += .35; gimFb(hits >= need ? '¡Pleno!' : '¡Diana! (más rápido…)'); if (hits >= need) setTimeout(gimWin, 700); }
+    else gimFb(off < .2 ? '¡Uy, casi!' : 'Fuera. El Espía aplaude con ironía.', true);
+  } });
+}
+/* 10 · Las parejas: memoria con las fotos de la familia */
+function gimMemory(g, box) {
+  var pool = shuffled(S.people.filter(function (p) { return p.avatar; })).slice(0, g.pairs || 6);
+  if (pool.length < 3) { box.innerHTML = '<button class="btn primary big-btn" data-act="gimManualWin">Seguir</button>'; return; }
+  var cards = shuffled(pool.concat(pool).map(function (p, i) { return { id: p.id, k: i }; })), open = [], done = 0, lock = false, tries = 0;
+  box.innerHTML = '<div class="gk-mem">' + cards.map(function (c, i) { return '<button class="gk-card-m" data-act="gimMem" data-i="' + i + '"><span class="back">?</span><span class="front">' + av(c.id, 'md') + '</span></button>'; }).join('') + '</div><p class="gk-fb" id="gk-fb">Levantad dos fotos iguales.</p>';
+  gimG = { flip: function (i) {
+    var el = box.querySelector('[data-i="' + i + '"]'); if (lock || !el || el.classList.contains('up')) return;
+    el.classList.add('up'); open.push(i);
+    if (open.length < 2) return;
+    lock = true; tries++; var a = cards[open[0]], b = cards[open[1]];
+    if (a.id === b.id) { open.forEach(function (k) { box.querySelector('[data-i="' + k + '"]').classList.add('ok'); }); open = []; lock = false; done++; gimFb('¡Pareja! ' + person(a.id).name + '.'); if (done >= pool.length) { gimFb('¡Todas en ' + tries + ' intentos! Memoria de agente.'); setTimeout(gimWin, 1000); } }
+    else setTimeout(function () { open.forEach(function (k) { var e = box.querySelector('[data-i="' + k + '"]'); if (e) e.classList.remove('up'); }); open = []; lock = false; }, 850);
+  } };
+}
+
 /* ---------- Buzón del Espía (solo su cuenta) ---------- */
 function gimSpyBtn() { return isSpy() ? '<button class="btn" data-act="gimSpyBox">🎙️ Misión gimcana: graba tus mensajes</button>' : ''; }
 var gimRec = null;
@@ -417,7 +472,7 @@ function gimSpyBoxOpen() {
     : Promise.resolve({ slots: ((SEED.gimcana || {}).stations || []).map(function (s) { return { id: s.id, name: s.name, tip: s.spyTip }; }), spy: GIM.spy || {} });
   load.then(function (d) {
     GIM.spy = d.spy || {};
-    var slots = [{ id: 'intro', name: 'La presentación', tip: 'Te presentas a los agentes: has robado el tesoro del cumpleaños de ' + bdayName() + ' y les retas a recuperarlo. Chulesco, misterioso y con humor.' }].concat(d.slots || []).concat([{ id: 'final', name: 'El final', tip: 'Han abierto el cofre. Reconoces la derrota (por esta vez) y les dices que tu identidad se sabrá… en la gala.' }]);
+    var slots = [{ id: 'intro', name: 'La presentación', tip: 'Te presentas a los agentes: le has robado a ' + babyName() + ' lo que más quiere y les retas a recuperarlo. Chulesco, misterioso y con humor.' }].concat(d.slots || []).concat([{ id: 'final', name: 'El final', tip: 'Han abierto el cofre y ' + babyName() + ' recupera lo suyo. Reconoces la derrota (por esta vez) y les dices que tu identidad se sabrá… en la gala.' }]);
     openSheet('<h2>🕵️ Tu misión en la gimcana</h2><p class="small">El domingo por la noche los peques harán una gimcana y <b>tú eres el villano</b>. No hace falta que estés: graba ahora un mensaje corto (máx. 20 s) para cada momento, o escríbelo. <b>Tu voz sonará distorsionada</b>, así que nadie sabrá quién eres. No verás las soluciones: solo lo que pasa en cada parada.</p>' +
       slots.map(function (s) { var m = GIM.spy[s.id] || {}; return '<section class="card spy-slot" data-s="' + s.id + '"><h3>' + esc(s.name) + '</h3><p class="small muted">' + esc(s.tip || '') + '</p><textarea data-s="' + s.id + '" maxlength="600" placeholder="Escribe tu mensaje (opcional si grabas)">' + esc(m.text || '') + '</textarea><div class="row wrap"><button class="btn" data-act="gimRec" data-s="' + s.id + '">🎙️ ' + (m.audio ? 'Volver a grabar' : 'Grabar (20 s)') + '</button>' + (m.audio ? '<button class="btn ghost" data-act="gimSpyPlay" data-s="' + s.id + '">' + icon('play') + 'Oír cómo suena</button>' : '') + '<button class="btn primary" data-act="gimSpySave" data-s="' + s.id + '">Guardar</button></div></section>'; }).join('') +
       '<button class="btn block" data-act="close">Cerrar</button>');
@@ -494,6 +549,10 @@ Object.assign(A, {
   gimGoals: function () { if (gimG && gimG.goals) gimG.goals(); },
   gimShakeTap: function () { if (gimG && gimG.tap) gimG.tap(); },
   gimSimon: function (el) { if (gimG && gimG.press) gimG.press(+el.dataset.i); },
+  gimOrder: function (el) { if (gimG && gimG.pick) gimG.pick(el.dataset.id); },
+  gimCipher: function () { if (gimG && gimG.check) gimG.check(); },
+  gimShot: function () { if (gimG && gimG.shot) gimG.shot(); },
+  gimMem: function (el) { if (gimG && gimG.flip) gimG.flip(+el.dataset.i); },
   gimTile: function (el) {
     var s = gimState(gimKid.team), C = GIM.content; s.pick = s.pick || []; s.pick.push(+el.dataset.i);
     if (s.pick.length === C.word.length) {
@@ -537,4 +596,4 @@ function gimPressStart(e) {
 function gimPressEnd() { clearTimeout(gimHoldT); document.querySelectorAll('.gg-hold.holding, .gk-exit.holding').forEach(function (b) { b.classList.remove('holding'); }); }
 document.addEventListener('pointerdown', gimPressStart);
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { document.addEventListener(ev, gimPressEnd); });
-document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-ans') A.gimAnswer(); if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-name') A.gimKidBegin(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-ans') A.gimAnswer(); if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-name') A.gimKidBegin(); if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-ci') A.gimCipher(); });
