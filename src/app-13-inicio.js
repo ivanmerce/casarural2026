@@ -26,7 +26,7 @@ function firstSteps() {
   if (isSpy()) {
     return '<section class="card first-steps spy-steps"><div class="card-head"><h3 class="row" style="gap:10px">' + av(m.id, 'sm') + 'Misión: incógnito</h3><span class="pill">Agente</span></div>' +
       '<p class="small">Bienvenido, agente' + (SPY_REAL ? ' <b>' + esc(SPY_REAL.split(' ')[0]) + '</b> (solo tú y el organizador lo sabéis)' : '') + '. Tu misión: <b>trastear por toda la app</b>, encontrar lo que falla o se puede mejorar y dejarlo en el <b>buzón de ideas</b>. Todo el mundo sabe que hay un espía. Nadie sabe quién es.</p>' +
-      '<div class="row wrap" style="gap:8px"><button class="btn primary" data-act="ideaNew">' + icon('bulb') + 'Dejar un informe</button><button class="btn ghost" data-act="secrets">' + icon('search') + 'Secretos</button></div></section>';
+      '<div class="row wrap" style="gap:8px"><button class="btn primary" data-act="ideaNew">' + icon('bulb') + 'Dejar un informe</button><button class="btn ghost" data-act="secrets">' + icon('search') + 'Secretos</button>' + (typeof gimSpyBtn === 'function' ? gimSpyBtn() : '') + '</div></section>';
   }
   if (isKid()) {
     return '<section class="card first-steps kid-steps"><div class="card-head"><h3>Modo explorador</h3><span class="pill">Peques</span></div>' +

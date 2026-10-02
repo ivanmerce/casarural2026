@@ -387,6 +387,8 @@ var CLOUD = (function () {
   PHOTOS.like = function (ph, on) { var q = client().from('photo_likes'); return (on ? q.insert({ photo_id: ph.id, person_id: ui.me }) : q.delete().match({ photo_id: ph.id, person_id: ui.me })).then(check); };
   PHOTOS.caption = function (ph, txt) { return client().from('photos').update({ caption: txt || null }).match({ id: ph.id }).then(check); };
 
+  /* para módulos con tablas propias (gimcana): el cliente ya autenticado */
+  api.sb = function () { return client(); };
   return api;
 })();
 A.cloudEmail = function () { CLOUD.email(); };
