@@ -6711,6 +6711,9 @@ function gimAdmRender() {
     h += '<p class="small muted">' + esc(babyName()) + ' va de mascota con su padre o su madre: no necesita equipo. En la última parada, el agente más joven pulsa el botón rojo.</p>';
   } else if (gimAdm.tab === 'spy') {
     var slots = [{ id: 'intro', name: 'La presentación' }].concat(C.stations).concat([{ id: 'final', name: 'El final' }]);
+    var vs = gimVoices(), cur = gimVoice();
+    h += '<section class="card"><h3>🎙️ La voz del Espía en este móvil</h3><p class="small">Si el Espía no graba su voz, la app lee sus mensajes con una voz del móvil, grave y con zumbido de misterio. Cada móvil trae voces distintas: elige la más ronca y masculina y pruébala. <b>Hazlo también en los móviles de los guías.</b></p>' +
+      (vs.length ? '<div class="field"><select data-change="gimVoicePick">' + vs.map(function (v) { return '<option value="' + esc(v.name) + '"' + (cur && cur.name === v.name ? ' selected' : '') + '>' + esc(v.name) + ' · ' + esc(v.lang) + (gimIsMale(v) ? '' : ' (suena femenina)') + '</option>'; }).join('') + '</select></div><button class="btn" data-act="gimVoiceTest">' + icon('play') + 'Probar la voz</button>' : '<p class="small muted">Este navegador no tiene voces en español: en el ensayo, que alguien lea los mensajes con voz de robot.</p>') + '</section>';
     h += '<p class="small">El Espía no estará en la finca: desde su buzón secreto (en su Inicio) graba antes un mensaje de voz o escribe un texto para cada momento. Su voz sale <b>distorsionada</b>. Si no graba nada, sale el texto por defecto.</p>';
     h += slots.map(function (s) {
       var m = GIM.spy[s.id] || {};
@@ -6760,14 +6763,44 @@ function gimStatic() {
     [880, 660].forEach(function (hz, k) { var o = actx.createOscillator(), gg = actx.createGain(), t = actx.currentTime + .3 + k * .12; o.type = 'square'; o.frequency.value = hz; gg.gain.setValueAtTime(.0001, t); gg.gain.exponentialRampToValueAtTime(.06, t + .01); gg.gain.exponentialRampToValueAtTime(.0001, t + .1); o.connect(gg); gg.connect(actx.destination); o.start(t); o.stop(t + .12); });
   } catch (e) {}
 }
-function gimSpeak(text) {
+/* Elegir voz: masculina y grave. Cada móvil trae voces distintas, así que se elige por nombre (y se puede cambiar en el panel) */
+var GIM_MALE = [/jorge/i, /[áa]lvaro/i, /pablo/i, /grandpa|abuelo/i, /reed/i, /rocko/i, /diego/i, /juan/i, /enrique/i, /carlos/i, /ra[uú]l/i, /eddy/i, /male|hombre|masc/i, /es-es-x-e[ef]d|es-es-x-eee/i];
+var GIM_FEMALE = /m[oó]nica|marisol|paulina|elvira|laura|helena|lucia|luc[ií]a|sandy|shelley|flo|grandma|abuela|female|mujer|ines|in[eé]s|conchita|penelope|lupe|esperanza|sabina|dalia/i;
+function gimVoices() { return window.speechSynthesis ? speechSynthesis.getVoices().filter(function (v) { return /^es/i.test(v.lang); }) : []; }
+function gimVoice() {
+  var vs = gimVoices(), pick = null, saved = null;
+  try { saved = localStorage.getItem(GIM_LS + 'voice'); } catch (e) {}
+  if (saved) pick = vs.find(function (v) { return v.name === saved; });
+  if (!pick) GIM_MALE.some(function (re) { pick = vs.find(function (v) { return re.test(v.name) && /^es[-_]ES/i.test(v.lang); }) || vs.find(function (v) { return re.test(v.name); }); return !!pick; });
+  if (!pick) pick = vs.find(function (v) { return !GIM_FEMALE.test(v.name); }) || vs[0] || null;
+  return pick;
+}
+function gimIsMale(v) { return !!v && !GIM_FEMALE.test(v.name); }
+/* Halo de misterio: un zumbido grave que acompaña a la voz mientras habla */
+var gimDrone = null;
+function gimDroneStart() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (gimDrone) return;
+    var g = actx.createGain(), lp = actx.createBiquadFilter(), o1 = actx.createOscillator(), o2 = actx.createOscillator(), lfo = actx.createOscillator(), lg = actx.createGain();
+    o1.type = 'sawtooth'; o1.frequency.value = 55; o2.type = 'sine'; o2.frequency.value = 82.4; lp.type = 'lowpass'; lp.frequency.value = 260;
+    lfo.frequency.value = .25; lg.gain.value = 120; lfo.connect(lg); lg.connect(lp.frequency);
+    g.gain.value = .0001; g.gain.exponentialRampToValueAtTime(.05, actx.currentTime + 1.2);
+    o1.connect(lp); o2.connect(lp); lp.connect(g); g.connect(actx.destination); o1.start(); o2.start(); lfo.start();
+    gimDrone = { stop: function () { try { g.gain.setTargetAtTime(.0001, actx.currentTime, .4); setTimeout(function () { o1.stop(); o2.stop(); lfo.stop(); }, 1600); } catch (e) {} } };
+  } catch (e) {}
+}
+function gimDroneStop() { if (gimDrone) { gimDrone.stop(); gimDrone = null; } }
+function gimSpeak(text, voiceName) {
   if (!text || !window.speechSynthesis || (gimKid && gimKid.mute)) return false;
   try {
     speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(String(text).replace(/—\s*E\.?\s*$/, '').replace(/[«»]/g, ''));
-    var vs = speechSynthesis.getVoices(), v = vs.find(function (x) { return /^es[-_]ES/i.test(x.lang); }) || vs.find(function (x) { return /^es/i.test(x.lang); });
-    u.lang = (v && v.lang) || 'es-ES'; if (v) u.voice = v; u.pitch = 0.05; u.rate = 0.88; u.volume = 1;   /* grave y lenta: voz de villano robot */
-    gimStatic(); setTimeout(function () { speechSynthesis.speak(u); }, 520);
+    var u = new SpeechSynthesisUtterance(String(text).replace(/—\s*E\.?\s*$/, '').replace(/[«»]/g, '').replace(/\.\.\.|…/g, '. '));
+    var v = voiceName ? gimVoices().find(function (x) { return x.name === voiceName; }) : gimVoice();
+    u.lang = (v && v.lang) || 'es-ES'; if (v) u.voice = v;
+    /* si la voz ya es de hombre, solo un poco más grave; si no hay ninguna de hombre, al mínimo para que suene ronca */
+    u.pitch = gimIsMale(v) ? 0.55 : 0.0; u.rate = 0.8; u.volume = 1;
+    u.onend = u.onerror = function () { gimDroneStop(); };
+    gimStatic(); gimDroneStart(); setTimeout(function () { speechSynthesis.speak(u); }, 700);
     return true;
   } catch (e) { return false; }
 }
@@ -6777,7 +6810,7 @@ function gimSpyVoice(slot, text) {
   if (m && m.audio) return gimSpyPlay(slot).then(function (ok) { return ok || gimSpeak(text || gimSpyText(slot)); });
   return Promise.resolve(gimSpeak(text || gimSpyText(slot)));
 }
-if (window.speechSynthesis) try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = function () {}; } catch (e) {}
+if (window.speechSynthesis) try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = function () { if (document.getElementById('gim-adm') && gimAdm.tab === 'spy') gimAdmRender(); }; } catch (e) {}
 function gimSpyPlay(slot) {
   var m = GIM.spy && GIM.spy[slot];
   if (m && m.audio) return gimSpyAudioUrl(m.audio).then(function (u) { return u ? gimPlayDistorted(u) : false; }).catch(function () { return false; });
@@ -7166,6 +7199,7 @@ Object.assign(A, {
   gimOpenChest: function () { var s = gimState(gimKid.team); s.t1 = Date.now(); s.phase = 'done'; gimPersist(gimKid.team); gimKidRender(); gimFinishGame(); try { fireworks(5000, 10); cannonsFx(200); rocketFx(400); applause(3); setTimeout(function () { gimSpyVoice('final'); }, 2200); } catch (e) {} },
   gimLiveOk: function (el) { var d = el.closest('.gk-live'); if (d) d.remove(); },
   gimKidAudio: function (el) { gimSpyVoice(el.dataset.s).then(function (ok) { if (!ok) toast('Este móvil no puede hablar: leedlo en voz alta (con voz de robot)'); }); },
+  gimVoiceTest: function () { gimSpeak('Atención, agentes. Soy El Espía. Os estoy vigilando… Muajajá.'); },
   gimMute: function (el) { if (!gimKid) return; gimKid.mute = !gimKid.mute; if (gimKid.mute && window.speechSynthesis) speechSynthesis.cancel(); el.textContent = gimKid.mute ? '🔇' : '🔊'; },
   /* buzón del Espía */
   gimSpyBox: function () { gimSpyBoxOpen(); },
@@ -7176,7 +7210,7 @@ Object.assign(A, {
     CLOUD.sb().rpc('gim_spy_save', { p_slot: slot, p_text: txt, p_audio: cur.audio || null }).then(function (r) { if (r.error) throw r.error; GIM.spy[slot] = { text: txt, audio: cur.audio || null }; toast('Guardado. Muajajá'); }, function () { toast('No se ha podido guardar'); });
   }
 });
-Object.assign(C, { gimGuide: function (el) { var t = gimTeamCfg(el.dataset.t); t.guide = el.value || null; gimSaveContent(); } });
+Object.assign(C, { gimGuide: function (el) { var t = gimTeamCfg(el.dataset.t); t.guide = el.value || null; gimSaveContent(); }, gimVoicePick: function (el) { try { localStorage.setItem(GIM_LS + 'voice', el.value); } catch (e) {} gimSpeak('Esta es mi voz. ¿Os da miedo? Deberíais.', el.value); } });
 
 /* Al terminar un equipo: su puesto, al juego de la gimcana (por tiempo) */
 function gimFinishGame() {
