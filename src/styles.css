@@ -1488,3 +1488,5 @@ body.gala-on .fx { z-index: 94; }
 .gk-card-m .front { background: #fff; transform: rotateY(180deg); } .gk-card-m .front .av { width: 80%; height: 80%; }
 .gk-card-m.up .back { transform: rotateY(180deg); } .gk-card-m.up .front { transform: none; }
 .gk-card-m.ok .front { box-shadow: 0 0 0 3px #7CF2C4, 0 0 18px #7CF2C4; }
+
+.gk-mute { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 999px; width: 34px; height: 30px; font-size: .9rem; }
