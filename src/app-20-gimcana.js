@@ -257,7 +257,7 @@ function gimStatic() {
 }
 /* Elegir voz: masculina y grave. Cada móvil trae voces distintas, así que se elige por nombre (y se puede cambiar en el panel) */
 var GIM_MALE = [/jorge/i, /[áa]lvaro/i, /pablo/i, /grandpa|abuelo/i, /reed/i, /rocko/i, /diego/i, /juan/i, /enrique/i, /carlos/i, /ra[uú]l/i, /eddy/i, /male|hombre|masc/i, /es-es-x-e[ef]d|es-es-x-eee/i];
-var GIM_FEMALE = /m[oó]nica|marisol|paulina|elvira|laura|helena|lucia|luc[ií]a|sandy|shelley|flo|grandma|abuela|female|mujer|ines|in[eé]s|conchita|penelope|lupe|esperanza|sabina|dalia/i;
+var GIM_FEMALE = /m[oó]nica|marisol|paulina|elvira|laura|helena|lucia|luc[ií]a|sandy|shelley|flo|grandma|abuela|female|mujer|ines|in[eé]s|conchita|penelope|lupe|esperanza|sabina|dalia|google/i;
 function gimVoices() { return window.speechSynthesis ? speechSynthesis.getVoices().filter(function (v) { return /^es/i.test(v.lang); }) : []; }
 function gimVoice() {
   var vs = gimVoices(), pick = null, saved = null;
