@@ -1490,3 +1490,18 @@ body.gala-on .fx { z-index: 94; }
 .gk-card-m.ok .front { box-shadow: 0 0 0 3px #7CF2C4, 0 0 18px #7CF2C4; }
 
 .gk-mute { border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); color: #fff; border-radius: 999px; width: 34px; height: 30px; font-size: .9rem; }
+
+/* v0.7.43 · Manual del Master */
+.gm-tools { gap: 8px; }
+.gm p { margin: 6px 0; line-height: 1.5; } .gm h3 { margin: 0 0 6px; }
+.gm-steps { display: flex; flex-direction: column; gap: 6px; padding-left: 20px; }
+.gm-st-h { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; } .gm-st-h img { width: 84px; height: 64px; object-fit: cover; border-radius: 10px; flex: none; }
+.gm-q { background: color-mix(in srgb, var(--accent) 7%, transparent); border-left: 3px solid var(--accent); padding: 8px 10px; border-radius: 8px; }
+.gm-spy { color: var(--muted); font-style: italic; }
+@media print {
+  body.print-gim > *:not(#gim-adm) { display: none !important; }
+  body.print-gim #gim-adm { position: static; overflow: visible; background: #fff; }
+  body.print-gim .ga-top, body.print-gim .ga-tabs, body.print-gim .gm-tools { display: none !important; }
+  body.print-gim .gim-ribbon { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body.print-gim .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}

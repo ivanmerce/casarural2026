@@ -85,7 +85,7 @@ function gimAdmOpen() {
   gimIdle();
   gimLoad().then(gimAdmRender, function () { el.querySelector('.ga-body').innerHTML = '<p class="small">No he podido cargar la gimcana. ¿Hay conexión? (Y recuerda: solo la ven los adultos que no juegan.)</p>'; });
 }
-function gimIdle() { clearTimeout(gimAdm.idleT); gimAdm.idleT = setTimeout(function () { gimAdmClose(); toast('Panel de la gimcana cerrado por seguridad'); }, 60000); }
+function gimIdle() { clearTimeout(gimAdm.idleT); gimAdm.idleT = setTimeout(function () { gimAdmClose(); toast('Panel de la gimcana cerrado por seguridad'); }, gimAdm.tab === 'manual' ? 240000 : 60000); }
 function gimAdmClose() { clearTimeout(gimAdm.idleT); var el = document.getElementById('gim-adm'); if (el) el.remove(); if (!gimKid) document.body.style.overflow = ''; }
 document.addEventListener('visibilitychange', function () { if (document.hidden && document.getElementById('gim-adm')) gimAdmClose(); });
 function gimSecret(txt, cls) { return '<span class="gim-secret' + (cls ? ' ' + cls : '') + '" data-act="gimReveal" title="Toca para ver">' + esc(txt) + '</span>'; }
@@ -93,7 +93,7 @@ function gimAdmRender() {
   var el = document.getElementById('gim-adm'); if (!el) return;
   var C = GIM.content;
   if (!C) { el.querySelector('.ga-body').innerHTML = '<p class="small">Aún no hay contenido de la gimcana.</p>'; return; }
-  var tabs = [['panel', 'En directo'], ['prep', 'Preparación'], ['teams', 'Equipos'], ['spy', 'El Espía']];
+  var tabs = [['panel', 'En directo'], ['manual', 'Manual del Master'], ['prep', 'Preparación'], ['teams', 'Equipos'], ['spy', 'El Espía']];
   el.querySelector('.ga-tabs').innerHTML = '<div class="seg">' + tabs.map(function (t) { return '<button data-act="gimTab" data-v="' + t[0] + '" aria-pressed="' + (gimAdm.tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>';
   var h = '';
   if (gimAdm.tab === 'panel') {
@@ -110,6 +110,8 @@ function gimAdmRender() {
         (s.phase ? '<button class="btn ghost danger-t" data-act="gimReset" data-t="' + t.id + '">Reiniciar</button>' : '') + '</div></section>';
     }).join('');
     h += '<section class="card"><h3>Ensayo</h3><p class="small">Recórrela desde el sofá: modo pekes completo, sin guardar nada y con los códigos a la vista.</p><button class="btn" data-act="gimKidStart" data-t="rojo" data-rehearsal="1">' + icon('eye') + 'Ensayar como Equipo Rojo</button></section>';
+  } else if (gimAdm.tab === 'manual') {
+    h += gimManualHtml(C);
   } else if (gimAdm.tab === 'prep') {
     if (C.quiet) h += '<section class="card alert"><h3>🤫 Zona de silencio</h3><p class="small">' + esc(C.quiet) + '</p></section>';
     h += '<section class="card"><h3>Antes de empezar</h3><ul class="small finca-ul">' +
@@ -147,6 +149,70 @@ function gimAdmRender() {
     }).join('');
   }
   el.querySelector('.ga-body').innerHTML = h;
+}
+/* ---------- Manual del Master: cada paso que dan los peques, con sus respuestas ---------- */
+var GIM_HELP = {
+  who: function (g) { return { does: 'Sale una foto de alguien de la familia muy pixelada que se va aclarando poco a poco, y 4 nombres. Tienen que tocar quién es. ' + (g.rounds || 3) + ' rondas.', solve: 'Mirar bien la foto y tocar el nombre correcto. Si fallan, siguen hasta acertar: la foto se va viendo mejor.', planB: 'No usa sensores. Si no carga una foto, «Saltar parada» desde el panel.' }; },
+  silence: function (g) { return { does: 'El móvil escucha: tienen que estar ' + (g.secs || 15) + ' segundos en silencio total. Si hay ruido, el contador vuelve a empezar.', solve: 'Callarse del todo y no mover el móvil. El primer segundo calibra el ruido del sitio.', planB: 'Si el móvil no deja usar el micrófono, sale un botón: el guía cuenta ' + (g.secs || 15) + ' segundos en silencio y lo pulsa.' }; },
+  candles: function (g) { return { does: 'Salen ' + (g.n || 10) + ' llamas en pantalla. Hay que apagarlas soplando fuerte cerca del micrófono (abajo del móvil).', solve: 'Soplar fuerte y seguido; cada soplo largo apaga una. También se pueden tocar las llamas.', planB: 'Sin micrófono: tocar cada llama con el dedo.' }; },
+  quiz: function (g) { return { does: 'Tres preguntas tipo test sobre la familia y la finca. Si fallan una, la repiten hasta acertar.', solve: (g.qs || []).filter(function (q) { return !q.dyn; }).map(function (q) { return q.q + ' → ' + q.opts[q.ok]; }).join(' · ') + ((g.qs || []).some(function (q) { return q.dyn; }) ? ' · ¿Quién lleva más secretos? → el primero del ranking de secretos en ese momento (si hay empate, esa pregunta no sale).' : ''), planB: 'No usa sensores.' }; },
+  shake: function (g) { return { does: 'Primero cada uno mete un gol en el futbolín; el guía pulsa «¡Todos han marcado!». Después agitan el móvil como una coctelera: ' + (g.n || 60) + ' sacudidas.', solve: 'Agitar fuerte (sin soltarlo: ¡atados a la muñeca si hace falta!). Pueden pasárselo entre ellos.', planB: 'En iPhone sale «Activar el sensor» (hay que pulsarlo). Si no va, botón para tocar muy rápido ' + (g.n || 60) + ' veces.' }; },
+  simon: function (g) { return { does: '4 colores con sonido. El móvil enseña una secuencia y tienen que repetirla; cada vez se alarga un color, hasta ' + (g.len || 5) + '. Si fallan, empieza de cero.', solve: 'Mirar y escuchar con atención, y repetir en el mismo orden.', planB: 'No usa sensores. Si se desesperan, «Saltar parada».' }; },
+  order: function (g) { var ids = (g.ids || []).filter(function (id) { return person(id); }).sort(function (a, b) { return (person(a).age || 0) - (person(b).age || 0); }); return { does: 'Salen ' + ids.length + ' personas de la familia desordenadas. Hay que tocarlas de la más joven a la más mayor.', solve: ids.map(function (id) { return person(id).name; }).join(' → '), planB: 'No usa sensores.' }; },
+  cipher: function (g) { return { does: 'Sale una palabra en clave: ' + g.secret + '. Cada letra es la SIGUIENTE del abecedario; hay que escribir la buena.', solve: g.secret + ' → ' + g.answer + ' (una letra hacia atrás en cada una).', planB: 'No usa sensores. Si no lo ven: «¿Qué letra va antes de la N?».' }; },
+  timing: function (g) { return { does: 'Una bola de luz va y viene por una barra. Hay que tocar cuando esté en la diana verde del centro. ' + (g.hits || 3) + ' aciertos; cada acierto va más rápido.', solve: 'Tocar justo cuando la bola cruza el centro. Mejor que lo haga uno solo cada vez.', planB: 'No usa sensores.' }; },
+  memory: function (g) { return { does: (g.pairs || 6) * 2 + ' cartas boca abajo con fotos de la familia. Se levantan de dos en dos para encontrar las ' + (g.pairs || 6) + ' parejas.', solve: 'Memoria pura: recordar dónde salió cada cara.', planB: 'No usa sensores.' }; }
+};
+function gimManualHtml(C) {
+  var n = C.stations.length, item = gimItem('{item}'), sh = gimAdm.showAll;
+  var S2 = function (t) { return sh ? '<b>' + esc(t) + '</b>' : gimSecret(t); };
+  var h = '<div class="row wrap gm-tools"><button class="btn ghost" data-act="gimShowAll">' + (sh ? '🙈 Ocultar respuestas' : '👀 Mostrar todas las respuestas') + '</button><button class="btn ghost" data-act="gimPrint">🖨️ Imprimir o guardar en PDF</button></div>';
+  h += '<section class="card gm"><h3>🕵️ La misión en 30 segundos</h3><p>El Espía le ha robado a ' + esc(babyName()) + ' <b>' + esc(item) + '</b> y lo ha encerrado en un cofre con candado. Los agentes recorren ' + n + ' sitios de la finca. En cada uno consiguen una letra. Con todas forman la contraseña <b>' + S2(C.wordShow || C.word) + '</b> y la app les da la combinación del candado: ' + S2(C.lock) + '. Gana el equipo que abre antes el cofre.</p>' +
+    '<p class="small muted">Domingo a las 20:00 · unos 50-60 minutos · base: ' + esc(C.base) + (C.master ? ' · master: <b>' + esc(nameOf(C.master)) + '</b>' : '') + '</p></section>';
+  h += '<section class="card gm"><h3>👥 Quién es quién</h3>' + C.teams.map(function (t) {
+    var r = gimRoute(t.id).map(function (s) { return C.stations.indexOf(s) + 1; });
+    return '<p><i class="ga-dot" style="background:' + t.color + '"></i> <b>' + esc(t.name) + '</b>' + (t.optional ? ' (si se apunta)' : '') + ': ' + t.members.map(function (id) { return esc(nameOf(id)); }).join(', ') + ' · guía: ' + (t.guide ? esc(nameOf(t.guide)) : '<i>por decidir</i>') + '<br><small class="muted">Orden de paradas: ' + r.join(' → ') + ' → base</small></p>';
+  }).join('') + '<p class="small"><b>Master</b>: sigue a todos desde «En directo», manda mensajes del Espía y rescata a quien se atasque. <b>Guías</b>: llevan el móvil del equipo, alumbran, vigilan y confirman las pruebas físicas. <b>Abuelos</b>: en la base con la chuleta (comodín).</p></section>';
+  if (C.quiet) h += '<section class="card alert gm"><h3>🤫 Zona de silencio</h3><p class="small">' + esc(C.quiet) + '</p></section>';
+  h += '<section class="card gm"><h3>🔁 Cómo es cada parada (siempre igual)</h3><ol class="small finca-ul gm-steps">' +
+    '<li><b>Acertijo:</b> lo leen en pantalla y escriben a qué sitio les manda. La app acepta tildes, mayúsculas y sinónimos. <b>A los 2 fallos sale una pista sola.</b></li>' +
+    '<li><b>Camino:</b> la app dice «¡Correcto! Id a…». Van con el guía y la linterna.</li>' +
+    '<li><b>Sobre:</b> encuentran el sobre TOP SECRET con la pulsera luminosa y escriben su código de 3 cifras (si no es el de ese sitio, no avanza).</li>' +
+    '<li><b>Prueba:</b> un minijuego en el móvil (algunos con micro o sensor; todos tienen plan B).</li>' +
+    '<li><b>Letra:</b> ganan una letra y el Espía les habla con su voz de villano. Botón «Siguiente pista».</li></ol>' +
+    '<p class="small"><b>Comodín del abuelo</b> (uno por equipo): en el acertijo, botón que les manda a la base a preguntar a los abuelos y además muestra la pista.</p></section>';
+  h += '<p class="eyebrow">Las ' + n + ' paradas, paso a paso</p>';
+  h += C.stations.map(function (s, i) {
+    var hp = (GIM_HELP[s.game.type] || function () { return { does: '', solve: '', planB: '' }; })(s.game);
+    return '<section class="card gm gm-st"><div class="gm-st-h"><img src="' + s.photo + '" alt="" loading="lazy" referrerpolicy="no-referrer"><div><span class="eyebrow">Parada ' + (i + 1) + ' · letra ' + S2(s.letter) + '</span><h3>' + esc(s.name) + '</h3></div></div>' +
+      '<p class="gm-q"><b>1 · Acertijo que leen:</b> «' + esc(s.riddle) + '»</p>' +
+      '<p><b>Respuestas que valen:</b> ' + S2(s.answers.join(', ')) + '</p>' +
+      '<p><b>Pista (sale a los 2 fallos o con el comodín):</b> ' + esc(s.hint) + '</p>' +
+      '<p><b>2 · Dónde está el sobre:</b> ' + esc(s.hide) + ' · <b>Código:</b> ' + S2(s.code) + '</p>' +
+      '<p><b>3 · Prueba «' + esc(s.game.title) + '»:</b> ' + esc(hp.does) + '</p>' +
+      '<p><b>Cómo se supera:</b> ' + (sh ? esc(hp.solve) : gimSecret(hp.solve)) + '</p>' +
+      '<p class="small"><b>Plan B:</b> ' + esc(hp.planB) + '</p>' +
+      '<p class="small gm-spy"><b>4 · El Espía les dice:</b> «' + esc(gimSpyText(s.id)) + '»</p></section>';
+  }).join('');
+  h += '<section class="card gm"><h3>🏁 El final, en la base</h3><ol class="small finca-ul gm-steps"><li>Tocan sus letras en orden hasta formar ' + S2(C.wordShow || C.word) + '. Si se equivocan, se borra y lo intentan otra vez.</li>' +
+    '<li>La app enseña la combinación del candado: ' + S2(C.lock) + ' («' + esc(C.final.lockText) + '»).</li>' +
+    '<li>' + esc(gimItem(C.final.button || '')) + ' Botón rojo gigante «ABRIR».</li>' +
+    '<li>Fuegos, el último mensaje del Espía, su «desenmascaramiento» (sigue siendo secreto hasta la gala) y la clasificación por tiempo, que pasa sola a Juegos.</li></ol></section>';
+  h += '<section class="card gm"><h3>🎛️ Tus herramientas de master</h3><ul class="small finca-ul">' +
+    '<li><b>Mensaje del Espía:</b> frases preparadas o la tuya; les salta en la pantalla y el Espía la lee en voz alta.</li>' +
+    '<li><b>Dar pista:</b> les manda la pista de la parada en la que están.</li>' +
+    '<li><b>Saltar parada:</b> les regala la letra y pasan a la siguiente (para atascos, lluvia o un sensor que no va).</li>' +
+    '<li><b>Reiniciar:</b> deja al equipo como al principio (pide confirmación).</li>' +
+    '<li><b>Ensayo:</b> el recorrido entero en tu móvil, sin guardar nada y con los códigos a la vista.</li>' +
+    '<li>En el móvil de los peques: 🔊/🔇 arriba para la voz, y <b>«Salir · adultos»</b> se mantiene pulsado 2-3 segundos.</li></ul></section>';
+  h += '<section class="card gm"><h3>🧯 Si pasa algo</h3><ul class="small finca-ul">' +
+    '<li><b>El móvil se apaga o se cierra la app:</b> el progreso se guarda en cada paso. Vuelve a entrar, abre el panel y pulsa «Modo pekes» del mismo equipo: sigue donde estaba.</li>' +
+    '<li><b>Sin wifi en algún rincón:</b> el juego sigue funcionando; el progreso se sube al volver la red (en el panel lo verás con retraso).</li>' +
+    '<li><b>No suena la voz:</b> tocad «🔊 Oír al Espía» (algunos móviles no dejan hablar sin un toque), o que el guía lo lea con voz de robot.</li>' +
+    '<li><b>No encuentran el sobre:</b> el guía sabe dónde está (está en este manual); que les vaya diciendo «frío, caliente».</li>' +
+    '<li><b>Llueve:</b> salta las paradas de fuera (terraza, piedra, mesa, jardinera, horno) y empieza en La Barbacoa y la sala de deportes.</li>' +
+    '<li><b>' + esc(babyName()) + ' se duerme:</b> nada pasa: el agente más joven pulsa el botón final y el trapo se le devuelve por la mañana. Ni pistas ni gritos cerca de Cézanne.</li></ul></section>';
+  return h;
 }
 function gimSendMsg(teamId, text) {
   GIM.msgs[teamId] = { text: text, at: new Date().toISOString(), id: uid('m') };
@@ -570,6 +636,8 @@ Object.assign(A, {
   gimAdmClose: function () { gimAdmClose(); },
   gimTab: function (el) { gimAdm.tab = el.dataset.v; gimAdmRender(); },
   gimReveal: function (el) { el.classList.toggle('shown'); },
+  gimShowAll: function () { gimAdm.showAll = !gimAdm.showAll; gimAdmRender(); },
+  gimPrint: function () { gimAdm.showAll = true; gimAdmRender(); document.body.classList.add('print-gim'); setTimeout(function () { window.print(); setTimeout(function () { document.body.classList.remove('print-gim'); }, 600); }, 300); },
   gimKidStart: function (el) { gimKidStart(el.dataset.t, !!el.dataset.rehearsal); },
   gimSpyMsg: function (el) {
     var t = el.dataset.t, q = (GIM.content.spyQuick || []);
