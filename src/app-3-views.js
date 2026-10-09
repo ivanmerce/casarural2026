@@ -97,7 +97,7 @@ VIEWS.cuentas = function () {
 
   var exF = lg.excluded || [], rowsR = lg.rows.filter(function (r) { return exF.indexOf(r.id) < 0; });
   var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
-  h += '<section class="card"><div class="card-head"><h3>Reparto entre hermanos y compañía</h3></div>' +
+  h += '<section class="card"><div class="card-head"><h3>' + (exF.length ? 'Reparto entre hermanos y compañía' : 'Reparto entre todos') + '</h3></div>' +
     (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
     '<div class="split-how"><span class="aw-ico sm">' + icon('users') + '</span><p class="small"><b>Cómo se reparte:</b> a proporción de <b>quién viene y a cuántas comidas</b>. Adultos y peques cuentan igual (comen como un adulto, y lo sabemos); ' + esc(babyName()) + ' no cuenta: su comida la traen sus padres de casa. Así, una familia de 5 paga más que una de 3, y quien viene menos días paga menos.</p></div>';
   var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
@@ -111,7 +111,7 @@ VIEWS.cuentas = function () {
     }).join('') + '</tbody></table></div>' +
     '<div class="pot"><div class="row"><span class="grow">Gasto total con precio real</span><b class="num">' + L.money(lg.total) + '</b></div>' +
     (lg.gifts ? '<div class="row olive-t"><span class="grow">Invitaciones' + (exF.length ? ' (abuelos y regalos)' : '') + '</span><b class="num">− ' + L.money(lg.gifts) + '</b></div>' : '') +
-    '<div class="row pot-total"><span class="grow"><b>A repartir entre hermanos y compañía</b></span><b class="num">' + L.money(lg.toShare) + '</b></div></div>' +
+    '<div class="row pot-total"><span class="grow"><b>' + (exF.length ? 'A repartir entre hermanos y compañía' : 'A repartir entre todos') + '</b></span><b class="num">' + L.money(lg.toShare) + '</b></div></div>' +
     (lg.giftsPledged > lg.gifts + 0.004 ? '<p class="small muted">Hay ' + L.money(lg.giftsPledged - lg.gifts) + ' de invitación esperando: se aplicarán en cuanto haya más gastos.</p>' : '');
 
   if (lg.total === 0) {
@@ -144,22 +144,33 @@ var ABU_LEVELS = [
   [120, 'Mecenas del Finde', 'Lorenzo de Médici, pero con tortilla de patatas.'],
   [250, 'Leyenda familiar', 'Se contará en todas las sobremesas de aquí a 2040.']
 ];
+function abuInvited(k) {   /* lo que cuenta en el Abuelómetro: invitaciones y, si están fuera del reparto, también lo que pagan de la compra */
+  var aport = S.expenses.filter(function (e) { return e.payer === k && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + (e.amount || 0); }, 0);
+  var out = L.excluded(S).indexOf(k) >= 0 ? ((L.ledger(S, false).rows.find(function (r) { return r.id === k; }) || { paid: 0 }).paid || 0) : 0;
+  return L.r2(aport + out);
+}
 function abuLevel(v) { var l = ABU_LEVELS[0], nx = null; ABU_LEVELS.forEach(function (x, i) { if (v >= x[0]) { l = x; nx = ABU_LEVELS[i + 1] || null; } }); return { l: l, next: nx }; }
 function abuCard(lg, tx) {
-  var ex = lg.excluded || []; if (!ex.length) return '';
-  var k = ex[0], F = fam(k), house = S.house, fn = F.name.replace(/\s*&\s*/g, ' y ');
+  var ex = lg.excluded || [], k = ex[0] || (S.house && S.house.payer); if (!k || !fam(k)) return '';
+  var inSplit = ex.indexOf(k) < 0;   /* v0.7.47: los abuelos también pueden entrar en el reparto de la compra */
+  var F = fam(k), house = S.house, fn = F.name.replace(/\s*&\s*/g, ' y ');
   var r = lg.rows.find(function (x) { return x.id === k; }) || { paid: 0 };
   var mine = S.expenses.filter(function (e) { return e.payer === k && e.kind === 'aportacion'; });
   var aport = L.r2(mine.reduce(function (a, e) { return a + (e.amount || 0); }, 0));
   var prods = S.ingredients.filter(function (i) { return i.family === k && (i.split || 'comun') === 'comun'; });
-  var invited = L.r2(aport + (r.paid || 0));
+  var invited = abuInvited(k);
   var base = (house && house.payer === k ? house.total : 0) + (S.tax.payer === k ? tx.withExemption : 0);
   var lv = abuLevel(invited), isAbu = me().family === k, canInv = can('edit') && (isAbu || can('access'));
   var pct = lv.next ? Math.max(4, Math.min(100, Math.round((invited - lv.l[0]) / (lv.next[0] - lv.l[0]) * 100))) : 100;
-  var h = '<section class="card abu" id="abu"><div class="card-head"><span class="eyebrow">El rincón de los abuelos</span><span class="pill olive">Fuera del reparto</span></div>' +
-    '<h3>' + (isAbu ? 'Abuelos, aquí nadie os pasa factura' : esc(fn) + ': aquí nadie les pasa factura') + '</h3>' +
-    '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ': <b class="num">' + L.money(base) + '</b>. Con eso ' + (isAbu ? 'tenéis' : 'tienen') + ' barra libre de nietos, sofá y mando de la tele. No ' + (isAbu ? 'entráis' : 'entran') + ' en el reparto.</p>' +
-    '<p class="small">' + (isAbu ? '¿Os apetece invitar a algo más?' : '¿Y si les apetece invitar a algo más?') + ' <b>Totalmente opcional.</b> Lo que ' + (isAbu ? 'pongáis' : 'pongan') + ' se <b>descuenta del bote</b> que se reparten los hermanos y compañía (que lo agradecerán con besos y fregando platos).</p>' +
+  var h = '<section class="card abu" id="abu"><div class="card-head"><span class="eyebrow">El rincón de los abuelos</span><span class="pill olive">' + (inSplit ? 'En el reparto' : 'Fuera del reparto') + '</span></div>' +
+    (inSplit ?
+      '<h3>' + (isAbu ? 'Abuelos, en el bote como uno más' : esc(fn) + ': en el bote como uno más') + '</h3>' +
+      '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ': <b class="num">' + L.money(base) + '</b>. Y como también ' + (isAbu ? 'habéis' : 'han') + ' ido comprando cosas, la compra ' + (isAbu ? 'la pagáis' : 'la pagan') + ' <b>como todos</b>: a proporción de personas y comidas, y lo que ' + (isAbu ? 'habéis' : 'han') + ' pagado cuenta como lo ' + (isAbu ? 'vuestro' : 'suyo') + '.</p>' +
+      '<p class="small">' + (isAbu ? '¿Queréis poner algo más?' : '¿Y si quieren poner algo más?') + ' <b>Totalmente opcional.</b> Lo que ' + (isAbu ? 'pongáis' : 'pongan') + ' de invitación se <b>descuenta del bote</b> de todos (que lo agradecerán con besos y fregando platos).</p>'
+    :
+      '<h3>' + (isAbu ? 'Abuelos, aquí nadie os pasa factura' : esc(fn) + ': aquí nadie les pasa factura') + '</h3>' +
+      '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ': <b class="num">' + L.money(base) + '</b>. Con eso ' + (isAbu ? 'tenéis' : 'tienen') + ' barra libre de nietos, sofá y mando de la tele. No ' + (isAbu ? 'entráis' : 'entran') + ' en el reparto.</p>' +
+      '<p class="small">' + (isAbu ? '¿Os apetece invitar a algo más?' : '¿Y si les apetece invitar a algo más?') + ' <b>Totalmente opcional.</b> Lo que ' + (isAbu ? 'pongáis' : 'pongan') + ' se <b>descuenta del bote</b> que se reparten los hermanos y compañía (que lo agradecerán con besos y fregando platos).</p>') +
     '<div class="abu-meter" data-egg="abumeter"><div class="row"><span class="aw-ico sm">' + icon('trophy') + '</span><span class="grow"><b>Abuelómetro:</b> ' + esc(lv.l[1]) + '<small class="muted" style="display:block">' + esc(lv.l[2]) + '</small></span><b class="num">' + L.money(invited) + '</b></div>' +
     '<div class="bar"><i style="width:' + pct + '%"></i></div>' +
     (lv.next ? '<small class="muted">Faltan ' + L.money(L.r2(lv.next[0] - invited)) + ' para «' + esc(lv.next[1]) + '»</small>' : '<small class="gold">Nivel máximo. Ya no hay más medallas que darles.</small>') + '</div>';
@@ -167,7 +178,7 @@ function abuCard(lg, tx) {
     h += '<div class="stack" style="gap:2px">' + mine.map(function (e) {
       var inner = '<span class="grow"><b>' + esc(e.concept) + '</b></span><b class="num">' + L.money(e.amount) + '</b>';
       return can('edit') ? '<button class="row abu-inv" data-act="editExp" data-id="' + e.id + '">' + inner + '</button>' : '<div class="row abu-inv">' + inner + '</div>';
-    }).join('') + (prods.length ? '<div class="row small abu-inv"><span class="grow">Productos de la compra que se han pedido (' + prods.length + ')</span><b class="num">' + L.money(r.paid || 0) + '</b></div>' : '') + '</div>';
+    }).join('') + (prods.length ? '<div class="row small abu-inv"><span class="grow">' + (inSplit ? 'Compra pagada, cuenta en el reparto (' : 'Productos de la compra que se han pedido (') + prods.length + ')</span><b class="num">' + L.money(r.paid || 0) + '</b></div>' : '') + '</div>';
   }
   if (canInv) {
     var c = ui.abuC || '', a = ui.abuA || null;

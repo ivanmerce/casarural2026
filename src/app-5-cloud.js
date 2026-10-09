@@ -51,7 +51,7 @@ var CLOUD = (function () {
       expenses: d.expenses.map(function (r) { return { id: r.id, concept: r.concept, amount: num(r.amount), payer: r.payer_family_id, split: r.split, kind: r.kind, date: r.spent_on }; }),
       house: { total: num(st.house_total), payer: st.house_payer_family_id, cancel: kv.cancel || [], payments: d.house_payments.slice().sort(function (a, b) { return a.id.localeCompare(b.id); }).map(function (r) { return { id: r.id, label: r.label, amount: num(r.amount), due: r.due_on, date: r.paid_on, paid: r.paid, note: r.note }; }) },
       tax: { perNight: num(st.tax_per_night), nights: st.tax_nights, minAge: st.tax_min_age, payer: st.tax_payer_family_id, note: kv.taxNote || '', fixed: kv.taxFixed || null },
-      split: { mode: st.split_mode, w: { adulto: num(st.w_adulto), menor: num(st.w_menor), bebe: num(st.w_bebe) } },
+      split: { mode: st.split_mode, w: { adulto: num(st.w_adulto), menor: num(st.w_menor), bebe: num(st.w_bebe) }, exclude: Array.isArray(st.split_exclude) ? st.split_exclude : undefined },
       activities: d.activities.map(function (r) { return { id: r.id, day: r.day, start: hm(r.start_time), dur: r.duration_min, title: r.title, place: r.place, where: r.where_text, travel: r.travel, age: r.age, marc: r.marc, owner: r.owner_person_id, planB: r.plan_b, desc: r.description, star: r.star, tournament: r.is_tournament }; }),
       paidOptions: kv.paidOptions || [],
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
@@ -74,7 +74,7 @@ var CLOUD = (function () {
   /* ---------- S → filas por tabla ---------- */
   function rows(S) {
     var out = {};
-    out.settings = [{ id: 1, house_total: S.house.total, house_payer_family_id: S.house.payer, split_mode: S.split.mode, w_adulto: S.split.w.adulto, w_menor: S.split.w.menor, w_bebe: S.split.w.bebe, tax_per_night: S.tax.perNight, tax_nights: S.tax.nights, tax_min_age: S.tax.minAge, tax_payer_family_id: S.tax.payer }];
+    out.settings = [{ id: 1, house_total: S.house.total, house_payer_family_id: S.house.payer, split_mode: S.split.mode, w_adulto: S.split.w.adulto, w_menor: S.split.w.menor, w_bebe: S.split.w.bebe, split_exclude: Array.isArray(S.split.exclude) ? S.split.exclude : null, tax_per_night: S.tax.perNight, tax_nights: S.tax.nights, tax_min_age: S.tax.minAge, tax_payer_family_id: S.tax.payer }];
     out.app_config = [{ key: 'trip', value: S.trip }, { key: 'comp', value: S.comp || { duos: [] } }];
     out.games = (S.games || []).map(function (g, i) { var d = {}; Object.keys(g).forEach(function (k) { if (k !== 'id' && k !== 'sort' && g[k] !== undefined) d[k] = g[k]; }); return { id: g.id, data: d, sort: g.sort != null ? g.sort : i }; });
     out.awards = Object.keys(S.awardData || {}).map(function (k) { return { id: k, data: S.awardData[k] }; });

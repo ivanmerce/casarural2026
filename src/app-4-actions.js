@@ -619,14 +619,13 @@ var A = {
   abuA: function (el) { var n = +el.dataset.v; ui.abuA = ui.abuA === n ? null : n; var f = document.getElementById('abu-amt'); if (f) f.value = ''; render(); },
   abuGo: function () {
     if (!guard('edit')) return;
-    var ex = L.excluded(S); if (!ex.length) return;
+    var k = L.excluded(S)[0] || (S.house && S.house.payer); if (!k) return;
     var typed = numVal('abu-amt'), amt = typed != null ? typed : ui.abuA;
     if (!amt || amt <= 0) { toast('¿Cuánto? Toca un importe o escríbelo'); return; }
-    var before = abuLevel(L.ledger(S, false).rows.filter(function (r) { return r.id === ex[0]; }).reduce(function (a, r) { return a + r.paid; }, 0) + S.expenses.filter(function (e) { return e.payer === ex[0] && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + e.amount; }, 0));
-    S.expenses.push({ id: uid('e'), concept: ui.abuC || 'Invitación de los abuelos', amount: amt, payer: ex[0], split: 'comun', kind: 'aportacion', date: new Date().toISOString().slice(0, 10) });
+    var before = abuLevel(abuInvited(k));
+    S.expenses.push({ id: uid('e'), concept: ui.abuC || 'Invitación de los abuelos', amount: amt, payer: k, split: 'comun', kind: 'aportacion', date: new Date().toISOString().slice(0, 10) });
     ui.abuC = ''; ui.abuA = null; save(); render(true);
-    var tot = S.expenses.filter(function (e) { return e.payer === ex[0] && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + e.amount; }, 0) + (L.ledger(S, false).rows.find(function (r) { return r.id === ex[0]; }) || { paid: 0 }).paid;
-    var after = abuLevel(tot);
+    var after = abuLevel(abuInvited(k));
     confetti(1600);
     if (after.l[1] !== before.l[1]) setTimeout(function () { message('<h2 style="font-size:clamp(1.8rem,9vw,3rem)">¡Nivel nuevo!<br>' + esc(after.l[1]) + '</h2>', 2600); }, 250);
     else toast('¡Gracias, abuelos! ' + L.money(amt) + ' menos en el bote');

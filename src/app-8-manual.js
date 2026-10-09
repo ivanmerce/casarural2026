@@ -26,7 +26,7 @@ VIEWS.manual = function () {
     ['camera', 'Álbum de fotos', 'Toca la <b>cámara</b> de arriba y sube tus fotos (se reducen solas). Corazones para las mejores.', 'album'],
     ['house', 'La Finca', '<b>Dormir</b> (plano, habitaciones y fotos), <b>Práctico</b> (Wi-Fi, registro, normas, si se va la luz, antes de irnos) y <b>Compras</b> (tiendas del pueblo; el domingo solo abre una).', 'finca', 'info'],
     ['users', 'Familia', 'Quién viene cada día y las personas de cada familia.', 'familia', 'dias'],
-    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa las pagan <b>' + esc(payer.name) + '</b>, fuera del reparto (si invitan a algo, se descuenta del bote). ' : '') + 'El resto, entre hermanos y compañía <b>a proporción de personas y comidas</b>, y la app dice <b>quién paga a quién</b>.', 'cuentas'],
+    ['coins', 'Cuentas claras', (payer ? 'La casa y la tasa las pagan <b>' + esc(payer.name) + '</b>' + (L.excluded(S).indexOf(payer.id) >= 0 ? ', fuera del reparto (si invitan a algo, se descuenta del bote). ' : '. ') : '') + (payer && L.excluded(S).indexOf(payer.id) < 0 ? 'La compra, entre todos (también ellos) ' : 'El resto, entre hermanos y compañía ') + '<b>a proporción de personas y comidas</b>, y la app dice <b>quién paga a quién</b>.', 'cuentas'],
     ['bulb', 'Buzón de ideas', 'La plataforma es <b>de todos</b>: propón juegos, comidas o cambios en Inicio → <b>Buzón de ideas</b> y apoya con <b>+1</b> las que te gusten.', 'inicio']
   ];
   function goBtn(tab, sub, label) { return tab ? '<button class="link man-go" data-act="tab" data-tab="' + tab + '"' + (sub ? (tab === 'finca' ? ' data-fsub="' : ' data-msub="') + sub + '"' : '') + '>' + (label || 'Ir') + ' ' + icon('arrow') + '</button>' : ''; }
