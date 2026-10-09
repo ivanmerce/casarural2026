@@ -1544,6 +1544,194 @@ body.gala-on .fx { z-index: 94; }
 .tk-big img { max-height: 62vh; }
 @media (max-width: 380px) { .tk-row { grid-template-columns: 1fr auto; } .tk-ico { display: none; } }
 
+/* ===================== Sobres lacrados (v0.7.48) =====================
+   Escenario oscuro a pantalla completa, sobre de papel con lacre carmesí y la carta en papel claro (igual en modo claro y oscuro). */
+.sb-card { background: linear-gradient(150deg, color-mix(in srgb, #B0122C 11%, var(--glass)), color-mix(in srgb, var(--wood) 10%, var(--glass))); border-color: color-mix(in srgb, #B0122C 28%, var(--glass-line)); }
+.sb-card-in { display: flex; gap: 14px; align-items: center; }
+.sb-card .card-head { align-items: flex-start; }
+.sb-card h3 { margin: 0; }
+.sb-card p { margin: 4px 0 0; }
+.sb-mini { width: 64px; flex: none; transform: rotate(-6deg); filter: drop-shadow(0 6px 10px rgba(60, 10, 20, .25)); }
+body.sobre-on .fx { z-index: 99; }
+body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+
+.sobre {
+  --sb-ink: #1E1715; --sb-soft: #6B5A52; --sb-crimson: #B0122C; --sb-gold: #F6CD62; --sb-letter: #FBF6EE;
+  --sb-net: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='.2' stroke-width='1'%3E%3Cpath d='M10 20 45 8 80 30 60 70 20 62 10 20 60 70M45 8 20 62'/%3E%3C/g%3E%3Cg fill='%23FFFFFF' fill-opacity='.32'%3E%3Ccircle cx='10' cy='20' r='2.2'/%3E%3Ccircle cx='45' cy='8' r='2.2'/%3E%3Ccircle cx='80' cy='30' r='2.2'/%3E%3Ccircle cx='60' cy='70' r='2.2'/%3E%3Ccircle cx='20' cy='62' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+  position: fixed; inset: 0; z-index: 96; overflow: hidden; color: #F6ECE4; font-family: var(--font-display); animation: fade .35s both;
+}
+.sobre button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+.sobre button:focus-visible { outline: 3px solid var(--sb-gold); outline-offset: 3px; }
+.sb-sky { position: absolute; inset: 0; background: radial-gradient(110% 70% at 50% 34%, #45152A 0%, #1C0B11 52%, #0B0607 100%); }
+.sb-sky::after { content: ""; position: absolute; inset: 0; background: var(--sb-net) 0 0 / 180px 180px; opacity: .45; -webkit-mask: radial-gradient(70% 55% at 50% 40%, #000, transparent); mask: radial-gradient(70% 55% at 50% 40%, #000, transparent); }
+.sb-x { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 6; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18); }
+.sb-x .ico { width: 22px; height: 22px; }
+.sobre.reading .sb-x { background: rgba(24, 10, 14, .78); border-color: rgba(255, 255, 255, .2); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+
+.sb-scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; padding: 24px; }
+.sobre.reading .sb-scene { pointer-events: none; }
+.sb-env { --w: min(84vw, 400px); position: relative; width: var(--w); aspect-ratio: 3 / 2; perspective: 1200px;
+  animation: sbIn .9s cubic-bezier(.2, .9, .25, 1.1) both, sbFloat 5s ease-in-out .9s infinite;
+  transition: transform .9s cubic-bezier(.5, 0, .8, .4), opacity .7s ease; }
+.sb-env.open { animation: none; }
+.sb-env.away { transform: translateY(75vh) rotate(9deg); opacity: 0; }
+@keyframes sbIn { from { opacity: 0; transform: translateY(40px) rotate(-8deg) scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes sbFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(-.8deg); } }
+.sb-card3d { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .1, .2, 1); }
+.sb-env.flipped .sb-card3d { transform: rotateY(180deg); }
+.sb-env.is-back .sb-card3d { transition: none; transform: none; }
+.sb-env.is-back .sb-front { display: none; }
+.sb-face { position: absolute; inset: 0; border-radius: 10px; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
+/* delante: dirección, sello con su cara y matasellos */
+.sb-front { overflow: hidden; color: var(--sb-ink); background: radial-gradient(120% 90% at 18% 8%, #FCF6EC, #EFE3CF 68%, #E4D4B9); box-shadow: 0 30px 60px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .5); }
+.sb-front::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(120, 90, 60, .22); border-radius: 6px; pointer-events: none; }
+.sb-stamp { position: absolute; top: 9%; right: 7%; width: 22%; aspect-ratio: 4 / 5; padding: 6px; background: #FFFDF8; transform: rotate(4deg);
+  -webkit-mask: radial-gradient(circle 3px, #0000 95%, #000) -4px -4px / 8px 8px, linear-gradient(#000 0 0) content-box;
+  mask: radial-gradient(circle 3px, #0000 95%, #000) -4px -4px / 8px 8px, linear-gradient(#000 0 0) content-box; }
+.sb-stamp-in { position: relative; width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; background: linear-gradient(160deg, #C4112F, #7A0A1C); }
+.sb-stamp-in .av { width: 64%; height: auto; aspect-ratio: 1; font-size: 1.15rem; box-shadow: 0 0 0 2px #FFFDF8; }
+.sb-stamp-in b { position: absolute; right: 7%; bottom: 3%; color: #FFE9EC; font-weight: 800; font-size: .9rem; }
+.sb-postmark { position: absolute; top: 13%; right: 16%; width: 36%; z-index: 1; color: rgba(44, 20, 30, .55); transform: rotate(-12deg); mix-blend-mode: multiply; }
+.sb-addr { position: absolute; left: 9%; right: 28%; bottom: 13%; display: flex; flex-direction: column; gap: 2px; }
+.sb-addr small { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic; font-size: clamp(.95rem, 3.8vw, 1.1rem); color: var(--sb-soft); }
+.sb-addr b { font-size: clamp(2.1rem, 11vw, 3.2rem); font-weight: 800; line-height: .95; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.sb-uline { display: block; width: 100%; height: 10px; color: var(--sb-crimson); margin-top: 3px; }
+.sb-addr span { margin-top: 5px; font-size: clamp(.74rem, 3vw, .84rem); font-weight: 600; color: var(--sb-soft); }
+.sb-flip { position: absolute; inset: 0; z-index: 2; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+
+/* detrás: el interior, la carta, el bolsillo, la solapa y el lacre */
+.sb-backf { transform: rotateY(180deg); perspective: 900px; }
+.sb-env.is-back .sb-backf { transform: none; }
+.sb-inside { position: absolute; inset: 0; border-radius: 10px; background: var(--sb-net) 0 0 / 90px 90px, linear-gradient(180deg, #9E0D25, #5E0614); box-shadow: 0 30px 60px rgba(0, 0, 0, .5); }
+.sb-letter { position: absolute; left: 7%; right: 7%; top: 6%; height: 86%; z-index: 2; padding: 7% 7%; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; color: var(--sb-ink); background: var(--sb-letter); box-shadow: 0 -2px 10px rgba(0, 0, 0, .18); transition: transform 1s cubic-bezier(.3, .1, .2, 1); }
+.sb-letter small { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic; font-size: .8rem; color: var(--sb-soft); }
+.sb-letter b { font-size: clamp(1.15rem, 5.4vw, 1.55rem); font-weight: 800; line-height: 1.05; letter-spacing: -.01em; }
+.sb-letter .sb-net-rule { width: 70%; height: 10px; margin-top: 6px; }
+.sb-env.rise .sb-letter { transform: translateY(-64%); }
+.sb-pocket { position: absolute; inset: 0; z-index: 3; border-radius: 10px; clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200 150 108 300 200' fill='none' stroke='%23A88C6A' stroke-opacity='.5' stroke-width='1.4'/%3E%3C/svg%3E") center / 100% 100% no-repeat, linear-gradient(172deg, #F6EEE1, #E5D5BB); }
+.sb-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; z-index: 4; transform-origin: 50% 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.4, .1, .2, 1); }
+.sb-flap-out, .sb-flap-in { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 50% 100%); -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.sb-flap-out { border-radius: 10px 10px 0 0; background: linear-gradient(180deg, #F1E7D6 0%, #E4D4B9 85%, #D9C6A6 100%); }
+.sb-flap-in { transform: rotateX(180deg); background: var(--sb-net) 0 0 / 90px 90px, linear-gradient(0deg, #8E0B21, #5E0614); }
+.sb-env.open .sb-flap { transform: rotateX(180deg); }
+.sb-env.flap-back .sb-flap { z-index: 1; }
+.sb-seal { position: absolute; left: 50%; top: 58%; z-index: 5; width: 30%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer;
+  transform: translate(-50%, -50%) scale(calc(1 - var(--k, 0) * .1)); touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  filter: drop-shadow(0 7px 8px rgba(40, 0, 8, .45)); }
+.sb-env:not(.is-back) .sb-seal { pointer-events: none; }
+.sb-seal::before { content: ""; position: absolute; inset: -4%; border-radius: 50%; pointer-events: none; }
+.sb-env.is-back:not(.open) .sb-seal:not(.holding)::before { animation: sbPulse 2.2s ease-out infinite; }
+@keyframes sbPulse { 0% { box-shadow: 0 0 0 0 rgba(246, 205, 98, .55); } 80%, 100% { box-shadow: 0 0 0 18px rgba(246, 205, 98, 0); } }
+.sb-wax { position: absolute; inset: 0; }
+.sb-wax svg { display: block; width: 100%; height: 100%; }
+.sb-wax-l { clip-path: inset(0 50% 0 0); }
+.sb-wax-r { clip-path: inset(0 0 0 50%); }
+.sb-crack { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sb-seal.cracking .sb-crack { stroke-dashoffset: 0; transition: stroke-dashoffset .25s ease-in; }
+.sb-seal.broken { pointer-events: none; filter: none; }
+.sb-seal.broken .sb-wax-l { animation: sbHalfL .95s cubic-bezier(.5, 0, .8, .6) forwards; }
+.sb-seal.broken .sb-wax-r { animation: sbHalfR .95s cubic-bezier(.5, 0, .8, .6) forwards; }
+@keyframes sbHalfL { 0% { transform: none; } 18% { transform: translate(-7px, -5px) rotate(-9deg); } 100% { transform: translate(-70px, 190px) rotate(-75deg); opacity: 0; } }
+@keyframes sbHalfR { 0% { transform: none; } 18% { transform: translate(7px, -5px) rotate(9deg); } 100% { transform: translate(70px, 200px) rotate(80deg); opacity: 0; } }
+.sb-ring { position: absolute; left: -14%; top: -14%; width: 128%; height: 128%; transform: rotate(-90deg); pointer-events: none; opacity: 0; transition: opacity .2s; }
+.sb-seal.holding .sb-ring { opacity: 1; }
+.sb-ring-bg { fill: none; stroke: rgba(246, 205, 98, .2); stroke-width: 4; }
+.sb-ring-fill { fill: none; stroke: var(--sb-gold); stroke-width: 4.5; stroke-linecap: round; }
+.sb-seal.broken .sb-ring { opacity: 0; }
+.sb-seal.nope { animation: sbNope .5s ease; }
+@keyframes sbNope {
+  0%, 100% { transform: translate(-50%, -50%); }
+  20% { transform: translate(calc(-50% - 9px), -50%) rotate(-9deg); }
+  40% { transform: translate(calc(-50% + 8px), -50%) rotate(8deg); }
+  60% { transform: translate(calc(-50% - 5px), -50%) rotate(-5deg); }
+  80% { transform: translate(calc(-50% + 3px), -50%) rotate(3deg); }
+}
+.sb-hint { min-height: 2.8em; max-width: 30ch; margin: 0; text-align: center; font-weight: 600; font-size: 1.04rem; line-height: 1.35; text-wrap: balance; color: #F6ECE4; }
+
+/* el «11» que estalla al abrir */
+.sb-eleven { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; pointer-events: none; opacity: 0; font-weight: 800; font-size: 72vmin; line-height: 1; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 2px rgba(246, 205, 98, .85); }
+.sb-eleven.go { animation: sbEleven 1.9s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes sbEleven { 0% { opacity: 0; transform: scale(.3); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.55); } }
+
+/* la carta a pantalla completa */
+.sb-read { position: absolute; inset: 0; z-index: 4; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  padding: calc(72px + env(safe-area-inset-top, 0px)) 14px calc(40px + env(safe-area-inset-bottom, 0px));
+  opacity: 0; transform: translateY(60px) scale(.94); transition: opacity .6s ease, transform .9s cubic-bezier(.2, .9, .25, 1); }
+.sb-read.in { opacity: 1; transform: none; }
+.sb-paper { position: relative; max-width: 620px; margin: 0 auto; overflow: hidden; padding: clamp(24px, 6.5vw, 52px); border-radius: 18px; color: var(--sb-ink); background: var(--sb-letter); box-shadow: 0 40px 80px rgba(0, 0, 0, .55); font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; }
+.sb-head { position: relative; }
+.sb-age { position: absolute; right: -.05em; top: -.3em; font-family: var(--font-display); font-weight: 800; font-size: clamp(7rem, 34vw, 12rem); line-height: 1; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 2px rgba(176, 18, 44, .16); pointer-events: none; }
+.sb-kicker { position: relative; margin: 0 0 6px; font-style: italic; font-size: 1.05rem; color: var(--sb-soft); }
+.sb-head h1 { position: relative; margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(2.1rem, 9.5vw, 3.4rem); line-height: 1; letter-spacing: -.025em; text-wrap: balance; color: var(--sb-ink); }
+.sb-net-rule { display: block; width: 100%; height: 14px; margin-top: 16px; color: var(--sb-crimson); }
+.sb-fig { max-width: 360px; margin: 28px auto 10px; color: var(--sb-ink); }
+.sb-pc { display: block; width: 100%; height: auto; }
+.sb-pc .sb-scr { fill: var(--sb-ink); }
+.sb-pc .sb-pwr { stroke: var(--sb-crimson); }
+.sb-cur { animation: sbBlink 1s steps(1) infinite; }
+@keyframes sbBlink { 50% { opacity: 0; } }
+.sb-text { margin-top: 18px; }
+.sb-text p { margin: 0 0 1em; font-size: 1.08rem; line-height: 1.68; text-wrap: pretty; }
+.sb-text .sb-greet { font-weight: 700; }
+.sb-text .sb-close { margin-top: 1.3em; font-family: var(--font-display); font-weight: 800; font-size: 1.28rem; line-height: 1.25; }
+
+.sb-ticket { position: relative; margin: 30px 0 6px; border: 2px solid var(--sb-ink); border-radius: 14px; background: #FFFDF8; font-family: var(--font-display); color: var(--sb-ink); }
+.sb-tk-top { padding: 18px 20px 16px; }
+.sb-tk-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 700; font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; }
+.sb-tk-no { padding: 2px 9px; border: 1.5px solid currentColor; border-radius: 999px; letter-spacing: .04em; }
+.sb-tk-title { margin: 8px 0 0; font-weight: 800; font-size: clamp(1.35rem, 6vw, 1.7rem); line-height: 1.1; text-wrap: balance; }
+.sb-tk-rows { position: relative; display: grid; gap: 7px; margin: 0; padding: 16px 20px 64px; border-top: 2px dashed var(--sb-ink); }
+.sb-tk-rows::before, .sb-tk-rows::after { content: ""; position: absolute; top: -15px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid; background: var(--sb-letter); transform: rotate(-45deg); }
+.sb-tk-rows::before { left: -15px; border-color: transparent var(--sb-ink) var(--sb-ink) transparent; }
+.sb-tk-rows::after { right: -15px; border-color: var(--sb-ink) transparent transparent var(--sb-ink); }
+.sb-tk-rows div { display: flex; gap: 10px; font-size: .98rem; line-height: 1.35; }
+.sb-tk-rows dt { flex: none; min-width: 6.4em; font-weight: 800; }
+.sb-tk-rows dd { margin: 0; font-weight: 500; }
+.sb-ink { position: absolute; right: 16px; bottom: 16px; padding: 6px 10px; border: 3px double var(--sb-crimson); border-radius: 8px; color: var(--sb-crimson); font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transform: rotate(-12deg); mix-blend-mode: multiply; pointer-events: none; }
+.sb-ticket.in .sb-ink { animation: sbStampIn .45s .45s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes sbStampIn { from { opacity: 0; transform: rotate(-12deg) scale(2.4); } to { opacity: .92; transform: rotate(-12deg) scale(1); } }
+.sb-fine { margin-top: 26px; padding-top: 14px; border-top: 1.5px dashed rgba(30, 23, 21, .35); }
+.sb-fine h2 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1rem; font-weight: 800; }
+.sb-fine ul { margin: 0; padding-left: 1.1em; font-size: .97rem; line-height: 1.55; color: #3F332E; }
+
+.sb-from { margin-top: 34px; text-align: center; }
+.sb-signoff { margin: 0 0 16px; font-style: italic; font-size: 1.08rem; }
+.sb-trio { position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); align-items: start; padding-top: 8px; }
+.sb-links { position: absolute; left: 0; top: 0; width: 100%; height: 120px; overflow: visible; pointer-events: none; }
+.sb-links path { fill: none; stroke: var(--sb-crimson); stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sb-from.in .sb-links path { stroke-dashoffset: 0; transition: stroke-dashoffset 1.1s .25s ease; }
+.sb-who { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0; transform: translateY(14px) scale(.9); }
+.sb-from.in .sb-who { opacity: 1; transform: none; transition: opacity .5s calc(var(--i) * .18s + .1s), transform .6s cubic-bezier(.2, 1.5, .4, 1) calc(var(--i) * .18s + .1s); }
+.sb-who .av { width: 68px; height: 68px; font-size: 1.6rem; box-shadow: 0 0 0 4px var(--sb-letter), 0 0 0 6px var(--sb-crimson); }
+.sb-who b { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; }
+.sb-who small { max-width: 12ch; font-size: .82rem; font-style: italic; line-height: 1.25; color: var(--sb-soft); }
+.sb-scribble { width: 84px; height: 24px; margin-top: -4px; }
+.sb-scribble path { fill: none; stroke: var(--sb-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sb-from.in .sb-scribble path { stroke-dashoffset: 0; transition: stroke-dashoffset 1.4s .9s ease-in-out; }
+
+.sb-keeper { display: flex; flex-direction: column; gap: 10px; max-width: 620px; margin: 16px auto 0; padding: 18px; border-radius: 18px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+.sb-keeper h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 1.02rem; color: var(--sb-gold); }
+.sb-keeper h2 .ico { width: 20px; height: 20px; }
+.sb-sw { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 12px; border-radius: 14px; text-align: left; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
+.sb-sw b { display: block; font-size: .98rem; }
+.sb-sw small { display: block; margin-top: 2px; font-size: .84rem; font-weight: 500; color: #D8C9C0; }
+.sb-sw i { position: relative; flex: none; width: 46px; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, .2); transition: background .2s; }
+.sb-sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); }
+.sb-sw[aria-pressed="true"] i { background: #D21C3A; }
+.sb-sw[aria-pressed="true"] i::after { transform: translateX(18px); }
+.sb-k-when { margin: 0; font-size: .86rem; color: #D8C9C0; }
+.sb-k-when:empty { display: none; }
+.sb-k-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.sb-k-btns.solo { max-width: 620px; margin: 16px auto 0; }
+.sb-btn { flex: 1 1 140px; min-height: 50px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .24); background: transparent; font-weight: 700; font-size: 1rem; }
+.sobre .sb-btn.solid { background: #F6ECE4; border-color: #F6ECE4; color: #1E1715; }
+
+/* sin movimiento: lo mismo, sin vuelos */
+.sobre.calm *, .sobre.calm *::before, .sobre.calm *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .15s !important; transition-delay: 0s !important; }
+@media (prefers-reduced-motion: reduce) { .sb-env, .sb-cur { animation: none; } }
+
 </style>
 </head>
 <body>
@@ -2488,6 +2676,7 @@ function closeOverlays() {
   var any = false;
   if (document.getElementById('viewer') && typeof viewerClose === 'function') { viewerClose(true); any = true; }
   if (document.getElementById('gala') && typeof galaClose === 'function') { galaClose(true); any = true; }
+  if (document.getElementById('sobre') && typeof sobreClose === 'function') { sobreClose(true); any = true; }
   if (document.getElementById('scrim')) { removeSheet(); any = true; }
   return any;
 }
@@ -4084,6 +4273,7 @@ function bindEvents() {
     var t = e.target;
     if (t.id === 'f-name') { clearTimeout(dupT); dupT = setTimeout(dupWarn, 250); }
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
+    if (t.dataset.input === 'search' && SPY_WORD.test(t.value) && !hasEgg('chivato') && !ui._spyOn) { ui._spyOn = true; setTimeout(function () { ui._spyOn = false; }, 4000); spyReply(true); }
     if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
     if (t.dataset.input === 'search' && /\b(con|sin) cebolla\b/i.test(t.value) && !ui._tortiOn) { ui._tortiOn = true; setTimeout(function () { ui._tortiOn = false; }, 4000); tortillaDebate(/sin/i.test(t.value)); }
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
@@ -5135,6 +5325,7 @@ function buildEggs() {
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Lo que se dice cuando sale humo blanco. En latín y en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
     { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra (o pedirse la bebida)', hint: 'Lo que se dice al brindar. Agua que no has de beber…', more: 'En el buscador de Compra, lo que se dice al brindar' },
     { k: 'tortilla', name: 'El gran debate', how: 'Buscar «con cebolla» o «sin cebolla» en la compra', hint: 'La pregunta que rompe familias desde tiempos inmemoriales', more: 'En el buscador de Compra: ¿la tortilla, con o sin…?' },
+    { k: 'chivato', name: 'Chivatazo', how: 'Escribir «espía» en el buzón de ideas o en el buscador de Compra', hint: 'Si lo nombras, aparece. Escríbelo donde se escriben cosas', more: 'En el buzón de ideas (o en el buscador de Compra), escribe a qué se dedica el invitado misterioso' },
     /* A su hora */
     { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A quien madruga Dios le ayuda. A quien trasnocha, la app', more: 'Abre la app de madrugada, cuando todos duermen' },
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números de ' + c, more: 'Mañana o noche, cuando el reloj marque cuatro unos' },
@@ -5768,6 +5959,7 @@ VIEWS.inicio = function () {
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
   h += homePayments();
+  if (typeof sobreCard === 'function') h += sobreCard();   /* v0.7.48: sobres lacrados */
   h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();
@@ -5811,7 +6003,7 @@ function orgName() { var a = S.people.find(function (p) { return p.role === 'adm
 var IDEA_ST = { nueva: 'Nueva', vista: 'Lo miramos', hecha: '¡Hecho!', no: 'Mejor no' };
 function ideaLikes(id) { return (S.ideaLikes && S.ideaLikes[id]) || []; }
 function ideasSorted() {
-  return (S.ideas || []).slice().sort(function (a, b) { return (ideaLikes(b.id).length - ideaLikes(a.id).length) || String(b.at).localeCompare(String(a.at)); });
+  return (S.ideas || []).slice().sort(function (a, b) { return (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0); });   /* v0.7.51: la más reciente, arriba */
 }
 function ideaRow(x) {
   var likes = ideaLikes(x.id), mine = likes.indexOf(me().id) >= 0, st = x.status || 'nueva';
@@ -5830,8 +6022,23 @@ function ideasCard() {
 }
 function ideasSheet() {
   var list = ideasSorted();
-  openSheet('<h2>Buzón de ideas</h2><p class="small muted">Ordenadas por apoyos. ' + (can('access') ? 'Tú puedes marcar cómo va cada una.' : esc(orgName()) + ' marca lo que ya está hecho.') + '</p>' +
+  openSheet('<h2>Buzón de ideas</h2><p class="small muted">La más reciente, arriba. ' + (can('access') ? 'Tú puedes marcar cómo va cada una.' : esc(orgName()) + ' marca lo que ya está hecho.') + '</p>' +
     '<div class="stack ideas-list">' + (list.length ? list.map(ideaRow).join('') : '<p class="small muted">Nada por aquí.</p>') + '</div><button class="btn block" data-act="close">Cerrar</button>');
+}
+/* El Espía lee el buzón (y el buscador de la compra). Si lo nombras, contesta. Secreto «Chivatazo» */
+var SPY_WORD = /\besp[ií]as?\b/i, spyN = 0;
+var SPY_REPLIES = [
+  'Mensaje interceptado. Tu idea ha quedado archivada en la carpeta «Sospechosos». Firmado: nadie.',
+  '¿Que no soy de fiar? Lo dice alguien que acaba de escribir en un buzón que lee toda la familia.',
+  'He leído tu mensaje, lo he memorizado y ahora me lo voy a comer. Es lo que hacemos los profesionales.',
+  'El Espía ni confirma ni desmiente. Pero apunta tu nombre en su libreta.',
+  'Gracias por tu interés. Tu expediente ha pasado de «normal» a «bajo vigilancia».'
+];
+var SPY_SEARCH = 'Me buscabas en la lista de la compra… Pues no estoy entre los yogures. Ni detrás de las croquetas. Sigue buscando.';
+function spyReply(viaSearch) {
+  var txt = viaSearch ? SPY_SEARCH : SPY_REPLIES[spyN++ % SPY_REPLIES.length];
+  if (hasEgg('chivato')) { toast(icon('search') + '<b>El Espía:</b> ' + esc(txt)); return; }
+  eggCard('chivato', 'El Espía te ha contestado', esc(txt));
 }
 Object.assign(A, {
   ideaNew: function () { go('inicio'); setTimeout(function () { var t = document.getElementById('idea-text'); if (t) { t.scrollIntoView({ block: 'center' }); t.focus(); } }, 150); },
@@ -5839,7 +6046,9 @@ Object.assign(A, {
     var t = document.getElementById('idea-text'), v = t ? t.value.trim() : '';
     if (v.length < 3) { toast('Escribe tu idea primero (aunque sea corta)'); return; }
     S.ideas = S.ideas || []; S.ideas.push({ id: uid('id'), by: me().id, text: v.slice(0, 400), at: new Date().toISOString(), status: 'nueva' });
-    save(); render(true); toast('¡Idea al buzón! Gracias por hacer la casa rural más chula');
+    save(); render(true);
+    if (SPY_WORD.test(v)) setTimeout(function () { spyReply(false); }, 700);   /* v0.7.50: si lo nombras, contesta */
+    else toast('¡Idea al buzón! Gracias por hacer la casa rural más chula');
   },
   ideaLike: function (el) {
     var id = el.dataset.id; S.ideaLikes = S.ideaLikes || {}; var l = S.ideaLikes[id] = S.ideaLikes[id] || [], k = l.indexOf(me().id);
@@ -6086,6 +6295,7 @@ function secretStyle(k) {
     himno:    { emo: '🎺', fx: ['emoji:🎺 🎶 👑', 'fireworks', 'rocket'], quip: 'Música para el número 1. Que no se le suba, que hasta el rabo todo es toro.' },
     abumetro: { emo: '🌡️', fx: ['emoji:🔥 🌡️ 👵 👴'], quip: 'El abuelómetro echa humo. Acepta sobornos: un vermut con aceitunas, por ejemplo.' },
     cazaesp:  { emo: '🕵️', fx: ['emoji:🕵️ 🔎 🥸 🗝️', 'smoke', 'cannons'], quip: 'Espía pinchado. No ha soltado prenda, pero se le ha caído el bigote postizo. Seguimos investigando.' },
+    chivato:  { emo: '🕵️', fx: ['smoke', 'emoji:🕵️ 📨 🔎 🥸'], quip: 'Has nombrado al Espía y te ha contestado. Ahora él también sabe quién eres.' },
     papa:     { emo: '🕊️', fx: ['smoke', 'emoji:🕊️ ⛪'], quip: 'Habemus papam. Y si no, habemus lista de la compra, que para esta familia es casi lo mismo.' },
     salud:    { emo: '🥂', fx: ['emoji:🥂 🍾 🍷 🍻', 'cannons'], quip: 'Chin chin. Por ' + c + ' y por quien friegue los vasos (que nunca es el mismo que brinda).' },
     tortilla: { emo: '🍳', fx: ['emoji:🥚 🧅 🥔 🍳', 'cannons'], quip: 'Has destapado el debate más antiguo de la cocina española. Esta noche, en la sobremesa: votación a mano alzada.' },
@@ -7483,6 +7693,453 @@ Object.assign(A, {
     var t = tkFind(el.dataset.id); if (!t) return;
     var p = tkCloud() ? CLOUD.sb().from('tickets').delete().match({ id: t.id }).then(function (r) { if (r.error) throw r.error; return tkBucket().remove([t.path]); }) : Promise.resolve();
     p.then(function () { TK.list = TK.list.filter(function (x) { return x !== t; }); closeSheet(); render(true); toast('Ticket borrado'); }, function () { toast('No he podido borrarlo'); });
+  }
+});
+
+/* ===================== Sobres lacrados (v0.7.48 · v0.7.49: hora programada y guardado automático) =====================
+   Una carta dentro de un sobre con lacre. Solo quien tiene la llave (keeper) puede abrirlo, y eso lo garantiza la base de
+   datos (RLS), no la interfaz: a los demás la carta ni siquiera les llega. El texto vive en Supabase (letter_bodies),
+   nunca en este código, que es público.
+   Estados del sobre: secreto (solo lo ve quien tiene la llave) → a la vista (todos ven el sobre cerrado en Inicio)
+   → guardado (el destinatario también puede abrirlo y releer la carta cuando quiera).
+   La ceremonia: el sobre por delante → darle la vuelta → mantener pulsado el lacre → se rompe → se abre la solapa
+   → sale la carta → la carta a pantalla completa, con confeti. */
+
+IC.mail = '<path d="M3.5 6.5h17v11h-17z"/><path d="m3.5 7 8.5 6.5L20.5 7"/>';
+IC.key = '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3M14 9l2 2"/>';
+var SB = { list: [], at: 0, loading: false, ch: false, bodies: {}, open: null, timers: [], tries: 0 };
+var SB_HOLD = 1100;
+function sbCloud() { return typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb; }
+function sbReduce() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+function sbLetter(id) { return SB.list.find(function (l) { return l.id === id; }); }
+function sbIsKeeper(l) { return !!(l && l.keeper === ui.me); }
+function sbAfter(ts) { return !!ts && Date.now() >= Date.parse(ts); }
+function sbVisNow(l) { return !!(l && (l.visible || sbAfter(l.visible_from))); }
+/* antes de share_after, abrirlo es un ensayo: no cuenta como primera vez ni se guarda para el destinatario */
+function sbIsReal(l) { return !l.share_after || sbAfter(l.share_after); }
+function sbCanRead(l) { return !!(l && (l.keeper === ui.me || (l.shared && l.to_person === ui.me))); }
+function sbAv(pid, cls) { return av(pid, cls).replace(/ data-egg="[^"]*"/, ''); }   /* sin secretos aquí dentro: el sobre manda */
+function sbVibe(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+function sbLater(fn, ms) { SB.timers.push(setTimeout(fn, ms)); }
+function sbStarDay() { var d = (S.days || []).find(function (x) { return x.star; }); return d ? d.k : null; }
+function sbMark(l) {
+  var e = (S.trip && S.trip.eggs) || {};
+  return l.to_person === e.bday && e.bdayAge ? String(e.bdayAge) : initial(nameOf(l.to_person, '?'));
+}
+function sbWhen(ts) {
+  var d = new Date(ts); if (isNaN(d)) return '';
+  var p = function (n) { return (n < 10 ? '0' : '') + n; };
+  return p(d.getDate()) + '/' + p(d.getMonth() + 1) + ' a las ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+/* ---------- Datos ---------- */
+function sbLoad(force) {
+  if (!sbCloud()) return Promise.resolve();
+  if (SB.loading || (!force && Date.now() - SB.at < 20000)) return Promise.resolve();
+  SB.loading = true;
+  if (!SB.ch) {
+    SB.ch = true;
+    /* el sobre programado aparece solo a su hora: se repasa cada 5 min y al volver a la app */
+    setInterval(function () { sbLoad(true); }, 300000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) sbLoad(true); });
+    try { CLOUD.sb().channel('letters').on('postgres_changes', { event: '*', schema: 'public', table: 'letters' }, function () { sbLoad(true); }).subscribe(); } catch (e) {}
+  }
+  return CLOUD.sb().from('letters').select('id,to_person,keeper,visible,shared,opened_at,visible_from,share_after').order('created_at').then(function (r) {
+    SB.loading = false; SB.at = Date.now(); if (r.error) return;
+    var before = JSON.stringify(SB.list); SB.list = r.data || [];
+    if (JSON.stringify(SB.list) === before) return;
+    if (SB.open && !sbLetter(SB.open.id)) { sobreClose(); return; }   /* te lo han quitado de la vista */
+    if (SB.open) sbPanelSync();
+    if (ui.tab === 'inicio' && !document.getElementById('scrim') && !SB.open) render(true);
+  }, function () { SB.loading = false; SB.at = Date.now(); });
+}
+function sbBody(l) {
+  if (SB.bodies[l.id]) return Promise.resolve(SB.bodies[l.id]);
+  return CLOUD.sb().from('letter_bodies').select('body').eq('letter_id', l.id).maybeSingle().then(function (r) {
+    if (r.error || !r.data) throw r.error || new Error('sin carta');
+    SB.bodies[l.id] = r.data.body; return r.data.body;
+  });
+}
+function sbSet(l, patch) {
+  var old = {}; Object.keys(patch).forEach(function (k) { old[k] = l[k]; });
+  Object.assign(l, patch);
+  return CLOUD.sb().from('letters').update(patch).match({ id: l.id }).then(function (r) { if (r.error) throw r.error; }, function (e) { throw e; })
+    .catch(function (e) { Object.assign(l, old); throw e; });
+}
+
+/* ---------- Dibujos ---------- */
+function sbMiniEnv(mark) {
+  return '<svg class="sb-mini" viewBox="0 0 64 46" aria-hidden="true"><rect x="2" y="3" width="60" height="40" rx="4" fill="#F2E8D8" stroke="#C9B79C" stroke-width="1.2"/>' +
+    '<path d="M2.6 4 32 27 61.4 4" fill="#E8DAC2" stroke="#C9B79C" stroke-width="1.2" stroke-linejoin="round"/>' +
+    '<circle cx="32" cy="26" r="9.5" fill="#B0122C"/><circle cx="32" cy="26" r="6.6" fill="none" stroke="rgba(255,255,255,.22)"/>' +
+    '<text x="32" y="29.4" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="9" fill="#FFE9EC">' + esc(mark) + '</text></svg>';
+}
+/* lacre: borde irregular (siempre el mismo), relieve y la marca en el centro */
+function sbWax(mark, uid) {
+  var pts = [], n = 28;
+  for (var i = 0; i < n; i++) {
+    var a = Math.PI * 2 * i / n, r = 52 + Math.sin(i * 2.7) * 2.6 + Math.cos(i * 5.1) * 1.8;
+    pts.push((60 + Math.cos(a) * r).toFixed(1) + ' ' + (60 + Math.sin(a) * r).toFixed(1));
+  }
+  var dots = [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { var a = Math.PI * 2 * i / 8 - Math.PI / 2; return '<circle cx="' + (60 + Math.cos(a) * 33).toFixed(1) + '" cy="' + (60 + Math.sin(a) * 33).toFixed(1) + '" r="1.9" fill="rgba(70,0,12,.45)"/>'; }).join('');
+  return '<svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="sbW' + uid + '" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#E5344F"/><stop offset=".45" stop-color="#B0122C"/><stop offset="1" stop-color="#5E0614"/></radialGradient></defs>' +
+    '<path d="M' + pts.join(' L') + 'Z" fill="url(#sbW' + uid + ')"/>' +
+    '<circle cx="60" cy="60" r="40" fill="none" stroke="rgba(60,0,10,.4)" stroke-width="3"/><circle cx="60.8" cy="60.8" r="40" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.2"/>' + dots +
+    '<text x="61.2" y="72.2" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="36" fill="rgba(255,255,255,.2)">' + esc(mark) + '</text>' +
+    '<text x="60" y="71" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="36" fill="rgba(70,0,14,.62)">' + esc(mark) + '</text>' +
+    '<path class="sb-crack" pathLength="1" d="M60 8 L55 30 L65 44 L54 62 L66 80 L57 96 L61 112" fill="none" stroke="#2A0208" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+}
+/* matasellos con la fecha del día grande (si lo hay) */
+function sbPostmark() {
+  var k = sbStarDay(), t = k ? k.slice(8, 10) + '·' + k.slice(5, 7) + '·' + k.slice(2, 4) : '';
+  return '<svg class="sb-postmark" viewBox="0 0 150 70" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6">' +
+    '<circle cx="40" cy="35" r="27"/><circle cx="40" cy="35" r="20"/>' +
+    '<path d="M72 22c9-5 17 5 26 0s17 5 26 0 17 5 24 0M72 35c9-5 17 5 26 0s17 5 26 0 17 5 24 0M72 48c9-5 17 5 26 0s17 5 26 0 17 5 24 0"/></g>' +
+    '<text x="40" y="39" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="700" font-size="10" fill="currentColor">' + esc(t) + '</text></svg>';
+}
+/* el regalo: torre + pantalla, con la pantalla escribiéndose sola */
+function sbComputer() {
+  return '<svg class="sb-pc" viewBox="0 0 360 232" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Un ordenador de torre con su pantalla, teclado y ratón">' +
+    '<rect x="8" y="8" width="234" height="152" rx="10"/><rect class="sb-scr" x="20" y="20" width="210" height="122" rx="4" stroke-width="1.5"/>' +
+    '<text id="sbT0" x="32" y="50" stroke="none" fill="#F3ECE8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13"></text>' +
+    '<text id="sbT1" x="32" y="72" stroke="none" fill="#F3ECE8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13"></text>' +
+    '<text x="32" y="94" stroke="none" fill="#F6CD62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">&gt;</text><rect class="sb-cur" x="46" y="83" width="8" height="14" stroke="none" fill="#F6CD62"/>' +
+    '<circle cx="125" cy="151" r="2.5" fill="currentColor" stroke="none"/><path d="M112 160 104 188M138 160l8 28"/><rect x="84" y="188" width="82" height="8" rx="4"/>' +
+    '<rect x="36" y="204" width="160" height="16" rx="4"/><path d="M48 212h136" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+    '<rect x="208" y="200" width="16" height="22" rx="8"/><path d="M216 200v8" stroke-width="1.5"/><path d="M216 200c0-14 34-4 46-14" stroke-width="1.5"/>' +
+    '<rect x="262" y="24" width="88" height="196" rx="8"/><rect x="274" y="40" width="64" height="12" rx="2" stroke-width="1.5"/><rect x="274" y="60" width="64" height="12" rx="2" stroke-width="1.5"/>' +
+    '<path d="M278 110h56M278 120h56M278 130h56M278 140h56" stroke-width="1.5"/><circle class="sb-pwr" cx="306" cy="190" r="9"/><path d="M306 184v7" stroke-width="2"/><path d="M0 228h360" stroke-width="1.5"/></svg>';
+}
+/* red de nodos de la casa: la firma de los tres */
+function sbNet() {
+  return '<svg class="sb-net-rule" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8h300" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
+    [0, 70, 150, 230, 300].map(function (x) { return '<circle cx="' + x + '" cy="8" r="3.4" fill="currentColor"/>'; }).join('') + '</svg>';
+}
+
+/* ---------- Tarjeta en Inicio ---------- */
+function sobreCard() {
+  if (!sbCloud()) return '';
+  sbLoad();
+  return SB.list.map(function (l) {
+    var to = person(l.to_person); if (!to) return '';
+    var k = nameOf(l.keeper, 'quien tiene la llave'), mine = sbIsKeeper(l), forMe = l.to_person === ui.me;
+    var title, txt, btn, pill = '';
+    if (mine) {
+      title = 'El sobre de ' + to.name;
+      var vis = sbVisNow(l), sched = !vis && l.visible_from;
+      txt = vis ? 'Todos ven el sobre cerrado. La llave solo la tienes tú.' : sched ? 'Secreto hasta el ' + sbWhen(l.visible_from) + '. Desde entonces lo verán todos, cerrado.' : 'Ahora mismo solo lo ves tú. Nadie más sabe que existe.';
+      if (l.share_after && !l.shared) txt += ' Si lo abres a partir del ' + sbWhen(l.share_after) + ', se guardará para ' + to.name + '.';
+      btn = 'Ver el sobre'; pill = '<span class="pill ' + (vis ? 'ok' : '') + '">' + (vis ? 'A la vista' : sched ? 'Programado' : 'Secreto') + '</span>';
+    } else if (forMe && l.shared) { title = 'Tu carta'; txt = 'Ya es tuya. Ábrela y reléela cuando quieras.'; btn = 'Abrir mi carta'; }
+    else if (forMe) { title = 'Hay un sobre para ti'; txt = 'Lacrado. La llave la tiene ' + k + ', así que toca esperar.'; btn = 'Ver el sobre'; }
+    else { title = 'Un sobre lacrado para ' + to.name; txt = 'Solo ' + k + ' puede abrirlo. Mirarlo sí se puede.'; btn = 'Ver el sobre'; }
+    return '<section class="card sb-card"><div class="sb-card-in">' + sbMiniEnv(sbMark(l)) +
+      '<div class="grow"><div class="card-head"><h3>' + esc(title) + '</h3>' + pill + '</div><p class="small muted">' + esc(txt) + '</p>' +
+      (mine && l.opened_at ? '<p class="small muted">Abierto de verdad el ' + esc(sbWhen(l.opened_at)) + '.</p>' : '') + '</div></div>' +
+      '<button class="btn primary block" data-act="sbOpen" data-id="' + esc(l.id) + '">' + icon('mail') + esc(btn) + '</button></section>';
+  }).join('');
+}
+
+/* ---------- El escenario ---------- */
+function sbStageHtml(l) {
+  var to = person(l.to_person) || { name: '' }, mark = sbMark(l), k = sbStarDay();
+  var sub = k ? 'Abrir el ' + L.ddmm(k) + '. Ni un minuto antes.' : 'Frágil: contiene cariño.';
+  return '<div class="sb-sky" aria-hidden="true"></div>' +
+    '<button type="button" class="sb-x" data-act="sbClose" aria-label="Cerrar el sobre">' + icon('x') + '</button>' +
+    '<div class="sb-scene" id="sbScene">' +
+      '<div class="sb-env" id="sbEnv">' +
+        '<div class="sb-card3d" id="sbCard">' +
+          '<div class="sb-face sb-front">' +
+            '<div class="sb-stamp"><div class="sb-stamp-in">' + sbAv(l.to_person, 'sb-stamp-av') + '<b>' + esc(mark) + '</b></div></div>' +
+            sbPostmark() +
+            '<div class="sb-addr"><small>Para</small><b>' + esc(to.name) + '</b><svg class="sb-uline" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c30-6 60 4 95-1s70-5 101 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>' + esc(sub) + '</span></div>' +
+            '<button type="button" class="sb-flip" data-act="sbFlip" aria-label="Darle la vuelta al sobre"></button>' +
+          '</div>' +
+          '<div class="sb-face sb-backf">' +
+            '<div class="sb-inside"></div>' +
+            '<div class="sb-letter" id="sbLetter"><small id="sbTeaseK"></small><b id="sbTeaseT"></b>' + sbNet() + '</div>' +
+            '<div class="sb-pocket"></div>' +
+            '<div class="sb-flap" id="sbFlap"><div class="sb-flap-out"></div><div class="sb-flap-in"></div></div>' +
+            '<button type="button" class="sb-seal" id="sbSeal" aria-label="' + (sbCanRead(l) ? 'Mantén pulsado el lacre para abrir el sobre' : 'Lacre del sobre') + '">' +
+              '<span class="sb-wax sb-wax-l">' + sbWax(mark, 'a') + '</span><span class="sb-wax sb-wax-r">' + sbWax(mark, 'b') + '</span>' +
+              '<svg class="sb-ring" viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="64" class="sb-ring-bg"/><circle cx="70" cy="70" r="64" class="sb-ring-fill" id="sbRing"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<p class="sb-hint" id="sbHint" aria-live="polite">Toca el sobre para darle la vuelta</p>' +
+    '</div>' +
+    '<div class="sb-eleven" id="sbEleven" aria-hidden="true"></div>' +
+    '<div class="sb-read" id="sbRead" hidden></div>';
+}
+function sobreOpen(id, replay) {
+  var l = sbLetter(id); if (!l) return;
+  sobreClose(true, replay);
+  var st = document.createElement('div');
+  st.id = 'sobre'; st.className = 'sobre' + (sbReduce() ? ' calm' : '');
+  st.setAttribute('role', 'dialog'); st.setAttribute('aria-modal', 'true'); st.setAttribute('aria-label', 'Sobre para ' + nameOf(l.to_person));
+  st.innerHTML = sbStageHtml(l);
+  document.body.appendChild(st);
+  document.body.classList.add('sobre-on'); document.body.style.overflow = 'hidden';
+  if (!replay) overlayPush('sobre');
+  SB.open = { id: l.id, phase: 'front' }; SB.tries = 0;
+  sbBindSeal(st, l);
+  document.addEventListener('keydown', sbKey);
+  if (sbCanRead(l)) sbBody(l).then(sbTease, function () {});
+  setTimeout(function () { var b = st.querySelector('.sb-flip'); if (b) b.focus(); }, 60);
+}
+function sbTease(b) {
+  var k = document.getElementById('sbTeaseK'), t = document.getElementById('sbTeaseT');
+  if (k) k.textContent = b.kicker || ''; if (t) t.textContent = b.title || '';
+}
+function sbKey(e) { if (e.key === 'Escape' && SB.open) sobreClose(); }
+function sobreClose(fromPop, quiet) {
+  var st = document.getElementById('sobre');
+  SB.timers.forEach(clearTimeout); SB.timers = [];
+  if (SB.typeT) { clearInterval(SB.typeT); SB.typeT = null; }
+  if (SB.io) { SB.io.disconnect(); SB.io = null; }
+  document.removeEventListener('keydown', sbKey);
+  if (!st) { SB.open = null; return; }
+  st.remove(); SB.open = null;
+  document.body.classList.remove('sobre-on'); document.body.style.overflow = '';
+  if (fromPop !== true) overlayDone();
+  if (ui.tab === 'inicio' && !quiet) render(true);
+}
+function sbHint(t) { var h = document.getElementById('sbHint'); if (h) h.textContent = t; }
+
+/* 1) darle la vuelta */
+function sbFlip() {
+  if (!SB.open || SB.open.phase !== 'front') return;
+  var l = sbLetter(SB.open.id), env = document.getElementById('sbEnv'); if (!l || !env) return;
+  SB.open.phase = 'flipping';
+  env.classList.add('flipped'); sbVibe(10); sbRustle(.18);
+  sbLater(function () {
+    env.classList.add('is-back'); SB.open.phase = 'back';
+    sbHint(sbCanRead(l) ? 'Mantén pulsado el lacre para romperlo' : l.to_person === ui.me ? 'Es para ti, pero la llave la tiene ' + nameOf(l.keeper) + '. Ya queda poco.' : 'Lacrado. Solo ' + nameOf(l.keeper) + ' tiene la llave.');
+    var s = document.getElementById('sbSeal'); if (s) s.focus();
+  }, sbReduce() ? 60 : 820);
+}
+/* 2) mantener pulsado el lacre */
+function sbBindSeal(st, l) {
+  var seal = st.querySelector('#sbSeal'), ring = st.querySelector('#sbRing'), C = 2 * Math.PI * 64, raf = 0, t0 = 0;
+  var hold = sbReduce() ? 450 : SB_HOLD;
+  ring.style.strokeDasharray = C; ring.style.strokeDashoffset = C;
+  function reset() { cancelAnimationFrame(raf); raf = 0; seal.classList.remove('holding'); ring.style.strokeDashoffset = C; seal.style.removeProperty('--k'); }
+  function step() {
+    var k = Math.min(1, (performance.now() - t0) / hold);
+    ring.style.strokeDashoffset = C * (1 - k); seal.style.setProperty('--k', k.toFixed(3));
+    if (k >= 1) { raf = 0; seal.classList.remove('holding'); sbBreak(l); return; }
+    raf = requestAnimationFrame(step);
+  }
+  seal.addEventListener('pointerdown', function (e) {
+    if (!SB.open || SB.open.phase !== 'back') return;
+    e.preventDefault();
+    if (!sbCanRead(l)) { sbNope(l); return; }
+    try { seal.setPointerCapture(e.pointerId); } catch (x) {}
+    t0 = performance.now(); seal.classList.add('holding'); sbVibe(8); raf = requestAnimationFrame(step);
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { seal.addEventListener(ev, function () { if (raf) reset(); }); });
+  seal.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  /* teclado y lectores de pantalla: Intro o Espacio abren directamente */
+  seal.addEventListener('click', function (e) {
+    if (e.detail !== 0 || !SB.open || SB.open.phase !== 'back') return;
+    if (sbCanRead(l)) sbBreak(l); else sbNope(l);
+  });
+}
+var SB_NOPE = [
+  'Lacrado. Solo {k} tiene la llave.',
+  'Que no. Que es lacre del bueno.',
+  'Insistir no funciona. Lo han probado otros antes que tú.',
+  'Tu intento ha quedado anotado. Es broma. O no.',
+  'Ni con súplicas. Ni con croquetas. Bueno, con croquetas a lo mejor.'
+];
+function sbNope(l) {
+  var s = document.getElementById('sbSeal'); if (!s) return;
+  s.classList.remove('nope'); void s.offsetWidth; s.classList.add('nope');
+  sbVibe([30, 40, 30]); sbThud();
+  sbHint(SB_NOPE[Math.min(SB.tries++, SB_NOPE.length - 1)].replace('{k}', nameOf(l.keeper)));
+}
+/* 3) se rompe el lacre, se abre la solapa, sale la carta */
+function sbBreak(l) {
+  if (!SB.open || SB.open.phase !== 'back') return;
+  SB.open.phase = 'opening';
+  var env = document.getElementById('sbEnv'), seal = document.getElementById('sbSeal'), calm = sbReduce();
+  seal.classList.add('cracking'); sbHint('');
+  sbBody(l).then(function (b) {
+    sbTease(b);
+    sbCrack(); sbVibe([18, 30, 60]);
+    seal.classList.add('broken');
+    if (sbIsKeeper(l) && sbIsReal(l)) {
+      var up = {};
+      if (!l.opened_at) up.opened_at = new Date().toISOString();
+      if (l.share_after && !l.shared) up.shared = true;   /* el momento de verdad: la carta pasa a ser suya */
+      if (Object.keys(up).length) sbSet(l, up).then(sbPanelSync, function () {});
+    }
+    sbLater(function () { env.classList.add('open'); sbRustle(.35); }, calm ? 80 : 380);
+    sbLater(function () { env.classList.add('flap-back'); }, calm ? 120 : 900);
+    sbLater(function () { env.classList.add('rise'); sbRustle(.5); }, calm ? 160 : 1050);
+    sbLater(function () { sbReveal(l, b); }, calm ? 500 : 2150);
+  }, function () {
+    seal.classList.remove('cracking'); SB.open.phase = 'back';
+    sbHint('No se ha podido abrir. Revisa la conexión y vuelve a intentarlo.');
+  });
+}
+/* 4) la carta, a lo grande */
+function sbReveal(l, b) {
+  var st = document.getElementById('sobre'), read = document.getElementById('sbRead'), env = document.getElementById('sbEnv');
+  if (!st || !read) return;
+  SB.open.phase = 'reading';
+  env.classList.add('away'); st.classList.add('reading');
+  read.innerHTML = sbReadHtml(l, b); read.hidden = false; read.scrollTop = 0;
+  requestAnimationFrame(function () { read.classList.add('in'); });
+  var el = document.getElementById('sbEleven');
+  if (el && b.age && !sbReduce()) { el.textContent = b.age; el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); }
+  try { tada(true); } catch (e) {}
+  if (!sbReduce()) { try { cannonsFx(150); } catch (e) {} try { confetti(3200); } catch (e) {} }
+  sbVibe([0, 40, 60, 40]);
+  sbLater(function () { sbType(b.screen || []); }, sbReduce() ? 0 : 1100);
+  sbObserve(read);
+  var x = st.querySelector('.sb-x'); if (x) x.focus();
+}
+function sbReadHtml(l, b) {
+  var v = b.voucher || null, keeper = sbIsKeeper(l), to = person(l.to_person) || { name: '' };
+  var from = (b.from || []).filter(function (f) { return person(f.pid); });
+  var h = '<article class="sb-paper">' +
+    '<header class="sb-head">' + (b.age ? '<span class="sb-age" aria-hidden="true">' + esc(b.age) + '</span>' : '') +
+      (b.kicker ? '<p class="sb-kicker">' + esc(b.kicker) + '</p>' : '') + '<h1>' + esc(b.title || '') + '</h1>' + sbNet() + '</header>' +
+    '<figure class="sb-fig">' + sbComputer() + '</figure>' +
+    '<div class="sb-text">' + (b.greeting ? '<p class="sb-greet">' + esc(b.greeting) + '</p>' : '') +
+      (b.paragraphs || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+      (b.closing ? '<p class="sb-close">' + esc(b.closing) + '</p>' : '') + '</div>';
+  if (v) {
+    h += '<section class="sb-ticket sb-reveal" aria-label="' + esc((v.label || '') + ' ' + (v.title || '')) + '">' +
+      '<div class="sb-tk-top"><div class="sb-tk-meta"><span>' + esc(v.label || '') + '</span><span class="sb-tk-no">' + esc(v.number || '') + '</span></div><p class="sb-tk-title">' + esc(v.title || '') + '</p></div>' +
+      '<dl class="sb-tk-rows">' + (v.rows || []).map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>' +
+      (v.stamp ? '<span class="sb-ink" aria-hidden="true">' + esc(v.stamp) + '</span>' : '') + '</section>';
+  }
+  if (b.fine && b.fine.length) h += '<section class="sb-fine"><h2>Letra pequeña</h2><ul>' + b.fine.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></section>';
+  if (from.length) {
+    var n = from.length, xs = from.map(function (_, i) { return Math.round((i + .5) * 300 / n); });
+    h += '<section class="sb-from sb-reveal">' + (b.signoff ? '<p class="sb-signoff">' + esc(b.signoff) + '</p>' : '') +
+      '<div class="sb-trio" style="--n:' + n + '">' +
+        '<svg class="sb-links" viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">' +
+          (n > 1 ? '<path d="M' + xs.map(function (x) { return x + ' 42'; }).join(' L') + '" pathLength="1"/>' : '') +
+          (n > 2 ? '<path d="M' + xs[0] + ' 42 Q150 -26 ' + xs[n - 1] + ' 42" pathLength="1"/>' : '') + '</svg>' +
+        from.map(function (f, i) {
+          return '<div class="sb-who" style="--i:' + i + '">' + sbAv(f.pid, 'sb-who-av') + '<b>' + esc(f.label || nameOf(f.pid)) + '</b>' +
+            (f.note ? '<svg class="sb-scribble" viewBox="0 0 120 34" aria-hidden="true"><path pathLength="1" d="M4 22c8-14 14-16 16-6s-6 14 2 8 12-20 18-12-4 18 6 10 10-18 16-10-2 14 8 8 12-14 18-8 4 10 14 4 10-8 14-6"/></svg><small>' + esc(f.note) + '</small>' : '') + '</div>';
+        }).join('') +
+      '</div></section>';
+  }
+  h += '</article>';
+  if (keeper) {
+    h += '<section class="sb-keeper"><h2>' + icon('key') + 'La llave la tienes tú</h2>' +
+      '<button type="button" class="sb-sw" id="sbVis" data-act="sbVis" aria-pressed="' + sbVisNow(l) + '"><span class="grow"><b>Sobre a la vista de todos</b><small id="sbVisNote">' + esc(sbVisNote(l)) + '</small></span><i aria-hidden="true"></i></button>' +
+      '<button type="button" class="sb-sw" id="sbShare" data-act="sbShare" aria-pressed="' + !!l.shared + '"><span class="grow"><b>Guardar la carta para ' + esc(to.name) + '</b><small id="sbShareNote">' + esc(sbShareNote(l)) + '</small></span><i aria-hidden="true"></i></button>' +
+      '<p class="sb-k-when" id="sbWhen">' + esc(sbWhenNote(l)) + '</p>' +
+      '<div class="sb-k-btns"><button type="button" class="sb-btn" data-act="sbReplay">Repetir la ceremonia</button><button type="button" class="sb-btn solid" data-act="sbClose">Cerrar</button></div></section>';
+  } else {
+    h += '<div class="sb-k-btns solo"><button type="button" class="sb-btn" data-act="sbReplay">Volver a abrirla</button><button type="button" class="sb-btn solid" data-act="sbClose">Cerrar</button></div>';
+  }
+  return h;
+}
+/* la pantalla del ordenador se escribe sola */
+function sbType(lines) {
+  var els = [document.getElementById('sbT0'), document.getElementById('sbT1')], li = 0, ci = 0;
+  if (!els[0]) return;
+  if (sbReduce()) { lines.slice(0, 2).forEach(function (t, i) { els[i].textContent = '> ' + t; }); return; }
+  SB.typeT = setInterval(function () {
+    if (li >= Math.min(2, lines.length)) { clearInterval(SB.typeT); SB.typeT = null; return; }
+    var t = '> ' + lines[li]; ci++;
+    els[li].textContent = t.slice(0, ci);
+    if (ci >= t.length) { li++; ci = 0; }
+  }, 62);
+}
+/* el sello «canjeable» y la firma de los tres entran al llegar a ellos */
+function sbObserve(root) {
+  var items = root.querySelectorAll('.sb-reveal');
+  if (!('IntersectionObserver' in window) || sbReduce()) { items.forEach(function (x) { x.classList.add('in'); }); return; }
+  SB.io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in'); SB.io.unobserve(e.target);
+      if (e.target.classList.contains('sb-ticket')) setTimeout(function () { sbThud(); sbVibe(25); }, 520);
+    });
+  }, { root: root, threshold: .55 });
+  items.forEach(function (x) { SB.io.observe(x); });
+}
+function sbVisNote(l) {
+  if (sbVisNow(l)) return 'Lo ven cerrado en su Inicio. Abrirlo, solo tú.';
+  if (l.visible_from) return 'Programado: aparecerá solo el ' + sbWhen(l.visible_from) + '.';
+  return 'Ahora es secreto. Actívalo y lo verán cerrado en su Inicio.';
+}
+function sbShareNote(l) {
+  var n = nameOf(l.to_person);
+  if (l.shared) return n + ' puede abrirla y releerla desde su móvil.';
+  if (l.share_after) return 'Se guardará sola al abrirla a partir del ' + sbWhen(l.share_after) + '.';
+  return 'Podrá abrirla y releerla desde su móvil.';
+}
+function sbWhenNote(l) {
+  if (l.opened_at) return 'Abierto de verdad el ' + sbWhen(l.opened_at) + '.';
+  if (l.share_after && !sbIsReal(l)) return 'Modo ensayo: hasta el ' + sbWhen(l.share_after) + ', abrirlo no cuenta y la carta no se le guarda a nadie.';
+  return '';
+}
+function sbPanelSync() {
+  var l = SB.open && sbLetter(SB.open.id); if (!l) return;
+  var v = document.getElementById('sbVis'), s = document.getElementById('sbShare'), w = document.getElementById('sbWhen');
+  var vn = document.getElementById('sbVisNote'), sn = document.getElementById('sbShareNote');
+  if (v) v.setAttribute('aria-pressed', sbVisNow(l));
+  if (s) s.setAttribute('aria-pressed', !!l.shared);
+  if (vn) vn.textContent = sbVisNote(l);
+  if (sn) sn.textContent = sbShareNote(l);
+  if (w) w.textContent = sbWhenNote(l);
+}
+
+/* ---------- Sonidos (sintetizados, sin archivos) ---------- */
+function sbAudio() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; } catch (e) { return null; } }
+function sbNoise(dur, freq, q, vol, type) {
+  var a = sbAudio(); if (!a) return;
+  try {
+    var len = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+    var src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    src.buffer = buf; f.type = type || 'bandpass'; f.frequency.value = freq; f.Q.value = q; g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(a.destination); src.start();
+  } catch (e) {}
+}
+function sbCrack() { sbNoise(.09, 2600, .8, .5, 'highpass'); setTimeout(function () { sbNoise(.22, 900, 1.4, .35); }, 40); sbThud(); }
+function sbRustle(dur) { sbNoise(dur || .4, 3200, .6, .12); }
+function sbThud() {
+  var a = sbAudio(); if (!a) return;
+  try {
+    var t = a.currentTime, o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(48, t + .18);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .22);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + .25);
+  } catch (e) {}
+}
+
+/* ---------- Acciones ---------- */
+Object.assign(A, {
+  sbOpen: function (el) { sbAudio(); sobreOpen(el.dataset.id); },
+  sbClose: function () { sobreClose(); },
+  sbFlip: function () { sbFlip(); },
+  sbReplay: function () { var id = SB.open && SB.open.id; if (id) sobreOpen(id, true); },
+  sbVis: function () {
+    var l = SB.open && sbLetter(SB.open.id); if (!l || !sbIsKeeper(l)) return;
+    var on = !sbVisNow(l);   /* apagarlo también cancela la hora programada */
+    sbSet(l, on ? { visible: true } : { visible: false, visible_from: null }).then(function () {
+      sbPanelSync(); toast(on ? 'Sobre a la vista: todos lo ven cerrado' : 'Sobre escondido: vuelve a ser secreto');
+    }, function () { sbPanelSync(); toast('No se ha podido cambiar. Revisa la conexión'); });
+    sbPanelSync();
+  },
+  sbShare: function () {
+    var l = SB.open && sbLetter(SB.open.id); if (!l || !sbIsKeeper(l)) return;
+    var who = nameOf(l.to_person);
+    sbSet(l, { shared: !l.shared }).then(function () {
+      sbPanelSync(); toast(l.shared ? 'Guardada: ' + esc(who) + ' ya puede abrirla cuando quiera' : 'Retirada: vuelve a ser solo tuya');
+    }, function () { sbPanelSync(); toast('No se ha podido cambiar. Revisa la conexión'); });
+    sbPanelSync();
   }
 });
 
