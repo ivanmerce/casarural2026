@@ -190,9 +190,11 @@ var L = (function () {
     (S.expenses || []).forEach(function (e) { if ((e.split || 'comun') === 'comun' && e.kind !== 'aportacion' && e.amount) t += e.amount; });
     return r2(t);
   }
-  function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family; }); }
+  /* «Comprar allí» es de todos: no necesita dueño (se compra en la finca y se apunta como gasto común) */
+  function together(i) { return i.buy === 'alli'; }
+  function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family && !together(i); }); }
   function coverage(items) {
-    var tot = items.length, done = items.filter(function (i) { return !!i.family; }).length;
+    var tot = items.length, done = items.filter(function (i) { return !!i.family || together(i); }).length;
     return { tot: tot, done: done, pct: tot ? Math.round(done / tot * 100) : 0 };
   }
 
@@ -290,6 +292,6 @@ var L = (function () {
     });
     return out.sort(function (x, y) { return y.score - x.score; });
   }
-  return { similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, together: together, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;

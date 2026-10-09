@@ -7,7 +7,7 @@ function exportScopeItems(scope) {
   if (scope === 'view') {
     var f = ui.fam, q = (ui.q || '').toLowerCase();
     return all.filter(function (i) {
-      if (!(f === 'all' || (f === 'libre' ? !i.family : i.family === f))) return false;
+      if (!(f === 'all' || (f === 'libre' ? !i.family && !L.together(i) : i.family === f))) return false;
       if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
       if (ui.buyF && i.buy !== ui.buyF) return false;
       if (q && i.name.toLowerCase().indexOf(q) < 0) return false;

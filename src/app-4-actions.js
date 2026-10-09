@@ -447,6 +447,7 @@ var A = {
   day: function (el) { ui.day = el.dataset.day; render(true); },
   sub: function (el) { ui.sub = el.dataset.sub; if (ui.tab !== 'planes') ui.tab = 'planes'; render(true); navPush(); },
   fam: function (el) { ui.fam = el.dataset.fam; saveUi(); render(true); },
+  alliView: function () { ui.fam = 'all'; ui.buyF = 'alli'; ui.mealFilter = null; render(true); },
   buyF: function (el) { ui.buyF = ui.buyF === el.dataset.v ? null : el.dataset.v; render(true); },
   st: function (el) { ui.st = el.dataset.st; render(true); },
   superMode: function () { ui.superMode = !ui.superMode; saveUi(); render(true); if (ui.superMode) { ui.st = 'pendiente'; ui.fam = me().family; render(true); toast('Modo súper: tu lista, letra grande y solo lo pendiente'); } },
@@ -478,6 +479,7 @@ var A = {
   claim: function (el) {
     if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }), f = fam(me().family); if (!i || !f) return;
     if (i.family) { toast('Ya se lo ha pedido ' + esc(fam(i.family).name)); render(true); return; }
+    if (L.together(i)) { toast('Esto se compra allí y es de todos: no hace falta pedírselo'); render(true); return; }
     i.family = f.id; save();
     var row = document.getElementById('it-' + i.id); if (row) { row.classList.add('claimed'); }
     if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
@@ -496,7 +498,7 @@ var A = {
   },
   claimMeal: function (el) {
     if (!guard('edit')) return; var f = fam(me().family); if (!f) return;
-    var its = S.ingredients.filter(function (i) { return !i.family && i.meals.indexOf(el.dataset.id) >= 0; });
+    var its = S.ingredients.filter(function (i) { return !i.family && !L.together(i) && i.meals.indexOf(el.dataset.id) >= 0; });
     its.forEach(function (i) { i.family = f.id; }); save(); render(true);
     toast(its.length + ' ingredientes para ' + esc(f.name), 'Deshacer', function () { its.forEach(function (i) { i.family = null; }); save(); render(true); });
   },

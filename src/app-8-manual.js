@@ -18,7 +18,7 @@ VIEWS.manual = function () {
     ['Pídete la compra', '<b>Compra → «Sin dueño»</b> → <b>«Me lo pido»</b>. Cuando lo compres, en «Lo nuestro» apunta el <b>precio real</b>: sin él no cuenta en Cuentas.', 'compra']
   ];
   var cards = [
-    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con la casilla de <b>precio real</b>. Al tocar un producto podéis decidir si se compra <b>antes de ir</b> o <b>allí</b>; entonces aparecen los filtros para verlo de un vistazo.', 'compra'],
+    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con la casilla de <b>precio real</b>. Al tocar un producto podéis decidir si se compra <b>antes de ir</b> o <b>allí</b>; entonces aparecen los filtros para verlo de un vistazo. Lo de <b>«allí»</b> es de todos: no necesita dueño y lo paga quien lo compre en la finca. ¿Venís del súper? En Compra, <b>«Subir un ticket»</b>: foto al ticket y se pasa a la lista con unidades y precios.', 'compra'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Si alguien no come ese día, toca los comensales: las cantidades se ajustan solas.', 'comidas'],
     ['plans', 'Planes', 'El planning de cada día, con plan B si llueve. Dale al corazón a lo que te apetezca.', 'planes'],
     ['trophy', 'Juegos y ranking', 'Sin horarios: elegid el que apetezca. Cada juego tiene su <b>ficha</b> (individual o por equipos, pasos, cómo se gana y cómo se apunta). Los editores apuntan resultados (con flechas para corregir el orden) y el <b>ranking</b> se actualiza solo.', 'juegos'],
