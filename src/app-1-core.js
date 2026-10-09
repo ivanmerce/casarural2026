@@ -223,6 +223,7 @@ function closeOverlays() {
   var any = false;
   if (document.getElementById('viewer') && typeof viewerClose === 'function') { viewerClose(true); any = true; }
   if (document.getElementById('gala') && typeof galaClose === 'function') { galaClose(true); any = true; }
+  if (document.getElementById('sobre') && typeof sobreClose === 'function') { sobreClose(true); any = true; }
   if (document.getElementById('scrim')) { removeSheet(); any = true; }
   return any;
 }

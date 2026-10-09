@@ -5,7 +5,7 @@ function orgName() { var a = S.people.find(function (p) { return p.role === 'adm
 var IDEA_ST = { nueva: 'Nueva', vista: 'Lo miramos', hecha: '¡Hecho!', no: 'Mejor no' };
 function ideaLikes(id) { return (S.ideaLikes && S.ideaLikes[id]) || []; }
 function ideasSorted() {
-  return (S.ideas || []).slice().sort(function (a, b) { return (ideaLikes(b.id).length - ideaLikes(a.id).length) || String(b.at).localeCompare(String(a.at)); });
+  return (S.ideas || []).slice().sort(function (a, b) { return (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0); });   /* v0.7.51: la más reciente, arriba */
 }
 function ideaRow(x) {
   var likes = ideaLikes(x.id), mine = likes.indexOf(me().id) >= 0, st = x.status || 'nueva';
@@ -24,8 +24,23 @@ function ideasCard() {
 }
 function ideasSheet() {
   var list = ideasSorted();
-  openSheet('<h2>Buzón de ideas</h2><p class="small muted">Ordenadas por apoyos. ' + (can('access') ? 'Tú puedes marcar cómo va cada una.' : esc(orgName()) + ' marca lo que ya está hecho.') + '</p>' +
+  openSheet('<h2>Buzón de ideas</h2><p class="small muted">La más reciente, arriba. ' + (can('access') ? 'Tú puedes marcar cómo va cada una.' : esc(orgName()) + ' marca lo que ya está hecho.') + '</p>' +
     '<div class="stack ideas-list">' + (list.length ? list.map(ideaRow).join('') : '<p class="small muted">Nada por aquí.</p>') + '</div><button class="btn block" data-act="close">Cerrar</button>');
+}
+/* El Espía lee el buzón (y el buscador de la compra). Si lo nombras, contesta. Secreto «Chivatazo» */
+var SPY_WORD = /\besp[ií]as?\b/i, spyN = 0;
+var SPY_REPLIES = [
+  'Mensaje interceptado. Tu idea ha quedado archivada en la carpeta «Sospechosos». Firmado: nadie.',
+  '¿Que no soy de fiar? Lo dice alguien que acaba de escribir en un buzón que lee toda la familia.',
+  'He leído tu mensaje, lo he memorizado y ahora me lo voy a comer. Es lo que hacemos los profesionales.',
+  'El Espía ni confirma ni desmiente. Pero apunta tu nombre en su libreta.',
+  'Gracias por tu interés. Tu expediente ha pasado de «normal» a «bajo vigilancia».'
+];
+var SPY_SEARCH = 'Me buscabas en la lista de la compra… Pues no estoy entre los yogures. Ni detrás de las croquetas. Sigue buscando.';
+function spyReply(viaSearch) {
+  var txt = viaSearch ? SPY_SEARCH : SPY_REPLIES[spyN++ % SPY_REPLIES.length];
+  if (hasEgg('chivato')) { toast(icon('search') + '<b>El Espía:</b> ' + esc(txt)); return; }
+  eggCard('chivato', 'El Espía te ha contestado', esc(txt));
 }
 Object.assign(A, {
   ideaNew: function () { go('inicio'); setTimeout(function () { var t = document.getElementById('idea-text'); if (t) { t.scrollIntoView({ block: 'center' }); t.focus(); } }, 150); },
@@ -33,7 +48,9 @@ Object.assign(A, {
     var t = document.getElementById('idea-text'), v = t ? t.value.trim() : '';
     if (v.length < 3) { toast('Escribe tu idea primero (aunque sea corta)'); return; }
     S.ideas = S.ideas || []; S.ideas.push({ id: uid('id'), by: me().id, text: v.slice(0, 400), at: new Date().toISOString(), status: 'nueva' });
-    save(); render(true); toast('¡Idea al buzón! Gracias por hacer la casa rural más chula');
+    save(); render(true);
+    if (SPY_WORD.test(v)) setTimeout(function () { spyReply(false); }, 700);   /* v0.7.50: si lo nombras, contesta */
+    else toast('¡Idea al buzón! Gracias por hacer la casa rural más chula');
   },
   ideaLike: function (el) {
     var id = el.dataset.id; S.ideaLikes = S.ideaLikes || {}; var l = S.ideaLikes[id] = S.ideaLikes[id] || [], k = l.indexOf(me().id);

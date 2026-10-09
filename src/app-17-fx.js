@@ -150,6 +150,7 @@ function secretStyle(k) {
     himno:    { emo: '🎺', fx: ['emoji:🎺 🎶 👑', 'fireworks', 'rocket'], quip: 'Música para el número 1. Que no se le suba, que hasta el rabo todo es toro.' },
     abumetro: { emo: '🌡️', fx: ['emoji:🔥 🌡️ 👵 👴'], quip: 'El abuelómetro echa humo. Acepta sobornos: un vermut con aceitunas, por ejemplo.' },
     cazaesp:  { emo: '🕵️', fx: ['emoji:🕵️ 🔎 🥸 🗝️', 'smoke', 'cannons'], quip: 'Espía pinchado. No ha soltado prenda, pero se le ha caído el bigote postizo. Seguimos investigando.' },
+    chivato:  { emo: '🕵️', fx: ['smoke', 'emoji:🕵️ 📨 🔎 🥸'], quip: 'Has nombrado al Espía y te ha contestado. Ahora él también sabe quién eres.' },
     papa:     { emo: '🕊️', fx: ['smoke', 'emoji:🕊️ ⛪'], quip: 'Habemus papam. Y si no, habemus lista de la compra, que para esta familia es casi lo mismo.' },
     salud:    { emo: '🥂', fx: ['emoji:🥂 🍾 🍷 🍻', 'cannons'], quip: 'Chin chin. Por ' + c + ' y por quien friegue los vasos (que nunca es el mismo que brinda).' },
     tortilla: { emo: '🍳', fx: ['emoji:🥚 🧅 🥔 🍳', 'cannons'], quip: 'Has destapado el debate más antiguo de la cocina española. Esta noche, en la sobremesa: votación a mano alzada.' },

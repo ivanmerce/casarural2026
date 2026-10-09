@@ -40,6 +40,7 @@ function buildEggs() {
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Lo que se dice cuando sale humo blanco. En latín y en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
     { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra (o pedirse la bebida)', hint: 'Lo que se dice al brindar. Agua que no has de beber…', more: 'En el buscador de Compra, lo que se dice al brindar' },
     { k: 'tortilla', name: 'El gran debate', how: 'Buscar «con cebolla» o «sin cebolla» en la compra', hint: 'La pregunta que rompe familias desde tiempos inmemoriales', more: 'En el buscador de Compra: ¿la tortilla, con o sin…?' },
+    { k: 'chivato', name: 'Chivatazo', how: 'Escribir «espía» en el buzón de ideas o en el buscador de Compra', hint: 'Si lo nombras, aparece. Escríbelo donde se escriben cosas', more: 'En el buzón de ideas (o en el buscador de Compra), escribe a qué se dedica el invitado misterioso' },
     /* A su hora */
     { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A quien madruga Dios le ayuda. A quien trasnocha, la app', more: 'Abre la app de madrugada, cuando todos duermen' },
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números de ' + c, more: 'Mañana o noche, cuando el reloj marque cuatro unos' },

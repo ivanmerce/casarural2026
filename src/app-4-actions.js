@@ -813,6 +813,7 @@ function bindEvents() {
     var t = e.target;
     if (t.id === 'f-name') { clearTimeout(dupT); dupT = setTimeout(dupWarn, 250); }
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
+    if (t.dataset.input === 'search' && SPY_WORD.test(t.value) && !hasEgg('chivato') && !ui._spyOn) { ui._spyOn = true; setTimeout(function () { ui._spyOn = false; }, 4000); spyReply(true); }
     if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
     if (t.dataset.input === 'search' && /\b(con|sin) cebolla\b/i.test(t.value) && !ui._tortiOn) { ui._tortiOn = true; setTimeout(function () { ui._tortiOn = false; }, 4000); tortillaDebate(/sin/i.test(t.value)); }
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }

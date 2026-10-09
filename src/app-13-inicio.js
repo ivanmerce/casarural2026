@@ -80,6 +80,7 @@ VIEWS.inicio = function () {
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
   h += homePayments();
+  if (typeof sobreCard === 'function') h += sobreCard();   /* v0.7.48: sobres lacrados */
   h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();
