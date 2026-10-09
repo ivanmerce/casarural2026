@@ -515,3 +515,49 @@ create policy "like_ins" on public.idea_likes for insert to authenticated with c
 create policy "like_del" on public.idea_likes for delete to authenticated using (person_id = public.my_person_id() or public.is_admin());
 grant select, insert, update, delete on public.ideas, public.idea_likes to authenticated;
 alter publication supabase_realtime add table public.ideas, public.idea_likes;
+
+-- ===================== v0.7.48 · Sobres lacrados =====================
+-- Una carta que solo abre quien tiene la llave (keeper). El texto vive en letter_bodies y nunca en el código.
+create table if not exists public.letters (
+  id text primary key,
+  to_person text not null references public.people(id) on delete cascade,
+  keeper text not null references public.people(id) on delete cascade,
+  visible boolean not null default false,   -- el sobre (cerrado) aparece en el Inicio de todos
+  shared boolean not null default false,    -- el destinatario puede abrir y releer la carta
+  opened_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create table if not exists public.letter_bodies (
+  letter_id text primary key references public.letters(id) on delete cascade,
+  body jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.letters enable row level security;
+alter table public.letter_bodies enable row level security;
+revoke all on public.letters, public.letter_bodies from anon;
+create policy "sobre_ver" on public.letters for select to authenticated
+  using (keeper = public.my_person_id() or (public.is_member() and (visible or (shared and to_person = public.my_person_id()))));
+create policy "sobre_llave_ins" on public.letters for insert to authenticated with check (keeper = public.my_person_id());
+create policy "sobre_llave_upd" on public.letters for update to authenticated using (keeper = public.my_person_id()) with check (keeper = public.my_person_id());
+create policy "sobre_llave_del" on public.letters for delete to authenticated using (keeper = public.my_person_id());
+create policy "carta_leer" on public.letter_bodies for select to authenticated
+  using (exists (select 1 from public.letters l where l.id = letter_id and (l.keeper = public.my_person_id() or (l.shared and l.to_person = public.my_person_id()))));
+create policy "carta_llave_ins" on public.letter_bodies for insert to authenticated
+  with check (exists (select 1 from public.letters l where l.id = letter_id and l.keeper = public.my_person_id()));
+create policy "carta_llave_upd" on public.letter_bodies for update to authenticated
+  using (exists (select 1 from public.letters l where l.id = letter_id and l.keeper = public.my_person_id()))
+  with check (exists (select 1 from public.letters l where l.id = letter_id and l.keeper = public.my_person_id()));
+create policy "carta_llave_del" on public.letter_bodies for delete to authenticated
+  using (exists (select 1 from public.letters l where l.id = letter_id and l.keeper = public.my_person_id()));
+create trigger letters_touch before update on public.letters for each row execute function public.touch();
+create trigger letter_bodies_touch before update on public.letter_bodies for each row execute function public.touch();
+alter publication supabase_realtime add table public.letters;
+
+-- ===================== v0.7.49 · Sobre programado =====================
+alter table public.letters add column if not exists visible_from timestamptz;   -- desde aquí, a la vista de todos (sin tocar nada)
+alter table public.letters add column if not exists share_after timestamptz;    -- abrirlo a partir de aquí = abrirlo de verdad: se guarda para el destinatario
+drop policy if exists "sobre_ver" on public.letters;
+create policy "sobre_ver" on public.letters for select to authenticated
+  using (keeper = public.my_person_id()
+         or (public.is_member() and (visible or (visible_from is not null and now() >= visible_from) or (shared and to_person = public.my_person_id()))));
