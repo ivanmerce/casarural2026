@@ -668,6 +668,11 @@ html.disco .card, html.disco .hero { animation: discoBeat .6s ease-in-out infini
 .fam-bar.libre .num { color: var(--accent); }
 .fam-dot.none { background: transparent; border: 2px dashed var(--muted); width: 11px; height: 11px; }
 .item.free { background: color-mix(in srgb, var(--accent) 3%, transparent); }
+.item.together { background: color-mix(in srgb, var(--olive) 5%, transparent); }
+.pill.together { white-space: nowrap; }
+.fam-bar.alli { grid-column: 1 / -1; grid-template-columns: auto 1fr auto; border-color: color-mix(in srgb, var(--olive) 45%, transparent); }
+.fam-bar.alli .num { color: var(--olive); }
+.fam-dot.all { background: var(--olive); }
 .check.free-dot { border-style: dashed; color: var(--muted); font-weight: 800; font-family: var(--font-display); font-size: 1.1rem; background: transparent; }
 .item .price { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .owner { border: 0; border-radius: 999px; padding: 4px 10px; min-height: 30px; font: inherit; font-size: .76rem; font-weight: 800; color: #fff; background: var(--f1); }
@@ -1523,6 +1528,22 @@ body.gala-on .fx { z-index: 94; }
   body.print-gim .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
 }
 
+/* v0.7.46 · Tickets de compra */
+.tk-card .card-head h3 { display: flex; align-items: center; gap: 8px; }
+.tk-list { display: grid; gap: 6px; }
+.tk-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; text-align: left; width: 100%; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--glass-strong); min-height: var(--tap); }
+.tk-ico { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); }
+.tk-txt { display: grid; gap: 2px; min-width: 0; }
+.tk-txt small { overflow: hidden; text-overflow: ellipsis; }
+.tk-res { color: var(--ok); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal; }
+.tk-note { white-space: nowrap; }
+.tk-side { display: grid; justify-items: end; gap: 4px; }
+.tk-side .pill { white-space: nowrap; }
+.tk-prev img, .tk-big img { display: block; width: 100%; max-height: 52vh; object-fit: contain; border-radius: 14px; background: var(--glass-strong); }
+.tk-big { display: grid; gap: 6px; justify-items: center; min-height: 120px; }
+.tk-big img { max-height: 62vh; }
+@media (max-width: 380px) { .tk-row { grid-template-columns: 1fr auto; } .tk-ico { display: none; } }
+
 </style>
 </head>
 <body>
@@ -1726,9 +1747,11 @@ var L = (function () {
     (S.expenses || []).forEach(function (e) { if ((e.split || 'comun') === 'comun' && e.kind !== 'aportacion' && e.amount) t += e.amount; });
     return r2(t);
   }
-  function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family; }); }
+  /* «Comprar allí» es de todos: no necesita dueño (se compra en la finca y se apunta como gasto común) */
+  function together(i) { return i.buy === 'alli'; }
+  function unassigned(S) { return S.ingredients.filter(function (i) { return !i.family && !together(i); }); }
   function coverage(items) {
-    var tot = items.length, done = items.filter(function (i) { return !!i.family; }).length;
+    var tot = items.length, done = items.filter(function (i) { return !!i.family || together(i); }).length;
     return { tot: tot, done: done, pct: tot ? Math.round(done / tot * 100) : 0 };
   }
 
@@ -1826,7 +1849,7 @@ var L = (function () {
     });
     return out.sort(function (x, y) { return y.score - x.score; });
   }
-  return { similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, together: together, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;
 
@@ -2772,7 +2795,7 @@ VIEWS.compra = function () {
   if (!ui.fam) ui.fam = free.length ? 'libre' : myF;
   var f = ui.fam, q = (ui.q || '').toLowerCase();
   var all = S.ingredients;
-  function inFam(i) { return f === 'all' || (f === 'libre' ? !i.family : i.family === f); }
+  function inFam(i) { return f === 'all' || (f === 'libre' ? !i.family && !L.together(i) : i.family === f); }
   var list = all.filter(function (i) {
     if (!inFam(i)) return false;
     if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
@@ -2780,7 +2803,8 @@ VIEWS.compra = function () {
     if (q && i.name.toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-  var assigned = all.length - free.length, pctA = all.length ? Math.round(assigned / all.length * 100) : 0;
+  var allis = all.filter(function (i) { return L.together(i) && !i.family; }).length;
+  var assigned = all.length - free.length - allis, pctA = (all.length - allis) ? Math.round(assigned / (all.length - allis) * 100) : 0;
   var mine = all.filter(function (i) { return i.family === myF; }), mineCost = mine.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
 
   var h = '<div class="view-head"><div><h2>Lista de la compra</h2><p class="muted small">Una lista para todos. Cada familia se pide lo que va a comprar</p></div><button class="btn ghost exp-btn" data-act="exportList" aria-label="Exportar la lista a Excel o PDF">' + icon('basket') + 'Exportar</button></div>';
@@ -2788,13 +2812,14 @@ VIEWS.compra = function () {
     '<li><span><b>Pídete lo que vayáis a comprar.</b> En «Sin dueño», toca <span class="claim-demo">' + icon('plus') + 'Me lo pido</span>. Ya queda a cargo de ' + esc(fam(myF) ? fam(myF).name : 'tu familia') + ' con su precio estimado. Desde Comidas puedes pedirte una comida entera.</span></li>' +
     '<li><span><b>Cuando lo compréis, apunta el precio.</b> En «Lo nuestro», escribe lo que ha costado en la casilla de cada producto. <b>Sin precio real no cuenta en las cuentas.</b></span></li>' +
     '<li><span><b>¿Te has equivocado?</b> Toca <b>Soltar</b> y vuelve a la lista sin dueño.</span></li></ol><p class="small muted">Si algo lo traéis de casa, tocad el producto y marcadlo (cuenta 0 €).</p>') + '</section>';
-  h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + all.length + ' con dueño</span></div>' +
+  h += '<section class="card"><div class="card-head"><h3>Reparto de la compra</h3><span class="small muted num">' + assigned + '/' + (all.length - allis) + ' con dueño' + (allis ? ' · ' + allis + ' allí' : '') + '</span></div>' +
     '<div class="progress split" role="progressbar" aria-valuenow="' + pctA + '" aria-valuemin="0" aria-valuemax="100">' + S.families.map(function (x) { var n = all.filter(function (i) { return i.family === x.id; }).length; return n ? '<i class="fb ' + x.color + '" style="width:' + (n / all.length * 100) + '%"></i>' : ''; }).join('') + '</div>' +
     '<div class="fam-bars">' + S.families.map(function (x) {
       var its = all.filter(function (i) { return i.family === x.id; }), e = its.reduce(function (a, i) { return a + L.itemCost(i); }, 0);
       return '<button class="fam-bar" data-act="fam" data-fam="' + x.id + '"><i class="fam-dot ' + x.color + '"></i><b>' + esc(x.short || x.name) + '</b><span class="num">' + its.length + '</span><small class="muted num">≈ ' + L.money(e) + '</small></button>';
-    }).join('') + '<button class="fam-bar libre" data-act="fam" data-fam="libre"><i class="fam-dot none"></i><b>Sin dueño</b><span class="num">' + free.length + '</span></button></div>' +
+    }).join('') + (allis ? '<button class="fam-bar alli" data-act="alliView"><i class="fam-dot all"></i><b>Allí · de todos</b><span class="num">' + allis + '</span></button>' : '') + '<button class="fam-bar libre" data-act="fam" data-fam="libre"><i class="fam-dot none"></i><b>Sin dueño</b><span class="num">' + free.length + '</span></button></div>' +
     '<p class="small muted">Total previsto ≈ <b class="num">' + L.money(L.estCommon(S)) + '</b> <span class="pill est">ESTIMADO</span></p></section>';
+  if (typeof ticketsCard === 'function') h += ticketsCard();
 
   var nSug = S.ingredients.filter(function (i) { return L.suggestQty(S, i); }).length;
   if (nSug) h += '<section class="card alert" style="gap:8px"><p class="small"><b>' + nSug + ' cantidades</b> vienen de la hoja (pensadas para 14) y no cuadran con los comensales previstos según la asistencia.</p><div class="row wrap">' + (can('edit') ? '<button class="btn" data-act="applyAllQty">Ajustar todas</button>' : '') + '<button class="btn ghost" data-act="tab" data-tab="asistencia">Ver asistencia</button></div></section>';
@@ -2811,7 +2836,7 @@ VIEWS.compra = function () {
   if (ui.buyF && S.shopping) h += '<section class="card wood buy-help"><p class="small">' + (ui.buyF === 'alli' ? S.shopping.alli : S.shopping.antes) + '</p></section>';
   h += '<input class="search" id="q" type="search" placeholder="Buscar ingrediente…" value="' + esc(ui.q || '') + '" data-input="search" aria-label="Buscar ingrediente">';
   if (ui.mealFilter) {
-    var mf = meal(ui.mealFilter), freeM = all.filter(function (i) { return !i.family && i.meals.indexOf(ui.mealFilter) >= 0; }).length;
+    var mf = meal(ui.mealFilter), freeM = all.filter(function (i) { return !i.family && !L.together(i) && i.meals.indexOf(ui.mealFilter) >= 0; }).length;
     h += '<section class="card wood" style="gap:8px"><div class="row"><span class="grow"><span class="eyebrow">Solo esta comida</span><b style="display:block">' + esc(mf.title) + '</b><small class="muted">' + esc(dayOf(mf.day).long) + ' · ' + slotName(mf.slot) + '</small></span><button class="link" data-act="clearMeal">Quitar filtro ' + icon('x') + '</button></div>' +
       (freeM && can('edit') && fam(myF) ? '<button class="btn primary block" data-act="claimMeal" data-id="' + mf.id + '">' + icon('plus') + 'Nos pedimos esta comida (' + freeM + ' sin dueño)</button>' : '') + '</section>';
   }
@@ -2845,13 +2870,14 @@ function itemRow(i) {
   var mealNames = i.meals.map(function (id) { var m = meal(id); return m ? dayOf(m.day).short + ' ' + slotName(m.slot).toLowerCase() : ''; }).filter(Boolean);
   var price = i.status === 'casa' ? '<span class="muted">0 €</span><small>DE CASA</small>' : i.cost != null ? L.money(i.cost) : (i.est != null ? '<span class="muted">≈ ' + L.money(i.est) + '</span><small>ESTIMADO</small>' : '');
   var right;
-  if (!f) right = price + (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>');
+  if (!f && L.together(i)) right = price + '<span class="pill buy-alli together">De todos · allí</span>';
+  else if (!f) right = price + (ed && fam(me().family) ? '<button class="claim" data-act="claim" data-id="' + i.id + '">' + icon('plus') + 'Me lo pido</button>' : '<span class="pill pend">Sin dueño</span>');
   else if (mine && ed) right = (i.status === 'casa' ? '<span class="casa-tag">De casa · 0 €</span>'
       : '<label class="price-in' + (i.cost != null ? ' ok' : '') + '"><input inputmode="decimal" enterkeyhint="next" autocomplete="off" class="price-field" data-change="itemCost" data-id="' + i.id + '" value="' + (i.cost != null ? L.n(i.cost) : '') + '" placeholder="' + (i.est != null ? '≈ ' + L.n(i.est) : 'precio') + '" aria-label="Precio real de ' + esc(i.name) + '"><span>€</span></label>') +
       '<button class="unclaim" data-act="unclaim" data-id="' + i.id + '" aria-label="Soltar ' + esc(i.name) + '">' + icon('undo') + 'Soltar</button>';
   else right = price + '<button class="owner ' + f.color + (mine ? ' mine' : '') + '" data-act="owner" data-id="' + i.id + '" aria-label="Lo compra ' + esc(f.name) + '">' + (mine ? 'Nuestro' : esc(f.short || f.name)) + '</button>';
   var st = f && L.needsPrice(i) ? ' noprice' : '';
-  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : ' free') + (i.status === 'casa' ? ' casa' : '') + st + '" id="it-' + i.id + '">' +
+  return '<div class="item' + (f ? (mine ? ' mine' : ' taken') : L.together(i) ? ' together' : ' free') + (i.status === 'casa' ? ' casa' : '') + st + '" id="it-' + i.id + '">' +
     (f ? '<i class="own-bar ' + f.color + '" aria-hidden="true"></i>' : '') +
     '<button class="body" data-act="editItem" data-id="' + i.id + '"><span class="name">' + esc(i.name) + '</span><span class="meta"><span class="num">' + L.n(i.qty) + ' ' + esc(i.unit) + '</span>' + (i.qtyEst ? '<span class="pill est">cant. estimada</span>' : '') +
       (mealNames.length ? '<span>· ' + esc(mealNames.slice(0, 2).join(', ')) + (mealNames.length > 2 ? ' +' + (mealNames.length - 2) : '') + '</span>' : '') +
@@ -3681,6 +3707,7 @@ var A = {
   day: function (el) { ui.day = el.dataset.day; render(true); },
   sub: function (el) { ui.sub = el.dataset.sub; if (ui.tab !== 'planes') ui.tab = 'planes'; render(true); navPush(); },
   fam: function (el) { ui.fam = el.dataset.fam; saveUi(); render(true); },
+  alliView: function () { ui.fam = 'all'; ui.buyF = 'alli'; ui.mealFilter = null; render(true); },
   buyF: function (el) { ui.buyF = ui.buyF === el.dataset.v ? null : el.dataset.v; render(true); },
   st: function (el) { ui.st = el.dataset.st; render(true); },
   superMode: function () { ui.superMode = !ui.superMode; saveUi(); render(true); if (ui.superMode) { ui.st = 'pendiente'; ui.fam = me().family; render(true); toast('Modo súper: tu lista, letra grande y solo lo pendiente'); } },
@@ -3712,6 +3739,7 @@ var A = {
   claim: function (el) {
     if (!guard('edit')) return; var i = S.ingredients.find(function (x) { return x.id === el.dataset.id; }), f = fam(me().family); if (!i || !f) return;
     if (i.family) { toast('Ya se lo ha pedido ' + esc(fam(i.family).name)); render(true); return; }
+    if (L.together(i)) { toast('Esto se compra allí y es de todos: no hace falta pedírselo'); render(true); return; }
     i.family = f.id; save();
     var row = document.getElementById('it-' + i.id); if (row) { row.classList.add('claimed'); }
     if (navigator.vibrate) try { navigator.vibrate(12); } catch (e) {}
@@ -3730,7 +3758,7 @@ var A = {
   },
   claimMeal: function (el) {
     if (!guard('edit')) return; var f = fam(me().family); if (!f) return;
-    var its = S.ingredients.filter(function (i) { return !i.family && i.meals.indexOf(el.dataset.id) >= 0; });
+    var its = S.ingredients.filter(function (i) { return !i.family && !L.together(i) && i.meals.indexOf(el.dataset.id) >= 0; });
     its.forEach(function (i) { i.family = f.id; }); save(); render(true);
     toast(its.length + ' ingredientes para ' + esc(f.name), 'Deshacer', function () { its.forEach(function (i) { i.family = null; }); save(); render(true); });
   },
@@ -5011,7 +5039,7 @@ VIEWS.manual = function () {
     ['Pídete la compra', '<b>Compra → «Sin dueño»</b> → <b>«Me lo pido»</b>. Cuando lo compres, en «Lo nuestro» apunta el <b>precio real</b>: sin él no cuenta en Cuentas.', 'compra']
   ];
   var cards = [
-    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con la casilla de <b>precio real</b>. Al tocar un producto podéis decidir si se compra <b>antes de ir</b> o <b>allí</b>; entonces aparecen los filtros para verlo de un vistazo.', 'compra'],
+    ['cart', 'Vuestra lista', 'Compra → <b>«Lo nuestro»</b> es vuestra lista para el súper, con la casilla de <b>precio real</b>. Al tocar un producto podéis decidir si se compra <b>antes de ir</b> o <b>allí</b>; entonces aparecen los filtros para verlo de un vistazo. Lo de <b>«allí»</b> es de todos: no necesita dueño y lo paga quien lo compre en la finca. ¿Venís del súper? En Compra, <b>«Subir un ticket»</b>: foto al ticket y se pasa a la lista con unidades y precios.', 'compra'],
     ['meals', 'Comidas', 'Cada comida con su menú y el <b>menú de ' + esc(babyN) + '</b>. Quién cocina se decide sobre la marcha. Si alguien no come ese día, toca los comensales: las cantidades se ajustan solas.', 'comidas'],
     ['plans', 'Planes', 'El planning de cada día, con plan B si llueve. Dale al corazón a lo que te apetezca.', 'planes'],
     ['trophy', 'Juegos y ranking', 'Sin horarios: elegid el que apetezca. Cada juego tiene su <b>ficha</b> (individual o por equipos, pasos, cómo se gana y cómo se apunta). Los editores apuntan resultados (con flechas para corregir el orden) y el <b>ranking</b> se actualiza solo.', 'juegos'],
@@ -6105,7 +6133,7 @@ function exportScopeItems(scope) {
   if (scope === 'view') {
     var f = ui.fam, q = (ui.q || '').toLowerCase();
     return all.filter(function (i) {
-      if (!(f === 'all' || (f === 'libre' ? !i.family : i.family === f))) return false;
+      if (!(f === 'all' || (f === 'libre' ? !i.family && !L.together(i) : i.family === f))) return false;
       if (ui.mealFilter && i.meals.indexOf(ui.mealFilter) < 0) return false;
       if (ui.buyF && i.buy !== ui.buyF) return false;
       if (q && i.name.toLowerCase().indexOf(q) < 0) return false;
@@ -7315,6 +7343,138 @@ function gimPressEnd() { clearTimeout(gimHoldT); document.querySelectorAll('.gg-
 document.addEventListener('pointerdown', gimPressStart);
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { document.addEventListener(ev, gimPressEnd); });
 document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-ans') A.gimAnswer(); if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-name') A.gimKidBegin(); if (e.key === 'Enter' && gimKid && e.target && e.target.id === 'gk-ci') A.gimCipher(); });
+
+/* ===================== Tickets de compra =====================
+   Cada familia hace foto al ticket y lo sube desde Compra. Queda «por pasar» hasta que se pasa a la lista:
+   cada producto queda comprado con sus unidades y su precio real, y lo que no estaba se añade.
+   Nube: bucket privado «tickets» (carpeta por persona) + tabla tickets (RLS). Demo: en memoria. */
+
+IC.receipt = '<path d="M6 3h12v18l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4L6 21V3Z"/><path d="M9 8h6M9 11.5h6M9 15h3.5"/>';
+var TK = { list: [], at: 0, loading: false, ch: false, urls: {}, file: null, demoUrls: {} };
+function tkCloud() { return typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb; }
+function tkBucket() { return CLOUD.sb().storage.from('tickets'); }
+
+function tkLoad(force) {
+  if (!tkCloud()) return Promise.resolve();
+  if (TK.loading || (!force && Date.now() - TK.at < 20000)) return Promise.resolve();
+  TK.loading = true;
+  if (!TK.ch) {
+    TK.ch = true;
+    try { CLOUD.sb().channel('tickets').on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, function () { tkLoad(true); }).subscribe(); } catch (e) {}
+  }
+  return CLOUD.sb().from('tickets').select('*').order('created_at', { ascending: false }).then(function (r) {
+    TK.loading = false; TK.at = Date.now(); if (r.error) return;
+    var before = JSON.stringify(TK.list); TK.list = r.data || [];
+    if (JSON.stringify(TK.list) !== before && ui.tab === 'compra' && !document.getElementById('scrim')) render(true);
+  }, function () { TK.loading = false; TK.at = Date.now(); });
+}
+
+function tkWhen(ts) {
+  var d = new Date(ts); if (isNaN(d)) return '';
+  var p = function (n) { return (n < 10 ? '0' : '') + n; };
+  return p(d.getDate()) + '/' + p(d.getMonth() + 1) + ' · ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function tkPill(t) {
+  if (t.status === 'procesado') return '<span class="pill ok">' + icon('check') + 'En la lista</span>';
+  if (t.status === 'descartado') return '<span class="pill pend">Descartado</span>';
+  return '<span class="pill est">Por pasar</span>';
+}
+function tkCanUpload() { return !(typeof isKid === 'function' && isKid()) && !!me(); }
+
+function ticketsCard() {
+  tkLoad();
+  var list = TK.list, pend = list.filter(function (t) { return t.status === 'pendiente'; }).length;
+  var shown = ui.tkAll ? list : list.slice(0, 4);
+  var h = '<section class="card tk-card"><div class="card-head"><h3>Tickets de compra</h3>' +
+    (pend ? '<span class="pill est num">' + pend + ' por pasar</span>' : list.length ? '<span class="pill ok">Todo en la lista</span>' : '') + '</div>';
+  h += '<p class="small muted">¿Venís del súper? Foto al ticket y para aquí. Se pasa a la lista: cada producto queda comprado con sus unidades y su precio, y lo que no estaba se añade. Nada de teclear precios con el carro en la mano.</p>';
+  if (tkCanUpload()) h += '<label class="btn primary block" for="tk-in" style="cursor:pointer">' + icon('receipt') + 'Subir un ticket</label><input id="tk-in" type="file" accept="image/*" hidden data-change="tkPick">';
+  if (list.length) {
+    h += '<div class="tk-list">' + shown.map(function (t) {
+      return '<button class="tk-row" data-act="tkOpen" data-id="' + esc(t.id) + '"><span class="tk-ico">' + icon('receipt') + '</span><span class="tk-txt"><b>' + esc(nameOf(t.person_id, 'Alguien')) + '</b> <small class="muted num">' + tkWhen(t.created_at) + '</small>' +
+        (t.status === 'procesado' && t.result ? '<small class="tk-res">' + esc(t.result) + '</small>' : t.note ? '<small class="muted tk-note">«' + esc(t.note) + '»</small>' : '') + '</span>' +
+        '<span class="tk-side">' + tkPill(t) + (t.total != null ? '<small class="num">' + L.money(Number(t.total)) + '</small>' : '') + '</span></button>';
+    }).join('') + '</div>';
+    if (list.length > 4) h += '<button class="link small" data-act="tkAll">' + (ui.tkAll ? 'Ver menos' : 'Ver los ' + list.length + ' tickets') + '</button>';
+  } else if (!tkCloud()) h += '<p class="small muted">En la demo los tickets se quedan en este móvil.</p>';
+  return h + '</section>';
+}
+
+function tkFind(id) { return TK.list.find(function (t) { return String(t.id) === String(id); }); }
+function tkUrl(t) {
+  if (!tkCloud()) return Promise.resolve(TK.demoUrls[t.id] || null);
+  var c = TK.urls[t.path]; if (c && c.exp > Date.now()) return Promise.resolve(c.url);
+  return tkBucket().createSignedUrl(t.path, 900).then(function (r) {
+    var u = r && r.data && (r.data.signedUrl || r.data.signedURL); if (u) TK.urls[t.path] = { url: u, exp: Date.now() + 840000 }; return u || null;
+  }, function () { return null; });
+}
+
+Object.assign(C, {
+  tkPick: function (el) {
+    var f = el.files && el.files[0]; el.value = ''; if (!f) return;
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|heic|webp)$/i.test(f.name)) { toast('Eso no parece una foto. Prueba con la cámara'); return; }
+    TK.file = f;
+    var prev = URL.createObjectURL(f);
+    openSheet('<h2>Subir ticket</h2><div class="tk-prev"><img src="' + prev + '" alt="Vista previa del ticket"></div>' +
+      '<label class="field"><span class="lbl">¿Algo que no haya que contar? <small class="muted">(opcional)</small></span><textarea id="tk-note" rows="3" maxlength="400" placeholder="Ej.: los pañales y el jamón dulce son nuestros"></textarea></label>' +
+      '<p class="small muted">Comprueba que se lee el total. Si sale borroso, mejor repetir la foto con luz.</p>' +
+      '<button class="btn primary block" data-act="tkSend">' + icon('receipt') + 'Subir ticket</button>');
+  }
+});
+
+Object.assign(A, {
+  tkAll: function () { ui.tkAll = !ui.tkAll; render(true); },
+  tkSend: function (el) {
+    if (!TK.file || el.disabled) return;
+    var note = ((document.getElementById('tk-note') || {}).value || '').trim().slice(0, 400);
+    el.disabled = true; el.innerHTML = 'Subiendo…';
+    shrink(TK.file, 2200, 0.86).then(function (img) {
+      if (!tkCloud()) {
+        var id = uid('tk'); TK.demoUrls[id] = img.url || URL.createObjectURL(img.blob);
+        TK.list.unshift({ id: id, person_id: me().id, family_id: me().family || null, path: id + '.jpg', note: note || null, status: 'pendiente', result: null, total: null, created_at: new Date().toISOString() });
+        return;
+      }
+      var name = ui.me + '/' + ((window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 8)) + '.jpg';
+      return tkBucket().upload(name, img.blob, { contentType: 'image/jpeg', upsert: false, cacheControl: '3600' }).then(function (r) { if (r.error) throw r.error; })
+        .then(function () { return CLOUD.sb().from('tickets').insert({ person_id: ui.me, family_id: me().family || null, path: name, note: note || null }).select().single(); })
+        .then(function (r) { if (r.error) throw r.error; TK.urls[name] = { url: URL.createObjectURL(img.blob), exp: Infinity }; TK.list.unshift(r.data); TK.at = Date.now(); });
+    }).then(function () {
+      TK.file = null; closeSheet(); render(true);
+      confetti(900); toast('Ticket recibido. En cuanto se pase, lo verás en la lista con sus precios');
+    }, function () {
+      el.disabled = false; el.innerHTML = icon('receipt') + 'Subir ticket';
+      toast('No he podido subir el ticket. Prueba otra vez (mejor con WiFi)');
+    });
+  },
+  tkOpen: function (el) {
+    var t = tkFind(el.dataset.id); if (!t) return;
+    var mine = t.person_id === ui.me, adm = me() && me().role === 'admin';
+    openSheet('<h2>Ticket de ' + esc(nameOf(t.person_id, 'alguien')) + '</h2><p class="small muted num">' + tkWhen(t.created_at) + ' · ' + tkPill(t) + '</p>' +
+      '<div class="tk-big" id="tk-big"><span class="ph-wait" aria-hidden="true"></span></div>' +
+      (t.note ? '<p class="small"><b>Nota:</b> «' + esc(t.note) + '»</p>' : '') +
+      (t.result ? '<p class="small"><b>Pasado a la lista:</b> ' + esc(t.result) + (t.total != null ? ' · <b class="num">' + L.money(Number(t.total)) + '</b>' : '') + '</p>' : '') +
+      '<div class="row wrap">' +
+      (adm && t.status === 'pendiente' ? '<button class="btn" data-act="tkMark" data-id="' + esc(t.id) + '" data-v="procesado">' + icon('check') + 'Ya está en la lista</button>' : '') +
+      ((mine || adm) && t.status === 'pendiente' ? '<button class="btn ghost" data-act="tkDel" data-id="' + esc(t.id) + '">' + icon('trash') + 'Borrar</button>' : '') +
+      '</div>');
+    tkUrl(t).then(function (u) {
+      var b = document.getElementById('tk-big'); if (!b) return;
+      b.innerHTML = u ? '<a href="' + u + '" target="_blank" rel="noopener"><img src="' + u + '" alt="Foto del ticket"></a><small class="muted">Toca la foto para verla en grande</small>' : '<p class="small muted">No he podido cargar la foto.</p>';
+    });
+  },
+  tkMark: function (el) {
+    var t = tkFind(el.dataset.id); if (!t) return;
+    var upd = { status: el.dataset.v, processed_at: new Date().toISOString() };
+    var p = tkCloud() ? CLOUD.sb().from('tickets').update(upd).match({ id: t.id }).then(function (r) { if (r.error) throw r.error; }) : Promise.resolve();
+    p.then(function () { Object.assign(t, upd); closeSheet(); render(true); toast('Ticket marcado como pasado'); }, function () { toast('No he podido guardarlo'); });
+  },
+  tkDel: function (el) {
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Borrar? Toca otra vez'; return; }
+    var t = tkFind(el.dataset.id); if (!t) return;
+    var p = tkCloud() ? CLOUD.sb().from('tickets').delete().match({ id: t.id }).then(function (r) { if (r.error) throw r.error; return tkBucket().remove([t.path]); }) : Promise.resolve();
+    p.then(function () { TK.list = TK.list.filter(function (x) { return x !== t; }); closeSheet(); render(true); toast('Ticket borrado'); }, function () { toast('No he podido borrarlo'); });
+  }
+});
 
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
