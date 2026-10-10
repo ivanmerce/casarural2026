@@ -1717,3 +1717,6 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 /* sin movimiento: lo mismo, sin vuelos */
 .sobre.calm *, .sobre.calm *::before, .sobre.calm *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .15s !important; transition-delay: 0s !important; }
 @media (prefers-reduced-motion: reduce) { .sb-env, .sb-cur { animation: none; } }
+
+/* v0.7.54: mantener pulsada una foto es un abrazo (secreto), no el menú de guardar imagen */
+.av, .av img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
