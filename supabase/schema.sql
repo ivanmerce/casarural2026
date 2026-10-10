@@ -561,3 +561,30 @@ drop policy if exists "sobre_ver" on public.letters;
 create policy "sobre_ver" on public.letters for select to authenticated
   using (keeper = public.my_person_id()
          or (public.is_member() and (visible or (visible_from is not null and now() >= visible_from) or (shared and to_person = public.my_person_id()))));
+
+-- ===================== v0.7.52 · Secretos por persona =====================
+-- El móvil envía para quién cree estar contando (p_pid). Si no coincide con la cuenta con la que ha entrado,
+-- solo cuenta la visita: ningún secreto pasa de una cuenta a otra.
+create table if not exists public.presence_backup (person_id text, eggs int, egg_keys text[], saved_at timestamptz default now(), why text);
+alter table public.presence_backup enable row level security;
+create or replace function public.ping(p_eggs integer, p_ver integer, p_keys text[], p_pid text)
+returns timestamptz language plpgsql security definer set search_path to 'public' as $$
+declare pid text := public.my_person_id(); n int := coalesce(least(greatest(p_eggs, 0), 99), 0);
+  k text[] := coalesce((select array_agg(distinct x) from unnest(coalesce(p_keys, '{}')) x where x ~ '^[a-z0-9_]{1,24}$'), '{}');
+  ok boolean;
+begin
+  if pid is null then return null; end if;
+  ok := p_pid is not null and p_pid = pid;
+  if not ok then k := '{}'; n := 0; end if;
+  if array_length(k, 1) > 64 then k := k[1:64]; end if;
+  insert into public.presence (person_id, last_seen, eggs, egg_keys) values (pid, now(), n, k)
+    on conflict (person_id) do update set
+      visits = public.presence.visits + case when public.presence.last_seen < now() - interval '30 minutes' then 1 else 0 end,
+      minutes = public.presence.minutes + case when public.presence.last_seen < now() - interval '50 seconds' and public.presence.last_seen > now() - interval '5 minutes' then 1 else 0 end,
+      eggs = case when ok and now() < timestamptz '2026-10-11 11:00:00+02' then greatest(public.presence.eggs, n) else public.presence.eggs end,
+      egg_keys = case when ok and now() < timestamptz '2026-10-11 11:00:00+02'
+        then (select coalesce(array_agg(distinct y), '{}') from unnest(public.presence.egg_keys || k) y) else public.presence.egg_keys end,
+      last_seen = now();
+  return now();
+end $$;
+grant execute on function public.ping(integer, integer, text[], text) to authenticated;
