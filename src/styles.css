@@ -1689,6 +1689,9 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 .sb-from.in .sb-who { opacity: 1; transform: none; transition: opacity .5s calc(var(--i) * .18s + .1s), transform .6s cubic-bezier(.2, 1.5, .4, 1) calc(var(--i) * .18s + .1s); }
 .sb-who .av { width: 68px; height: 68px; font-size: 1.6rem; box-shadow: 0 0 0 4px var(--sb-letter), 0 0 0 6px var(--sb-crimson); }
 .sb-who b { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; }
+.sb-crew { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 7px; max-width: 88px; min-height: 85px; }
+.sb-who.group .av { width: 38px; height: 38px; font-size: .95rem; box-shadow: 0 0 0 2.5px var(--sb-letter), 0 0 0 4px var(--sb-crimson); }
+.sb-who.group b { font-size: 1rem; white-space: nowrap; }
 .sb-who small { max-width: 12ch; font-size: .82rem; font-style: italic; line-height: 1.25; color: var(--sb-soft); }
 .sb-scribble { width: 84px; height: 24px; margin-top: -4px; }
 .sb-scribble path { fill: none; stroke: var(--sb-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }

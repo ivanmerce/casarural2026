@@ -305,7 +305,8 @@ function sbReveal(l, b) {
 }
 function sbReadHtml(l, b) {
   var v = b.voucher || null, keeper = sbIsKeeper(l), to = person(l.to_person) || { name: '' };
-  var from = (b.from || []).filter(function (f) { return person(f.pid); });
+  /* v0.7.53: una firma puede ser un grupo (pids): salen las fotos de todos */
+  var from = (b.from || []).map(function (f) { var ids = (f.pids || [f.pid]).filter(function (x) { return x && person(x); }); return ids.length ? Object.assign({}, f, { ids: ids }) : null; }).filter(Boolean);
   var h = '<article class="sb-paper">' +
     '<header class="sb-head">' + (b.age ? '<span class="sb-age" aria-hidden="true">' + esc(b.age) + '</span>' : '') +
       (b.kicker ? '<p class="sb-kicker">' + esc(b.kicker) + '</p>' : '') + '<h1>' + esc(b.title || '') + '</h1>' + sbNet() + '</header>' +
@@ -328,7 +329,7 @@ function sbReadHtml(l, b) {
           (n > 1 ? '<path d="M' + xs.map(function (x) { return x + ' 42'; }).join(' L') + '" pathLength="1"/>' : '') +
           (n > 2 ? '<path d="M' + xs[0] + ' 42 Q150 -26 ' + xs[n - 1] + ' 42" pathLength="1"/>' : '') + '</svg>' +
         from.map(function (f, i) {
-          return '<div class="sb-who" style="--i:' + i + '">' + sbAv(f.pid, 'sb-who-av') + '<b>' + esc(f.label || nameOf(f.pid)) + '</b>' +
+          return '<div class="sb-who' + (f.ids.length > 1 ? ' group' : '') + '" style="--i:' + i + '">' + (f.ids.length > 1 ? '<span class="sb-crew">' + f.ids.map(function (x) { return sbAv(x, 'sb-who-av'); }).join('') + '</span>' : sbAv(f.ids[0], 'sb-who-av')) + '<b>' + esc(f.label || nameOf(f.ids[0])) + '</b>' +
             (f.note ? '<svg class="sb-scribble" viewBox="0 0 120 34" aria-hidden="true"><path pathLength="1" d="M4 22c8-14 14-16 16-6s-6 14 2 8 12-20 18-12-4 18 6 10 10-18 16-10-2 14 8 8 12-14 18-8 4 10 14 4 10-8 14-6"/></svg><small>' + esc(f.note) + '</small>' : '') + '</div>';
         }).join('') +
       '</div></section>';
