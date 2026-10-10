@@ -1706,6 +1706,9 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 .sb-from.in .sb-who { opacity: 1; transform: none; transition: opacity .5s calc(var(--i) * .18s + .1s), transform .6s cubic-bezier(.2, 1.5, .4, 1) calc(var(--i) * .18s + .1s); }
 .sb-who .av { width: 68px; height: 68px; font-size: 1.6rem; box-shadow: 0 0 0 4px var(--sb-letter), 0 0 0 6px var(--sb-crimson); }
 .sb-who b { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; }
+.sb-crew { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 7px; max-width: 88px; min-height: 85px; }
+.sb-who.group .av { width: 38px; height: 38px; font-size: .95rem; box-shadow: 0 0 0 2.5px var(--sb-letter), 0 0 0 4px var(--sb-crimson); }
+.sb-who.group b { font-size: 1rem; white-space: nowrap; }
 .sb-who small { max-width: 12ch; font-size: .82rem; font-style: italic; line-height: 1.25; color: var(--sb-soft); }
 .sb-scribble { width: 84px; height: 24px; margin-top: -4px; }
 .sb-scribble path { fill: none; stroke: var(--sb-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
@@ -8044,7 +8047,8 @@ function sbReveal(l, b) {
 }
 function sbReadHtml(l, b) {
   var v = b.voucher || null, keeper = sbIsKeeper(l), to = person(l.to_person) || { name: '' };
-  var from = (b.from || []).filter(function (f) { return person(f.pid); });
+  /* v0.7.53: una firma puede ser un grupo (pids): salen las fotos de todos */
+  var from = (b.from || []).map(function (f) { var ids = (f.pids || [f.pid]).filter(function (x) { return x && person(x); }); return ids.length ? Object.assign({}, f, { ids: ids }) : null; }).filter(Boolean);
   var h = '<article class="sb-paper">' +
     '<header class="sb-head">' + (b.age ? '<span class="sb-age" aria-hidden="true">' + esc(b.age) + '</span>' : '') +
       (b.kicker ? '<p class="sb-kicker">' + esc(b.kicker) + '</p>' : '') + '<h1>' + esc(b.title || '') + '</h1>' + sbNet() + '</header>' +
@@ -8067,7 +8071,7 @@ function sbReadHtml(l, b) {
           (n > 1 ? '<path d="M' + xs.map(function (x) { return x + ' 42'; }).join(' L') + '" pathLength="1"/>' : '') +
           (n > 2 ? '<path d="M' + xs[0] + ' 42 Q150 -26 ' + xs[n - 1] + ' 42" pathLength="1"/>' : '') + '</svg>' +
         from.map(function (f, i) {
-          return '<div class="sb-who" style="--i:' + i + '">' + sbAv(f.pid, 'sb-who-av') + '<b>' + esc(f.label || nameOf(f.pid)) + '</b>' +
+          return '<div class="sb-who' + (f.ids.length > 1 ? ' group' : '') + '" style="--i:' + i + '">' + (f.ids.length > 1 ? '<span class="sb-crew">' + f.ids.map(function (x) { return sbAv(x, 'sb-who-av'); }).join('') + '</span>' : sbAv(f.ids[0], 'sb-who-av')) + '<b>' + esc(f.label || nameOf(f.ids[0])) + '</b>' +
             (f.note ? '<svg class="sb-scribble" viewBox="0 0 120 34" aria-hidden="true"><path pathLength="1" d="M4 22c8-14 14-16 16-6s-6 14 2 8 12-20 18-12-4 18 6 10 10-18 16-10-2 14 8 8 12-14 18-8 4 10 14 4 10-8 14-6"/></svg><small>' + esc(f.note) + '</small>' : '') + '</div>';
         }).join('') +
       '</div></section>';
