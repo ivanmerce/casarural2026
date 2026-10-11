@@ -1551,33 +1551,6 @@ body.gala-on .fx { z-index: 94; }
 .sec-note b { color: var(--ink); }
 .sec-note small { flex: none; opacity: .8; }
 
-/* v0.7.49 · Los dos sobres */
-.sobres-card { position: relative; overflow: hidden; }
-.sobres { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 6px auto 2px; width: 100%; max-width: 440px; }
-.sobres-adm .lbl { font-size: .8rem; color: var(--muted); font-weight: 600; }
-.sobre { position: relative; aspect-ratio: 3 / 2; border: 0; padding: 0; border-radius: 10px; cursor: pointer; font: inherit; color: inherit;
-  background: linear-gradient(160deg, #f4ead7, #e6d6b8); box-shadow: 0 8px 22px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.06); overflow: hidden; transition: transform .25s ease; }
-.sobre-back { position: absolute; inset: 0; background: linear-gradient(to top right, transparent 49.5%, rgba(0,0,0,.06) 50%, transparent 50.5%), linear-gradient(to top left, transparent 49.5%, rgba(0,0,0,.06) 50%, transparent 50.5%); }
-.sobre-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; background: linear-gradient(180deg, #eadcbf, #dcc8a3); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .6s cubic-bezier(.2,.8,.2,1); box-shadow: 0 2px 0 rgba(0,0,0,.05); }
-.sobre-seal { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 1.05rem; color: #fff;
-  background: radial-gradient(circle at 35% 30%, #e0404f, var(--accent, #b3122b) 60%, #6d0a19); box-shadow: 0 3px 8px rgba(0,0,0,.3), inset 0 -2px 4px rgba(0,0,0,.25); }
-.sobre-n { position: absolute; left: 8px; right: 8px; bottom: 7px; font-size: .78rem; font-weight: 700; color: #5a4a30; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sobre:active { transform: scale(.97); }
-.sobre.nope { animation: sobreNope .5s ease; }
-@keyframes sobreNope { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px) rotate(-2deg); } 40% { transform: translateX(7px) rotate(2deg); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
-.sobre.ready { animation: sobreGlow 1.8s ease-in-out infinite; }
-@keyframes sobreGlow { 0%,100% { box-shadow: 0 8px 22px rgba(0,0,0,.18); } 50% { box-shadow: 0 8px 30px color-mix(in srgb, var(--accent) 55%, transparent); } }
-.sobre.opening .sobre-flap { transform: rotateX(180deg); }
-.sobre.opening .sobre-seal { transform: translate(-50%, -50%) scale(0); transition: transform .3s ease; }
-.sobres-lock { text-align: center; color: var(--muted); margin: 4px 0 0; }
-.sobres-adm { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 8px; }
-.sobre-open { display: grid; place-items: center; padding: 8px 0 4px; }
-.sobre-letter { width: 100%; background: linear-gradient(180deg, #fffaf0, #f4ead7); color: #3b2f1c; border-radius: 12px; padding: 22px 18px; box-shadow: 0 10px 30px rgba(0,0,0,.2); animation: letterUp .6s cubic-bezier(.2,.8,.2,1); }
-.sobre-letter p { font-size: 1.15rem; line-height: 1.45; margin: 8px 0 0; }
-.sobre-letter .eyebrow { color: #9a2030; }
-@keyframes letterUp { from { transform: translateY(40px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .sobre.ready, .sobre.nope, .sobre-letter { animation: none; } }
-
 /* v0.7.49 · Pelis con mímica */
 .mim { display: grid; gap: 12px; }
 .mim-score { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -1671,47 +1644,6 @@ body.gala-on .fx { z-index: 94; }
 .egg-holding { animation: eggHold 1s linear both; }
 @keyframes eggHold { from { filter: none; } to { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 70%, transparent)) brightness(1.15); transform: scale(1.06); } }
 
-/* v0.7.55 · Sobres: vista de revisión del admin */
-.sobre-review { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--gold, #E8B64A) 16%, transparent); margin: 0 0 6px; }
-.sobre-review .ico { flex: none; width: 18px; height: 18px; margin-top: 1px; }
-
-/* v0.7.56 · Sobres: apertura a pantalla completa y ensayo del admin */
-.sobres-simbar { display: grid; gap: 8px; padding: 12px 14px; margin: -2px 0 6px; border-radius: 14px; border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
-.sobres-simbar b { display: flex; align-items: center; gap: 8px; }
-.sobres-simbar b .ico { width: 18px; height: 18px; color: var(--accent); }
-.sobres-simbar span { font-size: .9rem; color: var(--muted); }
-.sobre-stage { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px; background: radial-gradient(120% 90% at 50% 20%, rgba(74,21,32,.96), rgba(18,11,10,.97)); animation: fade .3s both; overflow-y: auto; }
-.ss-in { width: min(460px, 100%); display: grid; justify-items: center; gap: 18px; text-align: center; color: #FBF4EF; }
-.ss-in h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.8rem, 8vw, 2.6rem); line-height: 1.05; color: #FFE7A8; }
-.ss-in p { margin: 0; color: #E9E0DA; font-size: 1.05rem; }
-.ss-sim { font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #1A0F0C; background: #F2C65A; padding: 4px 10px; border-radius: 999px; }
-.ss-env { position: relative; width: min(300px, 78vw); aspect-ratio: 3 / 2; perspective: 900px; transition: transform .6s cubic-bezier(.3,1.3,.5,1), opacity .5s ease; }
-.ss-back, .ss-front, .ss-paper, .ss-flap { position: absolute; inset: 0; border-radius: 12px; }
-.ss-back { background: linear-gradient(160deg, #e2d0ad, #cfb98f); }
-.ss-paper { inset: 8% 7% 6%; border-radius: 6px; background: linear-gradient(180deg, #fffaf0, #f4ead7); transition: transform .7s cubic-bezier(.3,1.2,.5,1) .25s; }
-.ss-front { background: linear-gradient(160deg, #f4ead7, #e6d6b8); clip-path: polygon(0 34%, 50% 70%, 100% 34%, 100% 100%, 0 100%); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
-.ss-flap { bottom: auto; height: 62%; background: linear-gradient(180deg, #eadcbf, #d6c094); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .6s cubic-bezier(.3,1,.4,1); z-index: 2; }
-.ss-seal { position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%); z-index: 3; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 1.4rem; color: #fff; background: radial-gradient(circle at 35% 30%, #e0404f, #B8122C 60%, #6d0a19); box-shadow: 0 4px 12px rgba(0,0,0,.35); transition: transform .35s ease, opacity .35s ease; }
-.sobre-stage:not(.open) .ss-env { animation: ssWiggle .5s ease-in-out infinite alternate; }
-@keyframes ssWiggle { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
-.sobre-stage.open .ss-seal { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-.sobre-stage.open .ss-flap { transform: rotateX(180deg); z-index: 0; }
-.sobre-stage.open .ss-paper { transform: translateY(-38%); }
-.ss-card { width: 100%; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(30px) scale(.94); background: linear-gradient(180deg, #fffaf0, #f4ead7); color: #3b2f1c; border-radius: 16px; padding: 0 22px; box-shadow: 0 20px 50px rgba(0,0,0,.5); text-align: left; transition: all .7s cubic-bezier(.2,1.2,.4,1); }
-.ss-card .eyebrow { color: #9a2030; }
-.ss-card p { color: #3b2f1c; font-size: 1.2rem; line-height: 1.45; margin: 8px 0 0; }
-.sobre-stage.out .ss-env { transform: translateY(18px) scale(.72); opacity: .55; }
-.sobre-stage.out .ss-card { max-height: 60vh; overflow-y: auto; opacity: 1; transform: none; padding: 22px; }
-.ss-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; opacity: 0; transition: opacity .4s ease .5s; }
-.sobre-stage.out .ss-actions { opacity: 1; }
-.sobre-stage .btn.ghost { color: #FBF4EF; border-color: rgba(255,255,255,.3); }
-.sobre-stage.signal .ss-mini { display: flex; gap: 14px; }
-.ss-mini i { width: 78px; height: 52px; border-radius: 8px; background: linear-gradient(160deg, #f4ead7, #e6d6b8); position: relative; box-shadow: 0 10px 24px rgba(0,0,0,.4); animation: ssBounce .7s cubic-bezier(.3,1.6,.5,1) infinite alternate; }
-.ss-mini i:nth-child(2) { animation-delay: .25s; }
-.ss-mini i::after { content: ''; position: absolute; left: 50%; top: 55%; width: 18px; height: 18px; border-radius: 50%; transform: translate(-50%, -50%); background: #B8122C; }
-@keyframes ssBounce { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-14px) rotate(4deg); } }
-@media (prefers-reduced-motion: reduce) { .ss-env, .ss-mini i, .ss-card, .ss-flap, .ss-paper { animation: none !important; transition: none !important; } }
-
 /* v0.7.57 · Gala: el agradecimiento final a los abuelos */
 .gala-thanks { display: grid; justify-items: center; gap: 14px; max-width: 640px; }
 .gt-avs { display: flex; align-items: center; gap: 14px; }
@@ -1724,48 +1656,225 @@ body.gala-on .fx { z-index: 94; }
 @media (max-width: 520px) { .gt-av .av { width: 84px; height: 84px; } }
 @media (prefers-reduced-motion: reduce) { .gt-av .av, .gt-heart .ico { animation: none; } }
 
-/* v0.7.58 · Sobres: lacre que se rompe, fondo opaco y ensayo guiado en 3 pasos */
-.sobre-stage { background: #170C0C; background-image: radial-gradient(120% 90% at 50% 15%, #4A1520 0%, #1C0E0D 60%, #120B0A 100%); animation: none; }
-.ss-seal { background: none; box-shadow: none; width: 64px; height: 64px; }
-.ss-seal i { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e0404f, #B8122C 60%, #6d0a19); box-shadow: 0 4px 12px rgba(0,0,0,.35); transition: transform .5s cubic-bezier(.3,1.2,.5,1), opacity .5s ease; }
-.ss-seal i.l { clip-path: polygon(0 0, 54% 0, 44% 38%, 56% 62%, 46% 100%, 0 100%); }
-.ss-seal i.r { clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%, 56% 62%, 44% 38%); }
-.ss-seal b { position: relative; z-index: 1; font-weight: 900; font-size: 1.4rem; color: #fff; transition: opacity .3s ease; }
-.sobre-stage.open .ss-seal { transform: translate(-50%, -50%); opacity: 1; }
-.sobre-stage.crack .ss-seal b { opacity: 0; }
-.sobre-stage.crack .ss-seal i.l { transform: translate(-26px, 34px) rotate(-38deg); opacity: 0; }
-.sobre-stage.crack .ss-seal i.r { transform: translate(26px, 34px) rotate(38deg); opacity: 0; }
-.sobre-stage.crack .ss-env { animation: none; transform: scale(1.04); }
-.ss-hint { font-size: .95rem; color: #E9C77A !important; letter-spacing: .04em; transition: opacity .3s ease; }
-.sobre-stage.open .ss-hint { opacity: 0; }
-.sobre-stage.out .ss-hint { display: none; }
-.sobre-stage.out .ss-env { transform: scale(.82); opacity: 1; }
-.ss-warn { display: block; margin-top: 10px; color: #9a5a00; font-size: .85rem; }
-.sobres-ensayo { position: fixed; inset: 0; z-index: 110; overflow-y: auto; background: #170C0C; background-image: radial-gradient(120% 80% at 50% 0%, #3A1620, #140B0A 70%); color: #FBF4EF; display: grid; place-items: start center; padding: 18px 16px 28px; }
-.se-in { width: min(640px, 100%); display: grid; gap: 18px; }
-.se-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.se-x { color: #FBF4EF; background: rgba(255,255,255,.08); }
-.se-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.se-steps button { width: 100%; min-height: 56px; display: grid; justify-items: center; gap: 2px; padding: 8px 6px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.18); background: rgba(255,255,255,.04); color: #CDBDB4; font: inherit; font-size: .8rem; cursor: pointer; }
-.se-steps button b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #fff; font-size: .85rem; }
-.se-steps button.on { border-color: #F2C65A; color: #FFE7A8; background: rgba(242,198,90,.12); }
-.se-steps button.on b { background: #F2C65A; color: #1A0F0C; }
-.se-steps button.done b { background: #5E6B2E; }
-.se-body { display: grid; gap: 12px; justify-items: center; text-align: center; min-height: 330px; align-content: start; }
-.se-body h2 { margin: 6px 0 0; font-family: var(--font-display); font-size: clamp(1.35rem, 5.5vw, 1.9rem); line-height: 1.12; color: #FFE7A8; }
-.se-body p { margin: 0; color: #E9E0DA; max-width: 46ch; }
-.se-body .sobres { width: 100%; }
-.se-say { min-height: 1.6em; font-weight: 700; color: #FFE7A8 !important; }
-.se-say.pop { animation: sePop .4s cubic-bezier(.3,1.6,.5,1); }
-@keyframes sePop { from { transform: scale(.85); opacity: .3; } to { transform: none; opacity: 1; } }
-.se-signal { width: 100%; display: grid; justify-items: center; gap: 12px; padding: 22px 16px; border-radius: 20px; border: 1.5px solid rgba(242,198,90,.35); background: rgba(0,0,0,.25); }
-.se-signal h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.6rem, 7vw, 2.3rem); color: #FFE7A8; }
-.se-signal .ss-mini { display: flex; gap: 14px; }
-.se-warn { color: #FFD9A8 !important; font-size: .92rem; }
-.se-warn .link { color: #F2C65A; }
-.se-nav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.sobres-ensayo .btn.ghost { color: #FBF4EF; border-color: rgba(255,255,255,.3); }
-.sobres-ensayo .sobre-n { color: #5a4a30; }
+/* ===================== Sobres lacrados (v0.7.48) =====================
+   Escenario oscuro a pantalla completa, sobre de papel con lacre carmesí y la carta en papel claro (igual en modo claro y oscuro). */
+.sb-card { background: linear-gradient(150deg, color-mix(in srgb, #B0122C 11%, var(--glass)), color-mix(in srgb, var(--wood) 10%, var(--glass))); border-color: color-mix(in srgb, #B0122C 28%, var(--glass-line)); }
+.sb-card-in { display: flex; gap: 14px; align-items: center; }
+.sb-card .card-head { align-items: flex-start; }
+.sb-card h3 { margin: 0; }
+.sb-card p { margin: 4px 0 0; }
+.sb-mini { width: 64px; flex: none; transform: rotate(-6deg); filter: drop-shadow(0 6px 10px rgba(60, 10, 20, .25)); }
+body.sobre-on .fx { z-index: 99; }
+body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+
+.sobre {
+  --sb-ink: #1E1715; --sb-soft: #6B5A52; --sb-crimson: #B0122C; --sb-gold: #F6CD62; --sb-letter: #FBF6EE;
+  --sb-net: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='.2' stroke-width='1'%3E%3Cpath d='M10 20 45 8 80 30 60 70 20 62 10 20 60 70M45 8 20 62'/%3E%3C/g%3E%3Cg fill='%23FFFFFF' fill-opacity='.32'%3E%3Ccircle cx='10' cy='20' r='2.2'/%3E%3Ccircle cx='45' cy='8' r='2.2'/%3E%3Ccircle cx='80' cy='30' r='2.2'/%3E%3Ccircle cx='60' cy='70' r='2.2'/%3E%3Ccircle cx='20' cy='62' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+  position: fixed; inset: 0; z-index: 96; overflow: hidden; color: #F6ECE4; font-family: var(--font-display); animation: fade .35s both;
+}
+.sobre button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+.sobre button:focus-visible { outline: 3px solid var(--sb-gold); outline-offset: 3px; }
+.sb-sky { position: absolute; inset: 0; background: radial-gradient(110% 70% at 50% 34%, #45152A 0%, #1C0B11 52%, #0B0607 100%); }
+.sb-sky::after { content: ""; position: absolute; inset: 0; background: var(--sb-net) 0 0 / 180px 180px; opacity: .45; -webkit-mask: radial-gradient(70% 55% at 50% 40%, #000, transparent); mask: radial-gradient(70% 55% at 50% 40%, #000, transparent); }
+.sb-x { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 6; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18); }
+.sb-x .ico { width: 22px; height: 22px; }
+.sobre.reading .sb-x { background: rgba(24, 10, 14, .78); border-color: rgba(255, 255, 255, .2); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+
+.sb-scene { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; padding: 24px; }
+.sobre.reading .sb-scene { pointer-events: none; }
+.sb-env { --w: min(84vw, 400px); position: relative; width: var(--w); aspect-ratio: 3 / 2; perspective: 1200px;
+  animation: sbIn .9s cubic-bezier(.2, .9, .25, 1.1) both, sbFloat 5s ease-in-out .9s infinite;
+  transition: transform .9s cubic-bezier(.5, 0, .8, .4), opacity .7s ease; }
+.sb-env.open { animation: none; }
+.sb-env.away { transform: translateY(75vh) rotate(9deg); opacity: 0; }
+@keyframes sbIn { from { opacity: 0; transform: translateY(40px) rotate(-8deg) scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes sbFloat { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(-.8deg); } }
+.sb-card3d { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .1, .2, 1); }
+.sb-env.flipped .sb-card3d { transform: rotateY(180deg); }
+.sb-env.is-back .sb-card3d { transition: none; transform: none; }
+.sb-env.is-back .sb-front { display: none; }
+.sb-face { position: absolute; inset: 0; border-radius: 10px; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+
+/* delante: dirección, sello con su cara y matasellos */
+.sb-front { overflow: hidden; color: var(--sb-ink); background: radial-gradient(120% 90% at 18% 8%, #FCF6EC, #EFE3CF 68%, #E4D4B9); box-shadow: 0 30px 60px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .5); }
+.sb-front::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(120, 90, 60, .22); border-radius: 6px; pointer-events: none; }
+.sb-stamp { position: absolute; top: 9%; right: 7%; width: 22%; aspect-ratio: 4 / 5; padding: 6px; background: #FFFDF8; transform: rotate(4deg);
+  -webkit-mask: radial-gradient(circle 3px, #0000 95%, #000) -4px -4px / 8px 8px, linear-gradient(#000 0 0) content-box;
+  mask: radial-gradient(circle 3px, #0000 95%, #000) -4px -4px / 8px 8px, linear-gradient(#000 0 0) content-box; }
+.sb-stamp-in { position: relative; width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; background: linear-gradient(160deg, #C4112F, #7A0A1C); }
+.sb-stamp-in .av { width: 64%; height: auto; aspect-ratio: 1; font-size: 1.15rem; box-shadow: 0 0 0 2px #FFFDF8; }
+.sb-stamp-in b { position: absolute; right: 7%; bottom: 3%; color: #FFE9EC; font-weight: 800; font-size: .9rem; }
+.sb-postmark { position: absolute; top: 13%; right: 16%; width: 36%; z-index: 1; color: rgba(44, 20, 30, .55); transform: rotate(-12deg); mix-blend-mode: multiply; }
+.sb-addr { position: absolute; left: 9%; right: 28%; bottom: 13%; display: flex; flex-direction: column; gap: 2px; }
+.sb-addr small { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic; font-size: clamp(.95rem, 3.8vw, 1.1rem); color: var(--sb-soft); }
+.sb-addr b { font-size: clamp(2.1rem, 11vw, 3.2rem); font-weight: 800; line-height: .95; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.sb-uline { display: block; width: 100%; height: 10px; color: var(--sb-crimson); margin-top: 3px; }
+.sb-addr span { margin-top: 5px; font-size: clamp(.74rem, 3vw, .84rem); font-weight: 600; color: var(--sb-soft); }
+.sb-flip { position: absolute; inset: 0; z-index: 2; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+
+/* detrás: el interior, la carta, el bolsillo, la solapa y el lacre */
+.sb-backf { transform: rotateY(180deg); perspective: 900px; }
+.sb-env.is-back .sb-backf { transform: none; }
+.sb-inside { position: absolute; inset: 0; border-radius: 10px; background: var(--sb-net) 0 0 / 90px 90px, linear-gradient(180deg, #9E0D25, #5E0614); box-shadow: 0 30px 60px rgba(0, 0, 0, .5); }
+.sb-letter { position: absolute; left: 7%; right: 7%; top: 6%; height: 86%; z-index: 2; padding: 7% 7%; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; color: var(--sb-ink); background: var(--sb-letter); box-shadow: 0 -2px 10px rgba(0, 0, 0, .18); transition: transform 1s cubic-bezier(.3, .1, .2, 1); }
+.sb-letter small { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-style: italic; font-size: .8rem; color: var(--sb-soft); }
+.sb-letter b { font-size: clamp(1.15rem, 5.4vw, 1.55rem); font-weight: 800; line-height: 1.05; letter-spacing: -.01em; }
+.sb-letter .sb-net-rule { width: 70%; height: 10px; margin-top: 6px; }
+.sb-env.rise .sb-letter { transform: translateY(-64%); }
+.sb-pocket { position: absolute; inset: 0; z-index: 3; border-radius: 10px; clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200 150 108 300 200' fill='none' stroke='%23A88C6A' stroke-opacity='.5' stroke-width='1.4'/%3E%3C/svg%3E") center / 100% 100% no-repeat, linear-gradient(172deg, #F6EEE1, #E5D5BB); }
+.sb-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; z-index: 4; transform-origin: 50% 0; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.4, .1, .2, 1); }
+.sb-flap-out, .sb-flap-in { position: absolute; inset: 0; clip-path: polygon(0 0, 100% 0, 50% 100%); -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.sb-flap-out { border-radius: 10px 10px 0 0; background: linear-gradient(180deg, #F1E7D6 0%, #E4D4B9 85%, #D9C6A6 100%); }
+.sb-flap-in { transform: rotateX(180deg); background: var(--sb-net) 0 0 / 90px 90px, linear-gradient(0deg, #8E0B21, #5E0614); }
+.sb-env.open .sb-flap { transform: rotateX(180deg); }
+.sb-env.flap-back .sb-flap { z-index: 1; }
+.sb-seal { position: absolute; left: 50%; top: 58%; z-index: 5; width: 30%; aspect-ratio: 1; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer;
+  transform: translate(-50%, -50%) scale(calc(1 - var(--k, 0) * .1)); touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  filter: drop-shadow(0 7px 8px rgba(40, 0, 8, .45)); }
+.sb-env:not(.is-back) .sb-seal { pointer-events: none; }
+.sb-seal::before { content: ""; position: absolute; inset: -4%; border-radius: 50%; pointer-events: none; }
+.sb-env.is-back:not(.open) .sb-seal:not(.holding)::before { animation: sbPulse 2.2s ease-out infinite; }
+@keyframes sbPulse { 0% { box-shadow: 0 0 0 0 rgba(246, 205, 98, .55); } 80%, 100% { box-shadow: 0 0 0 18px rgba(246, 205, 98, 0); } }
+.sb-wax { position: absolute; inset: 0; }
+.sb-wax svg { display: block; width: 100%; height: 100%; }
+.sb-wax-l { clip-path: inset(0 50% 0 0); }
+.sb-wax-r { clip-path: inset(0 0 0 50%); }
+.sb-crack { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sb-seal.cracking .sb-crack { stroke-dashoffset: 0; transition: stroke-dashoffset .25s ease-in; }
+.sb-seal.broken { pointer-events: none; filter: none; }
+.sb-seal.broken .sb-wax-l { animation: sbHalfL .95s cubic-bezier(.5, 0, .8, .6) forwards; }
+.sb-seal.broken .sb-wax-r { animation: sbHalfR .95s cubic-bezier(.5, 0, .8, .6) forwards; }
+@keyframes sbHalfL { 0% { transform: none; } 18% { transform: translate(-7px, -5px) rotate(-9deg); } 100% { transform: translate(-70px, 190px) rotate(-75deg); opacity: 0; } }
+@keyframes sbHalfR { 0% { transform: none; } 18% { transform: translate(7px, -5px) rotate(9deg); } 100% { transform: translate(70px, 200px) rotate(80deg); opacity: 0; } }
+.sb-ring { position: absolute; left: -14%; top: -14%; width: 128%; height: 128%; transform: rotate(-90deg); pointer-events: none; opacity: 0; transition: opacity .2s; }
+.sb-seal.holding .sb-ring { opacity: 1; }
+.sb-ring-bg { fill: none; stroke: rgba(246, 205, 98, .2); stroke-width: 4; }
+.sb-ring-fill { fill: none; stroke: var(--sb-gold); stroke-width: 4.5; stroke-linecap: round; }
+.sb-seal.broken .sb-ring { opacity: 0; }
+.sb-seal.nope { animation: sbNope .5s ease; }
+@keyframes sbNope {
+  0%, 100% { transform: translate(-50%, -50%); }
+  20% { transform: translate(calc(-50% - 9px), -50%) rotate(-9deg); }
+  40% { transform: translate(calc(-50% + 8px), -50%) rotate(8deg); }
+  60% { transform: translate(calc(-50% - 5px), -50%) rotate(-5deg); }
+  80% { transform: translate(calc(-50% + 3px), -50%) rotate(3deg); }
+}
+.sb-hint { min-height: 2.8em; max-width: 30ch; margin: 0; text-align: center; font-weight: 600; font-size: 1.04rem; line-height: 1.35; text-wrap: balance; color: #F6ECE4; }
+
+/* el «11» que estalla al abrir */
+.sb-eleven { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; pointer-events: none; opacity: 0; font-weight: 800; font-size: 72vmin; line-height: 1; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 2px rgba(246, 205, 98, .85); }
+.sb-eleven.go { animation: sbEleven 1.9s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes sbEleven { 0% { opacity: 0; transform: scale(.3); } 30% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.55); } }
+
+/* la carta a pantalla completa */
+.sb-read { position: absolute; inset: 0; z-index: 4; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  padding: calc(72px + env(safe-area-inset-top, 0px)) 14px calc(40px + env(safe-area-inset-bottom, 0px));
+  opacity: 0; transform: translateY(60px) scale(.94); transition: opacity .6s ease, transform .9s cubic-bezier(.2, .9, .25, 1); }
+.sb-read.in { opacity: 1; transform: none; }
+.sb-paper { position: relative; max-width: 620px; margin: 0 auto; overflow: hidden; padding: clamp(24px, 6.5vw, 52px); border-radius: 18px; color: var(--sb-ink); background: var(--sb-letter); box-shadow: 0 40px 80px rgba(0, 0, 0, .55); font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; }
+.sb-head { position: relative; }
+.sb-age { position: absolute; right: -.05em; top: -.3em; font-family: var(--font-display); font-weight: 800; font-size: clamp(7rem, 34vw, 12rem); line-height: 1; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 2px rgba(176, 18, 44, .16); pointer-events: none; }
+.sb-kicker { position: relative; margin: 0 0 6px; font-style: italic; font-size: 1.05rem; color: var(--sb-soft); }
+.sb-head h1 { position: relative; margin: 0; font-family: var(--font-display); font-weight: 800; font-size: clamp(2.1rem, 9.5vw, 3.4rem); line-height: 1; letter-spacing: -.025em; text-wrap: balance; color: var(--sb-ink); }
+.sb-net-rule { display: block; width: 100%; height: 14px; margin-top: 16px; color: var(--sb-crimson); }
+.sb-fig { max-width: 360px; margin: 28px auto 10px; color: var(--sb-ink); }
+.sb-pc { display: block; width: 100%; height: auto; }
+.sb-pc .sb-scr { fill: var(--sb-ink); }
+.sb-pc .sb-pwr { stroke: var(--sb-crimson); }
+.sb-cur { animation: sbBlink 1s steps(1) infinite; }
+@keyframes sbBlink { 50% { opacity: 0; } }
+.sb-text { margin-top: 18px; }
+.sb-text p { margin: 0 0 1em; font-size: 1.08rem; line-height: 1.68; text-wrap: pretty; }
+.sb-text .sb-greet { font-weight: 700; }
+.sb-text .sb-close { margin-top: 1.3em; font-family: var(--font-display); font-weight: 800; font-size: 1.28rem; line-height: 1.25; }
+
+.sb-ticket { position: relative; margin: 30px 0 6px; border: 2px solid var(--sb-ink); border-radius: 14px; background: #FFFDF8; font-family: var(--font-display); color: var(--sb-ink); }
+.sb-tk-top { padding: 18px 20px 16px; }
+.sb-tk-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 700; font-size: .82rem; letter-spacing: .14em; text-transform: uppercase; }
+.sb-tk-no { padding: 2px 9px; border: 1.5px solid currentColor; border-radius: 999px; letter-spacing: .04em; }
+.sb-tk-title { margin: 8px 0 0; font-weight: 800; font-size: clamp(1.35rem, 6vw, 1.7rem); line-height: 1.1; text-wrap: balance; }
+.sb-tk-rows { position: relative; display: grid; gap: 7px; margin: 0; padding: 16px 20px 64px; border-top: 2px dashed var(--sb-ink); }
+.sb-tk-rows::before, .sb-tk-rows::after { content: ""; position: absolute; top: -15px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid; background: var(--sb-letter); transform: rotate(-45deg); }
+.sb-tk-rows::before { left: -15px; border-color: transparent var(--sb-ink) var(--sb-ink) transparent; }
+.sb-tk-rows::after { right: -15px; border-color: var(--sb-ink) transparent transparent var(--sb-ink); }
+.sb-tk-rows div { display: flex; gap: 10px; font-size: .98rem; line-height: 1.35; }
+.sb-tk-rows dt { flex: none; min-width: 6.4em; font-weight: 800; }
+.sb-tk-rows dd { margin: 0; font-weight: 500; }
+.sb-ink { position: absolute; right: 16px; bottom: 16px; padding: 6px 10px; border: 3px double var(--sb-crimson); border-radius: 8px; color: var(--sb-crimson); font-weight: 800; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; opacity: 0; transform: rotate(-12deg); mix-blend-mode: multiply; pointer-events: none; }
+.sb-ticket.in .sb-ink { animation: sbStampIn .45s .45s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes sbStampIn { from { opacity: 0; transform: rotate(-12deg) scale(2.4); } to { opacity: .92; transform: rotate(-12deg) scale(1); } }
+.sb-fine { margin-top: 26px; padding-top: 14px; border-top: 1.5px dashed rgba(30, 23, 21, .35); }
+.sb-fine h2 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1rem; font-weight: 800; }
+.sb-fine ul { margin: 0; padding-left: 1.1em; font-size: .97rem; line-height: 1.55; color: #3F332E; }
+
+.sb-from { margin-top: 34px; text-align: center; }
+.sb-signoff { margin: 0 0 16px; font-style: italic; font-size: 1.08rem; }
+.sb-trio { position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); align-items: start; padding-top: 8px; }
+.sb-links { position: absolute; left: 0; top: 0; width: 100%; height: 120px; overflow: visible; pointer-events: none; }
+.sb-links path { fill: none; stroke: var(--sb-crimson); stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sb-from.in .sb-links path { stroke-dashoffset: 0; transition: stroke-dashoffset 1.1s .25s ease; }
+.sb-who { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0; transform: translateY(14px) scale(.9); }
+.sb-from.in .sb-who { opacity: 1; transform: none; transition: opacity .5s calc(var(--i) * .18s + .1s), transform .6s cubic-bezier(.2, 1.5, .4, 1) calc(var(--i) * .18s + .1s); }
+.sb-who .av { width: 68px; height: 68px; font-size: 1.6rem; box-shadow: 0 0 0 4px var(--sb-letter), 0 0 0 6px var(--sb-crimson); }
+.sb-who b { font-family: var(--font-display); font-weight: 800; font-size: 1.12rem; }
+.sb-crew { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 7px; max-width: 88px; min-height: 85px; }
+.sb-who.group .av { width: 38px; height: 38px; font-size: .95rem; box-shadow: 0 0 0 2.5px var(--sb-letter), 0 0 0 4px var(--sb-crimson); }
+.sb-who.group b { font-size: 1rem; white-space: nowrap; }
+.sb-who small { max-width: 12ch; font-size: .82rem; font-style: italic; line-height: 1.25; color: var(--sb-soft); }
+.sb-scribble { width: 84px; height: 24px; margin-top: -4px; }
+.sb-scribble path { fill: none; stroke: var(--sb-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.sb-from.in .sb-scribble path { stroke-dashoffset: 0; transition: stroke-dashoffset 1.4s .9s ease-in-out; }
+
+.sb-keeper { display: flex; flex-direction: column; gap: 10px; max-width: 620px; margin: 16px auto 0; padding: 18px; border-radius: 18px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+.sb-keeper h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 1.02rem; color: var(--sb-gold); }
+.sb-keeper h2 .ico { width: 20px; height: 20px; }
+.sb-sw { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 10px 12px; border-radius: 14px; text-align: left; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
+.sb-sw b { display: block; font-size: .98rem; }
+.sb-sw small { display: block; margin-top: 2px; font-size: .84rem; font-weight: 500; color: #D8C9C0; }
+.sb-sw i { position: relative; flex: none; width: 46px; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, .2); transition: background .2s; }
+.sb-sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .25s cubic-bezier(.3, 1.4, .5, 1); }
+.sb-sw[aria-pressed="true"] i { background: #D21C3A; }
+.sb-sw[aria-pressed="true"] i::after { transform: translateX(18px); }
+.sb-k-when { margin: 0; font-size: .86rem; color: #D8C9C0; }
+.sb-k-when:empty { display: none; }
+.sb-k-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.sb-k-btns.solo { max-width: 620px; margin: 16px auto 0; }
+.sb-btn { flex: 1 1 140px; min-height: 50px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .24); background: transparent; font-weight: 700; font-size: 1rem; }
+.sobre .sb-btn.solid { background: #F6ECE4; border-color: #F6ECE4; color: #1E1715; }
+
+/* sin movimiento: lo mismo, sin vuelos */
+.sobre.calm *, .sobre.calm *::before, .sobre.calm *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .15s !important; transition-delay: 0s !important; }
+@media (prefers-reduced-motion: reduce) { .sb-env, .sb-cur { animation: none; } }
+
+/* v0.7.54: mantener pulsada una foto es un abrazo (secreto), no el menú de guardar imagen */
+.av, .av img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* v0.7.59 · Avisos al entrar (los sobres y el cierre de los secretos) */
+.aviso { position: fixed; inset: 0; z-index: 92; display: grid; place-items: center; padding: 16px; background: rgba(16, 9, 8, .5); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); animation: fade .22s ease both; }
+.aviso.out { opacity: 0; transition: opacity .2s ease; }
+.aviso-box { width: min(400px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; text-align: center; padding: 22px 20px 18px; border-radius: 26px; color: var(--ink);
+  background: var(--glass-strong); -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur)); border: 1px solid var(--glass-line); box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+  animation: avisoIn .5s cubic-bezier(.3, 1.35, .5, 1) both; }
+.aviso-box h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.45rem, 6.4vw, 1.9rem); line-height: 1.08; margin: 6px 0 8px; letter-spacing: -.01em; }
+.aviso-box p { margin: 0 auto; max-width: 34ch; font-size: 1.04rem; line-height: 1.45; color: var(--muted); }
+.aviso-box p b { color: var(--ink); }
+.aviso-btns { display: grid; gap: 8px; margin-top: 18px; }
+.aviso-btns .btn { min-height: var(--tap); width: 100%; justify-content: center; }
+.aviso-box.is-sobres { background: linear-gradient(160deg, color-mix(in srgb, #B0122C 12%, var(--glass-strong)), color-mix(in srgb, var(--wood) 12%, var(--glass-strong))); }
+.aviso-envs { display: flex; justify-content: center; gap: 10px; margin: 2px 0 4px; }
+.aviso-envs span { display: block; width: 84px; animation: avisoEnv .8s cubic-bezier(.3, 1.4, .5, 1) both; animation-delay: calc(.15s + var(--i) * .18s); }
+.aviso-envs span:nth-child(odd) { --r: -6deg; } .aviso-envs span:nth-child(even) { --r: 5deg; }
+.aviso-envs .sb-mini { display: block; width: 100%; height: auto; transform: rotate(var(--r, 0deg)); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .22)); }
+.aviso-clock { width: 86px; height: 86px; margin: 0 auto 4px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent);
+  box-shadow: 0 0 0 6px var(--accent-soft), 0 10px 26px color-mix(in srgb, var(--accent) 40%, transparent); animation: avisoTick 2.4s ease-in-out infinite; }
+.aviso-clock span { font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; }
+.sb-card.aviso-flash { animation: avisoFlash 1.6s ease 2; }
+@keyframes avisoIn { from { opacity: 0; transform: translateY(18px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes avisoEnv { from { opacity: 0; transform: translateY(-40px) rotate(-14deg); } to { opacity: 1; transform: none; } }
+@keyframes avisoTick { 0%, 100% { transform: rotate(0); } 8% { transform: rotate(-7deg); } 16% { transform: rotate(6deg); } 24% { transform: rotate(0); } }
+@keyframes avisoFlash { 0%, 100% { box-shadow: var(--shadow); } 40% { box-shadow: 0 0 0 4px color-mix(in srgb, #B0122C 45%, transparent), var(--shadow); } }
+@media (prefers-reduced-motion: reduce) { .aviso-box, .aviso-envs span, .aviso-clock, .sb-card.aviso-flash { animation: none; } }
 
 </style>
 </head>
@@ -2730,6 +2839,7 @@ function closeOverlays() {
   var any = false;
   if (document.getElementById('viewer') && typeof viewerClose === 'function') { viewerClose(true); any = true; }
   if (document.getElementById('gala') && typeof galaClose === 'function') { galaClose(true); any = true; }
+  if (document.getElementById('sobre') && typeof sobreClose === 'function') { sobreClose(true); any = true; }
   if (document.getElementById('scrim')) { removeSheet(); any = true; }
   return any;
 }
@@ -4338,6 +4448,7 @@ function bindEvents() {
     var t = e.target;
     if (t.id === 'f-name') { clearTimeout(dupT); dupT = setTimeout(dupWarn, 250); }
     if (t.dataset.input === 'search' && /habemus/i.test(t.value)) habemusPapam();
+    if (t.dataset.input === 'search' && SPY_WORD.test(t.value) && !hasEgg('chivato') && !ui._spyOn) { ui._spyOn = true; setTimeout(function () { ui._spyOn = false; }, 4000); spyReply(true); }
     if (t.dataset.input === 'search' && /^(salud|chin ?ch[ií]n)$/i.test(t.value.trim()) && !hasEgg('salud')) cheers('', true);
     if (t.dataset.input === 'search' && /\b(con|sin) cebolla\b/i.test(t.value) && !ui._tortiOn) { ui._tortiOn = true; setTimeout(function () { ui._tortiOn = false; }, 4000); tortillaDebate(/sin/i.test(t.value)); }
     if (t.dataset.input === 'search') { ui.q = t.value; var pos = t.selectionStart; render(true); var n = document.getElementById('q'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
@@ -5391,19 +5502,20 @@ function buildEggs() {
     { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Obras son amores… y corazones en el álbum', more: 'Abre una foto del álbum y toca el corazón' },
     /* Toques escondidos */
     { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'Llamad y se os abrirá. Bueno, más o menos', more: 'En Inicio, toca la casita de arriba a la izquierda o el título grande' },
-    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo), o deja el dedo quieto encima un segundo' },
+    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo)' },
     { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño de la casa esconde algo. A la tercera va la vencida', more: 'En Comidas, toca 3 veces «Menú ' + b + '» (o su foto)' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc… y así hasta quince', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas, rápido' },
-    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo), o deja el dedo quieto encima un segundo' },
+    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo)' },
     { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Al mal tiempo, buena cara… y cinco toques', more: 'En Inicio, toca 5 veces el título «El tiempo en la finca»' },
     { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás (o, ya en la finca, «¡Ya estamos en la finca!»)', hint: 'La cuenta atrás también sabe bailar. A la tercera…', more: 'En Inicio, toca 3 veces la frase «¡Ya estamos en la finca!» (antes del viaje eran los números de la cuenta atrás)' },
     { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música, aunque el trono esté vacío', more: 'Juegos → Ranking: toca 3 veces el podio (el primero, o el hueco)' },
     { k: 'abumetro', name: 'Abuelómetro al rojo', how: 'Tocar 3 veces el Abuelómetro', hint: 'Hay un medidor de abuelos. Se calienta si lo tocas', more: 'Cuentas → El rincón de los abuelos → toca 3 veces el Abuelómetro' },
-    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos), o deja el dedo quieto encima un segundo' },
+    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos)' },
     /* Palabras mágicas */
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Lo que se dice cuando sale humo blanco. En latín y en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
     { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra', hint: 'Lo que se dice al brindar. Agua que no has de beber…', more: 'En el buscador de Compra, lo que se dice al brindar' },
     { k: 'tortilla', name: 'El gran debate', how: 'Buscar «con cebolla» o «sin cebolla» en la compra', hint: 'La pregunta que rompe familias desde tiempos inmemoriales', more: 'En el buscador de Compra: ¿la tortilla, con o sin…?' },
+    { k: 'chivato', name: 'Chivatazo', how: 'Escribir «espía» en el buzón de ideas o en el buscador de Compra', hint: 'Si lo nombras, aparece. Escríbelo donde se escriben cosas', more: 'En el buzón de ideas (o en el buscador de Compra), escribe a qué se dedica el invitado misterioso' },
     /* A su hora */
     { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A quien madruga Dios le ayuda. A quien trasnocha, la app', more: 'Abre la app de madrugada, cuando todos duermen. Ojo: con el cierre del domingo a las 18:00, ya no queda ninguna madrugada que cuente' },
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números de ' + c, more: 'Cuando el reloj marque cuatro unos. Antes del cierre del domingo solo queda una: la de la mañana' },
@@ -5425,7 +5537,40 @@ function eggKey() { return KEY + '-eggs2-' + (ui.me || 'anon'); }
 function hintKey() { return KEY + '-hints2-' + (ui.me || 'anon'); }
 function readJ(k, mem) { try { var v = JSON.parse(localStorage.getItem(k)); if (v) return v; } catch (e) {} return (ui[mem] && ui[mem][ui.me]) || {}; }
 function writeJ(k, mem, v) { ui[mem] = ui[mem] || {}; ui[mem][ui.me] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-function foundMap() { return readJ(eggKey(), '_eggs'); }
+function foundMap() { eggsBorrowFix(); return readJ(eggKey(), '_eggs'); }
+/* v0.7.52 · Cada secreto, para quien lo descubre. Si en este móvil otra cuenta ya lo había descubierto antes,
+   entrar con otra cuenta y repetirlo no suma: se ve el efecto, pero no cuenta para el ranking. */
+function borrowKey() { return KEY + '-eggsx-' + (ui.me || 'anon'); }
+function borrowMap() { return readJ(borrowKey(), '_eggsx'); }
+function eggRealTs(v) { return v && v !== EGG_RESTORED_AT ? Date.parse(v) || 0 : 0; }
+function otherStores() {
+  var out = [], pre = KEY + '-eggs2-';
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i); if (!key || key.indexOf(pre) !== 0) continue;
+      var pid = key.slice(pre.length); if (!pid || pid === ui.me || pid === 'anon') continue;
+      var m = JSON.parse(localStorage.getItem(key) || '{}'); if (m) out.push({ pid: pid, map: m });
+    }
+  } catch (e) {}
+  return out;
+}
+/* ¿Quién lo descubrió antes que yo en este móvil? (solo descubrimientos reales, no lo recuperado de la nube) */
+function eggFirstHere(k, mine) {
+  var best = null;
+  otherStores().forEach(function (o) { var t = eggRealTs(o.map[k]); if (t && (!mine || t < mine) && (!best || t < best.t)) best = { pid: o.pid, t: t }; });
+  return best;
+}
+/* Una vez por cuenta: lo que se coló antes de esta versión pasa a «visto en este móvil» y deja de contar */
+function eggsBorrowFix() {
+  if (!ui.me || ui._bfix === ui.me) return; ui._bfix = ui.me;
+  var f = readJ(eggKey(), '_eggs'), x = borrowMap(), moved = 0;
+  Object.keys(f).forEach(function (k) {
+    var mine = eggRealTs(f[k]); if (!mine) return;   /* lo recuperado de la nube ya era tuyo */
+    var o = eggFirstHere(k, mine); if (!o) return;
+    x[k] = { by: o.pid, at: f[k] }; delete f[k]; moved++;
+  });
+  if (moved) { writeJ(eggKey(), '_eggs', f); writeJ(borrowKey(), '_eggsx', x); }
+}
 function hintsMap() { return readJ(hintKey(), '_hints'); }
 function hasEgg(k) { return !!foundMap()[k]; }
 function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
@@ -5434,6 +5579,14 @@ function rankedCount() { var f = foundMap(), c = secretsClose().getTime(); retur
 function egg(k, quiet) {
   var f = foundMap(); if (f[k]) return false;
   var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
+  var bx = borrowMap();
+  if (bx[k]) return false;
+  var first = eggFirstHere(k, 0);
+  if (first) {   /* en este móvil ya lo descubrió otra cuenta: se disfruta, pero no suma */
+    bx[k] = { by: first.pid, at: new Date().toISOString() }; writeJ(borrowKey(), '_eggsx', bx);
+    setTimeout(function () { toast('Este secreto ya lo descubrió ' + esc(nameOf(first.pid, 'otra cuenta')) + ' en este móvil, así que no suma para ' + esc(nameOf(ui.me, 'ti')) + '. ¡Descúbrelo en tu móvil!'); }, 1600);
+    return false;
+  }
   f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
   var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
   /* los secretos «silenciosos» (sin efecto propio) también tienen su gran momento */
@@ -5657,28 +5810,9 @@ function secretsHomeBanner() {
   return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
 }
 
-/* ----- v0.7.53: dejar el dedo encima también vale (y sin el menú de «copiar imagen» del móvil) -----
-   En los secretos de «tocar varias veces» (fotos de personas, logo, tiempo, cuenta atrás, podio…), mantener pulsado
-   ~1 segundo cuenta como todos los toques. Además se anula el menú contextual del navegador sobre fotos y zonas secretas. */
-(function () {
-  var holdT = null, sx = 0, sy = 0, holdEl = null;
-  function cancel() { clearTimeout(holdT); holdT = null; if (holdEl) holdEl.classList.remove('egg-holding'); holdEl = null; }
-  document.addEventListener('pointerdown', function (e) {
-    var el = e.target.closest && e.target.closest('[data-egg]'); if (!el || !S || typeof EGG_TAPS === 'undefined' || !EGG_TAPS[el.dataset.egg]) return;
-    cancel(); holdEl = el; sx = e.clientX; sy = e.clientY; el.classList.add('egg-holding');
-    holdT = setTimeout(function () {
-      var k = el.dataset.egg, n = EGG_TAPS[k] || 1; cancel();
-      if (navigator.vibrate) try { navigator.vibrate([20, 30, 40]); } catch (x) {}
-      for (var i = 0; i < n; i++) { if (eggTap(k, el)) break; }
-      el._heldAt = Date.now();
-    }, 1000);
-  }, { passive: true });
-  document.addEventListener('pointermove', function (e) { if (holdT && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) cancel(); }, { passive: true });
-  ['pointerup', 'pointercancel', 'scroll'].forEach(function (ev) { document.addEventListener(ev, cancel, { passive: true, capture: true }); });
-  /* el «clic» que llega justo después de mantener pulsado no suma otro toque */
-  document.addEventListener('click', function (e) { var el = e.target.closest && e.target.closest('[data-egg]'); if (el && el._heldAt && Date.now() - el._heldAt < 900) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
-  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.av, [data-egg], .gb-av, .pod-av, .gbd-av')) e.preventDefault(); });
-})();
+/* ----- v0.7.53/59: sin el menú de «copiar imagen» del móvil al mantener pulsada una foto o zona secreta
+   (así funciona el secreto «Abrazo largo»: mantener 2 s la foto de alguien) ----- */
+document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.av, [data-egg], .gb-av, .pod-av, .gbd-av')) e.preventDefault(); });
 
 /* ===================== La finca: todo lo práctico =====================
    El contenido (Wi-Fi, normas, tiendas…) vive en los datos (S.finca, en la BD), nunca en el código público.
@@ -6065,8 +6199,8 @@ VIEWS.inicio = function () {
   } else if (c.phase === 'during') h += '<p class="live" data-egg="disco">¡Ya estamos en la finca!</p>';
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
-  if (typeof sobresCard === 'function') h += sobresCard();
   h += homePayments();
+  if (typeof sobreCard === 'function') h += sobreCard();   /* v0.7.48: sobres lacrados */
   h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();
@@ -6110,7 +6244,7 @@ function orgName() { var a = S.people.find(function (p) { return p.role === 'adm
 var IDEA_ST = { nueva: 'Nueva', vista: 'Lo miramos', hecha: '¡Hecho!', no: 'Mejor no' };
 function ideaLikes(id) { return (S.ideaLikes && S.ideaLikes[id]) || []; }
 function ideasSorted() {
-  return (S.ideas || []).slice().sort(function (a, b) { return (ideaLikes(b.id).length - ideaLikes(a.id).length) || String(b.at).localeCompare(String(a.at)); });
+  return (S.ideas || []).slice().sort(function (a, b) { return (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0); });   /* v0.7.51: la más reciente, arriba */
 }
 function ideaRow(x) {
   var likes = ideaLikes(x.id), mine = likes.indexOf(me().id) >= 0, st = x.status || 'nueva';
@@ -6129,8 +6263,23 @@ function ideasCard() {
 }
 function ideasSheet() {
   var list = ideasSorted();
-  openSheet('<h2>Buzón de ideas</h2><p class="small muted">Ordenadas por apoyos. ' + (can('access') ? 'Tú puedes marcar cómo va cada una.' : esc(orgName()) + ' marca lo que ya está hecho.') + '</p>' +
+  openSheet('<h2>Buzón de ideas</h2><p class="small muted">La más reciente, arriba. ' + (can('access') ? 'Tú puedes marcar cómo va cada una.' : esc(orgName()) + ' marca lo que ya está hecho.') + '</p>' +
     '<div class="stack ideas-list">' + (list.length ? list.map(ideaRow).join('') : '<p class="small muted">Nada por aquí.</p>') + '</div><button class="btn block" data-act="close">Cerrar</button>');
+}
+/* El Espía lee el buzón (y el buscador de la compra). Si lo nombras, contesta. Secreto «Chivatazo» */
+var SPY_WORD = /\besp[ií]as?\b/i, spyN = 0;
+var SPY_REPLIES = [
+  'Mensaje interceptado. Tu idea ha quedado archivada en la carpeta «Sospechosos». Firmado: nadie.',
+  '¿Que no soy de fiar? Lo dice alguien que acaba de escribir en un buzón que lee toda la familia.',
+  'He leído tu mensaje, lo he memorizado y ahora me lo voy a comer. Es lo que hacemos los profesionales.',
+  'El Espía ni confirma ni desmiente. Pero apunta tu nombre en su libreta.',
+  'Gracias por tu interés. Tu expediente ha pasado de «normal» a «bajo vigilancia».'
+];
+var SPY_SEARCH = 'Me buscabas en la lista de la compra… Pues no estoy entre los yogures. Ni detrás de las croquetas. Sigue buscando.';
+function spyReply(viaSearch) {
+  var txt = viaSearch ? SPY_SEARCH : SPY_REPLIES[spyN++ % SPY_REPLIES.length];
+  if (hasEgg('chivato')) { toast(icon('search') + '<b>El Espía:</b> ' + esc(txt)); return; }
+  eggCard('chivato', 'El Espía te ha contestado', esc(txt));
 }
 Object.assign(A, {
   ideaNew: function () { go('inicio'); setTimeout(function () { var t = document.getElementById('idea-text'); if (t) { t.scrollIntoView({ block: 'center' }); t.focus(); } }, 150); },
@@ -6138,7 +6287,9 @@ Object.assign(A, {
     var t = document.getElementById('idea-text'), v = t ? t.value.trim() : '';
     if (v.length < 3) { toast('Escribe tu idea primero (aunque sea corta)'); return; }
     S.ideas = S.ideas || []; S.ideas.push({ id: uid('id'), by: me().id, text: v.slice(0, 400), at: new Date().toISOString(), status: 'nueva' });
-    save(); render(true); toast('¡Idea al buzón! Gracias por hacer la casa rural más chula');
+    save(); render(true);
+    if (SPY_WORD.test(v)) setTimeout(function () { spyReply(false); }, 700);   /* v0.7.50: si lo nombras, contesta */
+    else toast('¡Idea al buzón! Gracias por hacer la casa rural más chula');
   },
   ideaLike: function (el) {
     var id = el.dataset.id; S.ideaLikes = S.ideaLikes || {}; var l = S.ideaLikes[id] = S.ideaLikes[id] || [], k = l.indexOf(me().id);
@@ -6385,6 +6536,7 @@ function secretStyle(k) {
     himno:    { emo: '🎺', fx: ['emoji:🎺 🎶 👑', 'fireworks', 'rocket'], quip: 'Música para el número 1. Que no se le suba, que hasta el rabo todo es toro.' },
     abumetro: { emo: '🌡️', fx: ['emoji:🔥 🌡️ 👵 👴'], quip: 'El abuelómetro echa humo. Acepta sobornos: un vermut con aceitunas, por ejemplo.' },
     cazaesp:  { emo: '🕵️', fx: ['emoji:🕵️ 🔎 🥸 🗝️', 'smoke', 'cannons'], quip: 'Espía pinchado. No ha soltado prenda, pero se le ha caído el bigote postizo. Seguimos investigando.' },
+    chivato:  { emo: '🕵️', fx: ['smoke', 'emoji:🕵️ 📨 🔎 🥸'], quip: 'Has nombrado al Espía y te ha contestado. Ahora él también sabe quién eres.' },
     papa:     { emo: '🕊️', fx: ['smoke', 'emoji:🕊️ ⛪'], quip: 'Habemus papam. Y si no, habemus lista de la compra, que para esta familia es casi lo mismo.' },
     salud:    { emo: '🥂', fx: ['emoji:🥂 🍾 🍷 🍻', 'cannons'], quip: 'Chin chin. Por ' + c + ' y por quien friegue los vasos (que nunca es el mismo que brinda).' },
     tortilla: { emo: '🍳', fx: ['emoji:🥚 🧅 🥔 🍳', 'cannons'], quip: 'Has destapado el debate más antiguo de la cocina española. Esta noche, en la sobremesa: votación a mano alzada.' },
@@ -7928,219 +8080,568 @@ Object.assign(A, {
   }
 });
 
-/* ===================== Los dos sobres del cumple =====================
-   Desde las 9:00 del día del cumple todos ven dos sobres lacrados en Inicio. Nadie puede abrirlos
-   hasta que el admin da la señal. El contenido lo escribe el admin (si lo deja vacío, el sobre de la app
-   dice que toca abrir el sobre de verdad). Se guarda en app_config «sobres» (lo escribe el admin directamente).
-   v0.7.58: apertura a pantalla completa (tiembla, se rompe el lacre, se abre la solapa y sale la carta) y
-   ENSAYO guiado en 3 pasos para el admin (antes de la señal · la señal · abrir los sobres), sin guardar nada. */
+/* ===================== Sobres lacrados (v0.7.48 · v0.7.49: hora programada y guardado automático) =====================
+   Una carta dentro de un sobre con lacre. Solo quien tiene la llave (keeper) puede abrirlo, y eso lo garantiza la base de
+   datos (RLS), no la interfaz: a los demás la carta ni siquiera les llega. El texto vive en Supabase (letter_bodies),
+   nunca en este código, que es público.
+   Estados del sobre: secreto (solo lo ve quien tiene la llave) → a la vista (todos ven el sobre cerrado en Inicio)
+   → guardado (el destinatario también puede abrirlo y releer la carta cuando quiera).
+   La ceremonia: el sobre por delante → darle la vuelta → mantener pulsado el lacre → se rompe → se abre la solapa
+   → sale la carta → la carta a pantalla completa, con confeti. */
 
-var SOBRES_DEF = { at: '2026-10-11T09:00:00+02:00', open: false, items: [{ title: '', text: '' }, { title: '', text: '' }] };
-var SOBRES_NOPE = [
-  'Ni lo intentes: está lacrado.',
-  'Este sobre tiene más seguridad que el Camp Nou en un clásico.',
-  'Paciencia, que así sabe mejor.',
-  'El notario oficial de los sobres dice que no. Y tiene chupete.',
-  'Mirar a contraluz también cuenta como trampa.',
-  'Se aceptan teorías. No se aceptan trampas.',
-  'Cuanto más lo tocas, más tarda. (Es mentira, pero por si acaso.)'
+IC.mail = '<path d="M3.5 6.5h17v11h-17z"/><path d="m3.5 7 8.5 6.5L20.5 7"/>';
+IC.key = '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3M14 9l2 2"/>';
+var SB = { list: [], at: 0, loading: false, ch: false, bodies: {}, open: null, timers: [], tries: 0 };
+var SB_HOLD = 1100;
+function sbCloud() { return typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb; }
+function sbReduce() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+function sbLetter(id) { return SB.list.find(function (l) { return l.id === id; }); }
+function sbIsKeeper(l) { return !!(l && l.keeper === ui.me); }
+function sbAfter(ts) { return !!ts && Date.now() >= Date.parse(ts); }
+function sbVisNow(l) { return !!(l && (l.visible || sbAfter(l.visible_from))); }
+/* antes de share_after, abrirlo es un ensayo: no cuenta como primera vez ni se guarda para el destinatario */
+function sbIsReal(l) { return !l.share_after || sbAfter(l.share_after); }
+function sbCanRead(l) { return !!(l && (l.keeper === ui.me || (l.shared && l.to_person === ui.me))); }
+function sbAv(pid, cls) { return av(pid, cls).replace(/ data-egg="[^"]*"/, ''); }   /* sin secretos aquí dentro: el sobre manda */
+function sbVibe(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+function sbLater(fn, ms) { SB.timers.push(setTimeout(fn, ms)); }
+function sbStarDay() { var d = (S.days || []).find(function (x) { return x.star; }); return d ? d.k : null; }
+function sbMark(l) {
+  var e = (S.trip && S.trip.eggs) || {};
+  return l.to_person === e.bday && e.bdayAge ? String(e.bdayAge) : initial(nameOf(l.to_person, '?'));
+}
+function sbWhen(ts) {
+  var d = new Date(ts); if (isNaN(d)) return '';
+  var p = function (n) { return (n < 10 ? '0' : '') + n; };
+  return p(d.getDate()) + '/' + p(d.getMonth() + 1) + ' a las ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+/* ---------- Datos ---------- */
+function sbLoad(force) {
+  if (!sbCloud()) return Promise.resolve();
+  if (SB.loading || (!force && Date.now() - SB.at < 20000)) return Promise.resolve();
+  SB.loading = true;
+  if (!SB.ch) {
+    SB.ch = true;
+    /* el sobre programado aparece solo a su hora: se repasa cada 5 min y al volver a la app */
+    setInterval(function () { sbLoad(true); }, 300000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) sbLoad(true); });
+    try { CLOUD.sb().channel('letters').on('postgres_changes', { event: '*', schema: 'public', table: 'letters' }, function () { sbLoad(true); }).subscribe(); } catch (e) {}
+  }
+  return CLOUD.sb().from('letters').select('id,to_person,keeper,visible,shared,opened_at,visible_from,share_after').order('created_at').then(function (r) {
+    SB.loading = false; SB.at = Date.now(); if (r.error) return;
+    var before = JSON.stringify(SB.list); SB.list = r.data || [];
+    if (JSON.stringify(SB.list) === before) return;
+    if (SB.open && !sbLetter(SB.open.id)) { sobreClose(); return; }   /* te lo han quitado de la vista */
+    if (SB.open) sbPanelSync();
+    if (ui.tab === 'inicio' && !document.getElementById('scrim') && !SB.open) render(true);
+  }, function () { SB.loading = false; SB.at = Date.now(); });
+}
+function sbBody(l) {
+  if (SB.bodies[l.id]) return Promise.resolve(SB.bodies[l.id]);
+  return CLOUD.sb().from('letter_bodies').select('body').eq('letter_id', l.id).maybeSingle().then(function (r) {
+    if (r.error || !r.data) throw r.error || new Error('sin carta');
+    SB.bodies[l.id] = r.data.body; return r.data.body;
+  });
+}
+function sbSet(l, patch) {
+  var old = {}; Object.keys(patch).forEach(function (k) { old[k] = l[k]; });
+  Object.assign(l, patch);
+  return CLOUD.sb().from('letters').update(patch).match({ id: l.id }).then(function (r) { if (r.error) throw r.error; }, function (e) { throw e; })
+    .catch(function (e) { Object.assign(l, old); throw e; });
+}
+
+/* ---------- Dibujos ---------- */
+function sbMiniEnv(mark) {
+  return '<svg class="sb-mini" viewBox="0 0 64 46" aria-hidden="true"><rect x="2" y="3" width="60" height="40" rx="4" fill="#F2E8D8" stroke="#C9B79C" stroke-width="1.2"/>' +
+    '<path d="M2.6 4 32 27 61.4 4" fill="#E8DAC2" stroke="#C9B79C" stroke-width="1.2" stroke-linejoin="round"/>' +
+    '<circle cx="32" cy="26" r="9.5" fill="#B0122C"/><circle cx="32" cy="26" r="6.6" fill="none" stroke="rgba(255,255,255,.22)"/>' +
+    '<text x="32" y="29.4" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="9" fill="#FFE9EC">' + esc(mark) + '</text></svg>';
+}
+/* lacre: borde irregular (siempre el mismo), relieve y la marca en el centro */
+function sbWax(mark, uid) {
+  var pts = [], n = 28;
+  for (var i = 0; i < n; i++) {
+    var a = Math.PI * 2 * i / n, r = 52 + Math.sin(i * 2.7) * 2.6 + Math.cos(i * 5.1) * 1.8;
+    pts.push((60 + Math.cos(a) * r).toFixed(1) + ' ' + (60 + Math.sin(a) * r).toFixed(1));
+  }
+  var dots = [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { var a = Math.PI * 2 * i / 8 - Math.PI / 2; return '<circle cx="' + (60 + Math.cos(a) * 33).toFixed(1) + '" cy="' + (60 + Math.sin(a) * 33).toFixed(1) + '" r="1.9" fill="rgba(70,0,12,.45)"/>'; }).join('');
+  return '<svg viewBox="0 0 120 120" aria-hidden="true"><defs><radialGradient id="sbW' + uid + '" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#E5344F"/><stop offset=".45" stop-color="#B0122C"/><stop offset="1" stop-color="#5E0614"/></radialGradient></defs>' +
+    '<path d="M' + pts.join(' L') + 'Z" fill="url(#sbW' + uid + ')"/>' +
+    '<circle cx="60" cy="60" r="40" fill="none" stroke="rgba(60,0,10,.4)" stroke-width="3"/><circle cx="60.8" cy="60.8" r="40" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.2"/>' + dots +
+    '<text x="61.2" y="72.2" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="36" fill="rgba(255,255,255,.2)">' + esc(mark) + '</text>' +
+    '<text x="60" y="71" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="800" font-size="36" fill="rgba(70,0,14,.62)">' + esc(mark) + '</text>' +
+    '<path class="sb-crack" pathLength="1" d="M60 8 L55 30 L65 44 L54 62 L66 80 L57 96 L61 112" fill="none" stroke="#2A0208" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+}
+/* matasellos con la fecha del día grande (si lo hay) */
+function sbPostmark() {
+  var k = sbStarDay(), t = k ? k.slice(8, 10) + '·' + k.slice(5, 7) + '·' + k.slice(2, 4) : '';
+  return '<svg class="sb-postmark" viewBox="0 0 150 70" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6">' +
+    '<circle cx="40" cy="35" r="27"/><circle cx="40" cy="35" r="20"/>' +
+    '<path d="M72 22c9-5 17 5 26 0s17 5 26 0 17 5 24 0M72 35c9-5 17 5 26 0s17 5 26 0 17 5 24 0M72 48c9-5 17 5 26 0s17 5 26 0 17 5 24 0"/></g>' +
+    '<text x="40" y="39" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="700" font-size="10" fill="currentColor">' + esc(t) + '</text></svg>';
+}
+/* el regalo: torre + pantalla, con la pantalla escribiéndose sola */
+function sbComputer() {
+  return '<svg class="sb-pc" viewBox="0 0 360 232" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Un ordenador de torre con su pantalla, teclado y ratón">' +
+    '<rect x="8" y="8" width="234" height="152" rx="10"/><rect class="sb-scr" x="20" y="20" width="210" height="122" rx="4" stroke-width="1.5"/>' +
+    '<text id="sbT0" x="32" y="50" stroke="none" fill="#F3ECE8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13"></text>' +
+    '<text id="sbT1" x="32" y="72" stroke="none" fill="#F3ECE8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13"></text>' +
+    '<text x="32" y="94" stroke="none" fill="#F6CD62" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">&gt;</text><rect class="sb-cur" x="46" y="83" width="8" height="14" stroke="none" fill="#F6CD62"/>' +
+    '<circle cx="125" cy="151" r="2.5" fill="currentColor" stroke="none"/><path d="M112 160 104 188M138 160l8 28"/><rect x="84" y="188" width="82" height="8" rx="4"/>' +
+    '<rect x="36" y="204" width="160" height="16" rx="4"/><path d="M48 212h136" stroke-width="1.5" stroke-dasharray="6 4"/>' +
+    '<rect x="208" y="200" width="16" height="22" rx="8"/><path d="M216 200v8" stroke-width="1.5"/><path d="M216 200c0-14 34-4 46-14" stroke-width="1.5"/>' +
+    '<rect x="262" y="24" width="88" height="196" rx="8"/><rect x="274" y="40" width="64" height="12" rx="2" stroke-width="1.5"/><rect x="274" y="60" width="64" height="12" rx="2" stroke-width="1.5"/>' +
+    '<path d="M278 110h56M278 120h56M278 130h56M278 140h56" stroke-width="1.5"/><circle class="sb-pwr" cx="306" cy="190" r="9"/><path d="M306 184v7" stroke-width="2"/><path d="M0 228h360" stroke-width="1.5"/></svg>';
+}
+/* red de nodos de la casa: la firma de los tres */
+function sbNet() {
+  return '<svg class="sb-net-rule" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8h300" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"/>' +
+    [0, 70, 150, 230, 300].map(function (x) { return '<circle cx="' + x + '" cy="8" r="3.4" fill="currentColor"/>'; }).join('') + '</svg>';
+}
+
+/* ---------- Tarjeta en Inicio ---------- */
+function sobreCard() {
+  if (!sbCloud()) return '';
+  sbLoad();
+  return SB.list.map(function (l) {
+    var to = person(l.to_person); if (!to) return '';
+    var k = nameOf(l.keeper, 'quien tiene la llave'), mine = sbIsKeeper(l), forMe = l.to_person === ui.me;
+    var title, txt, btn, pill = '';
+    if (mine) {
+      title = 'El sobre de ' + to.name;
+      var vis = sbVisNow(l), sched = !vis && l.visible_from;
+      txt = vis ? 'Todos ven el sobre cerrado. La llave solo la tienes tú.' : sched ? 'Secreto hasta el ' + sbWhen(l.visible_from) + '. Desde entonces lo verán todos, cerrado.' : 'Ahora mismo solo lo ves tú. Nadie más sabe que existe.';
+      if (l.share_after && !l.shared) txt += ' Si lo abres a partir del ' + sbWhen(l.share_after) + ', se guardará para ' + to.name + '.';
+      btn = 'Ver el sobre'; pill = '<span class="pill ' + (vis ? 'ok' : '') + '">' + (vis ? 'A la vista' : sched ? 'Programado' : 'Secreto') + '</span>';
+    } else if (forMe && l.shared) { title = 'Tu carta'; txt = 'Ya es tuya. Ábrela y reléela cuando quieras.'; btn = 'Abrir mi carta'; }
+    else if (forMe) { title = 'Hay un sobre para ti'; txt = 'Lacrado. La llave la tiene ' + k + ', así que toca esperar.'; btn = 'Ver el sobre'; }
+    else { title = 'Un sobre lacrado para ' + to.name; txt = 'Solo ' + k + ' puede abrirlo. Mirarlo sí se puede.'; btn = 'Ver el sobre'; }
+    return '<section class="card sb-card"><div class="sb-card-in">' + sbMiniEnv(sbMark(l)) +
+      '<div class="grow"><div class="card-head"><h3>' + esc(title) + '</h3>' + pill + '</div><p class="small muted">' + esc(txt) + '</p>' +
+      (mine && l.opened_at ? '<p class="small muted">Abierto de verdad el ' + esc(sbWhen(l.opened_at)) + '.</p>' : '') + '</div></div>' +
+      '<button class="btn primary block" data-act="sbOpen" data-id="' + esc(l.id) + '">' + icon('mail') + esc(btn) + '</button></section>';
+  }).join('');
+}
+
+/* ---------- El escenario ---------- */
+function sbStageHtml(l) {
+  var to = person(l.to_person) || { name: '' }, mark = sbMark(l), k = sbStarDay();
+  var sub = k ? 'Abrir el ' + L.ddmm(k) + '. Ni un minuto antes.' : 'Frágil: contiene cariño.';
+  return '<div class="sb-sky" aria-hidden="true"></div>' +
+    '<button type="button" class="sb-x" data-act="sbClose" aria-label="Cerrar el sobre">' + icon('x') + '</button>' +
+    '<div class="sb-scene" id="sbScene">' +
+      '<div class="sb-env" id="sbEnv">' +
+        '<div class="sb-card3d" id="sbCard">' +
+          '<div class="sb-face sb-front">' +
+            '<div class="sb-stamp"><div class="sb-stamp-in">' + sbAv(l.to_person, 'sb-stamp-av') + '<b>' + esc(mark) + '</b></div></div>' +
+            sbPostmark() +
+            '<div class="sb-addr"><small>Para</small><b>' + esc(to.name) + '</b><svg class="sb-uline" viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 8c30-6 60 4 95-1s70-5 101 0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>' + esc(sub) + '</span></div>' +
+            '<button type="button" class="sb-flip" data-act="sbFlip" aria-label="Darle la vuelta al sobre"></button>' +
+          '</div>' +
+          '<div class="sb-face sb-backf">' +
+            '<div class="sb-inside"></div>' +
+            '<div class="sb-letter" id="sbLetter"><small id="sbTeaseK"></small><b id="sbTeaseT"></b>' + sbNet() + '</div>' +
+            '<div class="sb-pocket"></div>' +
+            '<div class="sb-flap" id="sbFlap"><div class="sb-flap-out"></div><div class="sb-flap-in"></div></div>' +
+            '<button type="button" class="sb-seal" id="sbSeal" aria-label="' + (sbCanRead(l) ? 'Mantén pulsado el lacre para abrir el sobre' : 'Lacre del sobre') + '">' +
+              '<span class="sb-wax sb-wax-l">' + sbWax(mark, 'a') + '</span><span class="sb-wax sb-wax-r">' + sbWax(mark, 'b') + '</span>' +
+              '<svg class="sb-ring" viewBox="0 0 140 140" aria-hidden="true"><circle cx="70" cy="70" r="64" class="sb-ring-bg"/><circle cx="70" cy="70" r="64" class="sb-ring-fill" id="sbRing"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<p class="sb-hint" id="sbHint" aria-live="polite">Toca el sobre para darle la vuelta</p>' +
+    '</div>' +
+    '<div class="sb-eleven" id="sbEleven" aria-hidden="true"></div>' +
+    '<div class="sb-read" id="sbRead" hidden></div>';
+}
+function sobreOpen(id, replay) {
+  var l = sbLetter(id); if (!l) return;
+  sobreClose(true, replay);
+  var st = document.createElement('div');
+  st.id = 'sobre'; st.className = 'sobre' + (sbReduce() ? ' calm' : '');
+  st.setAttribute('role', 'dialog'); st.setAttribute('aria-modal', 'true'); st.setAttribute('aria-label', 'Sobre para ' + nameOf(l.to_person));
+  st.innerHTML = sbStageHtml(l);
+  document.body.appendChild(st);
+  document.body.classList.add('sobre-on'); document.body.style.overflow = 'hidden';
+  if (!replay) overlayPush('sobre');
+  SB.open = { id: l.id, phase: 'front' }; SB.tries = 0;
+  sbBindSeal(st, l);
+  document.addEventListener('keydown', sbKey);
+  if (sbCanRead(l)) sbBody(l).then(sbTease, function () {});
+  setTimeout(function () { var b = st.querySelector('.sb-flip'); if (b) b.focus(); }, 60);
+}
+function sbTease(b) {
+  var k = document.getElementById('sbTeaseK'), t = document.getElementById('sbTeaseT');
+  if (k) k.textContent = b.kicker || ''; if (t) t.textContent = b.title || '';
+}
+function sbKey(e) { if (e.key === 'Escape' && SB.open) sobreClose(); }
+function sobreClose(fromPop, quiet) {
+  var st = document.getElementById('sobre');
+  SB.timers.forEach(clearTimeout); SB.timers = [];
+  if (SB.typeT) { clearInterval(SB.typeT); SB.typeT = null; }
+  if (SB.io) { SB.io.disconnect(); SB.io = null; }
+  document.removeEventListener('keydown', sbKey);
+  if (!st) { SB.open = null; return; }
+  st.remove(); SB.open = null;
+  document.body.classList.remove('sobre-on'); document.body.style.overflow = '';
+  if (fromPop !== true) overlayDone();
+  if (ui.tab === 'inicio' && !quiet) render(true);
+}
+function sbHint(t) { var h = document.getElementById('sbHint'); if (h) h.textContent = t; }
+
+/* 1) darle la vuelta */
+function sbFlip() {
+  if (!SB.open || SB.open.phase !== 'front') return;
+  var l = sbLetter(SB.open.id), env = document.getElementById('sbEnv'); if (!l || !env) return;
+  SB.open.phase = 'flipping';
+  env.classList.add('flipped'); sbVibe(10); sbRustle(.18);
+  sbLater(function () {
+    env.classList.add('is-back'); SB.open.phase = 'back';
+    sbHint(sbCanRead(l) ? 'Mantén pulsado el lacre para romperlo' : l.to_person === ui.me ? 'Es para ti, pero la llave la tiene ' + nameOf(l.keeper) + '. Ya queda poco.' : 'Lacrado. Solo ' + nameOf(l.keeper) + ' tiene la llave.');
+    var s = document.getElementById('sbSeal'); if (s) s.focus();
+  }, sbReduce() ? 60 : 820);
+}
+/* 2) mantener pulsado el lacre */
+function sbBindSeal(st, l) {
+  var seal = st.querySelector('#sbSeal'), ring = st.querySelector('#sbRing'), C = 2 * Math.PI * 64, raf = 0, t0 = 0;
+  var hold = sbReduce() ? 450 : SB_HOLD;
+  ring.style.strokeDasharray = C; ring.style.strokeDashoffset = C;
+  function reset() { cancelAnimationFrame(raf); raf = 0; seal.classList.remove('holding'); ring.style.strokeDashoffset = C; seal.style.removeProperty('--k'); }
+  function step() {
+    var k = Math.min(1, (performance.now() - t0) / hold);
+    ring.style.strokeDashoffset = C * (1 - k); seal.style.setProperty('--k', k.toFixed(3));
+    if (k >= 1) { raf = 0; seal.classList.remove('holding'); sbBreak(l); return; }
+    raf = requestAnimationFrame(step);
+  }
+  seal.addEventListener('pointerdown', function (e) {
+    if (!SB.open || SB.open.phase !== 'back') return;
+    e.preventDefault();
+    if (!sbCanRead(l)) { sbNope(l); return; }
+    try { seal.setPointerCapture(e.pointerId); } catch (x) {}
+    t0 = performance.now(); seal.classList.add('holding'); sbVibe(8); raf = requestAnimationFrame(step);
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { seal.addEventListener(ev, function () { if (raf) reset(); }); });
+  seal.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  /* teclado y lectores de pantalla: Intro o Espacio abren directamente */
+  seal.addEventListener('click', function (e) {
+    if (e.detail !== 0 || !SB.open || SB.open.phase !== 'back') return;
+    if (sbCanRead(l)) sbBreak(l); else sbNope(l);
+  });
+}
+var SB_NOPE = [
+  'Lacrado. Solo {k} tiene la llave.',
+  'Que no. Que es lacre del bueno.',
+  'Insistir no funciona. Lo han probado otros antes que tú.',
+  'Tu intento ha quedado anotado. Es broma. O no.',
+  'Ni con súplicas. Ni con croquetas. Bueno, con croquetas a lo mejor.'
 ];
-function sobresState() {
-  var s = S.sobres || {};
-  var it = (s.items && s.items.length ? s.items : SOBRES_DEF.items).slice(0, 2);
-  while (it.length < 2) it.push({ title: '', text: '' });
-  return { at: s.at || SOBRES_DEF.at, open: !!s.open, openedAt: s.openedAt || null, items: it };
+function sbNope(l) {
+  var s = document.getElementById('sbSeal'); if (!s) return;
+  s.classList.remove('nope'); void s.offsetWidth; s.classList.add('nope');
+  sbVibe([30, 40, 30]); sbThud();
+  sbHint(SB_NOPE[Math.min(SB.tries++, SB_NOPE.length - 1)].replace('{k}', nameOf(l.keeper)));
 }
-function sobresAdmin() { return !!(me() && me().role === 'admin'); }
-function sobresLive() {
-  var st = sobresState(), t = new Date(st.at).getTime(), end = t + 36 * 3600 * 1000;
-  return Date.now() >= t && Date.now() < end;
-}
-function sobresSave(v) {
-  S.sobres = v;
-  return (typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb)
-    ? CLOUD.sb().from('app_config').upsert({ key: 'sobres', value: v }).then(function (r) { if (r.error) throw r.error; })
-    : Promise.resolve();
-}
-function sobreSeal() { return S.trip && S.trip.eggs && S.trip.eggs.bdayAge ? esc(String(S.trip.eggs.bdayAge)) : '★'; }
-function sobreTitle(x, i) { return x.title ? esc(x.title) : 'Sobre ' + (i + 1); }
-function sobreBody(x) { return x.text ? esc(x.text).replace(/\n/g, '<br>') : '¡Ya podéis abrir el sobre de verdad!'; }
-function sobreBtn(x, i, ready) {
-  return '<button class="sobre' + (ready ? ' ready' : '') + '" data-i="' + i + '" aria-label="Sobre ' + (i + 1) + (ready ? ': ábrelo' : ': cerrado') + '">' +
-    '<span class="sobre-back"></span><span class="sobre-flap"></span><span class="sobre-seal">' + sobreSeal() + '</span>' +
-    '<span class="sobre-n">' + sobreTitle(x, i) + '</span></button>';
-}
-function sobreNope(el, sayEl) {
-  el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
-  if (navigator.vibrate) try { navigator.vibrate([20, 40, 20]); } catch (e) {}
-  ui.sobreN = ((ui.sobreN || 0) + 1) % SOBRES_NOPE.length;
-  if (sayEl) { sayEl.textContent = SOBRES_NOPE[ui.sobreN]; sayEl.classList.remove('pop'); void sayEl.offsetWidth; sayEl.classList.add('pop'); }
-  else toast(SOBRES_NOPE[ui.sobreN]);
-}
-
-function sobresCard() {
-  var adm = sobresAdmin(), live = sobresLive();
-  if (!live && !adm) return '';
-  var st = sobresState(), who = esc(bdayName());
-  if (st.open && ui.sobresSeen !== st.openedAt && live) {   /* la señal: todos se enteran a la vez */
-    ui.sobresSeen = st.openedAt;
-    setTimeout(function () { sobresSignalFx(); }, 400);
-  }
-  var h = '<section class="card sobres-card' + (st.open ? ' is-open' : '') + '" id="sobres">' +
-    '<div class="card-head"><span class="eyebrow">Cumple de ' + who + '</span><span class="pill ' + (st.open ? 'ok' : 'olive') + '">' + (st.open ? '¡Abiertos!' : 'Alto secreto') + '</span></div>' +
-    '<h3>' + (st.open ? 'Dos sobres. Ya hay permiso.' : 'Dos sobres. Cero pistas.') + '</h3>' +
-    '<p class="small muted">' + (st.open ? 'Toca un sobre para abrirlo.' : 'Nadie los abre hasta que el jefe dé la señal. Se aceptan teorías; trampas, no.') + '</p>' +
-    '<div class="sobres">' + st.items.map(function (x, i) { return sobreBtn(x, i, st.open).replace('<button class="sobre', '<button data-act="sobreTap" class="sobre'); }).join('') + '</div>' +
-    (st.open ? '' : '<p class="small sobres-lock">🔒 Cerrados hasta nueva orden</p>');
-  if (adm) {
-    var empty = st.items.filter(function (x) { return !x.text; }).length;
-    h += '<div class="sobres-adm"><span class="lbl">Solo tú ves esto' + (live ? '' : ' (los demás los verán a las ' + esc(st.at.slice(11, 16)) + ')') + '.' +
-      (empty ? ' ' + (empty === 2 ? 'Los dos sobres están' : 'Un sobre está') + ' sin texto: al abrirlo saldrá «¡Ya podéis abrir el sobre de verdad!».' : '') + '</span><div class="row wrap">' +
-      '<button class="btn primary" data-act="sobresSimStart">' + icon('play') + 'Ensayar todo el proceso</button>' +
-      '<button class="btn ghost" data-act="sobresEdit">' + icon('edit') + 'Escribir los sobres</button>' +
-      (st.open ? '<button class="btn ghost" data-act="sobresClose">' + icon('undo') + 'Volver a cerrarlos</button>'
-        : '<button class="btn ghost" data-act="sobresOpen">' + icon('gift') + '¡Que se abran! (de verdad)</button>') +
-      '</div></div>';
-  }
-  return h + '</section>';
-}
-
-/* ---------- La señal (de verdad): a todos les salta a la vez ---------- */
-function sobresSignalHtml(fake) {
-  return '<div class="ss-mini" aria-hidden="true"><i></i><i></i></div>' +
-    '<h2>¡Ya se pueden abrir los sobres!</h2><p>Que alguien avise a ' + esc(bdayName()) + '. Están en Inicio.</p>' +
-    '<button class="btn primary big-btn"' + (fake ? ' data-se="next"' : ' data-ss="go"') + '>¡Vamos!</button>';
-}
-function sobresSignalFx() {
-  var old = document.getElementById('sobre-stage'); if (old) old.remove();
-  var v = document.createElement('div'); v.className = 'sobre-stage signal'; v.id = 'sobre-stage'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true');
-  v.innerHTML = '<div class="ss-in">' + sobresSignalHtml(false) + '</div>';
-  document.body.appendChild(v);
-  try { confetti(2800); fanfare(); emojiFx(['✉️', '🎉', '✨'], 'rain', 200, 30); } catch (e) {}
-  if (navigator.vibrate) try { navigator.vibrate([60, 40, 60, 40, 120]); } catch (e) {}
-  v.addEventListener('click', function (e) {
-    if (e.target.closest('[data-ss="go"]') || e.target === v) {
-      v.remove();
-      if (ui.tab !== 'inicio') go('inicio');
-      setTimeout(function () { var c = document.getElementById('sobres'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+/* 3) se rompe el lacre, se abre la solapa, sale la carta */
+function sbBreak(l) {
+  if (!SB.open || SB.open.phase !== 'back') return;
+  SB.open.phase = 'opening';
+  var env = document.getElementById('sbEnv'), seal = document.getElementById('sbSeal'), calm = sbReduce();
+  seal.classList.add('cracking'); sbHint('');
+  sbBody(l).then(function (b) {
+    sbTease(b);
+    sbCrack(); sbVibe([18, 30, 60]);
+    seal.classList.add('broken');
+    if (sbIsKeeper(l) && sbIsReal(l)) {
+      var up = {};
+      if (!l.opened_at) up.opened_at = new Date().toISOString();
+      if (l.share_after && !l.shared) up.shared = true;   /* el momento de verdad: la carta pasa a ser suya */
+      if (Object.keys(up).length) sbSet(l, up).then(sbPanelSync, function () {});
     }
+    sbLater(function () { env.classList.add('open'); sbRustle(.35); }, calm ? 80 : 380);
+    sbLater(function () { env.classList.add('flap-back'); }, calm ? 120 : 900);
+    sbLater(function () { env.classList.add('rise'); sbRustle(.5); }, calm ? 160 : 1050);
+    sbLater(function () { sbReveal(l, b); }, calm ? 500 : 2150);
+  }, function () {
+    seal.classList.remove('cracking'); SB.open.phase = 'back';
+    sbHint('No se ha podido abrir. Revisa la conexión y vuelve a intentarlo.');
   });
 }
-
-/* ---------- Abrir un sobre: tiembla, se rompe el lacre, se abre la solapa y sale la carta ---------- */
-function sobreStage(i, sim) {
-  var st = sobresState(), x = st.items[i] || {};
-  var old = document.getElementById('sobre-stage'); if (old) old.remove();
-  var v = document.createElement('div'); v.className = 'sobre-stage'; v.id = 'sobre-stage'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true'); v.setAttribute('aria-label', 'Sobre ' + (i + 1));
-  v.innerHTML = '<div class="ss-in">' + (sim ? '<span class="ss-sim">Ensayo · así lo verá la familia</span>' : '') +
-    '<div class="ss-env" aria-hidden="true"><span class="ss-back"></span><span class="ss-paper"></span><span class="ss-front"></span><span class="ss-flap"></span>' +
-    '<span class="ss-seal"><i class="l"></i><i class="r"></i><b>' + sobreSeal() + '</b></span></div>' +
-    '<p class="ss-hint">Rompiendo el lacre…</p>' +
-    '<div class="ss-card"><span class="eyebrow">' + sobreTitle(x, i) + '</span><p>' + sobreBody(x) + '</p>' +
-    (sim && !x.text ? '<small class="ss-warn">Aún no has escrito este sobre: esto es lo que saldría.</small>' : '') + '</div>' +
-    '<div class="ss-actions">' + (st.items.length > 1 ? '<button class="btn ghost" data-ss="other">Abrir el sobre ' + (2 - i) + '</button>' : '') +
-    (sim && !x.text ? '<button class="btn ghost" data-ss="edit">' + icon('edit') + 'Escribirlo</button>' : '') +
-    '<button class="btn primary" data-ss="close">Cerrar</button></div></div>';
-  document.body.appendChild(v); document.body.style.overflow = 'hidden';
-  var T = [];
-  T.push(setTimeout(function () { v.classList.add('crack'); try { sfx('boom'); } catch (e) {} if (navigator.vibrate) try { navigator.vibrate(40); } catch (e) {} }, 700));
-  T.push(setTimeout(function () { v.classList.add('open'); try { sfx('whoosh'); } catch (e) {} }, 1250));
-  T.push(setTimeout(function () { v.classList.add('out'); try { confetti(2200); applause(2.2); emojiFx(['🎉', '✨', '🥳'], 'rise', 0, 24); } catch (e) {} if (navigator.vibrate) try { navigator.vibrate([30, 30, 60]); } catch (e) {} }, 1950));
-  function close() { T.forEach(clearTimeout); v.remove(); if (!document.getElementById('sobres-ensayo')) document.body.style.overflow = ''; }
-  v.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-ss]');
-    if (b && b.dataset.ss === 'other') { close(); sobreStage(1 - i, sim); return; }
-    if (b && b.dataset.ss === 'edit') { close(); var en = document.getElementById('sobres-ensayo'); if (en) en.remove(); document.body.style.overflow = ''; A.sobresEdit(); return; }
-    if ((b && b.dataset.ss === 'close') || e.target === v) close();
-  });
+/* 4) la carta, a lo grande */
+function sbReveal(l, b) {
+  var st = document.getElementById('sobre'), read = document.getElementById('sbRead'), env = document.getElementById('sbEnv');
+  if (!st || !read) return;
+  SB.open.phase = 'reading';
+  env.classList.add('away'); st.classList.add('reading');
+  read.innerHTML = sbReadHtml(l, b); read.hidden = false; read.scrollTop = 0;
+  requestAnimationFrame(function () { read.classList.add('in'); });
+  var el = document.getElementById('sbEleven');
+  if (el && b.age && !sbReduce()) { el.textContent = b.age; el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); }
+  try { tada(true); } catch (e) {}
+  if (!sbReduce()) { try { cannonsFx(150); } catch (e) {} try { confetti(3200); } catch (e) {} }
+  sbVibe([0, 40, 60, 40]);
+  sbLater(function () { sbType(b.screen || []); }, sbReduce() ? 0 : 1100);
+  sbObserve(read);
+  var x = st.querySelector('.sb-x'); if (x) x.focus();
 }
-
-/* ---------- Ensayo guiado (solo admin, nada se guarda, nadie más lo ve) ---------- */
-var SE_STEPS = ['Antes de la señal', 'La señal', 'Abrir los sobres'];
-function sobresEnsayo(step) {
-  var st = sobresState(), v = document.getElementById('sobres-ensayo');
-  if (!v) {
-    v = document.createElement('div'); v.id = 'sobres-ensayo'; v.className = 'sobres-ensayo'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true'); v.setAttribute('aria-label', 'Ensayo de los sobres');
-    document.body.appendChild(v); document.body.style.overflow = 'hidden';
-    v.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-se]'), s = +v.dataset.step;
-      if (b) {
-        var a = b.dataset.se;
-        if (a === 'exit') { v.remove(); document.body.style.overflow = ''; toast('Fin del ensayo. Todo sigue como estaba'); return; }
-        if (a === 'next') { sobresEnsayo(Math.min(3, s + 1)); return; }
-        if (a === 'prev') { sobresEnsayo(Math.max(1, s - 1)); return; }
-        if (a === 'go') { sobresEnsayo(+b.dataset.n); return; }
-        if (a === 'edit') { v.remove(); document.body.style.overflow = ''; A.sobresEdit(); return; }
-      }
-      var env = e.target.closest('.sobre');
-      if (env) { if (s === 3) { env.classList.add('opening'); setTimeout(function () { env.classList.remove('opening'); sobreStage(+env.dataset.i, true); }, 400); } else sobreNope(env, v.querySelector('.se-say')); }
+function sbReadHtml(l, b) {
+  var v = b.voucher || null, keeper = sbIsKeeper(l), to = person(l.to_person) || { name: '' };
+  /* v0.7.53: una firma puede ser un grupo (pids): salen las fotos de todos */
+  var from = (b.from || []).map(function (f) { var ids = (f.pids || [f.pid]).filter(function (x) { return x && person(x); }); return ids.length ? Object.assign({}, f, { ids: ids }) : null; }).filter(Boolean);
+  var h = '<article class="sb-paper">' +
+    '<header class="sb-head">' + (b.age ? '<span class="sb-age" aria-hidden="true">' + esc(b.age) + '</span>' : '') +
+      (b.kicker ? '<p class="sb-kicker">' + esc(b.kicker) + '</p>' : '') + '<h1>' + esc(b.title || '') + '</h1>' + sbNet() + '</header>' +
+    '<figure class="sb-fig">' + sbComputer() + '</figure>' +
+    '<div class="sb-text">' + (b.greeting ? '<p class="sb-greet">' + esc(b.greeting) + '</p>' : '') +
+      (b.paragraphs || []).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('') +
+      (b.closing ? '<p class="sb-close">' + esc(b.closing) + '</p>' : '') + '</div>';
+  if (v) {
+    h += '<section class="sb-ticket sb-reveal" aria-label="' + esc((v.label || '') + ' ' + (v.title || '')) + '">' +
+      '<div class="sb-tk-top"><div class="sb-tk-meta"><span>' + esc(v.label || '') + '</span><span class="sb-tk-no">' + esc(v.number || '') + '</span></div><p class="sb-tk-title">' + esc(v.title || '') + '</p></div>' +
+      '<dl class="sb-tk-rows">' + (v.rows || []).map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>' +
+      (v.stamp ? '<span class="sb-ink" aria-hidden="true">' + esc(v.stamp) + '</span>' : '') + '</section>';
+  }
+  if (b.fine && b.fine.length) h += '<section class="sb-fine"><h2>Letra pequeña</h2><ul>' + b.fine.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></section>';
+  if (from.length) {
+    var n = from.length, xs = from.map(function (_, i) { return Math.round((i + .5) * 300 / n); });
+    h += '<section class="sb-from sb-reveal">' + (b.signoff ? '<p class="sb-signoff">' + esc(b.signoff) + '</p>' : '') +
+      '<div class="sb-trio" style="--n:' + n + '">' +
+        '<svg class="sb-links" viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">' +
+          (n > 1 ? '<path d="M' + xs.map(function (x) { return x + ' 42'; }).join(' L') + '" pathLength="1"/>' : '') +
+          (n > 2 ? '<path d="M' + xs[0] + ' 42 Q150 -26 ' + xs[n - 1] + ' 42" pathLength="1"/>' : '') + '</svg>' +
+        from.map(function (f, i) {
+          return '<div class="sb-who' + (f.ids.length > 1 ? ' group' : '') + '" style="--i:' + i + '">' + (f.ids.length > 1 ? '<span class="sb-crew">' + f.ids.map(function (x) { return sbAv(x, 'sb-who-av'); }).join('') + '</span>' : sbAv(f.ids[0], 'sb-who-av')) + '<b>' + esc(f.label || nameOf(f.ids[0])) + '</b>' +
+            (f.note ? '<svg class="sb-scribble" viewBox="0 0 120 34" aria-hidden="true"><path pathLength="1" d="M4 22c8-14 14-16 16-6s-6 14 2 8 12-20 18-12-4 18 6 10 10-18 16-10-2 14 8 8 12-14 18-8 4 10 14 4 10-8 14-6"/></svg><small>' + esc(f.note) + '</small>' : '') + '</div>';
+        }).join('') +
+      '</div></section>';
+  }
+  h += '</article>';
+  if (keeper) {
+    h += '<section class="sb-keeper"><h2>' + icon('key') + 'La llave la tienes tú</h2>' +
+      '<button type="button" class="sb-sw" id="sbVis" data-act="sbVis" aria-pressed="' + sbVisNow(l) + '"><span class="grow"><b>Sobre a la vista de todos</b><small id="sbVisNote">' + esc(sbVisNote(l)) + '</small></span><i aria-hidden="true"></i></button>' +
+      '<button type="button" class="sb-sw" id="sbShare" data-act="sbShare" aria-pressed="' + !!l.shared + '"><span class="grow"><b>Guardar la carta para ' + esc(to.name) + '</b><small id="sbShareNote">' + esc(sbShareNote(l)) + '</small></span><i aria-hidden="true"></i></button>' +
+      '<p class="sb-k-when" id="sbWhen">' + esc(sbWhenNote(l)) + '</p>' +
+      '<div class="sb-k-btns"><button type="button" class="sb-btn" data-act="sbReplay">Repetir la ceremonia</button><button type="button" class="sb-btn solid" data-act="sbClose">Cerrar</button></div></section>';
+  } else {
+    h += '<div class="sb-k-btns solo"><button type="button" class="sb-btn" data-act="sbReplay">Volver a abrirla</button><button type="button" class="sb-btn solid" data-act="sbClose">Cerrar</button></div>';
+  }
+  return h;
+}
+/* la pantalla del ordenador se escribe sola */
+function sbType(lines) {
+  var els = [document.getElementById('sbT0'), document.getElementById('sbT1')], li = 0, ci = 0;
+  if (!els[0]) return;
+  if (sbReduce()) { lines.slice(0, 2).forEach(function (t, i) { els[i].textContent = '> ' + t; }); return; }
+  SB.typeT = setInterval(function () {
+    if (li >= Math.min(2, lines.length)) { clearInterval(SB.typeT); SB.typeT = null; return; }
+    var t = '> ' + lines[li]; ci++;
+    els[li].textContent = t.slice(0, ci);
+    if (ci >= t.length) { li++; ci = 0; }
+  }, 62);
+}
+/* el sello «canjeable» y la firma de los tres entran al llegar a ellos */
+function sbObserve(root) {
+  var items = root.querySelectorAll('.sb-reveal');
+  if (!('IntersectionObserver' in window) || sbReduce()) { items.forEach(function (x) { x.classList.add('in'); }); return; }
+  SB.io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('in'); SB.io.unobserve(e.target);
+      if (e.target.classList.contains('sb-ticket')) setTimeout(function () { sbThud(); sbVibe(25); }, 520);
     });
-  }
-  v.dataset.step = step;
-  var empty = st.items.filter(function (x) { return !x.text; }).length, body = '';
-  if (step === 1) body = '<h2>1 · Así los ve la familia hasta que des la señal</h2>' +
-    '<p>Dos sobres lacrados en Inicio. Prueba a tocar uno: no se deja, y suelta una frase.</p>' +
-    '<div class="sobres">' + st.items.map(function (x, i) { return sobreBtn(x, i, false); }).join('') + '</div>' +
-    '<p class="se-say" aria-live="polite">Toca un sobre…</p>';
-  else if (step === 2) body = '<h2>2 · Tocas «¡Que se abran!» y a todos les salta esto</h2>' +
-    '<p>A la vez, en todos los móviles, con confeti y fanfarria.</p>' +
-    '<div class="se-signal">' + sobresSignalHtml(true) + '</div>';
-  else body = '<h2>3 · Cada uno toca un sobre y lo abre</h2>' +
-    '<p>Toca un sobre: tiembla, se rompe el lacre, se abre la solapa y sale la carta.</p>' +
-    '<div class="sobres">' + st.items.map(function (x, i) { return sobreBtn(x, i, true); }).join('') + '</div>' +
-    (empty ? '<p class="se-warn">' + (empty === 2 ? 'Los dos sobres están' : 'Un sobre está') + ' sin escribir: saldrá «¡Ya podéis abrir el sobre de verdad!». <button class="link" data-se="edit">Escribirlos ahora</button></p>' : '');
-  v.innerHTML = '<div class="se-in">' +
-    '<div class="se-top"><span class="ss-sim">Ensayo · solo lo ves tú · no se guarda nada</span><button class="icon-btn se-x" data-se="exit" aria-label="Salir del ensayo">' + icon('x') + '</button></div>' +
-    '<ol class="se-steps">' + SE_STEPS.map(function (t, k) { var n = k + 1; return '<li><button data-se="go" data-n="' + n + '" class="' + (n === step ? 'on' : n < step ? 'done' : '') + '"><b>' + n + '</b><span>' + t + '</span></button></li>'; }).join('') + '</ol>' +
-    '<div class="se-body">' + body + '</div>' +
-    '<div class="se-nav">' + (step > 1 ? '<button class="btn ghost" data-se="prev">‹ Anterior</button>' : '<span></span>') +
-    (step < 3 ? '<button class="btn primary" data-se="next">Siguiente: ' + SE_STEPS[step].toLowerCase() + ' ›</button>' : '<button class="btn primary" data-se="exit">Terminar el ensayo</button>') + '</div></div>';
-  if (step === 2) try { confetti(2400); fanfare(); } catch (e) {}
+  }, { root: root, threshold: .55 });
+  items.forEach(function (x) { SB.io.observe(x); });
 }
-document.addEventListener('keydown', function (e) {
-  if (e.key !== 'Escape') return;
-  var v = document.getElementById('sobre-stage'); if (v) { v.remove(); if (!document.getElementById('sobres-ensayo')) document.body.style.overflow = ''; return; }
-  var en = document.getElementById('sobres-ensayo'); if (en) { en.remove(); document.body.style.overflow = ''; }
+function sbVisNote(l) {
+  if (sbVisNow(l)) return 'Lo ven cerrado en su Inicio. Abrirlo, solo tú.';
+  if (l.visible_from) return 'Programado: aparecerá solo el ' + sbWhen(l.visible_from) + '.';
+  return 'Ahora es secreto. Actívalo y lo verán cerrado en su Inicio.';
+}
+function sbShareNote(l) {
+  var n = nameOf(l.to_person);
+  if (l.shared) return n + ' puede abrirla y releerla desde su móvil.';
+  if (l.share_after) return 'Se guardará sola al abrirla a partir del ' + sbWhen(l.share_after) + '.';
+  return 'Podrá abrirla y releerla desde su móvil.';
+}
+function sbWhenNote(l) {
+  if (l.opened_at) return 'Abierto de verdad el ' + sbWhen(l.opened_at) + '.';
+  if (l.share_after && !sbIsReal(l)) return 'Modo ensayo: hasta el ' + sbWhen(l.share_after) + ', abrirlo no cuenta y la carta no se le guarda a nadie.';
+  return '';
+}
+function sbPanelSync() {
+  var l = SB.open && sbLetter(SB.open.id); if (!l) return;
+  var v = document.getElementById('sbVis'), s = document.getElementById('sbShare'), w = document.getElementById('sbWhen');
+  var vn = document.getElementById('sbVisNote'), sn = document.getElementById('sbShareNote');
+  if (v) v.setAttribute('aria-pressed', sbVisNow(l));
+  if (s) s.setAttribute('aria-pressed', !!l.shared);
+  if (vn) vn.textContent = sbVisNote(l);
+  if (sn) sn.textContent = sbShareNote(l);
+  if (w) w.textContent = sbWhenNote(l);
+}
+
+/* ---------- Sonidos (sintetizados, sin archivos) ---------- */
+function sbAudio() { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; } catch (e) { return null; } }
+function sbNoise(dur, freq, q, vol, type) {
+  var a = sbAudio(); if (!a) return;
+  try {
+    var len = Math.floor(a.sampleRate * dur), buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+    var src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    src.buffer = buf; f.type = type || 'bandpass'; f.frequency.value = freq; f.Q.value = q; g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(a.destination); src.start();
+  } catch (e) {}
+}
+function sbCrack() { sbNoise(.09, 2600, .8, .5, 'highpass'); setTimeout(function () { sbNoise(.22, 900, 1.4, .35); }, 40); sbThud(); }
+function sbRustle(dur) { sbNoise(dur || .4, 3200, .6, .12); }
+function sbThud() {
+  var a = sbAudio(); if (!a) return;
+  try {
+    var t = a.currentTime, o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(48, t + .18);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .22);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + .25);
+  } catch (e) {}
+}
+
+/* ---------- Acciones ---------- */
+Object.assign(A, {
+  sbOpen: function (el) { sbAudio(); sobreOpen(el.dataset.id); },
+  sbClose: function () { sobreClose(); },
+  sbFlip: function () { sbFlip(); },
+  sbReplay: function () { var id = SB.open && SB.open.id; if (id) sobreOpen(id, true); },
+  sbVis: function () {
+    var l = SB.open && sbLetter(SB.open.id); if (!l || !sbIsKeeper(l)) return;
+    var on = !sbVisNow(l);   /* apagarlo también cancela la hora programada */
+    sbSet(l, on ? { visible: true } : { visible: false, visible_from: null }).then(function () {
+      sbPanelSync(); toast(on ? 'Sobre a la vista: todos lo ven cerrado' : 'Sobre escondido: vuelve a ser secreto');
+    }, function () { sbPanelSync(); toast('No se ha podido cambiar. Revisa la conexión'); });
+    sbPanelSync();
+  },
+  sbShare: function () {
+    var l = SB.open && sbLetter(SB.open.id); if (!l || !sbIsKeeper(l)) return;
+    var who = nameOf(l.to_person);
+    sbSet(l, { shared: !l.shared }).then(function () {
+      sbPanelSync(); toast(l.shared ? 'Guardada: ' + esc(who) + ' ya puede abrirla cuando quiera' : 'Retirada: vuelve a ser solo tuya');
+    }, function () { sbPanelSync(); toast('No se ha podido cambiar. Revisa la conexión'); });
+    sbPanelSync();
+  }
 });
 
-Object.assign(A, {
-  sobreTap: function (el) {
-    var st = sobresState(), i = +el.dataset.i;
-    if (!st.open) { sobreNope(el); return; }
-    el.classList.add('opening');
-    setTimeout(function () { el.classList.remove('opening'); sobreStage(i, false); }, 400);
-  },
-  sobresSimStart: function () { if (sobresAdmin()) sobresEnsayo(1); },
-  sobresEdit: function () {
-    if (!sobresAdmin()) return;
-    var st = sobresState();
-    openSheet('<h2>Los dos sobres</h2><p class="small muted">Lo que escribas aquí sale al abrir cada sobre. Si lo dejas vacío, el sobre dirá que toca abrir el de verdad. Después, «Ensayar todo el proceso» para verlo como la familia.</p>' +
-      st.items.map(function (x, i) {
-        return '<label class="field"><span class="lbl">Sobre ' + (i + 1) + ' · nombre en el sobre</span><input id="sb-t' + i + '" maxlength="40" value="' + esc(x.title || '') + '" placeholder="Sobre ' + (i + 1) + '"></label>' +
-          '<label class="field"><span class="lbl">Sobre ' + (i + 1) + ' · lo que hay dentro</span><textarea id="sb-x' + i + '" rows="4" maxlength="800">' + esc(x.text || '') + '</textarea></label>';
-      }).join('') +
-      '<button class="btn primary block" data-act="sobresSave">' + icon('check') + 'Guardar</button>');
-  },
-  sobresSave: function () {
-    if (!sobresAdmin()) return;
-    var st = sobresState();
-    var v = { at: st.at, open: st.open, openedAt: st.openedAt, items: [0, 1].map(function (i) {
-      return { title: ((document.getElementById('sb-t' + i) || {}).value || '').trim(), text: ((document.getElementById('sb-x' + i) || {}).value || '').trim() };
-    }) };
-    sobresSave(v).then(function () { closeSheet(); render(true); toast('Sobres guardados. Siguen cerrados'); }, function () { toast('No he podido guardarlos'); });
-  },
-  sobresOpen: function (el) {
-    if (!sobresAdmin()) return;
-    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Seguro? Les salta a todos. Toca otra vez'; return; }
-    var st = sobresState();
-    sobresSave({ at: st.at, open: true, openedAt: new Date().toISOString(), items: st.items }).then(function () { render(true); }, function () { toast('No he podido abrirlos'); });
-  },
-  sobresClose: function () {
-    if (!sobresAdmin()) return;
-    var st = sobresState();
-    sobresSave({ at: st.at, open: false, openedAt: null, items: st.items }).then(function () { render(true); toast('Sobres cerrados otra vez'); }, function () { toast('No he podido cerrarlos'); });
-  }
+/* ===================== 10 secretos nuevos (v0.7.54) =====================
+   Se suman a la lista sin tocar los de siempre: palabras mágicas (buscador de Compra o buzón de ideas),
+   gestos del móvil (girarlo, hacer zoom, quedarse sin cobertura, mantener pulsada una foto) y un paseo por toda la app. */
+
+/* v0.7.59: los nombres se leen de la familia al entrar (la web pública no lleva nombres escritos) */
+function xN(id, fb) { try { return nameOf(id) || fb; } catch (e) { return fb; } }
+function eggsExtraList() { return [
+  { k: 'montserrat', name: 'Vistas de diez', how: 'Buscar «Montserrat» en la compra', hint: 'Desde la barbacoa se ve una montaña con forma de sierra. Nómbrala', more: 'En el buscador de Compra, el nombre de la montaña que se ve desde La Barbacoa' },
+  { k: 'piedras', name: 'Operación Piscina', how: 'Buscar «piedras» en la compra', hint: 'Alguien tiró algo a la piscina y alguien se mojó por rescatarlo', more: 'En el buscador de Compra: lo que ' + xN('marc', 'el peque') + ' tiró a la piscina' },
+  { k: 'gracias', name: 'Bien nacido', how: 'Escribir «gracias» en el buscador o en el buzón de ideas', hint: 'De bien nacido es ser agradecido. Díselo a la app', more: 'Escribe la palabra mágica de la buena educación en el buscador de Compra (o en el buzón)' },
+  { k: 'abuelos', name: '151 años de sabiduría', how: 'Buscar «abuelos» en la compra', hint: 'Suma la edad de los que más saben. Pero antes, nómbralos', more: 'Escribe en el buscador de Compra cómo llamamos a ' + xN('nenuca', 'la abuela') + ' y ' + xN('carlos', 'el abuelo') + '' },
+  { k: 'visca', name: 'Visca el Cónclave', how: 'Escribir «visca» en el buscador', hint: 'Estamos en Catalunya. Grita algo bonito en catalán… en el buscador', more: 'En el buscador de Compra: la palabra catalana que va antes de «el Barça»' },
+  { k: 'offline', name: 'Turismo rural auténtico', how: 'Quedarse sin conexión con la app abierta', hint: 'En el campo, a veces lo mejor es no tener cobertura. Pruébalo con la app abierta', more: 'Activa el modo avión unos segundos con la app abierta (y luego quítalo, que si no no cuenta en el ranking)' },
+  { k: 'cine', name: 'Modo panorámico', how: 'Girar el móvil en horizontal', hint: 'Esta app también sabe verse en pantalla ancha. Gira la cabeza… o el móvil', more: 'Pon el móvil en horizontal con la app abierta (con el giro automático activado)' },
+  { k: 'lupa', name: 'Ojo de lince', how: 'Hacer zoom con dos dedos', hint: 'Hay detalles que solo se ven de cerca. Pellizca la pantalla… al revés', more: 'Separa dos dedos sobre la pantalla para hacer zoom' },
+  { k: 'turista', name: 'Turista de la finca', how: 'Pasar por las 8 pestañas de abajo en la misma visita', hint: 'Quien no se mueve no conoce. Pasa por todas las secciones de abajo', more: 'Toca una a una las 8 pestañas de la barra de abajo, de Inicio a Cuentas' },
+  { k: 'abrazo', name: 'Abrazo largo', how: 'Mantener pulsada 2 segundos la foto de alguien', hint: 'Hay fotos que se tocan una vez. Y hay fotos a las que se abraza', more: 'Mantén el dedo 2 segundos sobre la foto de cualquiera de la familia' }
+]; }
+var EGG_STYLE_EXTRA = {
+  montserrat: { emo: '⛰️', fx: ['emoji:⛰️ 🌄 📸', 'stars'], quip: 'Montaña a la vista, barbacoa encendida y nadie con ganas de subirla. Turismo rural en estado puro.' },
+  piedras:    { emo: '🪨', fx: ['rise:🫧 🪨 🏊', 'cannons'], quip: 'Las piedras están a salvo. La dignidad tras un baño en octubre, no tanto.' },
+  gracias:    { emo: '🙏', fx: ['rise:💖 🙏 ✨', 'stars'], quip: 'Gracias a ti. Y a los abuelos, que pagan la casa. Y a quien friegue.' },
+  abuelos:    { emo: '👵', fx: ['emoji:👵 👴 ❤️ 🏠', 'fireworks'], quip: 'Más sabe el diablo por viejo que por diablo. Y estos dos saben un montón.' },
+  visca:      { emo: '💛', fx: ['emoji:💛 ❤️ 🎉', 'cannons'], quip: 'Bon dia, bona tarda i bona nit: ja ets de la casa.' },
+  offline:    { emo: '📵', fx: ['stars', 'emoji:📵 🌳 🌄'], quip: 'La app funciona sin internet. La familia, también.' },
+  cine:       { emo: '🍿', fx: ['emoji:🍿 🎬 📽️', 'stars'], quip: 'Lo mejor del cine en casa rural: aquí nadie te manda callar.' },
+  lupa:       { emo: '🦅', fx: ['emoji:🔎 🦅 👀', 'stars'], quip: 'Si lo ves todo tan grande, igual necesitas las gafas del abuelo.' },
+  turista:    { emo: '🧭', fx: ['emoji:🧭 🗺️ 📍', 'fireworks'], quip: 'Turista oficial: solo te faltan la gorra y la riñonera.' },
+  abrazo:     { emo: '🤗', fx: ['rise:🤗 💞 ✨', 'cannons'], quip: 'Abrazo enviado. Devolución garantizada.' }
+};
+var _buildEggs0 = buildEggs;
+buildEggs = function () {
+  _buildEggs0();
+  eggsExtraList().forEach(function (e) { if (!EGGS.some(function (x) { return x.k === e.k; })) EGGS.push(e); });
+};
+var _secretStyle0 = secretStyle;
+secretStyle = function (k) { return EGG_STYLE_EXTRA[k] || _secretStyle0(k); };
+function eggsReady() { return !!S && EGGS.length > 0; }
+function extraEgg(k, text) { if (eggsReady() && !hasEgg(k)) eggToast(k, text); }
+
+/* ---------- Palabras mágicas: buscador de Compra y buzón de ideas ---------- */
+var MAGIC_WORDS = [
+  { re: /\bmontserrat\b/i, k: 'montserrat', text: 'Desde La Barbacoa se ve Montserrat. Dicen que sus rocas parecen una sierra; esta familia jura que parecen una fila de croquetas.' },
+  { re: /\bpiedras?\b/i, k: 'piedras', text: function () { return xN('marc', 'El peque') + ' tiró las piedras a la piscina. ' + xN('hugo', 'Alguien') + ' se tiró a por ellas. En octubre. ' + xN('marc', 'El peque') + ' ya está preparando la segunda tanda.'; } },
+  { re: /\bgracias\b/i, k: 'gracias', text: 'La app no come ni bebe, pero se ha emocionado. Ahora dilo también en voz alta a quien ha cocinado hoy.' },
+  { re: /\babuel[oa]s\b/i, k: 'abuelos', text: function () { return xN('nenuca', 'La abuela') + ' (75) y ' + xN('carlos', 'el abuelo') + ' (76): 151 años entre los dos de sabiduría, paciencia y tápers. Y encima pagan la casa.'; } },
+  { re: /\bvisca\b/i, k: 'visca', text: 'Visca la família, visca la finca i visca el Cónclave! Si alguien grita «i el Barça», también vale.' }
+];
+function magicWords(v) {
+  if (!eggsReady() || !v) return;
+  MAGIC_WORDS.forEach(function (m) {
+    if (!m.re.test(v) || hasEgg(m.k) || ui['_mw_' + m.k]) return;
+    ui['_mw_' + m.k] = true; setTimeout(function () { ui['_mw_' + m.k] = false; }, 4000);
+    eggToast(m.k, typeof m.text === 'function' ? m.text() : m.text);
+  });
+}
+document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.input === 'search') magicWords(t.value); });
+if (A.ideaAdd) {
+  var _ideaAdd0 = A.ideaAdd;
+  A.ideaAdd = function (el, e) {
+    var t = document.getElementById('idea-text'), v = t ? t.value : '';
+    _ideaAdd0(el, e);
+    if (v.trim().length >= 3) setTimeout(function () { magicWords(v); }, 900);
+  };
+}
+
+/* ---------- Sin cobertura ---------- */
+window.addEventListener('offline', function () {
+  extraEgg('offline', 'Sin cobertura. Enhorabuena: has llegado al nivel máximo de casa rural. Mira por la ventana: eso de ahí fuera se llama paisaje.');
 });
+
+/* ---------- Móvil en horizontal ---------- */
+try {
+  var mqCine = window.matchMedia('(orientation: landscape) and (max-height: 520px)');
+  var onCine = function () { if (mqCine.matches) extraEgg('cine', 'Pantalla panorámica activada: la finca en 16:9 y sin anuncios. Solo faltan las palomitas.'); };
+  if (mqCine.addEventListener) mqCine.addEventListener('change', onCine); else if (mqCine.addListener) mqCine.addListener(onCine);
+} catch (e) {}
+
+/* ---------- Zoom con dos dedos ---------- */
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', function () {
+    if (window.visualViewport.scale >= 1.6) extraEgg('lupa', 'Ojo de lince: ahora ves hasta las migas de la barbacoa. Para volver, junta los dedos.');
+  });
+}
+
+/* ---------- Pasar por las 8 pestañas ---------- */
+var _secretsOnView0 = typeof secretsOnView === 'function' ? secretsOnView : null;
+secretsOnView = function () {
+  if (_secretsOnView0) _secretsOnView0();
+  try {
+    if (!eggsReady() || hasEgg('turista')) return;
+    ui._seenTabs = ui._seenTabs || {}; ui._seenTabs[ui.tab] = 1;
+    if (TABS.every(function (t) { return ui._seenTabs[t.k]; })) extraEgg('turista', 'Has pasado por todas las secciones. Ya conoces la app mejor que quien la hizo. Bueno, casi.');
+  } catch (e) {}
+};
+
+/* ---------- Mantener pulsada una foto ---------- */
+var hugT = null, hugXY = null;
+function hugStop() { clearTimeout(hugT); hugT = null; hugXY = null; }
+document.addEventListener('pointerdown', function (e) {
+  var a = e.target && e.target.closest && e.target.closest('.av');
+  if (!a || a.closest('.sobre') || !eggsReady() || hasEgg('abrazo')) return;
+  hugStop(); hugXY = [e.clientX, e.clientY];
+  hugT = setTimeout(function () {
+    hugT = null;
+    var n = a.getAttribute('title') || 'alguien de la familia';
+    extraEgg('abrazo', 'Abrazo virtual de dos segundos para ' + esc(n) + '. Los de verdad duran más y no gastan batería: ve a por uno.');
+  }, 2000);
+}, { passive: true });
+document.addEventListener('pointermove', function (e) {
+  if (hugT && hugXY && Math.abs(e.clientX - hugXY[0]) + Math.abs(e.clientY - hugXY[1]) > 14) hugStop();
+}, { passive: true });
+['pointerup', 'pointercancel'].forEach(function (ev) { document.addEventListener(ev, hugStop, { passive: true }); });
+window.addEventListener('scroll', hugStop, { passive: true });
 
 /* ===================== Pelis con mímica: el móvil hace de papelitos y de reloj =====================
    Para el juego de mímica (data.mimica): saca una peli al azar que solo ve quien actúa (mantener pulsado),
@@ -8293,6 +8794,112 @@ Object.assign(A, {
     galaSaveState({ open: false, at: null }).then(function () { render(true); toast('Estreno deshecho: el ranking vuelve a estar vivo'); }, function () { toast('No he podido deshacerlo'); });
   }
 });
+
+/* ===================== v0.7.59 · Avisos al entrar =====================
+   Dos ventanitas que saltan en el Inicio, de una en una y una sola vez por persona:
+   1) «Han aparecido dos sobres»: en cuanto los sobres lacrados están a la vista de todos (visible / visible_from).
+   2) «Los secretos se acaban hoy a las 18:00»: el día del cierre, antes de la hora.
+   Nunca tapan la gala, un sobre abierto, una hoja abierta ni el aviso de un secreto. */
+var AV = { busy: false, born: Date.now() };
+function avKey(k) { return KEY + '-aviso-' + k + '-' + (ui.me || 'anon'); }
+function avSeen(k) { var v = null; try { v = localStorage.getItem(avKey(k)); } catch (e) {} return v || (ui['_av_' + k] || null); }
+function avMark(k) { ui['_av_' + k] = '1'; try { localStorage.setItem(avKey(k), '1'); } catch (e) {} }
+function avBlocked() {
+  if (AV.busy || !S || !ui.me || ui.tab !== 'inicio' || document.hidden) return true;
+  if (typeof gala !== 'undefined' && gala) return true;
+  if (typeof SB !== 'undefined' && SB.open) return true;
+  return !!document.querySelector('.aviso, .egg-msg, .sobre, .scrim, #gala, .gim-kid, .gim-gate, .viewer, .fumata');
+}
+function avNum(n) { return n === 1 ? 'un sobre' : n === 2 ? 'dos sobres' : n + ' sobres'; }
+function avList(a) { return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1]; }
+function avUniq(a) { return a.filter(function (x, i) { return x && a.indexOf(x) === i; }); }
+
+function avShow(o) {
+  AV.busy = true;
+  var el = document.createElement('div');
+  el.className = 'aviso'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'aviso-t');
+  el.innerHTML = '<div class="aviso-box ' + (o.cls || '') + '">' + (o.top || '') +
+    '<h2 id="aviso-t">' + o.title + '</h2><p>' + o.text + '</p>' +
+    '<div class="aviso-btns"><button type="button" class="btn primary" data-av="go">' + o.go + '</button>' +
+    '<button type="button" class="btn ghost" data-av="ok">' + (o.ok || 'Entendido') + '</button></div></div>';
+  function close(go) {
+    if (!el.parentNode) return;
+    el.classList.add('out'); document.removeEventListener('keydown', key);
+    setTimeout(function () { el.remove(); AV.busy = false; if (go && o.onGo) o.onGo(); }, 220);
+  }
+  function key(e) { if (e.key === 'Escape') close(false); }
+  el.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var b = e.target.closest && e.target.closest('[data-av]');
+    if (b) close(b.dataset.av === 'go'); else if (e.target === el) close(false);
+  });
+  document.addEventListener('keydown', key);
+  document.body.appendChild(el);
+  try { if (navigator.vibrate) navigator.vibrate([18, 40, 18]); } catch (e) {}
+  setTimeout(function () { var b = el.querySelector('[data-av=go]'); if (b) try { b.focus({ preventScroll: true }); } catch (e) {} }, 60);
+}
+
+/* 1) Los sobres */
+function avSobres() {
+  if (typeof SB === 'undefined' || typeof sbCloud !== 'function' || !sbCloud() || avSeen('sobres')) return false;
+  if (!SB.at) return 'wait';   /* aún no ha llegado la lista de sobres: esperamos un poco antes del otro aviso */
+  var vis = SB.list.filter(function (l) { return sbVisNow(l) && person(l.to_person); });
+  if (!vis.length) return false;
+  var n = vis.length, Num = avNum(n).charAt(0).toUpperCase() + avNum(n).slice(1);
+  var to = avUniq(vis.map(function (l) { return l.to_person; })), keepers = avUniq(vis.map(function (l) { return l.keeper; }));
+  var toN = avList(to.map(function (p) { return esc(nameOf(p)); })), kN = avList(keepers.map(function (p) { return esc(nameOf(p, 'quien tiene la llave')); }));
+  var mine = keepers.indexOf(ui.me) >= 0, forMe = to.indexOf(ui.me) >= 0;
+  var title, text;
+  if (mine) {
+    title = n === 1 ? 'Tu sobre ya está a la vista' : 'Tus ' + avNum(n) + ' ya están a la vista';
+    text = 'Desde ahora toda la familia ve ' + (n === 1 ? 'el sobre cerrado' : 'los ' + avNum(n) + ' cerrados') + ' en su Inicio y le acaba de saltar este mismo aviso. La llave solo la tienes tú: tú decides cuándo se rompe el lacre.';
+  } else if (forMe) {
+    title = n === 1 ? 'Ha aparecido un sobre para ti' : 'Han aparecido ' + avNum(n) + ' para ti';
+    text = 'Lacrado' + (n === 1 ? '' : 's') + ' y con tu nombre. La llave la tiene ' + kN + ', así que toca esperar. Mirar' + (n === 1 ? 'lo' : 'los') + ' sí puedes. Sacudir el móvil no sirve (lo hemos probado).';
+  } else {
+    title = n === 1 ? 'Ha aparecido un sobre' : 'Han aparecido ' + avNum(n);
+    text = Num + ' lacrado' + (n === 1 ? '' : 's') + ' para ' + toN + ' en el Inicio. La llave la tiene ' + kN + ': mirar se puede, abrir todavía no. Ni con el vapor de la cafetera.';
+  }
+  avMark('sobres');
+  avShow({
+    cls: 'is-sobres', title: title, text: text, go: icon('mail') + (n === 1 ? 'Verlo' : 'Verlos'), ok: 'Vale',
+    top: '<div class="aviso-envs" aria-hidden="true">' + vis.slice(0, 3).map(function (l, i) { return '<span style="--i:' + i + '">' + sbMiniEnv(sbMark(l)) + '</span>'; }).join('') + '</div>',
+    onGo: function () {
+      var c = document.querySelector('.sb-card'); if (!c) return;
+      c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      c.classList.remove('aviso-flash'); void c.offsetWidth; c.classList.add('aviso-flash');
+    }
+  });
+  return true;
+}
+
+/* 2) El cierre de los secretos */
+function avCierre() {
+  if (typeof secretsCloseDay !== 'function' || !secretsCloseDay() || !EGGS.length) return false;
+  var k = 'cierre-' + secretsCloseIso().slice(0, 10); if (avSeen(k)) return false;
+  var f = foundCount(), N = EGGS.length, h = closeHour(), all = f >= N;
+  avMark(k);
+  avShow({
+    cls: 'is-cierre', title: 'Los secretos se acaban hoy a las ' + h,
+    text: all
+      ? 'Los tienes todos: <b class="num">' + f + '/' + N + '</b>. A las ' + h + ' se cierra el ranking. Ahora solo te queda presumir en la gala.'
+      : 'Llevas <b class="num">' + f + '/' + N + '</b>. A las ' + h + ' se cierra el ranking y lo que no hayas encontrado se queda en el cajón. Hasta la próxima casa rural, por lo menos.',
+    go: icon('search') + (all ? 'Ver el ranking' : 'Buscar secretos'), ok: 'Luego',
+    top: '<div class="aviso-clock" aria-hidden="true"><span class="num">' + h + '</span></div>',
+    onGo: function () { if (A.secrets) A.secrets(); }
+  });
+  return true;
+}
+
+setInterval(function () {
+  try {
+    if (avBlocked() || Date.now() - AV.born < 2500) return;
+    var s = avSobres();
+    if (s === true) return;
+    if (s === 'wait' && Date.now() - AV.born < 12000) return;
+    avCierre();
+  } catch (e) {}
+}, 1500);
 
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
@@ -8472,7 +9079,7 @@ var CLOUD = (function () {
   }
   function ping() {
     var eg = 0, ks = []; try { eg = rankedCount(); ks = rankedKeys(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg, p_ver: 3, p_keys: ks }).then(function () {
+    client().rpc('ping', { p_eggs: eg, p_ver: 4, p_keys: ks, p_pid: ui.me || null })   /* v0.7.52: la base de datos comprueba que eres tú */.then(function () {
       return client().from('presence').select('person_id,last_seen,visits,minutes,eggs,egg_keys');
     }).then(function (r) {
       if (r && r.data) {
