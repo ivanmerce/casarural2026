@@ -1614,6 +1614,56 @@ body.gala-on .fx { z-index: 94; }
 @media (max-width: 380px) { .gala-stats { gap: 8px; } .gs { padding: 10px 6px; } .gs-emo { font-size: 1.6rem; } }
 @media (prefers-reduced-motion: reduce) { .gs, .gbd-num, .gbd-av, .gbd-crown, .gs-n.pop { animation: none; } }
 
+/* v0.7.52 · Gala: formatos de entrega, fotos que se cuelan y ranking congelado */
+.gala > .gala-pics { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.gpic { position: absolute; width: clamp(84px, 21vw, 210px); aspect-ratio: 1; object-fit: cover; border: 6px solid #FFF8EC; border-bottom-width: 18px; border-radius: 4px; box-shadow: 0 14px 30px rgba(0,0,0,.45); transform: rotate(var(--r, 0deg)); opacity: .92; animation: gpicIn .8s cubic-bezier(.2,1.4,.4,1) both, gpicDrift 7s ease-in-out both; }
+.gpic.out { animation: gpicOut .9s ease both; }
+@keyframes gpicIn { from { opacity: 0; transform: rotate(calc(var(--r) * 3)) scale(.4); } to { opacity: .92; transform: rotate(var(--r)) scale(1); } }
+@keyframes gpicDrift { from { translate: 0 0; } to { translate: 0 -14px; } }
+@keyframes gpicOut { to { opacity: 0; transform: rotate(var(--r)) scale(.85) translateY(20px); } }
+.gala.present .gpic { width: clamp(120px, 16vw, 260px); }
+/* tragaperras */
+.gb-reel { display: block; width: min(200px, 90%); height: 34px; overflow: hidden; border-radius: 10px; background: #0E0907; border: 2px solid #E8B64A; box-shadow: inset 0 8px 10px rgba(0,0,0,.6), inset 0 -8px 10px rgba(0,0,0,.6); }
+.gb-reel-in { display: flex; flex-direction: column; animation: reelSpin 1.6s linear infinite; animation-delay: calc(var(--k) * -.37s); }
+.gb-reel-in i { display: block; height: 34px; line-height: 34px; font-style: normal; font-weight: 800; font-size: .82rem; color: #FFE7A8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
+@keyframes reelSpin { from { transform: translateY(0); } to { transform: translateY(calc(-100% + 34px)); } }
+.gala-burst.waiting .gb-reel-in { animation-duration: .35s; }
+.gala-burst.m-tragaperras .gb.on { animation: slotStop .9s cubic-bezier(.2,1.8,.4,1) both; animation-delay: var(--d); }
+@keyframes slotStop { 0% { transform: translateY(-40px) scaleY(1.2); opacity: 0; filter: blur(4px); } 60% { transform: translateY(8px) scaleY(.95); opacity: 1; filter: none; } 100% { transform: none; } }
+/* noticias */
+.gn-bar { position: absolute; left: 0; right: 0; top: 54px; display: flex; align-items: stretch; background: #B8122C; color: #fff; font-size: .8rem; overflow: hidden; z-index: 2; }
+.gn-bar b { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; color: #B8122C; letter-spacing: .06em; }
+.gn-dot { width: 8px; height: 8px; border-radius: 50%; background: #B8122C; animation: gnDot 1s infinite; }
+@keyframes gnDot { 50% { opacity: .2; } }
+.gn-tick { flex: 1; overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
+.gn-tick span { display: inline-block; padding-left: 100%; animation: gnTick 22s linear infinite; }
+@keyframes gnTick { to { transform: translateX(-100%); } }
+.gala[data-mode="noticias"] .gala-in { padding-top: 96px; }
+.gb-tv { display: grid; place-items: center; width: min(180px, 86%); height: 44px; border-radius: 8px; background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 2px, rgba(0,0,0,.2) 2px 4px), #2a2422; animation: tvStatic .2s steps(3) infinite; }
+.gb-tv i { font-style: normal; font-weight: 800; font-size: .72rem; letter-spacing: .1em; color: #fff; background: #B8122C; padding: 2px 8px; border-radius: 4px; }
+.gb-tv.live i { animation: gnDot .5s infinite; }
+@keyframes tvStatic { 50% { background-position: 0 2px; filter: brightness(1.3); } }
+.gb-lower { display: inline-block; background: #B8122C; color: #fff; font-weight: 800; font-size: .7rem; letter-spacing: .12em; padding: 2px 10px; border-radius: 3px; }
+.gala-burst.m-noticias .gb.on { animation: newsIn .7s cubic-bezier(.2,1.2,.4,1) both; animation-delay: var(--d); border-left: 4px solid #B8122C; }
+@keyframes newsIn { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* cartas */
+.gb-card { display: grid; place-items: center; width: 70px; height: 96px; border-radius: 10px; border: 3px solid #FFF8EC; background: repeating-linear-gradient(45deg, #B8122C 0 8px, #8E0E22 8px 16px); box-shadow: 0 8px 18px rgba(0,0,0,.4); }
+.gb-card i { font-style: normal; font-family: var(--font-display); font-weight: 900; font-size: 2rem; color: #FFE7A8; }
+.gb-card.shuffle { animation: cardShuffle .35s ease-in-out infinite alternate; }
+@keyframes cardShuffle { from { transform: translateX(-8px) rotate(-6deg); } to { transform: translateX(8px) rotate(6deg); } }
+.gala-burst.m-cartas .gb.on { animation: cardFlip .9s cubic-bezier(.3,1.2,.4,1) both; animation-delay: var(--d); }
+@keyframes cardFlip { 0% { transform: perspective(700px) rotateY(180deg); opacity: .2; } 100% { transform: perspective(700px) rotateY(0); opacity: 1; } }
+/* foco */
+.gala-burst.m-foco .gb:not(.on) .gb-av .av { filter: grayscale(1) brightness(.45); }
+.gala-burst.m-foco .gb:not(.on) { background: rgba(0,0,0,.25); }
+.gala-burst.m-foco.waiting .gb { animation: focoSweep 1.2s ease-in-out infinite; animation-delay: calc(var(--d) * .6); }
+@keyframes focoSweep { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 40px rgba(255,240,200,.35); } }
+.gb-q { font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; color: rgba(255,255,255,.35); }
+.gala-burst.m-foco .gb.on { animation: focoOn .9s ease both; animation-delay: var(--d); background: radial-gradient(circle at 50% 0%, rgba(255,240,200,.35), rgba(255,255,255,.04) 70%); }
+@keyframes focoOn { 0% { filter: brightness(.3); transform: scale(.94); } 40% { filter: brightness(1.6); } 100% { filter: none; transform: none; } }
+.sec-note.frozen { color: var(--ink); border-color: color-mix(in srgb, var(--gold, #E8B64A) 70%, transparent); background: color-mix(in srgb, var(--gold, #E8B64A) 10%, transparent); }
+@media (prefers-reduced-motion: reduce) { .gb-reel-in, .gn-tick span, .gb-tv, .gb-card.shuffle, .gpic { animation: none !important; } }
+
 </style>
 </head>
 <body>
@@ -4486,7 +4536,7 @@ function rankingView() {
     return '<div class="empty"><span data-egg="podio" class="podio-empty">' + icon('podium') + '</span><b>El podio está vacío</b><span>En cuanto termine el primer juego aparecen aquí los puntos. Se admiten apuestas.</span></div>' + (nx ? '<button class="btn block" data-act="jsub" data-v="juegos">Ver los juegos</button>' : '');
   }
   var top = [2, 1, 3].map(function (p) { return rank.filter(function (r) { return r.pos === p && r.pts > 0; }); });
-  var h = '<section class="podium-wrap"><div class="podium">' + top.map(function (list, i) {
+  var h = (galaFrozen() ? '<p class="sec-note frozen">' + icon('trophy') + '<span>Ranking cerrado en la gala (' + esc(galaHour()) + '). Lo que se juegue ahora ya no suma.</span></p>' : '') + '<section class="podium-wrap"><div class="podium">' + top.map(function (list, i) {
     var p = [2, 1, 3][i]; if (!list.length) return '<div class="pod p' + p + ' empty"><div class="block">' + p + '</div></div>';
     return '<div class="pod p' + p + '"' + (p === 1 ? ' data-egg="podio"' : '') + '>' + (p === 1 ? '<span class="crown">' + icon('trophy') + '</span>' : '') + '<span class="pod-av pod-avs">' + list.slice(0, 3).map(function (r) { return eAv(r.id, 'lg'); }).join('') + '</span><b class="pod-name">' + list.map(function (r) { return eName(r.id); }).join('<br>') + '</b><span class="pod-pts num">' + list[0].pts + ' pts</span><div class="block">' + p + '</div></div>';
   }).join('') + '</div></section>';
@@ -4506,8 +4556,11 @@ function premiosView() {
   var prized = S.people.filter(function (p) { return t[p.id].length; }), none = S.people.filter(function (p) { return !t[p.id].length && (p.attends || G.presentOn(S, G.entrantOf(S, p.id))); });
   var h = '<section class="card gala-card"><span class="eyebrow">La noche de los premios</span><h3>Gala de premios</h3><p class="small">' + withW.length + ' premios con ganador · ' + prized.length + ' de ' + S.people.length + ' personas premiadas.</p>' +
     (galaOpenNow() ? '<button class="btn primary block big-btn" data-act="galaStart" data-mode="gala"' + (withW.length ? '' : ' disabled') + '>' + icon('play') + 'Empezar la gala</button>'
-      : '<p class="small gala-date">' + icon('clock') + '<span>Se estrena el <b>' + esc(galaWhen()) + '</b>, con los premios ya decididos. Hasta entonces, sin spoilers.</span></p><button class="btn primary block big-btn" data-act="galaStart" data-mode="trailer">' + icon('play') + 'Ver el tráiler</button>') +
+      : '<p class="small gala-date">' + icon('clock') + '<span>Se estrena <b>' + esc(galaWhen()) + '</b>. En ese momento se cierran el ranking y los premios. Hasta entonces, sin spoilers.</span></p><button class="btn primary block big-btn" data-act="galaStart" data-mode="trailer">' + icon('play') + 'Ver el tráiler</button>') +
     (none.length ? '<p class="small muted">Aún sin premio: ' + none.map(function (p) { return esc(p.name); }).join(', ') + '. ' + (can('edit') ? 'Crea un premio especial para que nadie se quede sin estatuilla.' : '') + '</p>' : '<p class="small">Todo el mundo tiene al menos un premio. Así se hace.</p>') +
+    (can('access') ? (galaOpenNow()
+      ? '<p class="small gala-date">' + icon('check') + '<span>Gala estrenada a las <b>' + esc(galaHour()) + '</b>. Ranking y premios congelados.</span></p><button class="link small" data-act="galaReopen">Deshacer el estreno (solo admin)</button>'
+      : '<button class="btn primary block" data-act="galaPremiere">' + icon('trophy') + '¡Estrenar la gala ahora!</button><p class="small muted">Solo tú lo ves. Al tocarlo (dos veces) se congelan el ranking y los premios tal y como estén, y a todos les salta el aviso. Lo que se juegue después ya no cuenta.</p>') : '') +
     (can('access') ? '<button class="btn block" data-act="galaStart" data-mode="sim">' + icon('shuffle') + 'Gala de prueba: premios al azar (solo admin)</button><p class="small muted">Reparte los premios al azar para ver cómo queda la gala. No guarda nada ni cambia ningún premio. Cada vez sale distinta.</p>' : '') +
     (can('edit') ? '<button class="btn block" data-act="aNew">' + icon('plus') + 'Premio especial</button>' : '') + '</section>';
   ['podio', 'juegos', 'casa', 'publico', 'extra'].forEach(function (gk) {
@@ -4547,8 +4600,12 @@ function pickList(act, id, selected, kind) {
 var gala = null;
 var GALA_AT = '2026-10-11T22:00:00+02:00';
 function galaAtIso() { return (S.trip && S.trip.galaAt) || GALA_AT; }
-function galaOpenNow() { return Date.now() >= new Date(galaAtIso()).getTime(); }
-function galaWhen() { var k = galaAtIso().slice(0, 10), d = dayOf(k); return (d && d.long ? d.long.toLowerCase() : 'domingo') + ' a las ' + galaAtIso().slice(11, 16); }
+/* v0.7.52: la gala se estrena cuando el admin lo decide (y en ese momento se congelan ranking y premios) */
+function galaState() { return S.galaState || null; }
+function galaOpenNow() { var g = galaState(); return !!(g && g.open); }
+function galaWhen() { return 'esta noche, cuando el jefe dé la señal'; }
+function galaFrozen() { var g = galaState(); return g && g.open && g.awards ? g : null; }
+function galaHour() { var g = galaState(), d = g && g.at ? new Date(g.at) : null; return d && !isNaN(d) ? d.toTimeString().slice(0, 5) : ''; }
 function pickOne(arr, seed) { var h = 0, s = String(seed || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return arr[Math.abs(h) % arr.length]; }
 
 /* Lo que dice el presentador antes de abrir el sobre */
@@ -6457,7 +6514,7 @@ function galaSlides(trailer, awardsList) {
   /* ráfagas de 3 (si sobra uno solo, se va con la anterior) */
   var groups = []; for (var i = 0; i < picks.length; i += 3) groups.push(picks.slice(i, i + 3));
   if (groups.length > 1 && groups[groups.length - 1].length === 1) groups[groups.length - 2] = groups[groups.length - 2].concat(groups.pop());
-  groups.forEach(function (g, k) { slides.push({ t: 'burst', items: g, song: k % 2 ? 2 : 1 }); if (k === 1 || (k === 3 && groups.length > 5)) slides.push({ t: 'ad', ad: ads[k === 1 ? 0 : 1] }); });
+  groups.forEach(function (g, k) { slides.push({ t: 'burst', items: g, song: k % 2 ? 2 : 1, mode: GALA_MODES[k % GALA_MODES.length] }); if (k === 1 || (k === 3 && groups.length > 5)) slides.push({ t: 'ad', ad: ads[k === 1 ? 0 : 1] }); });
   /* el cumpleañero cierra las ráfagas y, justo después, su momento: todos de pie */
   var e = S.trip.eggs || {}; if (e.bday && person(e.bday) && !gala_noBday(list)) slides.push({ t: 'bday', pid: e.bday, age: e.bdayAge || '' });
   if (typeof photoList === 'function' && photoList().length >= 3) slides.push({ t: 'photos' });
@@ -6515,6 +6572,71 @@ function galaMinutes(slides) {
   return Math.max(1, Math.round(s / 60));
 }
 
+/* ---------- v0.7.52: cada entrega, un formato distinto ---------- */
+var GALA_MODES = ['sobres', 'tragaperras', 'noticias', 'cartas', 'foco'];
+var GALA_MODE = {
+  sobres: { ask: 'Abrimos los sobres…', drum: null, gap: .5 },
+  tragaperras: { ask: '¡Tragaperras de estatuillas!', drum: 'Tirando de la palanca… que no salgan tres limones…', gap: .75 },
+  noticias: { ask: 'Informativos Casa Rural · en directo', drum: 'Conectamos con nuestra unidad móvil… (es un móvil, literalmente)', gap: .65 },
+  cartas: { ask: 'Cartas boca abajo…', drum: 'Barajamos… sin trampas… casi sin trampas…', gap: .85 },
+  foco: { ask: 'Foco, por favor…', drum: 'Que se apaguen las luces. Bueno, las de la barbacoa no.', gap: 1 }
+};
+var GALA_TICKER = ['Se busca al fantasma de la finca: última vez visto detrás de un seto', 'El péndulo salchichero deja secuelas en varios cuellos',
+  'La tortilla con cebolla gana por la mínima (fuentes no confirmadas)', 'Los globos de agua piden asilo político', 'Récord de ping-pong: 0 mesas rotas',
+  'Los abuelos invitan a todo: la familia, en shock', 'Un secreto más encontrado. Nadie sabe cuál. Nadie lo dirá', 'Última hora: la mímica de «Titanic» sigue sin acertarse'];
+function galaReelHtml(k) {
+  var names = shuffled((gala.list || G.awards(S)).filter(function (a) { return a.winners && a.winners.length; }).map(function (a) { return a.name; })).slice(0, 7);
+  if (!names.length) names = ['Premio', 'Estatuilla', 'Medalla'];
+  names = names.concat(names.slice(0, 1));
+  return '<span class="gb-reel" aria-hidden="true"><span class="gb-reel-in" style="--k:' + k + '">' + names.map(function (n) { return '<i>' + esc(n) + '</i>'; }).join('') + '</span></span>';
+}
+function galaWaitHtml(mode, k, rv) {
+  if (mode === 'tragaperras') return galaReelHtml(k);
+  if (mode === 'noticias') return '<span class="gb-tv' + (rv === 'wait' ? ' live' : '') + '" aria-hidden="true"><i>EN DIRECTO</i></span>';
+  if (mode === 'cartas') return '<span class="gb-card' + (rv === 'wait' ? ' shuffle' : '') + '" aria-hidden="true"><i>?</i></span>';
+  if (mode === 'foco') return '<span class="gb-q" aria-hidden="true">?</span>';
+  return '<span class="gb-env' + (rv === 'wait' ? ' opening' : '') + '" aria-hidden="true"></span>';
+}
+/* efectos de sonido de cada formato */
+function sfx(kind) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); var t0 = actx.currentTime;
+    function tone(f, t, d, type, v) { var o = actx.createOscillator(), g = actx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + .02); }
+    if (kind === 'coins') [1318, 1568, 2093, 2637].forEach(function (f, i) { tone(f, t0 + i * .07, .18, 'square', .05); });
+    else if (kind === 'news') [[523, 0], [659, .14], [784, .28], [1047, .42]].forEach(function (x) { tone(x[0], t0 + x[1], .32, 'sawtooth', .05); tone(x[0] / 2, t0 + x[1], .3, 'triangle', .08); });
+    else if (kind === 'whoosh') { var o = actx.createOscillator(), g = actx.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(180, t0); o.frequency.exponentialRampToValueAtTime(1400, t0 + .25); g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(.05, t0 + .05); g.gain.exponentialRampToValueAtTime(.0001, t0 + .3); o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0 + .32); }
+    else if (kind === 'boom') { tone(70, t0, .5, 'sine', .35); tone(140, t0, .25, 'triangle', .12); }
+    else if (kind === 'ding') tone(1760, t0, .4, 'sine', .07);
+  } catch (e) {}
+}
+var GALA_SFX = { sobres: 'ding', tragaperras: 'coins', noticias: 'news', cartas: 'whoosh', foco: 'boom' };
+
+/* ---------- v0.7.52: las fotos del álbum se cuelan por todas las diapositivas ---------- */
+var GPICS = null;
+function galaPicsStart() {
+  var el = document.getElementById('gala'); if (!el || GPICS || typeof photoList !== 'function') return;
+  var ps = shuffled(photoList()).slice(0, 40); if (!ps.length) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var box = document.createElement('div'); box.className = 'gala-pics'; box.setAttribute('aria-hidden', 'true'); el.insertBefore(box, el.firstChild.nextSibling);
+  try { PHOTOS.ensure(ps.map(function (p) { return p.thumb; })); } catch (e) {}
+  var spots = [[2, 6, 'l'], [2, 8, 'r'], [3, 70, 'l'], [3, 66, 'r'], [-2, 38, 'l'], [-2, 42, 'r']], i = 0, used = {};
+  function add() {
+    var s = gala && gala.slides[gala.i]; if (!s || s.t === 'photos' || s.t === 'ad' || document.hidden) return;
+    if (box.children.length >= 4) return;
+    var p = null; for (var n = 0; n < ps.length && !p; n++) { var c = ps[(i + n) % ps.length]; if (PHOTOS.url(c.thumb) && !used[c.id]) p = c; }
+    i++; if (!p) { used = {}; return; }
+    var free = spots.filter(function (sp, k) { return !box.querySelector('[data-k="' + k + '"]'); }); if (!free.length) return;
+    var sp = free[Math.floor(Math.random() * free.length)], k = spots.indexOf(sp);
+    used[p.id] = 1; if (Object.keys(used).length >= ps.length) used = {};
+    var im = document.createElement('img'); im.className = 'gpic'; im.src = PHOTOS.url(p.thumb); im.alt = ''; im.dataset.k = k;
+    im.style.cssText = (sp[2] === 'l' ? 'left:' : 'right:') + (sp[0] + Math.random() * 3) + '%;top:' + (sp[1] + Math.random() * 6) + '%;--r:' + ((Math.random() * 22) - 11).toFixed(1) + 'deg';
+    box.appendChild(im); setTimeout(function () { im.classList.add('out'); setTimeout(function () { im.remove(); }, 900); }, 6200);
+  }
+  var iv = setInterval(add, 1900); setTimeout(add, 500); setTimeout(add, 1300);
+  GPICS = { stop: function () { clearInterval(iv); box.remove(); } };
+}
+function galaPicsStop() { if (GPICS) { GPICS.stop(); GPICS = null; } }
+
 /* ---------- Pantallas ---------- */
 var GALA_ENTER = ['flip', 'zoom', 'drop', 'spin', 'slide'];
 var GALA_ASK = ['¿Qué se lleva…?', 'Para ti, este sobre…', 'A ver, a ver…', 'Lo que todos sospechábamos…', 'Redoble, por favor…', '¿Adivináis?'];
@@ -6522,9 +6644,9 @@ function winnersHtml(a, size) { return a.winners.map(function (w) { return '<spa
 function galaRender() {
   var el = document.getElementById('gala'); if (!el || !gala) return;
   var s = gala.slides[gala.i], inner = '', rv = gala.revealed;
-  el.classList.toggle('is-ad', s.t === 'ad'); el.dataset.slide = s.t;
+  el.classList.toggle('is-ad', s.t === 'ad'); el.dataset.slide = s.t; if (s.t !== 'burst') delete el.dataset.mode;
   if (s.t === 'intro') inner = '<div class="gala-curtain" aria-hidden="true"><i></i><i></i></div><span class="eyebrow">' + esc(S.trip.name) + (gala.rehearsal ? ' · ensayo' : gala.sim ? ' · simulación' : '') + '</span><h1 class="gala-title xl">' + (s.trailer ? 'Próximamente' : 'Gala de premios') + '</h1>' +
-    (s.trailer ? '<p>La gran noche llega el <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>'
+    (s.trailer ? '<p>La gran noche llega <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>'
       : '<p>Una estatuilla para cada uno. Nadie se va de vacío.</p><p class="small">' + s.n + ' estatuillas + el podio · unos ' + galaMinutes(gala.slides) + ' minutos · cero modestia</p>' +
         '<div class="gala-start"><button class="btn primary big-btn" data-act="galaGo" data-auto="1">' + icon('play') + 'Empezar (avanza sola)</button><button class="btn" data-act="galaGo">Paso a paso</button></div>');
   else if (s.t === 'cifras') inner = '<span class="eyebrow">Previously on…</span><h1 class="gala-title">El finde en cifras</h1><div class="gala-stats">' + s.stats.map(function (x, k) {
@@ -6536,12 +6658,15 @@ function galaRender() {
   else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p>';
   else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">Una estatuilla para cada uno</h1><p>Sobres, redoble, discursos de 30 segundos y un podio que va a dar que hablar.</p>';
   else if (s.t === 'burst') {
-    inner = '<span class="eyebrow">' + esc(pickOne(GALA_ASK, gala.i)) + '</span><div class="gala-burst" style="--n:' + s.items.length + '">' + s.items.map(function (x, k) {
+    var mode = s.mode || 'sobres', MD = GALA_MODE[mode] || GALA_MODE.sobres;
+    el.dataset.mode = mode;
+    inner = (mode === 'noticias' ? '<div class="gn-bar"><b><i class="gn-dot"></i>ÚLTIMA HORA</b><span class="gn-tick"><span>' + shuffled(GALA_TICKER).slice(0, 4).map(esc).join(' &nbsp;·&nbsp; ') + '</span></span></div>' : '') +
+      '<span class="eyebrow">' + esc(rv === true ? pickOne(GALA_ASK, gala.i) : MD.ask) + '</span><div class="gala-burst m-' + mode + (rv === 'wait' ? ' waiting' : '') + '" style="--n:' + s.items.length + '">' + s.items.map(function (x, k) {
       var a = x.a, fx = GALA_ENTER[(gala.i + k) % GALA_ENTER.length];
-      return '<div class="gb fx-' + fx + (rv === true ? ' on' : '') + '" style="--d:' + (k * .5) + 's"><span class="gb-av">' + av(x.pid, 'xl') + '</span><b class="gb-who">' + pname(x.pid) + '</b>' +
-        (rv === true ? '<span class="gb-ico">' + icon(a.icon || 'star') + '</span><b class="gb-name">' + esc(a.name) + '</b><small class="gb-quip">' + esc(GALA_QUIP[a.id] || a.why || '') + '</small>'
-          : '<span class="gb-env' + (rv === 'wait' ? ' opening' : '') + '" aria-hidden="true"></span>') + '</div>';
-    }).join('') + '</div>' + (rv === true ? '' : '<p class="gala-drum' + (rv === 'wait' ? ' rolling' : '') + '">' + esc(pickOne(GALA_DRUM, gala.i)) + '</p>');
+      return '<div class="gb fx-' + fx + (rv === true ? ' on' : '') + '" style="--d:' + (k * MD.gap) + 's"><span class="gb-av">' + av(x.pid, 'xl') + '</span><b class="gb-who">' + pname(x.pid) + '</b>' +
+        (rv === true ? (mode === 'noticias' ? '<span class="gb-lower">EXCLUSIVA</span>' : '') + '<span class="gb-ico">' + icon(a.icon || 'star') + '</span><b class="gb-name">' + esc(a.name) + '</b><small class="gb-quip">' + esc(GALA_QUIP[a.id] || a.why || '') + '</small>'
+          : galaWaitHtml(mode, k, rv)) + '</div>';
+    }).join('') + '</div>' + (rv === true ? '' : '<p class="gala-drum' + (rv === 'wait' ? ' rolling' : '') + '">' + esc(MD.drum || pickOne(GALA_DRUM, gala.i)) + '</p>');
   } else if (s.t === 'podium') {
     var step = typeof rv === 'number' ? rv : 0, order = { bronce: 3, plata: 2, oro: 1 };
     inner = '<span class="eyebrow">Lo que todos esperabais</span><h1 class="gala-title">El podio</h1><div class="gala-podium">' + ['plata', 'oro', 'bronce'].map(function (id) {
@@ -6603,8 +6728,9 @@ function galaReveal() {
   setTimeout(function () {
     if (!gala || gala.slides[gala.i] !== s) return;
     gala.revealed = true; galaMusicDuck(false); galaRender();
-    applause(2); confetti(2000);
-    s.items.forEach(function (x, k) { setTimeout(function () { galaFxBurstAt('.gb:nth-child(' + (k + 1) + ')'); }, k * 500 + 300); });
+    var mode = s.mode || 'sobres', gap = (GALA_MODE[mode] || GALA_MODE.sobres).gap * 1000;
+    applause(mode === 'foco' ? 3 : 2); confetti(2000);
+    s.items.forEach(function (x, k) { setTimeout(function () { galaFxBurstAt('.gb:nth-child(' + (k + 1) + ')'); sfx(GALA_SFX[mode]); }, k * gap + 300); });
     galaFxRandom(gala.i);
     if (navigator.vibrate) try { navigator.vibrate([30, 40, 30]); } catch (x) {}
   }, 1300);
@@ -6769,10 +6895,10 @@ function galaOpen(mode) {
     '<div class="gala-ctl"><div class="gala-prog" aria-hidden="true"><i></i></div><button class="btn" data-act="galaPrev">' + icon('back') + '</button><span class="gala-count small"></span><button class="btn primary" data-act="galaNext"></button></div>';
   document.body.appendChild(el); document.body.style.overflow = 'hidden'; document.body.classList.add('gala-on'); overlayPush('gala');
   el.addEventListener('pointermove', galaPoke); el.addEventListener('pointerdown', galaPoke);
-  galaFxStart(); galaMusicStart(0); galaRender(); try { fanfare(); } catch (e) {}
+  galaFxStart(); galaPicsStart(); galaMusicStart(0); galaRender(); try { fanfare(); } catch (e) {}
 }
 function galaClose(fromNav) {
-  clearInterval(speechT); if (gala) { clearTimeout(gala.timer); clearTimeout(gala.bdT); } galaMusicStop(); if (GFX) { GFX.stop(); GFX = null; }
+  clearInterval(speechT); if (gala) { clearTimeout(gala.timer); clearTimeout(gala.bdT); } galaMusicStop(); galaPicsStop(); if (GFX) { GFX.stop(); GFX = null; }
   try { if (gala && gala.lock) gala.lock.release(); if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {}); } catch (e) {}
   var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; document.body.classList.remove('gala-on'); gala = null; if (el && !fromNav) overlayDone();
 }
@@ -7867,6 +7993,62 @@ Object.assign(A, {
   }
 });
 
+/* ===================== Estreno de la gala y ranking congelado =====================
+   La gala se estrena cuando el admin lo decide. En ese momento se guardan (app_config «gala») el ranking y los premios
+   tal y como están: a partir de ahí, todo lo que lee el ranking o los premios usa esa foto fija, aunque se jueguen más juegos.
+   A todos les salta el aviso una vez. El admin puede deshacer el estreno si se ha equivocado. */
+(function () {
+  var liveRank = G.ranking, liveAwards = G.awards, liveTally = G.tally;
+  function copy(x) { return JSON.parse(JSON.stringify(x)); }
+  G.ranking = function (S2) { var f = galaFrozen(); return f && f.rank ? copy(f.rank) : liveRank(S2); };
+  G.awards = function (S2) { var f = galaFrozen(); return f ? copy(f.awards) : liveAwards(S2); };
+  G.tally = function (S2) {
+    var f = galaFrozen(); if (!f) return liveTally(S2);
+    var t = {}; S2.people.concat(S2.spies || []).forEach(function (p) { t[p.id] = []; });
+    f.awards.forEach(function (a) { var seen = {}; (a.winners || []).forEach(function (w) { G.peopleOf(S2, w).forEach(function (pid) { if (t[pid] && !seen[pid]) { seen[pid] = 1; t[pid].push(a.id); } }); }); });
+    return t;
+  };
+  G.live = { ranking: liveRank, awards: liveAwards };
+})();
+
+function galaSaveState(v) {
+  S.galaState = v;
+  return (typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb)
+    ? CLOUD.sb().from('app_config').upsert({ key: 'gala', value: v }).then(function (r) { if (r.error) throw r.error; })
+    : Promise.resolve();
+}
+function galaSeenKey() { return KEY + '-galaSeen-' + (ui.me || 'anon'); }
+/* aviso a todos, una sola vez, cuando el admin estrena la gala */
+setInterval(function () {
+  try {
+    var g = S && S.galaState; if (!g || !g.open || !ui.me || typeof gala === 'undefined' || gala) return;
+    var seen = null; try { seen = localStorage.getItem(galaSeenKey()); } catch (e) { seen = ui._galaSeen; }
+    if (seen === g.at) return;
+    ui._galaSeen = g.at; try { localStorage.setItem(galaSeenKey(), g.at); } catch (e) {}
+    confetti(2600); try { fanfare(); } catch (e) {}
+    message('<div class="code-pop">🏆</div><h2>¡Empieza la gala!</h2><p>Todos al salón. El ranking y los premios ya están cerrados.</p><button class="btn primary" id="gala-go-now">' + icon('play') + 'Ver la gala</button>', 9000);
+    var b = document.getElementById('gala-go-now');
+    if (b) b.addEventListener('click', function (e) { e.stopPropagation(); var m = document.querySelector('.egg-msg'); if (m) m.remove(); galaOpen('gala'); });
+  } catch (e) {}
+}, 4000);
+
+Object.assign(A, {
+  galaPremiere: function (el) {
+    if (!can('access')) return;
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = icon('trophy') + '¿Seguro? Se congela el ranking. Toca otra vez'; return; }
+    el.disabled = true;
+    var at = new Date().toISOString();
+    var v = { open: true, at: at, rank: G.live.ranking(S), awards: G.live.awards(S) };
+    try { localStorage.setItem(galaSeenKey(), at); } catch (e) {} ui._galaSeen = at;
+    galaSaveState(v).then(function () { render(true); galaOpen('gala'); }, function () { el.disabled = false; toast('No he podido estrenar la gala. ¿Hay conexión?'); });
+  },
+  galaReopen: function (el) {
+    if (!can('access')) return;
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.textContent = '¿Seguro? El ranking vuelve a moverse. Toca otra vez'; return; }
+    galaSaveState({ open: false, at: null }).then(function () { render(true); toast('Estreno deshecho: el ranking vuelve a estar vivo'); }, function () { toast('No he podido deshacerlo'); });
+  }
+});
+
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
    Estrategia: la app trabaja sobre el mismo objeto S que la demo. Cada save() programa una sincronización que
@@ -7926,7 +8108,7 @@ var CLOUD = (function () {
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
-      comp: kv.comp || { duos: [] }, sobres: kv.sobres || null, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
+      comp: kv.comp || { duos: [] }, sobres: kv.sobres || null, galaState: kv.gala || null, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
       ideas: (d.ideas || []).map(function (r) { return { id: r.id, by: r.person_id, text: r.text, at: r.created_at, status: r.status || 'nueva' }; }),
       ideaLikes: (function () { var o = {}; (d.idea_likes || []).forEach(function (r) { (o[r.idea_id] = o[r.idea_id] || []).push(r.person_id); }); return o; })(),
       roomAssign: (function () { var o = {}; (d.room_assignments || []).forEach(function (r) { o[r.person_id] = r.room_id; }); return o; })(),
