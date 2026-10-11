@@ -79,8 +79,8 @@ VIEWS.inicio = function () {
   } else if (c.phase === 'during') h += '<p class="live" data-egg="disco">¡Ya estamos en la finca!</p>';
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
+  if (typeof sobresCard === 'function') h += sobresCard();
   h += homePayments();
-  if (typeof sobreCard === 'function') h += sobreCard();   /* v0.7.48: sobres lacrados */
   h += '<div class="home-flow">';
   h += homeWeather();
   h += firstSteps();

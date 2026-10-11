@@ -590,7 +590,7 @@ function gimMemory(g, box) {
 }
 
 /* ---------- Buzón del Espía (solo su cuenta) ---------- */
-function gimSpyBtn() { return isSpy() ? '<button class="btn" data-act="gimSpyBox">🎙️ Misión gimcana: graba tus mensajes</button>' : ''; }
+function gimSpyBtn() { return isSpy() && (S.games || []).some(function (g) { return /gimcana/i.test(g.name || ''); }) ? '<button class="btn" data-act="gimSpyBox">🎙️ Misión gimcana: graba tus mensajes</button>' : ''; }
 var gimRec = null;
 function gimSpyBoxOpen() {
   var load = gimCloud() ? CLOUD.sb().rpc('gim_spy_get').then(function (r) { if (r.error) throw r.error; return r.data; })

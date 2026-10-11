@@ -253,7 +253,7 @@ function secretsWatch() {
   function tick() {
     var ms = secretsClose().getTime() - Date.now();
     if (ms <= 0) { if (ms > -6 * 3600000 && !flagGet('secClosed')) { flagSet('secClosed'); secretsClosedFx(); } return; }
-    if (ms > SECRETS_WARN_MIN * 60000) return;
+    if (ms > SECRETS_WARN_MIN * 60000) { if (secretsCloseDay() && !flagGet('secDay')) { flagSet('secDay'); toast('Aviso: hoy a las ' + closeHour() + ' se cierra el juego de los secretos'); } return; }
     if (ui.tab === 'inicio' && !document.querySelector('.sec-banner')) render(true);
     if (flagGet('secWarn')) return; flagSet('secWarn');
     secretsAlarm(ms);
@@ -281,8 +281,14 @@ function alarmBeep() {
   } catch (e) {}
 }
 /* Aviso fijo en Inicio durante las 2 horas previas al cierre */
+function secretsCloseDay() {   /* hoy es el día del cierre (y aún no ha llegado) */
+  var c = secretsClose(), n = new Date();
+  return c.getTime() > n.getTime() && c.toDateString() === n.toDateString();
+}
 function secretsHomeBanner() {
   var ms = secretsClose().getTime() - Date.now();
+  /* v0.7.49: el día del cierre, una nota discreta para todos hasta que llegue el aviso grande */
+  if (ms > SECRETS_WARN_MIN * 60000 && secretsCloseDay()) return '<button class="sec-note" data-act="secrets">' + icon('search') + '<span>Hoy a las <b>' + closeHour() + '</b> se cierra el juego de los secretos</span><small class="num">' + foundCount() + '/' + EGGS.length + '</small></button>';
   if (ms <= 0 || ms > SECRETS_WARN_MIN * 60000) return '';
   return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
 }

@@ -149,6 +149,7 @@ function gameView(g) {
   h += '<div class="facts"><span class="pill ' + GST[st][1] + '">' + GST[st][0] + '</span><span class="fact">' + icon('clock') + gWhen(g) + '</span>' + (g.where ? '<span class="fact">' + icon('pin') + esc(g.where) + '</span>' : '') + '<span class="fact">' + icon('users') + (g.entrants || []).length + '</span></div>';
   h += gFicha(g);
   if (typeof gimEntryHtml === 'function') h += gimEntryHtml(g);
+  if (typeof mimicaEntryHtml === 'function') h += mimicaEntryHtml(g);
   if (g.needs) h += '<p class="small needs">' + icon('umbrella') + '<span><b>Material:</b> ' + esc(g.needs) + '</span></p>';
   if (act) h += '<button class="link small" data-act="tab" data-tab="planes">En el planning: ' + esc(dayOf(act.day).short) + ' ' + act.start + ' · ' + esc(act.title) + ' ' + icon('arrow') + '</button>';
   if (!ed) h += '<p class="small pill pend" style="white-space:normal">Modo lector: ves los resultados en directo. Los apuntan los editores.</p>';

@@ -57,7 +57,7 @@ var CLOUD = (function () {
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
-      comp: kv.comp || { duos: [] }, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
+      comp: kv.comp || { duos: [] }, sobres: kv.sobres || null, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
       ideas: (d.ideas || []).map(function (r) { return { id: r.id, by: r.person_id, text: r.text, at: r.created_at, status: r.status || 'nueva' }; }),
       ideaLikes: (function () { var o = {}; (d.idea_likes || []).forEach(function (r) { (o[r.idea_id] = o[r.idea_id] || []).push(r.person_id); }); return o; })(),
       roomAssign: (function () { var o = {}; (d.room_assignments || []).forEach(function (r) { o[r.person_id] = r.room_id; }); return o; })(),
@@ -176,7 +176,7 @@ var CLOUD = (function () {
   }
   function ping() {
     var eg = 0, ks = []; try { eg = rankedCount(); ks = rankedKeys(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg, p_ver: 4, p_keys: ks, p_pid: ui.me || null })   /* v0.7.52: la base de datos comprueba que eres tú */.then(function () {
+    client().rpc('ping', { p_eggs: eg, p_ver: 3, p_keys: ks }).then(function () {
       return client().from('presence').select('person_id,last_seen,visits,minutes,eggs,egg_keys');
     }).then(function (r) {
       if (r && r.data) {
