@@ -1908,7 +1908,7 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-var BUILD_ID = "20261011072404";
+var BUILD_ID = "20261011073817";
 /* =====================================================================
    Casa Rural · Lógica pura (sin DOM). Testeable con node: tests/logic.test.js
    ===================================================================== */
@@ -8642,9 +8642,15 @@ if (A.ideaAdd) {
 }
 
 /* ---------- Sin cobertura ---------- */
-window.addEventListener('offline', function () {
-  extraEgg('offline', 'Sin cobertura. Enhorabuena: has llegado al nivel máximo de casa rural. Mira por la ventana: eso de ahí fuera se llama paisaje.');
-});
+function offlineEgg() { extraEgg('offline', 'Sin cobertura. Enhorabuena: has llegado al nivel máximo de casa rural. Mira por la ventana: eso de ahí fuera se llama paisaje.'); }
+window.addEventListener('offline', offlineEgg);
+/* v0.7.63: en el iPhone el aviso de «sin conexión» a veces no llega (sobre todo con la app en la pantalla de inicio).
+   Por eso también se comprueba al volver a la app y cada pocos segundos. */
+function offlineCheck() { try { if (navigator.onLine === false) offlineEgg(); } catch (e) {} }
+document.addEventListener('visibilitychange', function () { if (!document.hidden) { offlineCheck(); setTimeout(offlineCheck, 1200); } });
+window.addEventListener('focus', function () { setTimeout(offlineCheck, 300); });
+window.addEventListener('pageshow', function () { setTimeout(offlineCheck, 300); });
+setInterval(offlineCheck, 3000);
 
 /* ---------- Móvil en horizontal ---------- */
 try {
@@ -8706,6 +8712,43 @@ if (typeof sbNope === 'function') {
     _sbNope0(l);
     ui._sbNope = (ui._sbNope || 0) + 1;
     if (ui._sbNope >= 3 && eggsReady() && !hasEgg('fisgon')) setTimeout(function () { sobreClose(); setTimeout(function () { extraEgg('fisgon', FISGON_TXT); }, 350); }, 900);
+  };
+}
+
+/* ---------- v0.7.63 · Secreto especial para la abuela ----------
+   El «Noctámbulo» (abrir la app de madrugada) no es para quien se acuesta a su hora.
+   Para ella, ese hueco lo ocupa un secreto solo suyo. El total sigue siendo el mismo para todos. */
+var MATRIARCA_PID = 'nenuca';
+function eggMatriarca() { return { k: 'matriarca', name: 'La Matriarca', how: 'Escribir «te quiero» (o «¿has comido?») en el buscador o en el buzón', hint: 'Las dos palabras que más repite una abuela… después de «¿has comido?». Escríbelas en el buscador de la compra', more: 'En el buscador de Compra (o en el buzón de ideas), escribe «te quiero»' }; }
+EGG_STYLE_EXTRA.matriarca = { emo: '👑', fx: ['rise:❤️ 👑 🌹 ✨', 'fireworks'], quip: 'Este secreto solo existe en un móvil: el de la jefa. Los demás, a dormir a su hora.' };
+var eggsWho = null, EGGS_BUHO = null;
+function eggsPersonal() {
+  if (!EGGS.length || eggsWho === (ui.me || '')) return;
+  eggsWho = ui.me || '';
+  var mine = ui.me === MATRIARCA_PID, iB = -1, iM = -1;
+  EGGS.forEach(function (e, i) { if (e.k === 'buho') iB = i; if (e.k === 'matriarca') iM = i; });
+  if (iB >= 0) EGGS_BUHO = EGGS[iB];
+  if (mine && iB >= 0 && iM < 0) EGGS.splice(iB, 1, eggMatriarca());
+  else if (!mine && iM >= 0 && EGGS_BUHO) EGGS.splice(iM, 1, EGGS_BUHO);
+}
+var _buildEggs1 = buildEggs;
+buildEggs = function () { _buildEggs1(); eggsWho = null; eggsPersonal(); };
+var _foundMap0 = foundMap;
+foundMap = function () { try { eggsPersonal(); } catch (e) {} return _foundMap0(); };
+var MATRIARCA_RE = /te\s*quiero|has\s+comido/i;
+function matriarcaWords(v) {
+  if (!v || !eggsReady() || !MATRIARCA_RE.test(v)) return;
+  if (!EGGS.some(function (e) { return e.k === 'matriarca'; }) || hasEgg('matriarca') || ui._mwMat) return;
+  ui._mwMat = true; setTimeout(function () { ui._mwMat = false; }, 4000);
+  eggToast('matriarca', xN(MATRIARCA_PID, 'Abuela') + ': 75 años, una tribu de nietos, tápers infinitos y la pregunta eterna: «¿has comido?». Este secreto es solo tuyo. Te queremos.');
+}
+document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.input === 'search') matriarcaWords(t.value); });
+if (A.ideaAdd) {
+  var _ideaAdd1 = A.ideaAdd;
+  A.ideaAdd = function (el, e) {
+    var t = document.getElementById('idea-text'), v = t ? t.value : '';
+    _ideaAdd1(el, e);
+    if (v.trim().length >= 3) setTimeout(function () { matriarcaWords(v); }, 1100);
   };
 }
 
