@@ -63,7 +63,10 @@ var L = (function () {
     return w[p.kind] != null ? w[p.kind] : 1;
   }
   /* familias fuera del reparto: por defecto, quien paga la casa (los abuelos). Lo que paguen o aporten se descuenta del bote */
+  /* v0.7.51: una familia que lo paga todo (los abuelos invitan a la compra y a los gastos del finde) */
+  function payAll(S) { var p = S.split && S.split.payAll; return p && S.families.some(function (f) { return f.id === p; }) ? p : null; }
   function excluded(S) {
+    if (payAll(S)) return [];
     var x = S.split && S.split.exclude;
     if (Array.isArray(x)) return x.slice();
     return S.house && S.house.payer ? [S.house.payer] : [];
@@ -88,6 +91,7 @@ var L = (function () {
       });
     }
     excluded(S).forEach(function (k) { if (k in units) units[k] = 0; });
+    var pa = payAll(S); if (pa) Object.keys(units).forEach(function (k) { units[k] = k === pa ? 1 : 0; });
     var tot = Object.keys(units).reduce(function (a, k) { return a + units[k]; }, 0);
     var out = {};
     Object.keys(units).forEach(function (k) { out[k] = tot ? units[k] / tot : 0; });
@@ -292,6 +296,6 @@ var L = (function () {
     });
     return out.sort(function (x, y) { return y.score - x.score; });
   }
-  return { similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, together: together, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
+  return { payAll: payAll, similarItems: similarItems, gifts: gifts, mealConflict: mealConflict, offHours: offHours, dayStatus: dayStatus, dayCount: dayCount, suggestQty: suggestQty, money: money, n: n, ddmm: ddmm, r2: r2, attends: attends, diners: diners, mealsAttended: mealsAttended, shares: shares, paidBy: paidBy, settle: settle, ledger: ledger, coverage: coverage, excluded: excluded, itemCost: itemCost, realCost: realCost, needsPrice: needsPrice, estCommon: estCommon, unassigned: unassigned, together: together, tax: tax, taxPays: taxPays, sleeps: sleeps, wmo: wmo, advice: advice, advance: advance };
 })();
 if (typeof module !== 'undefined') module.exports = L;

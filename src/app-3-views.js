@@ -97,7 +97,9 @@ VIEWS.cuentas = function () {
 
   var exF = lg.excluded || [], rowsR = lg.rows.filter(function (r) { return exF.indexOf(r.id) < 0; });
   var exNm = exF.map(function (k) { return fam(k).name; }).join(' y ');
-  h += '<section class="card"><div class="card-head"><h3>' + (exF.length ? 'Reparto entre hermanos y compañía' : 'Reparto entre todos') + '</h3></div>' +
+  var payA = L.payAll(S), payN = payA ? fam(payA).name.replace(/\s*&\s*/g, ' y ') : '';
+  h += '<section class="card"><div class="card-head"><h3>' + (payA ? 'Invitan ' + esc(payN) : exF.length ? 'Reparto entre hermanos y compañía' : 'Reparto entre todos') + '</h3></div>' +
+    (payA ? '<p class="small"><b>' + esc(payN) + ' pagan el 100 % de la compra y de los gastos comunes.</b> Cada familia recibe por Bizum lo que ha adelantado (abajo, a quién y cuánto). Lo propio de cada familia no entra.</p>' : '') +
     (exF.length ? '<p class="small muted">' + esc(exNm) + ' no entran en el reparto: ya ponen la casa. Lo que ellos inviten se descuenta del bote.</p>' : '') +
     '<div class="split-how"><span class="aw-ico sm">' + icon('users') + '</span><p class="small"><b>Cómo se reparte:</b> a proporción de <b>quién viene y a cuántas comidas</b>. Adultos y peques cuentan igual (comen como un adulto, y lo sabemos); ' + esc(babyName()) + ' no cuenta: su comida la traen sus padres de casa. Así, una familia de 5 paga más que una de 3, y quien viene menos días paga menos.</p></div>';
   var noP = S.ingredients.filter(function (i) { return L.needsPrice(i) && (i.split || 'comun') === 'comun'; });
@@ -111,7 +113,7 @@ VIEWS.cuentas = function () {
     }).join('') + '</tbody></table></div>' +
     '<div class="pot"><div class="row"><span class="grow">Gasto total con precio real</span><b class="num">' + L.money(lg.total) + '</b></div>' +
     (lg.gifts ? '<div class="row olive-t"><span class="grow">Invitaciones' + (exF.length ? ' (abuelos y regalos)' : '') + '</span><b class="num">− ' + L.money(lg.gifts) + '</b></div>' : '') +
-    '<div class="row pot-total"><span class="grow"><b>' + (exF.length ? 'A repartir entre hermanos y compañía' : 'A repartir entre todos') + '</b></span><b class="num">' + L.money(lg.toShare) + '</b></div></div>' +
+    '<div class="row pot-total"><span class="grow"><b>' + (payA ? 'Lo pagan ' + esc(payN) : exF.length ? 'A repartir entre hermanos y compañía' : 'A repartir entre todos') + '</b></span><b class="num">' + L.money(lg.toShare) + '</b></div></div>' +
     (lg.giftsPledged > lg.gifts + 0.004 ? '<p class="small muted">Hay ' + L.money(lg.giftsPledged - lg.gifts) + ' de invitación esperando: se aplicarán en cuanto haya más gastos.</p>' : '');
 
   if (lg.total === 0) {
@@ -146,13 +148,14 @@ var ABU_LEVELS = [
 ];
 function abuInvited(k) {   /* lo que cuenta en el Abuelómetro: invitaciones y, si están fuera del reparto, también lo que pagan de la compra */
   var aport = S.expenses.filter(function (e) { return e.payer === k && e.kind === 'aportacion'; }).reduce(function (a, e) { return a + (e.amount || 0); }, 0);
+  if (L.payAll(S) === k) return L.r2(L.ledger(S, false).total + aport);
   var out = L.excluded(S).indexOf(k) >= 0 ? ((L.ledger(S, false).rows.find(function (r) { return r.id === k; }) || { paid: 0 }).paid || 0) : 0;
   return L.r2(aport + out);
 }
 function abuLevel(v) { var l = ABU_LEVELS[0], nx = null; ABU_LEVELS.forEach(function (x, i) { if (v >= x[0]) { l = x; nx = ABU_LEVELS[i + 1] || null; } }); return { l: l, next: nx }; }
 function abuCard(lg, tx) {
   var ex = lg.excluded || [], k = ex[0] || (S.house && S.house.payer); if (!k || !fam(k)) return '';
-  var inSplit = ex.indexOf(k) < 0;   /* v0.7.47: los abuelos también pueden entrar en el reparto de la compra */
+  var inSplit = ex.indexOf(k) < 0, payA = L.payAll(S) === k;   /* v0.7.47: los abuelos también pueden entrar en el reparto de la compra */
   var F = fam(k), house = S.house, fn = F.name.replace(/\s*&\s*/g, ' y ');
   var r = lg.rows.find(function (x) { return x.id === k; }) || { paid: 0 };
   var mine = S.expenses.filter(function (e) { return e.payer === k && e.kind === 'aportacion'; });
@@ -162,8 +165,11 @@ function abuCard(lg, tx) {
   var base = (house && house.payer === k ? house.total : 0) + (S.tax.payer === k ? tx.withExemption : 0);
   var lv = abuLevel(invited), isAbu = me().family === k, canInv = can('edit') && (isAbu || can('access'));
   var pct = lv.next ? Math.max(4, Math.min(100, Math.round((invited - lv.l[0]) / (lv.next[0] - lv.l[0]) * 100))) : 100;
-  var h = '<section class="card abu" id="abu"><div class="card-head"><span class="eyebrow">El rincón de los abuelos</span><span class="pill olive">' + (inSplit ? 'En el reparto' : 'Fuera del reparto') + '</span></div>' +
-    (inSplit ?
+  var h = '<section class="card abu" id="abu"><div class="card-head"><span class="eyebrow">El rincón de los abuelos</span><span class="pill olive">' + (payA ? 'Invitan a todo' : inSplit ? 'En el reparto' : 'Fuera del reparto') + '</span></div>' +
+    (payA ?
+      '<h3>' + (isAbu ? 'Abuelos, invitáis a todo' : esc(fn) + ': invitan a todo') + '</h3>' +
+      '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ' (<b class="num">' + L.money(base) + '</b>) y, además, <b>toda la compra y los gastos del finde</b>. Cada familia recibe por Bizum lo que adelantó: lo tenéis en «Liquidación», más abajo.</p>'
+    : inSplit ?
       '<h3>' + (isAbu ? 'Abuelos, en el bote como uno más' : esc(fn) + ': en el bote como uno más') + '</h3>' +
       '<p class="small">' + (isAbu ? 'Ya ponéis' : 'Ya ponen') + ' <b>la casa</b>' + (S.tax.payer === k ? ' y <b>la tasa turística</b>' : '') + ': <b class="num">' + L.money(base) + '</b>. Y como también ' + (isAbu ? 'habéis' : 'han') + ' ido comprando cosas, la compra ' + (isAbu ? 'la pagáis' : 'la pagan') + ' <b>como todos</b>: a proporción de personas y comidas, y lo que ' + (isAbu ? 'habéis' : 'han') + ' pagado cuenta como lo ' + (isAbu ? 'vuestro' : 'suyo') + '.</p>' +
       '<p class="small">' + (isAbu ? '¿Queréis poner algo más?' : '¿Y si quieren poner algo más?') + ' <b>Totalmente opcional.</b> Lo que ' + (isAbu ? 'pongáis' : 'pongan') + ' de invitación se <b>descuenta del bote</b> de todos (que lo agradecerán con besos y fregando platos).</p>'
@@ -180,7 +186,7 @@ function abuCard(lg, tx) {
       return can('edit') ? '<button class="row abu-inv" data-act="editExp" data-id="' + e.id + '">' + inner + '</button>' : '<div class="row abu-inv">' + inner + '</div>';
     }).join('') + (prods.length ? '<div class="row small abu-inv"><span class="grow">' + (inSplit ? 'Compra pagada, cuenta en el reparto (' : 'Productos de la compra que se han pedido (') + prods.length + ')</span><b class="num">' + L.money(r.paid || 0) + '</b></div>' : '') + '</div>';
   }
-  if (canInv) {
+  if (canInv && !payA) {
     var c = ui.abuC || '', a = ui.abuA || null;
     h += '<div class="abu-form"><span class="lbl">¿A qué invitáis?</span><div class="chips">' + abuIdeas().map(function (x) {
       return '<button class="chip" data-act="abuC" data-v="' + esc(x) + '" aria-pressed="' + (c === x) + '">' + esc(x) + '</button>';
@@ -190,7 +196,7 @@ function abuCard(lg, tx) {
       }).join('') + '<label class="price-in"><input class="price-field" id="abu-amt" inputmode="decimal" placeholder="Otro" value="' + (a && [10, 20, 50, 100].indexOf(a) < 0 ? L.n(a) : '') + '">€</label></div>' +
       '<button class="btn primary block" data-act="abuGo">' + icon('gift') + '¡Invitamos nosotros!</button>' +
       '<p class="small muted">Luego la app os dice a quién hacer el bizum. Si os arrepentís, tocad la invitación y se borra (sin rencores).</p></div>';
-  } else {
+  } else if (!payA) {
     h += '<p class="small muted">Solo los abuelos pueden invitar desde aquí. Se admiten indirectas.</p>' +
       '<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent('Abuelos, os echamos de menos en el Abuelómetro de la app de ' + (S.trip.short || 'la casa rural') + '. Ni una presión, eh. Bueno, un poco. ' + location.origin + location.pathname + ' ') + '">' + icon('megaphone') + 'Mandar una indirecta a los abuelos</a>';
   }

@@ -85,6 +85,7 @@ function galaStats() {
 function galaCount() {
   document.querySelectorAll('#gala .gs-n').forEach(function (n, k) {
     var to = +n.dataset.to || 0, t0 = null, dur = 1400, delay = 350 * k;
+    setTimeout(function () { n.textContent = to.toLocaleString('es-ES'); }, delay + dur + 900);   /* por si la pantalla no anima */
     setTimeout(function () {
       (function f(t) { if (!t0) t0 = t; var p = Math.min(1, (t - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - p, 3))); n.textContent = v.toLocaleString('es-ES'); if (p < 1 && document.body.contains(n)) requestAnimationFrame(f); else { n.classList.add('pop'); try { emojiFx([n.dataset.e || '✨'], 'rise', 0, 8); } catch (x) {} } })(performance.now());
     }, delay + 250);
