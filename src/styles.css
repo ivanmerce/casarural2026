@@ -1706,3 +1706,46 @@ body.gala-on .fx { z-index: 94; }
 .gala.present .gt-av .av { width: 160px; height: 160px; }
 @media (max-width: 520px) { .gt-av .av { width: 84px; height: 84px; } }
 @media (prefers-reduced-motion: reduce) { .gt-av .av, .gt-heart .ico { animation: none; } }
+
+/* v0.7.58 · Sobres: lacre que se rompe, fondo opaco y ensayo guiado en 3 pasos */
+.sobre-stage { background: #170C0C; background-image: radial-gradient(120% 90% at 50% 15%, #4A1520 0%, #1C0E0D 60%, #120B0A 100%); animation: none; }
+.ss-seal { background: none; box-shadow: none; width: 64px; height: 64px; }
+.ss-seal i { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e0404f, #B8122C 60%, #6d0a19); box-shadow: 0 4px 12px rgba(0,0,0,.35); transition: transform .5s cubic-bezier(.3,1.2,.5,1), opacity .5s ease; }
+.ss-seal i.l { clip-path: polygon(0 0, 54% 0, 44% 38%, 56% 62%, 46% 100%, 0 100%); }
+.ss-seal i.r { clip-path: polygon(54% 0, 100% 0, 100% 100%, 46% 100%, 56% 62%, 44% 38%); }
+.ss-seal b { position: relative; z-index: 1; font-weight: 900; font-size: 1.4rem; color: #fff; transition: opacity .3s ease; }
+.sobre-stage.open .ss-seal { transform: translate(-50%, -50%); opacity: 1; }
+.sobre-stage.crack .ss-seal b { opacity: 0; }
+.sobre-stage.crack .ss-seal i.l { transform: translate(-26px, 34px) rotate(-38deg); opacity: 0; }
+.sobre-stage.crack .ss-seal i.r { transform: translate(26px, 34px) rotate(38deg); opacity: 0; }
+.sobre-stage.crack .ss-env { animation: none; transform: scale(1.04); }
+.ss-hint { font-size: .95rem; color: #E9C77A !important; letter-spacing: .04em; transition: opacity .3s ease; }
+.sobre-stage.open .ss-hint { opacity: 0; }
+.sobre-stage.out .ss-hint { display: none; }
+.sobre-stage.out .ss-env { transform: scale(.82); opacity: 1; }
+.ss-warn { display: block; margin-top: 10px; color: #9a5a00; font-size: .85rem; }
+.sobres-ensayo { position: fixed; inset: 0; z-index: 110; overflow-y: auto; background: #170C0C; background-image: radial-gradient(120% 80% at 50% 0%, #3A1620, #140B0A 70%); color: #FBF4EF; display: grid; place-items: start center; padding: 18px 16px 28px; }
+.se-in { width: min(640px, 100%); display: grid; gap: 18px; }
+.se-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.se-x { color: #FBF4EF; background: rgba(255,255,255,.08); }
+.se-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.se-steps button { width: 100%; min-height: 56px; display: grid; justify-items: center; gap: 2px; padding: 8px 6px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.18); background: rgba(255,255,255,.04); color: #CDBDB4; font: inherit; font-size: .8rem; cursor: pointer; }
+.se-steps button b { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #fff; font-size: .85rem; }
+.se-steps button.on { border-color: #F2C65A; color: #FFE7A8; background: rgba(242,198,90,.12); }
+.se-steps button.on b { background: #F2C65A; color: #1A0F0C; }
+.se-steps button.done b { background: #5E6B2E; }
+.se-body { display: grid; gap: 12px; justify-items: center; text-align: center; min-height: 330px; align-content: start; }
+.se-body h2 { margin: 6px 0 0; font-family: var(--font-display); font-size: clamp(1.35rem, 5.5vw, 1.9rem); line-height: 1.12; color: #FFE7A8; }
+.se-body p { margin: 0; color: #E9E0DA; max-width: 46ch; }
+.se-body .sobres { width: 100%; }
+.se-say { min-height: 1.6em; font-weight: 700; color: #FFE7A8 !important; }
+.se-say.pop { animation: sePop .4s cubic-bezier(.3,1.6,.5,1); }
+@keyframes sePop { from { transform: scale(.85); opacity: .3; } to { transform: none; opacity: 1; } }
+.se-signal { width: 100%; display: grid; justify-items: center; gap: 12px; padding: 22px 16px; border-radius: 20px; border: 1.5px solid rgba(242,198,90,.35); background: rgba(0,0,0,.25); }
+.se-signal h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.6rem, 7vw, 2.3rem); color: #FFE7A8; }
+.se-signal .ss-mini { display: flex; gap: 14px; }
+.se-warn { color: #FFD9A8 !important; font-size: .92rem; }
+.se-warn .link { color: #F2C65A; }
+.se-nav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sobres-ensayo .btn.ghost { color: #FBF4EF; border-color: rgba(255,255,255,.3); }
+.sobres-ensayo .sobre-n { color: #5a4a30; }
