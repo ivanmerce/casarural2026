@@ -1675,6 +1675,43 @@ body.gala-on .fx { z-index: 94; }
 .sobre-review { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--gold, #E8B64A) 16%, transparent); margin: 0 0 6px; }
 .sobre-review .ico { flex: none; width: 18px; height: 18px; margin-top: 1px; }
 
+/* v0.7.56 · Sobres: apertura a pantalla completa y ensayo del admin */
+.sobres-simbar { display: grid; gap: 8px; padding: 12px 14px; margin: -2px 0 6px; border-radius: 14px; border: 1.5px dashed color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.sobres-simbar b { display: flex; align-items: center; gap: 8px; }
+.sobres-simbar b .ico { width: 18px; height: 18px; color: var(--accent); }
+.sobres-simbar span { font-size: .9rem; color: var(--muted); }
+.sobre-stage { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px; background: radial-gradient(120% 90% at 50% 20%, rgba(74,21,32,.96), rgba(18,11,10,.97)); animation: fade .3s both; overflow-y: auto; }
+.ss-in { width: min(460px, 100%); display: grid; justify-items: center; gap: 18px; text-align: center; color: #FBF4EF; }
+.ss-in h2 { margin: 0; font-family: var(--font-display); font-size: clamp(1.8rem, 8vw, 2.6rem); line-height: 1.05; color: #FFE7A8; }
+.ss-in p { margin: 0; color: #E9E0DA; font-size: 1.05rem; }
+.ss-sim { font-size: .72rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #1A0F0C; background: #F2C65A; padding: 4px 10px; border-radius: 999px; }
+.ss-env { position: relative; width: min(300px, 78vw); aspect-ratio: 3 / 2; perspective: 900px; transition: transform .6s cubic-bezier(.3,1.3,.5,1), opacity .5s ease; }
+.ss-back, .ss-front, .ss-paper, .ss-flap { position: absolute; inset: 0; border-radius: 12px; }
+.ss-back { background: linear-gradient(160deg, #e2d0ad, #cfb98f); }
+.ss-paper { inset: 8% 7% 6%; border-radius: 6px; background: linear-gradient(180deg, #fffaf0, #f4ead7); transition: transform .7s cubic-bezier(.3,1.2,.5,1) .25s; }
+.ss-front { background: linear-gradient(160deg, #f4ead7, #e6d6b8); clip-path: polygon(0 34%, 50% 70%, 100% 34%, 100% 100%, 0 100%); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+.ss-flap { bottom: auto; height: 62%; background: linear-gradient(180deg, #eadcbf, #d6c094); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .6s cubic-bezier(.3,1,.4,1); z-index: 2; }
+.ss-seal { position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%); z-index: 3; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 1.4rem; color: #fff; background: radial-gradient(circle at 35% 30%, #e0404f, #B8122C 60%, #6d0a19); box-shadow: 0 4px 12px rgba(0,0,0,.35); transition: transform .35s ease, opacity .35s ease; }
+.sobre-stage:not(.open) .ss-env { animation: ssWiggle .5s ease-in-out infinite alternate; }
+@keyframes ssWiggle { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+.sobre-stage.open .ss-seal { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+.sobre-stage.open .ss-flap { transform: rotateX(180deg); z-index: 0; }
+.sobre-stage.open .ss-paper { transform: translateY(-38%); }
+.ss-card { width: 100%; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(30px) scale(.94); background: linear-gradient(180deg, #fffaf0, #f4ead7); color: #3b2f1c; border-radius: 16px; padding: 0 22px; box-shadow: 0 20px 50px rgba(0,0,0,.5); text-align: left; transition: all .7s cubic-bezier(.2,1.2,.4,1); }
+.ss-card .eyebrow { color: #9a2030; }
+.ss-card p { color: #3b2f1c; font-size: 1.2rem; line-height: 1.45; margin: 8px 0 0; }
+.sobre-stage.out .ss-env { transform: translateY(18px) scale(.72); opacity: .55; }
+.sobre-stage.out .ss-card { max-height: 60vh; overflow-y: auto; opacity: 1; transform: none; padding: 22px; }
+.ss-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; opacity: 0; transition: opacity .4s ease .5s; }
+.sobre-stage.out .ss-actions { opacity: 1; }
+.sobre-stage .btn.ghost { color: #FBF4EF; border-color: rgba(255,255,255,.3); }
+.sobre-stage.signal .ss-mini { display: flex; gap: 14px; }
+.ss-mini i { width: 78px; height: 52px; border-radius: 8px; background: linear-gradient(160deg, #f4ead7, #e6d6b8); position: relative; box-shadow: 0 10px 24px rgba(0,0,0,.4); animation: ssBounce .7s cubic-bezier(.3,1.6,.5,1) infinite alternate; }
+.ss-mini i:nth-child(2) { animation-delay: .25s; }
+.ss-mini i::after { content: ''; position: absolute; left: 50%; top: 55%; width: 18px; height: 18px; border-radius: 50%; transform: translate(-50%, -50%); background: #B8122C; }
+@keyframes ssBounce { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-14px) rotate(4deg); } }
+@media (prefers-reduced-motion: reduce) { .ss-env, .ss-mini i, .ss-card, .ss-flap, .ss-paper { animation: none !important; transition: none !important; } }
+
 </style>
 </head>
 <body>
@@ -7827,7 +7864,9 @@ Object.assign(A, {
 /* ===================== Los dos sobres del cumple =====================
    Desde las 9:00 del día del cumple todos ven dos sobres lacrados en Inicio. Nadie puede abrirlos
    hasta que el admin da la señal. El contenido lo escribe el admin (si lo deja vacío, el sobre de la app
-   dice que toca abrir el sobre de verdad). Se guarda en app_config «sobres» (lo escribe el admin directamente). */
+   dice que toca abrir el sobre de verdad). Se guarda en app_config «sobres» (lo escribe el admin directamente).
+   v0.7.56: apertura a pantalla completa (el sobre se abre y la carta sale) y ENSAYO completo para el admin:
+   ve exactamente lo que verá la familia, paso a paso, sin guardar nada ni avisar a nadie. */
 
 var SOBRES_DEF = { at: '2026-10-11T09:00:00+02:00', open: false, items: [{ title: '', text: '' }, { title: '', text: '' }] };
 var SOBRES_NOPE = [
@@ -7839,70 +7878,113 @@ var SOBRES_NOPE = [
   'Se aceptan teorías. No se aceptan trampas.',
   'Cuanto más lo tocas, más tarda. (Es mentira, pero por si acaso.)'
 ];
-function sobresState() {
+function sobresReal() {
   var s = S.sobres || {};
   var it = (s.items && s.items.length ? s.items : SOBRES_DEF.items).slice(0, 2);
   while (it.length < 2) it.push({ title: '', text: '' });
   return { at: s.at || SOBRES_DEF.at, open: !!s.open, openedAt: s.openedAt || null, items: it };
 }
+/* lo que se pinta: la realidad o, en el ensayo, la simulación (mismos textos, apertura simulada) */
+function sobresState() {
+  var r = sobresReal();
+  if (ui.sobresSim) return { at: r.at, open: !!ui.sobresSim.open, openedAt: ui.sobresSim.openedAt || null, items: r.items, sim: true };
+  return r;
+}
 function sobresAdmin() { return !!(me() && me().role === 'admin'); }
 function sobresLive() {
-  var st = sobresState(), t = new Date(st.at).getTime(), end = new Date(st.at).getTime() + 36 * 3600 * 1000;
+  var st = sobresReal(), t = new Date(st.at).getTime(), end = t + 36 * 3600 * 1000;
   return Date.now() >= t && Date.now() < end;
 }
 function sobresSave(v) {
   S.sobres = v;
-  var p = (typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb)
+  return (typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb)
     ? CLOUD.sb().from('app_config').upsert({ key: 'sobres', value: v }).then(function (r) { if (r.error) throw r.error; })
     : Promise.resolve();
-  return p;
 }
+function sobreSeal() { return S.trip && S.trip.eggs && S.trip.eggs.bdayAge ? esc(String(S.trip.eggs.bdayAge)) : '★'; }
+function sobreTitle(x, i) { return x.title ? esc(x.title) : 'Sobre ' + (i + 1); }
+function sobreBody(x) { return x.text ? esc(x.text).replace(/\n/g, '<br>') : '¡Ya podéis abrir el sobre de verdad!'; }
 
 function sobresCard() {
-  var adm = sobresAdmin(), live = sobresLive();
+  var adm = sobresAdmin(), live = sobresLive(), sim = !!ui.sobresSim;
   if (!live && !adm) return '';
   var st = sobresState(), who = esc(bdayName());
-  if (st.open && ui.sobresSeen !== st.openedAt && live) {   /* la señal: todos se enteran a la vez */
+  if (!sim && st.open && ui.sobresSeen !== st.openedAt && live) {   /* la señal: todos se enteran a la vez */
     ui.sobresSeen = st.openedAt;
-    setTimeout(function () { confetti(2600); message('<div class="code-pop">✉️✉️</div><h2>¡Ya se pueden abrir los sobres!</h2><p>Que alguien avise a ' + who + '. Están en Inicio.</p>', 3200); }, 400);
+    setTimeout(function () { sobresSignalFx(false); }, 400);
   }
-  var h = '<section class="card sobres-card' + (st.open ? ' is-open' : '') + '" id="sobres">' +
-    '<div class="card-head"><span class="eyebrow">Cumple de ' + who + '</span><span class="pill ' + (st.open ? 'ok' : 'olive') + '">' + (st.open ? '¡Abiertos!' : 'Alto secreto') + '</span></div>' +
+  var h = '<section class="card sobres-card' + (st.open ? ' is-open' : '') + (sim ? ' is-sim' : '') + '" id="sobres">';
+  if (sim) h += '<div class="sobres-simbar"><b>' + icon('eye') + 'Ensayo: así lo ve la familia.</b><span>No se guarda nada y nadie más lo ve.</span><div class="row wrap">' +
+    (st.open ? '<button class="btn ghost" data-act="sobresSimReset">' + icon('undo') + 'Volver a cerrarlos</button>'
+      : '<button class="btn primary" data-act="sobresSimSignal">' + icon('gift') + 'Simular la señal</button>') +
+    '<button class="btn ghost" data-act="sobresSimExit">' + icon('x') + 'Salir del ensayo</button></div>' +
+    '<small class="muted">' + (st.open ? 'Paso 3: toca un sobre para abrirlo, como lo hará la familia.' : 'Paso 1: toca un sobre cerrado (verás el aviso de que no se puede). Paso 2: «Simular la señal».') + '</small></div>';
+  h += '<div class="card-head"><span class="eyebrow">Cumple de ' + who + '</span><span class="pill ' + (st.open ? 'ok' : 'olive') + '">' + (st.open ? '¡Abiertos!' : 'Alto secreto') + '</span></div>' +
     '<h3>' + (st.open ? 'Dos sobres. Ya hay permiso.' : 'Dos sobres. Cero pistas.') + '</h3>' +
     '<p class="small muted">' + (st.open ? 'Toca un sobre para abrirlo.' : 'Nadie los abre hasta que el jefe dé la señal. Se aceptan teorías; trampas, no.') + '</p>' +
     '<div class="sobres">' + st.items.map(function (x, i) {
       return '<button class="sobre' + (st.open ? ' ready' : '') + '" data-act="sobreTap" data-i="' + i + '" aria-label="Sobre ' + (i + 1) + (st.open ? ': ábrelo' : ': cerrado') + '">' +
-        '<span class="sobre-back"></span><span class="sobre-flap"></span><span class="sobre-seal">' + (S.trip && S.trip.eggs && S.trip.eggs.bdayAge ? esc(String(S.trip.eggs.bdayAge)) : '★') + '</span>' +
-        '<span class="sobre-n">' + (x.title ? esc(x.title) : 'Sobre ' + (i + 1)) + '</span></button>';
+        '<span class="sobre-back"></span><span class="sobre-flap"></span><span class="sobre-seal">' + sobreSeal() + '</span>' +
+        '<span class="sobre-n">' + sobreTitle(x, i) + '</span></button>';
     }).join('') + '</div>' +
     (st.open ? '' : '<p class="small sobres-lock">🔒 Cerrados hasta nueva orden</p>');
-  if (adm) {
-    h += '<div class="sobres-adm"><span class="lbl">Solo tú ves esto' + (live ? '' : ' (los demás los verán a las ' + esc(st.at.slice(11, 16)) + ')') + '. Si tocas un sobre cerrado, lo abres en modo revisión: nadie más lo ve.</span><div class="row wrap">' +
-      '<button class="btn ghost" data-act="sobresReview">' + icon('eye') + 'Revisar por dentro</button>' +
+  if (adm && !sim) {
+    var real = sobresReal(), empty = real.items.filter(function (x) { return !x.text; }).length;
+    h += '<div class="sobres-adm"><span class="lbl">Solo tú ves esto' + (live ? '' : ' (los demás los verán a las ' + esc(real.at.slice(11, 16)) + ')') + '.' +
+      (empty ? ' ' + (empty === 2 ? 'Los dos sobres están' : 'Un sobre está') + ' sin texto: al abrirlo saldrá «¡Ya podéis abrir el sobre de verdad!».' : '') + '</span><div class="row wrap">' +
+      '<button class="btn primary" data-act="sobresSimStart">' + icon('play') + 'Ensayar todo el proceso</button>' +
       '<button class="btn ghost" data-act="sobresEdit">' + icon('edit') + 'Escribir los sobres</button>' +
-      (st.open ? '<button class="btn ghost" data-act="sobresClose">' + icon('undo') + 'Volver a cerrarlos</button>'
-        : '<button class="btn primary" data-act="sobresOpen">' + icon('gift') + '¡Que se abran!</button>') +
+      (real.open ? '<button class="btn ghost" data-act="sobresClose">' + icon('undo') + 'Volver a cerrarlos</button>'
+        : '<button class="btn ghost" data-act="sobresOpen">' + icon('gift') + '¡Que se abran! (de verdad)</button>') +
       '</div></div>';
   }
   return h + '</section>';
 }
 
-function sobrePreview(i) {
-  var st = sobresState(), x = st.items[i] || {};
-  var body = x.text ? esc(x.text).replace(/\n/g, '<br>') : '¡Ya podéis abrir el sobre de verdad!';
-  openSheet('<p class="small sobre-review">' + icon('eye') + '<span><b>Vista de revisión: solo la ves tú.</b> Para los demás, el sobre sigue cerrado.</span></p>' +
-    '<div class="sobre-open"><div class="sobre-letter"><span class="eyebrow">' + (x.title ? esc(x.title) : 'Sobre ' + (i + 1)) + '</span><p>' + body + '</p></div></div>' +
-    (x.text ? '' : '<p class="small muted">Este sobre aún no tiene texto: al abrirlo, la familia verá «¡Ya podéis abrir el sobre de verdad!».</p>') +
-    '<div class="row wrap">' + (st.items.length > 1 ? '<button class="btn ghost" data-act="sobrePrev" data-i="' + (1 - i) + '">Ver el sobre ' + (2 - i) + '</button>' : '') +
-    '<button class="btn primary" data-act="sobresEdit">' + icon('edit') + 'Cambiar los sobres</button></div>');
+/* ---------- La señal: a todos les salta a la vez (en el ensayo, solo a ti) ---------- */
+function sobresSignalFx(sim) {
+  var old = document.getElementById('sobre-stage'); if (old) old.remove();
+  var v = document.createElement('div'); v.className = 'sobre-stage signal'; v.id = 'sobre-stage'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true');
+  v.innerHTML = '<div class="ss-in">' + (sim ? '<span class="ss-sim">Ensayo · solo lo ves tú</span>' : '') +
+    '<div class="ss-mini" aria-hidden="true"><i></i><i></i></div>' +
+    '<h2>¡Ya se pueden abrir los sobres!</h2><p>Que alguien avise a ' + esc(bdayName()) + '. Están en Inicio.</p>' +
+    '<button class="btn primary big-btn" data-ss="go">¡Vamos!</button></div>';
+  document.body.appendChild(v);
+  try { confetti(2800); fanfare(); emojiFx(['✉️', '🎉', '✨'], 'rain', 200, 30); } catch (e) {}
+  if (navigator.vibrate) try { navigator.vibrate([60, 40, 60, 40, 120]); } catch (e) {}
+  v.addEventListener('click', function (e) {
+    if (e.target.closest('[data-ss="go"]') || e.target === v) {
+      v.remove();
+      if (ui.tab !== 'inicio') go('inicio');
+      setTimeout(function () { var c = document.getElementById('sobres'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+    }
+  });
 }
+
+/* ---------- Abrir un sobre: pantalla completa, el sobre se abre y sale la carta ---------- */
+function sobreStage(i, sim) {
+  var st = sobresState(), x = st.items[i] || {};
+  var old = document.getElementById('sobre-stage'); if (old) old.remove();
+  var v = document.createElement('div'); v.className = 'sobre-stage'; v.id = 'sobre-stage'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true'); v.setAttribute('aria-label', 'Sobre ' + (i + 1));
+  v.innerHTML = '<div class="ss-in">' + (sim ? '<span class="ss-sim">Ensayo · solo lo ves tú</span>' : '') +
+    '<div class="ss-env" aria-hidden="true"><span class="ss-back"></span><span class="ss-paper"></span><span class="ss-front"></span><span class="ss-flap"></span><span class="ss-seal">' + sobreSeal() + '</span></div>' +
+    '<div class="ss-card"><span class="eyebrow">' + sobreTitle(x, i) + '</span><p>' + sobreBody(x) + '</p></div>' +
+    '<div class="ss-actions">' + (st.items.length > 1 ? '<button class="btn ghost" data-ss="other">Abrir el sobre ' + (2 - i) + '</button>' : '') + '<button class="btn primary" data-ss="close">Cerrar</button></div></div>';
+  document.body.appendChild(v); document.body.style.overflow = 'hidden';
+  setTimeout(function () { v.classList.add('open'); try { sfx && sfx('whoosh'); } catch (e) {} }, 350);
+  setTimeout(function () { v.classList.add('out'); try { confetti(2200); applause(2.2); emojiFx(['🎉', '✨', '🥳'], 'rise', 0, 24); } catch (e) {} if (navigator.vibrate) try { navigator.vibrate([30, 30, 60]); } catch (e) {} }, 1250);
+  function close() { v.remove(); document.body.style.overflow = ''; }
+  v.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ss]');
+    if (b && b.dataset.ss === 'other') { close(); sobreStage(1 - i, sim); return; }
+    if ((b && b.dataset.ss === 'close') || e.target === v) close();
+  });
+}
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var v = document.getElementById('sobre-stage'); if (v) { v.remove(); document.body.style.overflow = ''; } } });
+
 Object.assign(A, {
-  sobrePrev: function (el) { if (sobresAdmin()) sobrePreview(+el.dataset.i); },
-  sobresReview: function () { if (sobresAdmin()) sobrePreview(0); },
   sobreTap: function (el) {
-    var st = sobresState(), i = +el.dataset.i, x = st.items[i] || {};
-    /* v0.7.55: el admin puede abrirlos por detrás para revisarlos (solo él lo ve; para los demás siguen cerrados) */
-    if (!st.open && sobresAdmin()) { sobrePreview(i); return; }
+    var st = sobresState(), i = +el.dataset.i;
     if (!st.open) {
       el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
       if (navigator.vibrate) try { navigator.vibrate([20, 40, 20]); } catch (e) {}
@@ -7911,17 +7993,17 @@ Object.assign(A, {
       return;
     }
     el.classList.add('opening');
-    setTimeout(function () {
-      el.classList.remove('opening');
-      confetti(1800);
-      var body = x.text ? esc(x.text).replace(/\n/g, '<br>') : '¡Ya podéis abrir el sobre de verdad!';
-      openSheet('<div class="sobre-open"><div class="sobre-letter"><span class="eyebrow">' + (x.title ? esc(x.title) : 'Sobre ' + (i + 1)) + '</span><p>' + body + '</p></div></div>');
-    }, 650);
+    setTimeout(function () { el.classList.remove('opening'); sobreStage(i, !!st.sim); }, 450);
   },
+  /* ensayo completo (solo admin, nada se guarda) */
+  sobresSimStart: function () { if (!sobresAdmin()) return; ui.sobresSim = { open: false }; if (ui.tab !== 'inicio') go('inicio'); else render(true); setTimeout(function () { var c = document.getElementById('sobres'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120); toast('Ensayo: ahora ves los sobres como la familia'); },
+  sobresSimSignal: function () { if (!ui.sobresSim) return; ui.sobresSim = { open: true, openedAt: new Date().toISOString() }; render(true); sobresSignalFx(true); },
+  sobresSimReset: function () { if (!ui.sobresSim) return; ui.sobresSim = { open: false }; render(true); },
+  sobresSimExit: function () { ui.sobresSim = null; render(true); toast('Fin del ensayo. Todo sigue como estaba'); },
   sobresEdit: function () {
     if (!sobresAdmin()) return;
-    var st = sobresState();
-    openSheet('<h2>Los dos sobres</h2><p class="small muted">Lo que escribas aquí sale al abrir cada sobre. Si lo dejas vacío, el sobre dirá que toca abrir el de verdad.</p>' +
+    var st = sobresReal();
+    openSheet('<h2>Los dos sobres</h2><p class="small muted">Lo que escribas aquí sale al abrir cada sobre. Si lo dejas vacío, el sobre dirá que toca abrir el de verdad. Después, «Ensayar todo el proceso» para verlo como la familia.</p>' +
       st.items.map(function (x, i) {
         return '<label class="field"><span class="lbl">Sobre ' + (i + 1) + ' · nombre en el sobre</span><input id="sb-t' + i + '" maxlength="40" value="' + esc(x.title || '') + '" placeholder="Sobre ' + (i + 1) + '"></label>' +
           '<label class="field"><span class="lbl">Sobre ' + (i + 1) + ' · lo que hay dentro</span><textarea id="sb-x' + i + '" rows="4" maxlength="800">' + esc(x.text || '') + '</textarea></label>';
@@ -7930,7 +8012,7 @@ Object.assign(A, {
   },
   sobresSave: function () {
     if (!sobresAdmin()) return;
-    var st = sobresState();
+    var st = sobresReal();
     var v = { at: st.at, open: st.open, openedAt: st.openedAt, items: [0, 1].map(function (i) {
       return { title: ((document.getElementById('sb-t' + i) || {}).value || '').trim(), text: ((document.getElementById('sb-x' + i) || {}).value || '').trim() };
     }) };
@@ -7938,14 +8020,14 @@ Object.assign(A, {
   },
   sobresOpen: function (el) {
     if (!sobresAdmin()) return;
-    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Seguro? Toca otra vez'; return; }
-    var st = sobresState();
-    var v = { at: st.at, open: true, openedAt: new Date().toISOString(), items: st.items };
-    sobresSave(v).then(function () { render(true); }, function () { toast('No he podido abrirlos'); });
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Seguro? Les salta a todos. Toca otra vez'; return; }
+    var st = sobresReal();
+    ui.sobresSim = null;
+    sobresSave({ at: st.at, open: true, openedAt: new Date().toISOString(), items: st.items }).then(function () { render(true); }, function () { toast('No he podido abrirlos'); });
   },
   sobresClose: function () {
     if (!sobresAdmin()) return;
-    var st = sobresState();
+    var st = sobresReal();
     sobresSave({ at: st.at, open: false, openedAt: null, items: st.items }).then(function () { render(true); toast('Sobres cerrados otra vez'); }, function () { toast('No he podido cerrarlos'); });
   }
 });
