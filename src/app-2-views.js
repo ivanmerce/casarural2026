@@ -122,9 +122,14 @@ function startHero() {
   var names = S ? S.people : Array.from({ length: 12 }, function (_, i) { return { kind: i % 4 ? 'adulto' : 'menor' }; });
   /* cada nodo es una persona de la familia: si hay foto, su cara */
   var withFaces = names.some(function (p) { return p.avatar; });
-  var narrow = W < 520, X0 = withFaces ? (narrow ? 0.62 : 0.56) : 0.45, YMAX = withFaces ? (narrow ? 0.42 : W >= 900 ? 0.46 : 0.56) : 1, KR = narrow ? 0.78 : 1;
+  /* v0.7.55: en pantallas anchas, las caras ocupan toda la mitad derecha (no solo la esquina de arriba) y nunca tocan los bordes */
+  var narrow = W < 520, wide = W >= 700;
+  var X0 = withFaces ? (narrow ? 0.62 : wide ? 0.5 : 0.56) : 0.45, YMIN = withFaces ? (wide ? 0.12 : 0.08) : 0, YMAX = withFaces ? (narrow ? 0.42 : wide ? 0.88 : 0.56) : 1, KR = narrow ? 0.78 : wide ? 1.15 : 1, PAD = 10;
+  /* reparto inicial en rejilla con un poco de azar: así no se amontonan */
+  var nN = names.length, cols = Math.max(1, Math.round(Math.sqrt(nN * ((1 - X0) * W) / Math.max(1, (YMAX - YMIN) * H)))), rows = Math.ceil(nN / cols), order = names.map(function (_, i) { return i; }).sort(function () { return Math.random() - .5; });
   var nodes = names.map(function (p, i) {
-    var n = { x: W * (X0 + (1 - X0) * Math.random()), y: H * (withFaces ? 0.06 + (YMAX - 0.1) * Math.random() : Math.random()), vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22, r: p.kind === 'bebe' ? 2.4 : p.kind === 'menor' ? 3 : 3.6 };
+    var k = order[i], cx = (k % cols + .2 + Math.random() * .6) / cols, cy = (Math.floor(k / cols) + .2 + Math.random() * .6) / rows;
+    var n = { x: W * (X0 + (1 - X0) * cx) - (withFaces ? 18 * cx : 0), y: H * (withFaces ? YMIN + (YMAX - YMIN) * cy : Math.random()), vx: (Math.random() - .5) * .22, vy: (Math.random() - .5) * .22, r: p.kind === 'bebe' ? 2.4 : p.kind === 'menor' ? 3 : 3.6 };
     if (p.avatar) { n.img = new Image(); n.img.src = p.avatar; n.R = Math.round((p.kind === 'bebe' ? 12 : p.kind === 'menor' ? 14 : 16) * KR); }
     return n;
   });
@@ -134,7 +139,7 @@ function startHero() {
     ctx.globalAlpha = 1;
     for (var i = 0; i < nodes.length; i++) {
       var a = nodes[i];
-      if (!still) { var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy); if (sp > .3) { a.vx *= .3 / sp; a.vy *= .3 / sp; } a.x += a.vx; a.y += a.vy; var m = a.R || 0; if (a.x < W * (withFaces ? X0 : .3) || a.x > W - m) a.vx *= -1; if (a.y < m || a.y > H * YMAX - m) a.vy *= -1; }
+      if (!still) { var sp = Math.sqrt(a.vx * a.vx + a.vy * a.vy); if (sp > .3) { a.vx *= .3 / sp; a.vy *= .3 / sp; } a.x += a.vx; a.y += a.vy; var m = (a.R || 0) + (a.R ? PAD : 0); if (a.x < W * (withFaces ? X0 : .3) + (a.R || 0) || a.x > W - m) a.vx *= -1; if (a.y < H * YMIN + m || a.y > H * YMAX - m) a.vy *= -1; }
       for (var j = i + 1; j < nodes.length; j++) {
         var b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d = Math.sqrt(dx * dx + dy * dy);
         if (a.R && b.R && d > 0.1) { var gap = a.R + b.R + 6; if (d < gap) { var f = (gap - d) / d * 0.04; a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f; } }
