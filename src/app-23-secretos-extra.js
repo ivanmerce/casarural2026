@@ -2,21 +2,18 @@
    Se suman a la lista sin tocar los de siempre: palabras mágicas (buscador de Compra o buzón de ideas),
    gestos del móvil (girarlo, hacer zoom, quedarse sin cobertura, mantener pulsada una foto) y un paseo por toda la app. */
 
-/* v0.7.59: los nombres se leen de la familia al entrar (la web pública no lleva nombres escritos) */
-function xN(id, fb) { try { return nameOf(id) || fb; } catch (e) { return fb; } }
-function eggsExtraList() { return [
+var EGGS_EXTRA = [
   { k: 'montserrat', name: 'Vistas de diez', how: 'Buscar «Montserrat» en la compra', hint: 'Desde la barbacoa se ve una montaña con forma de sierra. Nómbrala', more: 'En el buscador de Compra, el nombre de la montaña que se ve desde La Barbacoa' },
-  { k: 'piedras', name: 'Operación Piscina', how: 'Buscar «piedras» en la compra', hint: 'Alguien tiró algo a la piscina y alguien se mojó por rescatarlo', more: 'En el buscador de Compra: lo que ' + xN('marc', 'el peque') + ' tiró a la piscina' },
+  { k: 'piedras', name: 'Operación Piscina', how: 'Buscar «piedras» en la compra', hint: 'Alguien tiró algo a la piscina y alguien se mojó por rescatarlo', more: 'En el buscador de Compra: lo que Marc tiró a la piscina' },
   { k: 'gracias', name: 'Bien nacido', how: 'Escribir «gracias» en el buscador o en el buzón de ideas', hint: 'De bien nacido es ser agradecido. Díselo a la app', more: 'Escribe la palabra mágica de la buena educación en el buscador de Compra (o en el buzón)' },
-  { k: 'abuelos', name: '151 años de sabiduría', how: 'Buscar «abuelos» en la compra', hint: 'Suma la edad de los que más saben. Pero antes, nómbralos', more: 'Escribe en el buscador de Compra cómo llamamos a ' + xN('nenuca', 'la abuela') + ' y ' + xN('carlos', 'el abuelo') + '' },
+  { k: 'abuelos', name: '151 años de sabiduría', how: 'Buscar «abuelos» en la compra', hint: 'Suma la edad de los que más saben. Pero antes, nómbralos', more: 'Escribe en el buscador de Compra cómo llamamos a Nenuca y Carlos' },
   { k: 'visca', name: 'Visca el Cónclave', how: 'Escribir «visca» en el buscador', hint: 'Estamos en Catalunya. Grita algo bonito en catalán… en el buscador', more: 'En el buscador de Compra: la palabra catalana que va antes de «el Barça»' },
   { k: 'offline', name: 'Turismo rural auténtico', how: 'Quedarse sin conexión con la app abierta', hint: 'En el campo, a veces lo mejor es no tener cobertura. Pruébalo con la app abierta', more: 'Activa el modo avión unos segundos con la app abierta (y luego quítalo, que si no no cuenta en el ranking)' },
   { k: 'cine', name: 'Modo panorámico', how: 'Girar el móvil en horizontal', hint: 'Esta app también sabe verse en pantalla ancha. Gira la cabeza… o el móvil', more: 'Pon el móvil en horizontal con la app abierta (con el giro automático activado)' },
   { k: 'lupa', name: 'Ojo de lince', how: 'Hacer zoom con dos dedos', hint: 'Hay detalles que solo se ven de cerca. Pellizca la pantalla… al revés', more: 'Separa dos dedos sobre la pantalla para hacer zoom' },
   { k: 'turista', name: 'Turista de la finca', how: 'Pasar por las 8 pestañas de abajo en la misma visita', hint: 'Quien no se mueve no conoce. Pasa por todas las secciones de abajo', more: 'Toca una a una las 8 pestañas de la barra de abajo, de Inicio a Cuentas' },
-  { k: 'abrazo', name: 'Abrazo largo', how: 'Mantener pulsada 2 segundos la foto de alguien', hint: 'Hay fotos que se tocan una vez. Y hay fotos a las que se abraza', more: 'Mantén el dedo 2 segundos sobre la foto de cualquiera de la familia' },
-  { k: 'fisgon', name: 'Pesado y fisgón', how: 'Insistir con los sobres lacrados', hint: 'La curiosidad mató al gato. A ti solo te dará un secreto: insiste con lo que no es tuyo', more: 'Abre los sobres lacrados del Inicio una y otra vez (4 veces), o intenta romper el lacre sin tener la llave' }
-]; }
+  { k: 'abrazo', name: 'Abrazo largo', how: 'Mantener pulsada 2 segundos la foto de alguien', hint: 'Hay fotos que se tocan una vez. Y hay fotos a las que se abraza', more: 'Mantén el dedo 2 segundos sobre la foto de cualquiera de la familia' }
+];
 var EGG_STYLE_EXTRA = {
   montserrat: { emo: '⛰️', fx: ['emoji:⛰️ 🌄 📸', 'stars'], quip: 'Montaña a la vista, barbacoa encendida y nadie con ganas de subirla. Turismo rural en estado puro.' },
   piedras:    { emo: '🪨', fx: ['rise:🫧 🪨 🏊', 'cannons'], quip: 'Las piedras están a salvo. La dignidad tras un baño en octubre, no tanto.' },
@@ -27,13 +24,12 @@ var EGG_STYLE_EXTRA = {
   cine:       { emo: '🍿', fx: ['emoji:🍿 🎬 📽️', 'stars'], quip: 'Lo mejor del cine en casa rural: aquí nadie te manda callar.' },
   lupa:       { emo: '🦅', fx: ['emoji:🔎 🦅 👀', 'stars'], quip: 'Si lo ves todo tan grande, igual necesitas las gafas del abuelo.' },
   turista:    { emo: '🧭', fx: ['emoji:🧭 🗺️ 📍', 'fireworks'], quip: 'Turista oficial: solo te faltan la gorra y la riñonera.' },
-  fisgon:     { emo: '🕵️', fx: ['emoji:🕵️ ✉️ 👀', 'stars'], quip: 'Pesado, fisgón y cotilla: triplete. Los sobres siguen cerrados, pero tú ya tienes un secreto más.' },
   abrazo:     { emo: '🤗', fx: ['rise:🤗 💞 ✨', 'cannons'], quip: 'Abrazo enviado. Devolución garantizada.' }
 };
 var _buildEggs0 = buildEggs;
 buildEggs = function () {
   _buildEggs0();
-  eggsExtraList().forEach(function (e) { if (!EGGS.some(function (x) { return x.k === e.k; })) EGGS.push(e); });
+  EGGS_EXTRA.forEach(function (e) { if (!EGGS.some(function (x) { return x.k === e.k; })) EGGS.push(e); });
 };
 var _secretStyle0 = secretStyle;
 secretStyle = function (k) { return EGG_STYLE_EXTRA[k] || _secretStyle0(k); };
@@ -43,9 +39,9 @@ function extraEgg(k, text) { if (eggsReady() && !hasEgg(k)) eggToast(k, text); }
 /* ---------- Palabras mágicas: buscador de Compra y buzón de ideas ---------- */
 var MAGIC_WORDS = [
   { re: /\bmontserrat\b/i, k: 'montserrat', text: 'Desde La Barbacoa se ve Montserrat. Dicen que sus rocas parecen una sierra; esta familia jura que parecen una fila de croquetas.' },
-  { re: /\bpiedras?\b/i, k: 'piedras', text: function () { return xN('marc', 'El peque') + ' tiró las piedras a la piscina. ' + xN('hugo', 'Alguien') + ' se tiró a por ellas. En octubre. ' + xN('marc', 'El peque') + ' ya está preparando la segunda tanda.'; } },
+  { re: /\bpiedras?\b/i, k: 'piedras', text: 'Marc tiró las piedras a la piscina. Hugo se tiró a por ellas. En octubre. Marc ya está preparando la segunda tanda.' },
   { re: /\bgracias\b/i, k: 'gracias', text: 'La app no come ni bebe, pero se ha emocionado. Ahora dilo también en voz alta a quien ha cocinado hoy.' },
-  { re: /\babuel[oa]s\b/i, k: 'abuelos', text: function () { return xN('nenuca', 'La abuela') + ' (75) y ' + xN('carlos', 'el abuelo') + ' (76): 151 años entre los dos de sabiduría, paciencia y tápers. Y encima pagan la casa.'; } },
+  { re: /\babuel[oa]s\b/i, k: 'abuelos', text: 'Nenuca (75) y Carlos (76): 151 años entre los dos de sabiduría, paciencia y tápers. Y encima pagan la casa.' },
   { re: /\bvisca\b/i, k: 'visca', text: 'Visca la família, visca la finca i visca el Cónclave! Si alguien grita «i el Barça», también vale.' }
 ];
 function magicWords(v) {
@@ -53,7 +49,7 @@ function magicWords(v) {
   MAGIC_WORDS.forEach(function (m) {
     if (!m.re.test(v) || hasEgg(m.k) || ui['_mw_' + m.k]) return;
     ui['_mw_' + m.k] = true; setTimeout(function () { ui['_mw_' + m.k] = false; }, 4000);
-    eggToast(m.k, typeof m.text === 'function' ? m.text() : m.text);
+    eggToast(m.k, m.text);
   });
 }
 document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.input === 'search') magicWords(t.value); });
@@ -67,9 +63,15 @@ if (A.ideaAdd) {
 }
 
 /* ---------- Sin cobertura ---------- */
-window.addEventListener('offline', function () {
-  extraEgg('offline', 'Sin cobertura. Enhorabuena: has llegado al nivel máximo de casa rural. Mira por la ventana: eso de ahí fuera se llama paisaje.');
-});
+function offlineEgg() { extraEgg('offline', 'Sin cobertura. Enhorabuena: has llegado al nivel máximo de casa rural. Mira por la ventana: eso de ahí fuera se llama paisaje.'); }
+window.addEventListener('offline', offlineEgg);
+/* v0.7.55: en el iPhone el aviso de «sin conexión» a veces no llega (sobre todo con la app en la pantalla de inicio).
+   Por eso también se comprueba al volver a la app y cada pocos segundos. */
+function offlineCheck() { try { if (navigator.onLine === false) offlineEgg(); } catch (e) {} }
+document.addEventListener('visibilitychange', function () { if (!document.hidden) { offlineCheck(); setTimeout(offlineCheck, 1200); } });
+window.addEventListener('focus', function () { setTimeout(offlineCheck, 300); });
+window.addEventListener('pageshow', function () { setTimeout(offlineCheck, 300); });
+setInterval(offlineCheck, 3000);
 
 /* ---------- Móvil en horizontal ---------- */
 try {
@@ -115,21 +117,42 @@ document.addEventListener('pointermove', function (e) {
 ['pointerup', 'pointercancel'].forEach(function (ev) { document.addEventListener(ev, hugStop, { passive: true }); });
 window.addEventListener('scroll', hugStop, { passive: true });
 
-/* ---------- v0.7.62 · Pesado y fisgón: insistir con los sobres lacrados ---------- */
-var FISGON_TXT = 'Eres un pesado y un fisgón. Los sobres siguen lacrados y la llave no la tienes tú. Cuando el jefe dé la señal, te enteras como todos. Mientras tanto, toma: un secreto por cotilla.';
-if (A.sbOpen) {
-  var _sbOpen0 = A.sbOpen;
-  A.sbOpen = function (el, e) {
-    ui._sbPeek = (ui._sbPeek || 0) + 1;
-    if (ui._sbPeek >= 4 && eggsReady() && !hasEgg('fisgon')) { extraEgg('fisgon', FISGON_TXT); return; }   /* esta vez, en vez del sobre, el secreto */
-    return _sbOpen0(el, e);
-  };
+/* ---------- v0.7.55 · Secreto especial para Nenuca ----------
+   El «Noctámbulo» (abrir la app de madrugada) no es para quien se acuesta a su hora.
+   Para Nenuca, ese hueco lo ocupa un secreto solo suyo. El total sigue siendo el mismo para todos. */
+var EGG_NENUCA = { k: 'matriarca', name: 'La Matriarca', how: 'Escribir «te quiero» (o «¿has comido?») en el buscador o en el buzón', hint: 'Las dos palabras que más repite una abuela… después de «¿has comido?». Escríbelas en el buscador de la compra', more: 'En el buscador de Compra (o en el buzón de ideas), escribe «te quiero»' };
+EGG_STYLE_EXTRA.matriarca = { emo: '👑', fx: ['rise:❤️ 👑 🌹 ✨', 'fireworks'], quip: 'Este secreto solo existe en un móvil: el de la jefa. Los demás, a dormir a su hora.' };
+var eggsWho = null;
+function eggsPersonal() {
+  if (!EGGS.length || eggsWho === (ui.me || '')) return;
+  eggsWho = ui.me || '';
+  var mine = ui.me === 'nenuca', iB = -1, iM = -1;
+  EGGS.forEach(function (e, i) { if (e.k === 'buho') iB = i; if (e.k === 'matriarca') iM = i; });
+  if (mine && iB >= 0 && iM < 0) EGGS.splice(iB, 1, EGG_NENUCA);
+  else if (!mine && iM >= 0) EGGS.splice(iM, 1, EGGS_BUHO);
 }
-if (typeof sbNope === 'function') {
-  var _sbNope0 = sbNope;
-  sbNope = function (l) {
-    _sbNope0(l);
-    ui._sbNope = (ui._sbNope || 0) + 1;
-    if (ui._sbNope >= 3 && eggsReady() && !hasEgg('fisgon')) setTimeout(function () { sobreClose(); setTimeout(function () { extraEgg('fisgon', FISGON_TXT); }, 350); }, 900);
+var EGGS_BUHO = null;
+var _buildEggs1 = buildEggs;
+buildEggs = function () {
+  _buildEggs1();
+  EGGS_BUHO = EGGS.find(function (e) { return e.k === 'buho'; }) || EGGS_BUHO;
+  eggsWho = null; eggsPersonal();
+};
+var _foundMap0 = foundMap;
+foundMap = function () { try { eggsPersonal(); } catch (e) {} return _foundMap0(); };
+var NENUCA_RE = /te\s*quiero|has\s+comido/i;
+function nenucaWords(v) {
+  if (!v || !eggsReady() || !NENUCA_RE.test(v)) return;
+  if (!EGGS.some(function (e) { return e.k === 'matriarca'; }) || hasEgg('matriarca') || ui._mwNen) return;
+  ui._mwNen = true; setTimeout(function () { ui._mwNen = false; }, 4000);
+  eggToast('matriarca', 'Nenuca: 75 años, una tribu de nietos, tápers infinitos y la pregunta eterna: «¿has comido?». Este secreto es solo tuyo. Te queremos.');
+}
+document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.input === 'search') nenucaWords(t.value); });
+if (A.ideaAdd) {
+  var _ideaAdd1 = A.ideaAdd;
+  A.ideaAdd = function (el, e) {
+    var t = document.getElementById('idea-text'), v = t ? t.value : '';
+    _ideaAdd1(el, e);
+    if (v.trim().length >= 3) setTimeout(function () { nenucaWords(v); }, 1100);
   };
 }
