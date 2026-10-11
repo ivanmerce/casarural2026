@@ -5,7 +5,7 @@
    v0.7.50: arranca con «el finde en cifras» (contadores con datos reales), dos pausas publicitarias nuevas, premios de los
    juegos del domingo y el «momento cumple» con la melodía de cumpleaños antes del podio. */
 
-var GALA_TIME = { cifras: 8, bday: 11, intro: 6, burst0: 2.6, burst1: 7.5, podStep0: 2.2, podStep1: 3.2, podEnd: 7, ad: 5, teaser: 6, photos: 8, final: 9, credits: 16 };
+var GALA_TIME = { gracias: 13, cifras: 8, bday: 11, intro: 6, burst0: 2.6, burst1: 7.5, podStep0: 2.2, podStep1: 3.2, podEnd: 7, ad: 5, teaser: 6, photos: 8, final: 9, credits: 16 };
 var GALA_PODIUM = { oro: 1, plata: 1, bronce: 1 };
 
 /* ---------- La estatuilla de cada uno ----------
@@ -63,9 +63,12 @@ function galaSlides(trailer, awardsList) {
   if (typeof photoList === 'function' && photoList().length >= 3) slides.push({ t: 'photos' });
   var pod = ['bronce', 'plata', 'oro'].map(function (id) { return list.find(function (a) { return a.id === id; }); }).filter(Boolean);
   if (pod.length) slides.push({ t: 'podium', pods: pod, song: 3 });
-  slides.push({ t: 'final', picks: picks }, { t: 'credits' });
+  slides.push({ t: 'final', picks: picks });
+  if (galaGrand().length) slides.push({ t: 'gracias', song: 3 });   /* v0.7.57: el final, para los abuelos */
+  slides.push({ t: 'credits' });
   return slides;
 }
+function galaGrand() { var e = S.trip.eggs || {}; return (e.grand || []).filter(function (id) { return person(id); }); }
 function gala_noBday(list) { var d = (S.awardData || {}).cumple; return !!(d && d.hidden); }
 /* El finde en cifras: solo lo que dice la app, nada inventado */
 function galaStats() {
@@ -198,6 +201,14 @@ function galaRender() {
   else if (s.t === 'bday') inner = '<div class="gala-bday"><span class="eyebrow">Momento cumple</span><div class="gbd-num" aria-hidden="true">' + esc(String(s.age || '')) + '</div>' +
       '<span class="gbd-av">' + av(s.pid, 'xl') + '<i class="gbd-crown" aria-hidden="true">👑</i></span><h1 class="gala-title">¡Felicidades, ' + pname(s.pid) + '!</h1>' +
       '<p>Todos de pie. La música la pone la app; la letra, vosotros. Y que suene más alto que en el fútbol.</p></div>';
+  else if (s.t === 'gracias') {
+    var gr = galaGrand(), gn = gr.map(function (id) { return pname(id); });
+    inner = '<div class="gala-thanks"><span class="eyebrow">Antes de apagar las luces…</span>' +
+      '<div class="gt-avs">' + gr.map(function (id) { return '<span class="gt-av">' + av(id, 'xl') + '</span>'; }).join('<span class="gt-heart" aria-hidden="true">' + icon('heart') + '</span>') + '</div>' +
+      '<h1 class="gala-title">Gracias, ' + gn.join(' y ') + '</h1>' +
+      '<p>Por la casa, la compra, la tarta y todo lo demás. Pero, sobre todo, por regalarnos lo mejor del finde: estos días juntos, en familia.</p>' +
+      '<p class="gt-last">El premio más grande de esta gala es vuestro. Aplauso largo, de pie y sin prisa.</p></div>';
+  }
   else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p>';
   else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">Una estatuilla para cada uno</h1><p>Sobres, redoble, discursos de 30 segundos y un podio que va a dar que hablar.</p>';
   else if (s.t === 'burst') {
@@ -295,6 +306,7 @@ function galaStep(dir) {
     try { emojiFx(['🎂', '🎈', '🥳', '🎉', '🕯️'], 'rain', 200, 46); fireworks(4200, 8); cannonsFx(600); } catch (x) {}
     clearTimeout(gala.bdT); gala.bdT = setTimeout(function () { if (!gala) return; galaMusicDuck(false); applause(3.2); confetti(3600); try { rocketFx(0); rocketFx(500); } catch (x) {} }, ms || 9000);
   }
+  if (n.t === 'gracias' && dir > 0) { try { emojiFx(['❤️', '🧡', '💛', '✨'], 'rise', 300, 46); fireworks(5200, 10); applause(4.5); } catch (x) {} }
   if (n.t === 'final' && !gala.trailer) { confetti(3400); applause(3); try { rocketFx(0); rocketFx(600); cannonsFx(300); } catch (x) {} }
   if (gala.i === gala.slides.length - 1 && !gala.sim) egg('gala');
 }
@@ -398,7 +410,7 @@ function galaFxStart() {
 function galaFxMood(s) {
   if (!GFX) return;
   var m = { intro: { bubbles: .8, confetti: .6, rockets: .5 }, ad: { bubbles: .2, confetti: 0, rockets: 0 }, burst: { bubbles: .6, confetti: .6, rockets: .4 },
-    podium: { bubbles: .8, confetti: .8, rockets: .8 }, cifras: { bubbles: .7, confetti: .5, rockets: .3 }, bday: { bubbles: 1.2, confetti: 1.6, rockets: 1.4 }, photos: { bubbles: .9, confetti: .3, rockets: 0 }, final: { bubbles: 1, confetti: 1.4, rockets: 1.2 }, credits: { bubbles: .6, confetti: .6, rockets: .4 } }[s.t] || { bubbles: .5, confetti: .4, rockets: .25 };
+    podium: { bubbles: .8, confetti: .8, rockets: .8 }, cifras: { bubbles: .7, confetti: .5, rockets: .3 }, gracias: { bubbles: 1.2, confetti: .8, rockets: .9 }, bday: { bubbles: 1.2, confetti: 1.6, rockets: 1.4 }, photos: { bubbles: .9, confetti: .3, rockets: 0 }, final: { bubbles: 1, confetti: 1.4, rockets: 1.2 }, credits: { bubbles: .6, confetti: .6, rockets: .4 } }[s.t] || { bubbles: .5, confetti: .4, rockets: .25 };
   if (s.t === 'podium' && gala.revealed >= s.pods.length) m = { bubbles: 1, confetti: 1.6, rockets: 1.6 };
   GFX.mood(m);
 }
