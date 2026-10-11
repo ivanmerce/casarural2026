@@ -27,19 +27,20 @@ function buildEggs() {
     { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Obras son amores… y corazones en el álbum', more: 'Abre una foto del álbum y toca el corazón' },
     /* Toques escondidos */
     { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'Llamad y se os abrirá. Bueno, más o menos', more: 'En Inicio, toca la casita de arriba a la izquierda o el título grande' },
-    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo), o deja el dedo quieto encima un segundo' },
+    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo)' },
     { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño de la casa esconde algo. A la tercera va la vencida', more: 'En Comidas, toca 3 veces «Menú ' + b + '» (o su foto)' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc… y así hasta quince', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas, rápido' },
-    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo), o deja el dedo quieto encima un segundo' },
+    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo)' },
     { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Al mal tiempo, buena cara… y cinco toques', more: 'En Inicio, toca 5 veces el título «El tiempo en la finca»' },
     { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás (o, ya en la finca, «¡Ya estamos en la finca!»)', hint: 'La cuenta atrás también sabe bailar. A la tercera…', more: 'En Inicio, toca 3 veces la frase «¡Ya estamos en la finca!» (antes del viaje eran los números de la cuenta atrás)' },
     { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música, aunque el trono esté vacío', more: 'Juegos → Ranking: toca 3 veces el podio (el primero, o el hueco)' },
     { k: 'abumetro', name: 'Abuelómetro al rojo', how: 'Tocar 3 veces el Abuelómetro', hint: 'Hay un medidor de abuelos. Se calienta si lo tocas', more: 'Cuentas → El rincón de los abuelos → toca 3 veces el Abuelómetro' },
-    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos), o deja el dedo quieto encima un segundo' },
+    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos)' },
     /* Palabras mágicas */
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Lo que se dice cuando sale humo blanco. En latín y en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
     { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra', hint: 'Lo que se dice al brindar. Agua que no has de beber…', more: 'En el buscador de Compra, lo que se dice al brindar' },
     { k: 'tortilla', name: 'El gran debate', how: 'Buscar «con cebolla» o «sin cebolla» en la compra', hint: 'La pregunta que rompe familias desde tiempos inmemoriales', more: 'En el buscador de Compra: ¿la tortilla, con o sin…?' },
+    { k: 'chivato', name: 'Chivatazo', how: 'Escribir «espía» en el buzón de ideas o en el buscador de Compra', hint: 'Si lo nombras, aparece. Escríbelo donde se escriben cosas', more: 'En el buzón de ideas (o en el buscador de Compra), escribe a qué se dedica el invitado misterioso' },
     /* A su hora */
     { k: 'buho', name: 'Noctámbulo', how: 'Abrir la app entre las 00:00 y las 05:00', hint: 'A quien madruga Dios le ayuda. A quien trasnocha, la app', more: 'Abre la app de madrugada, cuando todos duermen. Ojo: con el cierre del domingo a las 18:00, ya no queda ninguna madrugada que cuente' },
     { k: 'deseo', name: '11:11', how: 'Tener la app abierta a las 11:11', hint: 'Una hora con los números de ' + c, more: 'Cuando el reloj marque cuatro unos. Antes del cierre del domingo solo queda una: la de la mañana' },
@@ -61,7 +62,40 @@ function eggKey() { return KEY + '-eggs2-' + (ui.me || 'anon'); }
 function hintKey() { return KEY + '-hints2-' + (ui.me || 'anon'); }
 function readJ(k, mem) { try { var v = JSON.parse(localStorage.getItem(k)); if (v) return v; } catch (e) {} return (ui[mem] && ui[mem][ui.me]) || {}; }
 function writeJ(k, mem, v) { ui[mem] = ui[mem] || {}; ui[mem][ui.me] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-function foundMap() { return readJ(eggKey(), '_eggs'); }
+function foundMap() { eggsBorrowFix(); return readJ(eggKey(), '_eggs'); }
+/* v0.7.52 · Cada secreto, para quien lo descubre. Si en este móvil otra cuenta ya lo había descubierto antes,
+   entrar con otra cuenta y repetirlo no suma: se ve el efecto, pero no cuenta para el ranking. */
+function borrowKey() { return KEY + '-eggsx-' + (ui.me || 'anon'); }
+function borrowMap() { return readJ(borrowKey(), '_eggsx'); }
+function eggRealTs(v) { return v && v !== EGG_RESTORED_AT ? Date.parse(v) || 0 : 0; }
+function otherStores() {
+  var out = [], pre = KEY + '-eggs2-';
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var key = localStorage.key(i); if (!key || key.indexOf(pre) !== 0) continue;
+      var pid = key.slice(pre.length); if (!pid || pid === ui.me || pid === 'anon') continue;
+      var m = JSON.parse(localStorage.getItem(key) || '{}'); if (m) out.push({ pid: pid, map: m });
+    }
+  } catch (e) {}
+  return out;
+}
+/* ¿Quién lo descubrió antes que yo en este móvil? (solo descubrimientos reales, no lo recuperado de la nube) */
+function eggFirstHere(k, mine) {
+  var best = null;
+  otherStores().forEach(function (o) { var t = eggRealTs(o.map[k]); if (t && (!mine || t < mine) && (!best || t < best.t)) best = { pid: o.pid, t: t }; });
+  return best;
+}
+/* Una vez por cuenta: lo que se coló antes de esta versión pasa a «visto en este móvil» y deja de contar */
+function eggsBorrowFix() {
+  if (!ui.me || ui._bfix === ui.me) return; ui._bfix = ui.me;
+  var f = readJ(eggKey(), '_eggs'), x = borrowMap(), moved = 0;
+  Object.keys(f).forEach(function (k) {
+    var mine = eggRealTs(f[k]); if (!mine) return;   /* lo recuperado de la nube ya era tuyo */
+    var o = eggFirstHere(k, mine); if (!o) return;
+    x[k] = { by: o.pid, at: f[k] }; delete f[k]; moved++;
+  });
+  if (moved) { writeJ(eggKey(), '_eggs', f); writeJ(borrowKey(), '_eggsx', x); }
+}
 function hintsMap() { return readJ(hintKey(), '_hints'); }
 function hasEgg(k) { return !!foundMap()[k]; }
 function foundCount() { var f = foundMap(); return EGGS.filter(function (e) { return f[e.k]; }).length; }
@@ -70,6 +104,14 @@ function rankedCount() { var f = foundMap(), c = secretsClose().getTime(); retur
 function egg(k, quiet) {
   var f = foundMap(); if (f[k]) return false;
   var e = EGGS.find(function (x) { return x.k === k; }); if (!e) return false;
+  var bx = borrowMap();
+  if (bx[k]) return false;
+  var first = eggFirstHere(k, 0);
+  if (first) {   /* en este móvil ya lo descubrió otra cuenta: se disfruta, pero no suma */
+    bx[k] = { by: first.pid, at: new Date().toISOString() }; writeJ(borrowKey(), '_eggsx', bx);
+    setTimeout(function () { toast('Este secreto ya lo descubrió ' + esc(nameOf(first.pid, 'otra cuenta')) + ' en este móvil, así que no suma para ' + esc(nameOf(ui.me, 'ti')) + '. ¡Descúbrelo en tu móvil!'); }, 1600);
+    return false;
+  }
   f[k] = new Date().toISOString(); writeJ(eggKey(), '_eggs', f);
   var n = foundCount(), all = n === EGGS.length, late = secretsClosed();
   /* los secretos «silenciosos» (sin efecto propio) también tienen su gran momento */
@@ -293,25 +335,6 @@ function secretsHomeBanner() {
   return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
 }
 
-/* ----- v0.7.53: dejar el dedo encima también vale (y sin el menú de «copiar imagen» del móvil) -----
-   En los secretos de «tocar varias veces» (fotos de personas, logo, tiempo, cuenta atrás, podio…), mantener pulsado
-   ~1 segundo cuenta como todos los toques. Además se anula el menú contextual del navegador sobre fotos y zonas secretas. */
-(function () {
-  var holdT = null, sx = 0, sy = 0, holdEl = null;
-  function cancel() { clearTimeout(holdT); holdT = null; if (holdEl) holdEl.classList.remove('egg-holding'); holdEl = null; }
-  document.addEventListener('pointerdown', function (e) {
-    var el = e.target.closest && e.target.closest('[data-egg]'); if (!el || !S || typeof EGG_TAPS === 'undefined' || !EGG_TAPS[el.dataset.egg]) return;
-    cancel(); holdEl = el; sx = e.clientX; sy = e.clientY; el.classList.add('egg-holding');
-    holdT = setTimeout(function () {
-      var k = el.dataset.egg, n = EGG_TAPS[k] || 1; cancel();
-      if (navigator.vibrate) try { navigator.vibrate([20, 30, 40]); } catch (x) {}
-      for (var i = 0; i < n; i++) { if (eggTap(k, el)) break; }
-      el._heldAt = Date.now();
-    }, 1000);
-  }, { passive: true });
-  document.addEventListener('pointermove', function (e) { if (holdT && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) cancel(); }, { passive: true });
-  ['pointerup', 'pointercancel', 'scroll'].forEach(function (ev) { document.addEventListener(ev, cancel, { passive: true, capture: true }); });
-  /* el «clic» que llega justo después de mantener pulsado no suma otro toque */
-  document.addEventListener('click', function (e) { var el = e.target.closest && e.target.closest('[data-egg]'); if (el && el._heldAt && Date.now() - el._heldAt < 900) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
-  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.av, [data-egg], .gb-av, .pod-av, .gbd-av')) e.preventDefault(); });
-})();
+/* ----- v0.7.53/59: sin el menú de «copiar imagen» del móvil al mantener pulsada una foto o zona secreta
+   (así funciona el secreto «Abrazo largo»: mantener 2 s la foto de alguien) ----- */
+document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.av, [data-egg], .gb-av, .pod-av, .gbd-av')) e.preventDefault(); });

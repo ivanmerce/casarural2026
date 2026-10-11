@@ -176,7 +176,7 @@ var CLOUD = (function () {
   }
   function ping() {
     var eg = 0, ks = []; try { eg = rankedCount(); ks = rankedKeys(); } catch (e) {}
-    client().rpc('ping', { p_eggs: eg, p_ver: 3, p_keys: ks }).then(function () {
+    client().rpc('ping', { p_eggs: eg, p_ver: 4, p_keys: ks, p_pid: ui.me || null })   /* v0.7.52: la base de datos comprueba que eres tú */.then(function () {
       return client().from('presence').select('person_id,last_seen,visits,minutes,eggs,egg_keys');
     }).then(function (r) {
       if (r && r.data) {
