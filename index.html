@@ -1908,7 +1908,7 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-var BUILD_ID = "20261011073817";
+var BUILD_ID = "20261011074418";
 /* =====================================================================
    Casa Rural · Lógica pura (sin DOM). Testeable con node: tests/logic.test.js
    ===================================================================== */
@@ -8715,21 +8715,28 @@ if (typeof sbNope === 'function') {
   };
 }
 
-/* ---------- v0.7.63 · Secreto especial para la abuela ----------
-   El «Noctámbulo» (abrir la app de madrugada) no es para quien se acuesta a su hora.
-   Para ella, ese hueco lo ocupa un secreto solo suyo. El total sigue siendo el mismo para todos. */
+/* ---------- v0.7.63/64 · «La Matriarca»: segunda oportunidad para los que duermen ----------
+   El «Noctámbulo» (abrir la app de madrugada) ya no se puede conseguir: con el cierre a las 18:00 no queda ninguna madrugada.
+   Quien no lo tiene lo cambia por «La Matriarca» (mismo hueco, el total sigue igual para todos).
+   Quien ya lo tiene no nota nada. Lista sacada del ranking el domingo a las 09:45 (nadie más puede conseguirlo ya). */
 var MATRIARCA_PID = 'nenuca';
+var BUHO_HAVE = ['clara', 'hugo', 'ivan', 'lucas', 'marta', 'sergi'];
 function eggMatriarca() { return { k: 'matriarca', name: 'La Matriarca', how: 'Escribir «te quiero» (o «¿has comido?») en el buscador o en el buzón', hint: 'Las dos palabras que más repite una abuela… después de «¿has comido?». Escríbelas en el buscador de la compra', more: 'En el buscador de Compra (o en el buzón de ideas), escribe «te quiero»' }; }
-EGG_STYLE_EXTRA.matriarca = { emo: '👑', fx: ['rise:❤️ 👑 🌹 ✨', 'fireworks'], quip: 'Este secreto solo existe en un móvil: el de la jefa. Los demás, a dormir a su hora.' };
+EGG_STYLE_EXTRA.matriarca = { emo: '👑', fx: ['rise:❤️ 👑 🌹 ✨', 'fireworks'], quip: 'Dormir a su hora también tiene premio. La jefa lo aprueba.' };
 var eggsWho = null, EGGS_BUHO = null;
+function matriarcaSwap() {   /* ¿a esta persona le toca «La Matriarca» en lugar del «Noctámbulo»? */
+  if (!ui.me || BUHO_HAVE.indexOf(ui.me) >= 0) return false;
+  var f = {}; try { f = _foundMap0() || {}; } catch (e) {}
+  return !f.buho;   /* si lo consiguió en este móvil, se lo queda */
+}
 function eggsPersonal() {
   if (!EGGS.length || eggsWho === (ui.me || '')) return;
   eggsWho = ui.me || '';
-  var mine = ui.me === MATRIARCA_PID, iB = -1, iM = -1;
+  var swap = matriarcaSwap(), iB = -1, iM = -1;
   EGGS.forEach(function (e, i) { if (e.k === 'buho') iB = i; if (e.k === 'matriarca') iM = i; });
   if (iB >= 0) EGGS_BUHO = EGGS[iB];
-  if (mine && iB >= 0 && iM < 0) EGGS.splice(iB, 1, eggMatriarca());
-  else if (!mine && iM >= 0 && EGGS_BUHO) EGGS.splice(iM, 1, EGGS_BUHO);
+  if (swap && iB >= 0 && iM < 0) EGGS.splice(iB, 1, eggMatriarca());
+  else if (!swap && iM >= 0 && EGGS_BUHO) EGGS.splice(iM, 1, EGGS_BUHO);
 }
 var _buildEggs1 = buildEggs;
 buildEggs = function () { _buildEggs1(); eggsWho = null; eggsPersonal(); };
@@ -8740,7 +8747,10 @@ function matriarcaWords(v) {
   if (!v || !eggsReady() || !MATRIARCA_RE.test(v)) return;
   if (!EGGS.some(function (e) { return e.k === 'matriarca'; }) || hasEgg('matriarca') || ui._mwMat) return;
   ui._mwMat = true; setTimeout(function () { ui._mwMat = false; }, 4000);
-  eggToast('matriarca', xN(MATRIARCA_PID, 'Abuela') + ': 75 años, una tribu de nietos, tápers infinitos y la pregunta eterna: «¿has comido?». Este secreto es solo tuyo. Te queremos.');
+  var ab = xN(MATRIARCA_PID, 'la abuela');
+  eggToast('matriarca', ui.me === MATRIARCA_PID
+    ? ab + ': 75 años, una tribu de nietos, tápers infinitos y la pregunta eterna: «¿has comido?». Este secreto es tuyo. Te queremos.'
+    : '«¿Has comido?» y «te quiero»: las dos frases oficiales de ' + ab + '. El secreto ya es tuyo, pero solo vale de verdad si vas y se las dices en persona. Con abrazo incluido.');
 }
 document.addEventListener('input', function (e) { var t = e.target; if (t && t.dataset && t.dataset.input === 'search') matriarcaWords(t.value); });
 if (A.ideaAdd) {
@@ -8751,6 +8761,24 @@ if (A.ideaAdd) {
     if (v.trim().length >= 3) setTimeout(function () { matriarcaWords(v); }, 1100);
   };
 }
+/* Aviso (una vez por persona) para quien recibe el cambio. Usa las ventanitas de app-25-avisos */
+var MAT_BORN = Date.now();
+setInterval(function () {
+  try {
+    if (typeof avShow !== 'function' || typeof avBlocked !== 'function' || avBlocked() || Date.now() - MAT_BORN < 7000) return;
+    if (!eggsReady() || avSeen('matriarca')) return;
+    foundMap();
+    if (!EGGS.some(function (e) { return e.k === 'matriarca'; }) || hasEgg('matriarca') || secretsClosed()) return;
+    avMark('matriarca');
+    avShow({
+      cls: 'is-cierre', title: 'Segunda oportunidad para los que duermen',
+      text: 'El secreto «Noctámbulo» pedía abrir la app de madrugada y ya no queda ninguna antes del cierre. Como dormir no es pecado, te lo hemos cambiado por uno nuevo: <b>«La Matriarca»</b>.<br><br>Pista: las dos palabras que más repite una abuela… después de «¿has comido?». Escríbelas en el buscador de la compra.',
+      go: icon('search') + 'Ver mis secretos', ok: 'Vale',
+      top: '<div class="aviso-clock" aria-hidden="true"><span>👑</span></div>',
+      onGo: function () { if (A.secrets) A.secrets(); }
+    });
+  } catch (e) {}
+}, 2000);
 
 /* ===================== Pelis con mímica: el móvil hace de papelitos y de reloj =====================
    Para el juego de mímica (data.mimica): saca una peli al azar que solo ve quien actúa (mantener pulsado),
