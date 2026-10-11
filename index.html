@@ -1544,6 +1544,56 @@ body.gala-on .fx { z-index: 94; }
 .tk-big img { max-height: 62vh; }
 @media (max-width: 380px) { .tk-row { grid-template-columns: 1fr auto; } .tk-ico { display: none; } }
 
+/* v0.7.49 · Nota discreta del cierre de secretos */
+.sec-note { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .88rem; color: var(--muted); background: transparent; border: 1px dashed color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 999px; padding: 7px 14px; margin-bottom: 10px; min-height: 40px; }
+.sec-note .ico { width: 16px; height: 16px; color: var(--accent); flex: none; }
+.sec-note span { flex: 1; min-width: 0; }
+.sec-note b { color: var(--ink); }
+.sec-note small { flex: none; opacity: .8; }
+
+/* v0.7.49 · Los dos sobres */
+.sobres-card { position: relative; overflow: hidden; }
+.sobres { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 6px 0 2px; }
+.sobre { position: relative; aspect-ratio: 3 / 2; border: 0; padding: 0; border-radius: 10px; cursor: pointer; font: inherit; color: inherit;
+  background: linear-gradient(160deg, #f4ead7, #e6d6b8); box-shadow: 0 8px 22px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.06); overflow: hidden; transition: transform .25s ease; }
+.sobre-back { position: absolute; inset: 0; background: linear-gradient(to top right, transparent 49.5%, rgba(0,0,0,.06) 50%, transparent 50.5%), linear-gradient(to top left, transparent 49.5%, rgba(0,0,0,.06) 50%, transparent 50.5%); }
+.sobre-flap { position: absolute; left: 0; right: 0; top: 0; height: 58%; background: linear-gradient(180deg, #eadcbf, #dcc8a3); clip-path: polygon(0 0, 100% 0, 50% 100%); transform-origin: top; transition: transform .6s cubic-bezier(.2,.8,.2,1); box-shadow: 0 2px 0 rgba(0,0,0,.05); }
+.sobre-seal { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 1.05rem; color: #fff;
+  background: radial-gradient(circle at 35% 30%, #e0404f, var(--accent, #b3122b) 60%, #6d0a19); box-shadow: 0 3px 8px rgba(0,0,0,.3), inset 0 -2px 4px rgba(0,0,0,.25); }
+.sobre-n { position: absolute; left: 8px; right: 8px; bottom: 7px; font-size: .78rem; font-weight: 700; color: #5a4a30; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sobre:active { transform: scale(.97); }
+.sobre.nope { animation: sobreNope .5s ease; }
+@keyframes sobreNope { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px) rotate(-2deg); } 40% { transform: translateX(7px) rotate(2deg); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+.sobre.ready { animation: sobreGlow 1.8s ease-in-out infinite; }
+@keyframes sobreGlow { 0%,100% { box-shadow: 0 8px 22px rgba(0,0,0,.18); } 50% { box-shadow: 0 8px 30px color-mix(in srgb, var(--accent) 55%, transparent); } }
+.sobre.opening .sobre-flap { transform: rotateX(180deg); }
+.sobre.opening .sobre-seal { transform: translate(-50%, -50%) scale(0); transition: transform .3s ease; }
+.sobres-lock { text-align: center; color: var(--muted); margin: 4px 0 0; }
+.sobres-adm { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.sobre-open { display: grid; place-items: center; padding: 8px 0 4px; }
+.sobre-letter { width: 100%; background: linear-gradient(180deg, #fffaf0, #f4ead7); color: #3b2f1c; border-radius: 12px; padding: 22px 18px; box-shadow: 0 10px 30px rgba(0,0,0,.2); animation: letterUp .6s cubic-bezier(.2,.8,.2,1); }
+.sobre-letter p { font-size: 1.15rem; line-height: 1.45; margin: 8px 0 0; }
+.sobre-letter .eyebrow { color: #9a2030; }
+@keyframes letterUp { from { transform: translateY(40px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sobre.ready, .sobre.nope, .sobre-letter { animation: none; } }
+
+/* v0.7.49 · Pelis con mímica */
+.mim { display: grid; gap: 12px; }
+.mim-score { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mim-team { border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; display: grid; gap: 2px; opacity: .7; }
+.mim-team.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+.mim-team b { font-size: 2rem; line-height: 1; }
+.mim-turn { text-align: center; margin: 0; }
+.mim-peli { position: relative; min-height: 120px; border-radius: 16px; border: 2px dashed var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); font: inherit; color: inherit; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; padding: 16px; }
+.mim-peli .mim-show { display: none; font-size: 1.6rem; font-weight: 900; line-height: 1.15; }
+.mim-peli.show .mim-show { display: block; }
+.mim-peli.show .mim-hide { display: none; }
+.mim-hide { color: var(--muted); }
+.mim-clock { text-align: center; display: grid; }
+.mim-clock b { font-size: 3rem; line-height: 1; }
+.mim-clock.hurry b { color: var(--accent); animation: sobreGlow 1s infinite; }
+.mim-btns { justify-content: center; }
+
 </style>
 </head>
 <body>
@@ -4274,6 +4324,7 @@ function gameView(g) {
   h += '<div class="facts"><span class="pill ' + GST[st][1] + '">' + GST[st][0] + '</span><span class="fact">' + icon('clock') + gWhen(g) + '</span>' + (g.where ? '<span class="fact">' + icon('pin') + esc(g.where) + '</span>' : '') + '<span class="fact">' + icon('users') + (g.entrants || []).length + '</span></div>';
   h += gFicha(g);
   if (typeof gimEntryHtml === 'function') h += gimEntryHtml(g);
+  if (typeof mimicaEntryHtml === 'function') h += mimicaEntryHtml(g);
   if (g.needs) h += '<p class="small needs">' + icon('umbrella') + '<span><b>Material:</b> ' + esc(g.needs) + '</span></p>';
   if (act) h += '<button class="link small" data-act="tab" data-tab="planes">En el planning: ' + esc(dayOf(act.day).short) + ' ' + act.start + ' · ' + esc(act.title) + ' ' + icon('arrow') + '</button>';
   if (!ed) h += '<p class="small pill pend" style="white-space:normal">Modo lector: ves los resultados en directo. Los apuntan los editores.</p>';
@@ -5348,7 +5399,7 @@ function secretsWatch() {
   function tick() {
     var ms = secretsClose().getTime() - Date.now();
     if (ms <= 0) { if (ms > -6 * 3600000 && !flagGet('secClosed')) { flagSet('secClosed'); secretsClosedFx(); } return; }
-    if (ms > SECRETS_WARN_MIN * 60000) return;
+    if (ms > SECRETS_WARN_MIN * 60000) { if (secretsCloseDay() && !flagGet('secDay')) { flagSet('secDay'); toast('Aviso: hoy a las ' + closeHour() + ' se cierra el juego de los secretos'); } return; }
     if (ui.tab === 'inicio' && !document.querySelector('.sec-banner')) render(true);
     if (flagGet('secWarn')) return; flagSet('secWarn');
     secretsAlarm(ms);
@@ -5376,8 +5427,14 @@ function alarmBeep() {
   } catch (e) {}
 }
 /* Aviso fijo en Inicio durante las 2 horas previas al cierre */
+function secretsCloseDay() {   /* hoy es el día del cierre (y aún no ha llegado) */
+  var c = secretsClose(), n = new Date();
+  return c.getTime() > n.getTime() && c.toDateString() === n.toDateString();
+}
 function secretsHomeBanner() {
   var ms = secretsClose().getTime() - Date.now();
+  /* v0.7.49: el día del cierre, una nota discreta para todos hasta que llegue el aviso grande */
+  if (ms > SECRETS_WARN_MIN * 60000 && secretsCloseDay()) return '<button class="sec-note" data-act="secrets">' + icon('search') + '<span>Hoy a las <b>' + closeHour() + '</b> se cierra el juego de los secretos</span><small class="num">' + foundCount() + '/' + EGGS.length + '</small></button>';
   if (ms <= 0 || ms > SECRETS_WARN_MIN * 60000) return '';
   return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
 }
@@ -5767,6 +5824,7 @@ VIEWS.inicio = function () {
   } else if (c.phase === 'during') h += '<p class="live" data-egg="disco">¡Ya estamos en la finca!</p>';
   else h += '<p class="live">' + esc(S.trip.name) + ' clausurado. Habemus recuerdos.</p>';
   h += '</section>';
+  if (typeof sobresCard === 'function') h += sobresCard();
   h += homePayments();
   h += '<div class="home-flow">';
   h += homeWeather();
@@ -7217,7 +7275,7 @@ function gimMemory(g, box) {
 }
 
 /* ---------- Buzón del Espía (solo su cuenta) ---------- */
-function gimSpyBtn() { return isSpy() ? '<button class="btn" data-act="gimSpyBox">🎙️ Misión gimcana: graba tus mensajes</button>' : ''; }
+function gimSpyBtn() { return isSpy() && (S.games || []).some(function (g) { return /gimcana/i.test(g.name || ''); }) ? '<button class="btn" data-act="gimSpyBox">🎙️ Misión gimcana: graba tus mensajes</button>' : ''; }
 var gimRec = null;
 function gimSpyBoxOpen() {
   var load = gimCloud() ? CLOUD.sb().rpc('gim_spy_get').then(function (r) { if (r.error) throw r.error; return r.data; })
@@ -7486,6 +7544,214 @@ Object.assign(A, {
   }
 });
 
+/* ===================== Los dos sobres del cumple =====================
+   Desde las 9:00 del día del cumple todos ven dos sobres lacrados en Inicio. Nadie puede abrirlos
+   hasta que el admin da la señal. El contenido lo escribe el admin (si lo deja vacío, el sobre de la app
+   dice que toca abrir el sobre de verdad). Se guarda en app_config «sobres» (lo escribe el admin directamente). */
+
+var SOBRES_DEF = { at: '2026-10-11T09:00:00+02:00', open: false, items: [{ title: '', text: '' }, { title: '', text: '' }] };
+var SOBRES_NOPE = [
+  'Ni lo intentes: está lacrado.',
+  'Este sobre tiene más seguridad que el Camp Nou en un clásico.',
+  'Paciencia, que así sabe mejor.',
+  'El notario oficial de los sobres dice que no. Y tiene chupete.',
+  'Mirar a contraluz también cuenta como trampa.',
+  'Se aceptan teorías. No se aceptan trampas.',
+  'Cuanto más lo tocas, más tarda. (Es mentira, pero por si acaso.)'
+];
+function sobresState() {
+  var s = S.sobres || {};
+  var it = (s.items && s.items.length ? s.items : SOBRES_DEF.items).slice(0, 2);
+  while (it.length < 2) it.push({ title: '', text: '' });
+  return { at: s.at || SOBRES_DEF.at, open: !!s.open, openedAt: s.openedAt || null, items: it };
+}
+function sobresAdmin() { return !!(me() && me().role === 'admin'); }
+function sobresLive() {
+  var st = sobresState(), t = new Date(st.at).getTime(), end = new Date(st.at).getTime() + 36 * 3600 * 1000;
+  return Date.now() >= t && Date.now() < end;
+}
+function sobresSave(v) {
+  S.sobres = v;
+  var p = (typeof PHOTOS !== 'undefined' && PHOTOS.demo === false && window.CLOUD && CLOUD.sb)
+    ? CLOUD.sb().from('app_config').upsert({ key: 'sobres', value: v }).then(function (r) { if (r.error) throw r.error; })
+    : Promise.resolve();
+  return p;
+}
+
+function sobresCard() {
+  var adm = sobresAdmin(), live = sobresLive();
+  if (!live && !adm) return '';
+  var st = sobresState(), who = esc(bdayName());
+  if (st.open && ui.sobresSeen !== st.openedAt && live) {   /* la señal: todos se enteran a la vez */
+    ui.sobresSeen = st.openedAt;
+    setTimeout(function () { confetti(2600); message('<div class="code-pop">✉️✉️</div><h2>¡Ya se pueden abrir los sobres!</h2><p>Que alguien avise a ' + who + '. Están en Inicio.</p>', 3200); }, 400);
+  }
+  var h = '<section class="card sobres-card' + (st.open ? ' is-open' : '') + '" id="sobres">' +
+    '<div class="card-head"><span class="eyebrow">Cumple de ' + who + '</span><span class="pill ' + (st.open ? 'ok' : 'olive') + '">' + (st.open ? '¡Abiertos!' : 'Alto secreto') + '</span></div>' +
+    '<h3>' + (st.open ? 'Dos sobres. Ya hay permiso.' : 'Dos sobres. Cero pistas.') + '</h3>' +
+    '<p class="small muted">' + (st.open ? 'Toca un sobre para abrirlo.' : 'Nadie los abre hasta que el jefe dé la señal. Se aceptan teorías; trampas, no.') + '</p>' +
+    '<div class="sobres">' + st.items.map(function (x, i) {
+      return '<button class="sobre' + (st.open ? ' ready' : '') + '" data-act="sobreTap" data-i="' + i + '" aria-label="Sobre ' + (i + 1) + (st.open ? ': ábrelo' : ': cerrado') + '">' +
+        '<span class="sobre-back"></span><span class="sobre-flap"></span><span class="sobre-seal">' + (S.trip && S.trip.eggs && S.trip.eggs.bdayAge ? esc(String(S.trip.eggs.bdayAge)) : '★') + '</span>' +
+        '<span class="sobre-n">' + (x.title ? esc(x.title) : 'Sobre ' + (i + 1)) + '</span></button>';
+    }).join('') + '</div>' +
+    (st.open ? '' : '<p class="small sobres-lock">🔒 Cerrados hasta nueva orden</p>');
+  if (adm) {
+    h += '<div class="sobres-adm"><span class="lbl">Solo tú ves esto' + (live ? '' : ' (los demás los verán a las ' + esc(st.at.slice(11, 16)) + ')') + '</span><div class="row wrap">' +
+      '<button class="btn ghost" data-act="sobresEdit">' + icon('edit') + 'Escribir los sobres</button>' +
+      (st.open ? '<button class="btn ghost" data-act="sobresClose">' + icon('undo') + 'Volver a cerrarlos</button>'
+        : '<button class="btn primary" data-act="sobresOpen">' + icon('gift') + '¡Que se abran!</button>') +
+      '</div></div>';
+  }
+  return h + '</section>';
+}
+
+Object.assign(A, {
+  sobreTap: function (el) {
+    var st = sobresState(), i = +el.dataset.i, x = st.items[i] || {};
+    if (!st.open) {
+      el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
+      if (navigator.vibrate) try { navigator.vibrate([20, 40, 20]); } catch (e) {}
+      ui.sobreN = ((ui.sobreN || 0) + 1) % SOBRES_NOPE.length;
+      toast(SOBRES_NOPE[ui.sobreN]);
+      return;
+    }
+    el.classList.add('opening');
+    setTimeout(function () {
+      el.classList.remove('opening');
+      confetti(1800);
+      var body = x.text ? esc(x.text).replace(/\n/g, '<br>') : '¡Ya podéis abrir el sobre de verdad!';
+      openSheet('<div class="sobre-open"><div class="sobre-letter"><span class="eyebrow">' + (x.title ? esc(x.title) : 'Sobre ' + (i + 1)) + '</span><p>' + body + '</p></div></div>');
+    }, 650);
+  },
+  sobresEdit: function () {
+    if (!sobresAdmin()) return;
+    var st = sobresState();
+    openSheet('<h2>Los dos sobres</h2><p class="small muted">Lo que escribas aquí sale al abrir cada sobre. Si lo dejas vacío, el sobre dirá que toca abrir el de verdad.</p>' +
+      st.items.map(function (x, i) {
+        return '<label class="field"><span class="lbl">Sobre ' + (i + 1) + ' · nombre en el sobre</span><input id="sb-t' + i + '" maxlength="40" value="' + esc(x.title || '') + '" placeholder="Sobre ' + (i + 1) + '"></label>' +
+          '<label class="field"><span class="lbl">Sobre ' + (i + 1) + ' · lo que hay dentro</span><textarea id="sb-x' + i + '" rows="4" maxlength="800">' + esc(x.text || '') + '</textarea></label>';
+      }).join('') +
+      '<button class="btn primary block" data-act="sobresSave">' + icon('check') + 'Guardar</button>');
+  },
+  sobresSave: function () {
+    if (!sobresAdmin()) return;
+    var st = sobresState();
+    var v = { at: st.at, open: st.open, openedAt: st.openedAt, items: [0, 1].map(function (i) {
+      return { title: ((document.getElementById('sb-t' + i) || {}).value || '').trim(), text: ((document.getElementById('sb-x' + i) || {}).value || '').trim() };
+    }) };
+    sobresSave(v).then(function () { closeSheet(); render(true); toast('Sobres guardados. Siguen cerrados'); }, function () { toast('No he podido guardarlos'); });
+  },
+  sobresOpen: function (el) {
+    if (!sobresAdmin()) return;
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.innerHTML = '¿Seguro? Toca otra vez'; return; }
+    var st = sobresState();
+    var v = { at: st.at, open: true, openedAt: new Date().toISOString(), items: st.items };
+    sobresSave(v).then(function () { render(true); }, function () { toast('No he podido abrirlos'); });
+  },
+  sobresClose: function () {
+    if (!sobresAdmin()) return;
+    var st = sobresState();
+    sobresSave({ at: st.at, open: false, openedAt: null, items: st.items }).then(function () { render(true); toast('Sobres cerrados otra vez'); }, function () { toast('No he podido cerrarlos'); });
+  }
+});
+
+/* ===================== Pelis con mímica: el móvil hace de papelitos y de reloj =====================
+   Para el juego de mímica (data.mimica): saca una peli al azar que solo ve quien actúa (mantener pulsado),
+   cuenta 1 minuto y lleva el marcador de los dos equipos. El marcador vive en este móvil; el resultado
+   final se apunta como siempre en la ficha del juego. */
+
+var MIMICA_PELIS = [
+  'El Rey León', 'Frozen', 'Toy Story', 'Buscando a Nemo', 'Shrek', 'Harry Potter', 'Star Wars', 'Titanic', 'Jurassic Park',
+  'Spider-Man', 'Mary Poppins', 'Coco', 'Up', 'Ratatouille', 'Los Increíbles', 'Cars', 'Monstruos S.A.', 'Gru, mi villano favorito',
+  'Los Minions', 'Kung Fu Panda', 'Madagascar', 'Ice Age', 'Del revés', 'Encanto', 'Vaiana', 'Aladdín', 'La sirenita',
+  'La bella y la bestia', 'Blancanieves', 'La Cenicienta', 'El libro de la selva', 'Peter Pan', 'Pinocho', 'Dumbo', 'Mulán',
+  'Hércules', 'Tarzán', 'Lilo y Stitch', 'Zootrópolis', 'Enredados', 'Wall-E', 'E.T., el extraterrestre', 'Regreso al futuro',
+  'Indiana Jones', 'Piratas del Caribe', 'Karate Kid', 'Rocky', 'Tiburón', 'Cazafantasmas', 'Solo en casa', 'Grease',
+  'Mamma Mia!', 'Matilda', 'Charlie y la fábrica de chocolate', 'Jumanji', 'Avatar', 'Los Vengadores', 'Batman', 'Superman',
+  'Super Mario Bros.', 'Sonic', 'Barbie', 'Top Gun', 'Misión imposible', 'El mago de Oz', 'Forrest Gump', 'A todo gas',
+  'El señor de los anillos', 'Los Pitufos', 'Paddington', 'Astérix y Obélix', 'Campeones', 'Ocho apellidos vascos',
+  'Las aventuras de Tadeo Jones', 'Mortadelo y Filemón', 'Los Goonies', 'Pokémon', 'Cómo entrenar a tu dragón', 'Bolt',
+  'Chicken Run', 'Wallace y Gromit', 'Hotel Transilvania', 'Los Croods', 'Space Jam', 'El gato con botas', 'Gremlins'
+];
+function mimicaOn(g) { return !!(g && (g.mimica || /m[ií]mica/i.test(g.name || ''))); }
+function mimicaEntryHtml(g) {
+  if (!mimicaOn(g)) return '';
+  return '<section class="card mim-card"><div class="card-head"><h3>El móvil hace de papelitos</h3><span class="pill olive">' + MIMICA_PELIS.length + ' pelis</span></div>' +
+    '<p class="small muted">Quien actúa saca una peli al azar (solo la ve quien mantiene pulsado), pone el minuto en marcha y, si su equipo acierta, punto. El marcador va en este móvil; al acabar, apuntad el resultado en el juego.</p>' +
+    '<button class="btn primary block" data-act="mimOpen">' + icon('play') + 'Empezar la mímica</button></section>';
+}
+var MIM = null;
+function mimInit() {
+  if (MIM) return MIM;
+  var used = {}; try { used = JSON.parse(localStorage.getItem(KEY + '-mim-used')) || {}; } catch (e) {}
+  var sc = [0, 0]; try { sc = JSON.parse(localStorage.getItem(KEY + '-mim-score')) || [0, 0]; } catch (e) {}
+  MIM = { used: used, score: sc, turn: 0, peli: null, t: 0, timer: null };
+  return MIM;
+}
+function mimStore() { try { localStorage.setItem(KEY + '-mim-used', JSON.stringify(MIM.used)); localStorage.setItem(KEY + '-mim-score', JSON.stringify(MIM.score)); } catch (e) {} }
+function mimTeamName(i) {
+  var g = (S.games || []).find(mimicaOn), t = g && g.teams && g.teams[i];
+  return (t && t.name) || ('Equipo ' + (i + 1));
+}
+function mimRender() {
+  var el = document.getElementById('mim'); if (!el || !MIM) return;
+  var running = MIM.t > 0;
+  el.innerHTML =
+    '<div class="mim-score">' + [0, 1].map(function (i) {
+      return '<div class="mim-team' + (MIM.turn === i ? ' on' : '') + '"><small>' + esc(mimTeamName(i)) + '</small><b class="num">' + MIM.score[i] + '</b></div>';
+    }).join('') + '</div>' +
+    '<p class="small muted mim-turn">Turno de <b>' + esc(mimTeamName(MIM.turn)) + '</b></p>' +
+    (MIM.peli
+      ? '<button class="mim-peli" id="mim-peli" aria-label="Mantén pulsado para ver la peli"><span class="mim-hide">Mantén pulsado para verla</span><span class="mim-show">' + esc(MIM.peli) + '</span></button>'
+      : '<button class="btn primary block" data-act="mimDraw">' + icon('shuffle') + 'Sacar peli</button>') +
+    '<div class="mim-clock' + (running && MIM.t <= 10 ? ' hurry' : '') + '"><b class="num" id="mim-t">' + (running ? MIM.t : 60) + '</b><small>segundos</small></div>' +
+    '<div class="row wrap mim-btns">' +
+    (MIM.peli && !running ? '<button class="btn" data-act="mimGo">' + icon('play') + 'Empieza el minuto</button>' : '') +
+    (MIM.peli ? '<button class="btn primary" data-act="mimHit">' + icon('check') + '¡Acertado!</button><button class="btn ghost" data-act="mimMiss">' + icon('x') + 'Fallado</button>' : '') +
+    '</div>' +
+    '<button class="link small" data-act="mimReset">Poner el marcador a cero</button>';
+  var p = document.getElementById('mim-peli');
+  if (p) {
+    var on = function (e) { e.preventDefault(); p.classList.add('show'); }, off = function () { p.classList.remove('show'); };
+    p.addEventListener('pointerdown', on); p.addEventListener('pointerup', off); p.addEventListener('pointerleave', off); p.addEventListener('pointercancel', off);
+    p.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  }
+}
+function mimStop() { if (MIM && MIM.timer) { clearInterval(MIM.timer); MIM.timer = null; } if (MIM) MIM.t = 0; }
+function mimNext(hit) {
+  mimStop();
+  if (hit) { MIM.score[MIM.turn]++; confetti(900); if (navigator.vibrate) try { navigator.vibrate(30); } catch (e) {} }
+  MIM.peli = null; MIM.turn = 1 - MIM.turn; mimStore(); mimRender();
+}
+Object.assign(A, {
+  mimOpen: function () {
+    mimInit();
+    openSheet('<h2>Pelis con mímica</h2><div id="mim" class="mim"></div>');
+    mimRender();
+  },
+  mimDraw: function () {
+    var left = MIMICA_PELIS.filter(function (p) { return !MIM.used[p]; });
+    if (!left.length) { MIM.used = {}; left = MIMICA_PELIS.slice(); toast('Se acabaron las pelis: empezamos otra vez'); }
+    MIM.peli = left[Math.floor(Math.random() * left.length)]; MIM.used[MIM.peli] = 1; mimStore(); mimRender();
+  },
+  mimGo: function () {
+    mimStop(); MIM.t = 60; mimRender();
+    MIM.timer = setInterval(function () {
+      if (!document.getElementById('mim')) { mimStop(); return; }
+      MIM.t--; var n = document.getElementById('mim-t'); if (n) n.textContent = Math.max(0, MIM.t);
+      if (MIM.t === 10) { var c = document.querySelector('.mim-clock'); if (c) c.classList.add('hurry'); }
+      if (MIM.t <= 0) { mimStop(); if (navigator.vibrate) try { navigator.vibrate([300, 100, 300]); } catch (e) {} toast('¡Tiempo! ¿La han acertado?'); mimRender(); }
+    }, 1000);
+  },
+  mimHit: function () { mimNext(true); },
+  mimMiss: function () { mimNext(false); },
+  mimReset: function (el) {
+    if (!el.dataset.armed) { el.dataset.armed = '1'; el.textContent = '¿Seguro? Toca otra vez'; return; }
+    mimStop(); MIM.score = [0, 0]; MIM.turn = 0; MIM.peli = null; mimStore(); mimRender();
+  }
+});
+
 /* ===================== Modo nube (Supabase) =====================
    Solo va en la web pública. El código no lleva datos personales: todo llega de la base de datos tras entrar.
    Estrategia: la app trabaja sobre el mismo objeto S que la demo. Cada save() programa una sincronización que
@@ -7545,7 +7811,7 @@ var CLOUD = (function () {
       tournament: { name: kv.tournamentName || 'Torneo', rounds: rounds.map(function (r) { return r || []; }) },
       weather: old.weather || kv.weather || { days: [], climate: {} },
       attendance: att, dayConfirm: dc, votes: votes, fumataShown: old.fumataShown,
-      comp: kv.comp || { duos: [] }, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
+      comp: kv.comp || { duos: [] }, sobres: kv.sobres || null, finca: kv.finca || null, rooms: kv.rooms || null, shopping: kv.shopping || null,
       ideas: (d.ideas || []).map(function (r) { return { id: r.id, by: r.person_id, text: r.text, at: r.created_at, status: r.status || 'nueva' }; }),
       ideaLikes: (function () { var o = {}; (d.idea_likes || []).forEach(function (r) { (o[r.idea_id] = o[r.idea_id] || []).push(r.person_id); }); return o; })(),
       roomAssign: (function () { var o = {}; (d.room_assignments || []).forEach(function (r) { o[r.person_id] = r.room_id; }); return o; })(),
