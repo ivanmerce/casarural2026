@@ -154,7 +154,7 @@ function gameView(g) {
   if (act) h += '<button class="link small" data-act="tab" data-tab="planes">En el planning: ' + esc(dayOf(act.day).short) + ' ' + act.start + ' · ' + esc(act.title) + ' ' + icon('arrow') + '</button>';
   if (!ed) h += '<p class="small pill pend" style="white-space:normal">Modo lector: ves los resultados en directo. Los apuntan los editores.</p>';
 
-  if (sd.champion && (g.format === 'bracket' || g.format === 'league')) h += '<div class="champ card">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón</span><h3>' + eName(sd.champion) + '</h3></div><button class="btn" data-act="gTrophy" data-id="' + g.id + '">Trofeo</button></div>';
+  if (sd.champion && (g.format === 'bracket' || g.format === 'league' || g.trophy)) h += '<div class="champ card">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón</span><h3>' + eName(sd.champion) + '</h3></div><button class="btn" data-act="gTrophy" data-id="' + g.id + '">Trofeo</button></div>';
 
   if (g.format === 'bracket') h += bracketHtml(g, ed);
   else if (g.format === 'league') h += leagueHtml(g, ed);
@@ -574,7 +574,7 @@ function awardSheet(id) {
 function mObj(g, k) { var p = k.split(':'); return p[0] === 'b' ? g.rounds[+p[1]][+p[2]] : g.matches[+p[1]]; }
 function afterResult(g, before) {
   var sd = G.standings(S, g); save(); render(true);
-  if (sd.champion && sd.champion !== before && (g.format === 'bracket' || g.format === 'league')) setTimeout(function () { gTrophy(sd.champion, g.name); }, 250);
+  if (sd.champion && sd.champion !== before && (g.format === 'bracket' || g.format === 'league' || g.trophy)) setTimeout(function () { gTrophy(sd.champion, g.name); }, 250);
   else if (sd.complete && !before) { confetti(1800); toast('¡' + esc(g.name) + ' terminado! Los puntos ya cuentan'); }
   checkAllGames();
 }
