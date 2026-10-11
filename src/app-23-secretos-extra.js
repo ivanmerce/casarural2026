@@ -14,7 +14,8 @@ function eggsExtraList() { return [
   { k: 'cine', name: 'Modo panorámico', how: 'Girar el móvil en horizontal', hint: 'Esta app también sabe verse en pantalla ancha. Gira la cabeza… o el móvil', more: 'Pon el móvil en horizontal con la app abierta (con el giro automático activado)' },
   { k: 'lupa', name: 'Ojo de lince', how: 'Hacer zoom con dos dedos', hint: 'Hay detalles que solo se ven de cerca. Pellizca la pantalla… al revés', more: 'Separa dos dedos sobre la pantalla para hacer zoom' },
   { k: 'turista', name: 'Turista de la finca', how: 'Pasar por las 8 pestañas de abajo en la misma visita', hint: 'Quien no se mueve no conoce. Pasa por todas las secciones de abajo', more: 'Toca una a una las 8 pestañas de la barra de abajo, de Inicio a Cuentas' },
-  { k: 'abrazo', name: 'Abrazo largo', how: 'Mantener pulsada 2 segundos la foto de alguien', hint: 'Hay fotos que se tocan una vez. Y hay fotos a las que se abraza', more: 'Mantén el dedo 2 segundos sobre la foto de cualquiera de la familia' }
+  { k: 'abrazo', name: 'Abrazo largo', how: 'Mantener pulsada 2 segundos la foto de alguien', hint: 'Hay fotos que se tocan una vez. Y hay fotos a las que se abraza', more: 'Mantén el dedo 2 segundos sobre la foto de cualquiera de la familia' },
+  { k: 'fisgon', name: 'Pesado y fisgón', how: 'Insistir con los sobres lacrados', hint: 'La curiosidad mató al gato. A ti solo te dará un secreto: insiste con lo que no es tuyo', more: 'Abre los sobres lacrados del Inicio una y otra vez (4 veces), o intenta romper el lacre sin tener la llave' }
 ]; }
 var EGG_STYLE_EXTRA = {
   montserrat: { emo: '⛰️', fx: ['emoji:⛰️ 🌄 📸', 'stars'], quip: 'Montaña a la vista, barbacoa encendida y nadie con ganas de subirla. Turismo rural en estado puro.' },
@@ -26,6 +27,7 @@ var EGG_STYLE_EXTRA = {
   cine:       { emo: '🍿', fx: ['emoji:🍿 🎬 📽️', 'stars'], quip: 'Lo mejor del cine en casa rural: aquí nadie te manda callar.' },
   lupa:       { emo: '🦅', fx: ['emoji:🔎 🦅 👀', 'stars'], quip: 'Si lo ves todo tan grande, igual necesitas las gafas del abuelo.' },
   turista:    { emo: '🧭', fx: ['emoji:🧭 🗺️ 📍', 'fireworks'], quip: 'Turista oficial: solo te faltan la gorra y la riñonera.' },
+  fisgon:     { emo: '🕵️', fx: ['emoji:🕵️ ✉️ 👀', 'stars'], quip: 'Pesado, fisgón y cotilla: triplete. Los sobres siguen cerrados, pero tú ya tienes un secreto más.' },
   abrazo:     { emo: '🤗', fx: ['rise:🤗 💞 ✨', 'cannons'], quip: 'Abrazo enviado. Devolución garantizada.' }
 };
 var _buildEggs0 = buildEggs;
@@ -112,3 +114,22 @@ document.addEventListener('pointermove', function (e) {
 }, { passive: true });
 ['pointerup', 'pointercancel'].forEach(function (ev) { document.addEventListener(ev, hugStop, { passive: true }); });
 window.addEventListener('scroll', hugStop, { passive: true });
+
+/* ---------- v0.7.62 · Pesado y fisgón: insistir con los sobres lacrados ---------- */
+var FISGON_TXT = 'Eres un pesado y un fisgón. Los sobres siguen lacrados y la llave no la tienes tú. Cuando el jefe dé la señal, te enteras como todos. Mientras tanto, toma: un secreto por cotilla.';
+if (A.sbOpen) {
+  var _sbOpen0 = A.sbOpen;
+  A.sbOpen = function (el, e) {
+    ui._sbPeek = (ui._sbPeek || 0) + 1;
+    if (ui._sbPeek >= 4 && eggsReady() && !hasEgg('fisgon')) { extraEgg('fisgon', FISGON_TXT); return; }   /* esta vez, en vez del sobre, el secreto */
+    return _sbOpen0(el, e);
+  };
+}
+if (typeof sbNope === 'function') {
+  var _sbNope0 = sbNope;
+  sbNope = function (l) {
+    _sbNope0(l);
+    ui._sbNope = (ui._sbNope || 0) + 1;
+    if (ui._sbNope >= 3 && eggsReady() && !hasEgg('fisgon')) setTimeout(function () { sobreClose(); setTimeout(function () { extraEgg('fisgon', FISGON_TXT); }, 350); }, 900);
+  };
+}
