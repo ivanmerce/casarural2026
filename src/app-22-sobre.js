@@ -119,27 +119,50 @@ function sbNet() {
 }
 
 /* ---------- Tarjeta en Inicio ---------- */
+/* v0.7.61: los sobres, uno al lado del otro en una sola tarjeta. Quien tiene la llave ve qué es cada uno
+   y, antes de la hora buena (share_after), abrirlos es un ensayo solo para él: no se guarda nada. */
 function sobreCard() {
   if (!sbCloud()) return '';
   sbLoad();
-  return SB.list.map(function (l) {
-    var to = person(l.to_person); if (!to) return '';
-    var k = nameOf(l.keeper, 'quien tiene la llave'), mine = sbIsKeeper(l), forMe = l.to_person === ui.me;
-    var title, txt, btn, pill = '';
-    if (mine) {
-      title = 'El sobre de ' + to.name;
-      var vis = sbVisNow(l), sched = !vis && l.visible_from;
-      txt = vis ? 'Todos ven el sobre cerrado. La llave solo la tienes tú.' : sched ? 'Secreto hasta el ' + sbWhen(l.visible_from) + '. Desde entonces lo verán todos, cerrado.' : 'Ahora mismo solo lo ves tú. Nadie más sabe que existe.';
-      if (l.share_after && !l.shared) txt += ' Si lo abres a partir del ' + sbWhen(l.share_after) + ', se guardará para ' + to.name + '.';
-      btn = 'Ver el sobre'; pill = '<span class="pill ' + (vis ? 'ok' : '') + '">' + (vis ? 'A la vista' : sched ? 'Programado' : 'Secreto') + '</span>';
-    } else if (forMe && l.shared) { title = 'Tu carta'; txt = 'Ya es tuya. Ábrela y reléela cuando quieras.'; btn = 'Abrir mi carta'; }
-    else if (forMe) { title = 'Hay un sobre para ti'; txt = 'Lacrado. La llave la tiene ' + k + ', así que toca esperar.'; btn = 'Ver el sobre'; }
-    else { title = 'Un sobre lacrado para ' + to.name; txt = 'Solo ' + k + ' puede abrirlo. Mirarlo sí se puede.'; btn = 'Ver el sobre'; }
-    return '<section class="card sb-card"><div class="sb-card-in">' + sbMiniEnv(sbMark(l)) +
-      '<div class="grow"><div class="card-head"><h3>' + esc(title) + '</h3>' + pill + '</div><p class="small muted">' + esc(txt) + '</p>' +
-      (mine && l.opened_at ? '<p class="small muted">Abierto de verdad el ' + esc(sbWhen(l.opened_at)) + '.</p>' : '') + '</div></div>' +
-      '<button class="btn primary block" data-act="sbOpen" data-id="' + esc(l.id) + '">' + icon('mail') + esc(btn) + '</button></section>';
+  var ls = SB.list.filter(function (l) { return person(l.to_person); });
+  if (!ls.length) return '';
+  var n = ls.length, mineAll = ls.every(sbIsKeeper), forMe = ls.every(function (l) { return l.to_person === ui.me; });
+  var toName = nameOf(ls[0].to_person), k = nameOf(ls[0].keeper, 'quien tiene la llave');
+  var words = n === 1 ? 'un sobre' : n === 2 ? 'dos sobres' : n + ' sobres';
+  var title, txt, pill = '';
+  if (mineAll) {
+    var vis = ls.some(sbVisNow), vf = ls.map(function (l) { return l.visible_from; }).filter(Boolean).sort()[0];
+    var sa = ls.map(function (l) { return l.share_after; }).filter(Boolean).sort()[0];
+    title = n === 1 ? 'Tu sobre para ' + toName : 'Tus ' + words + ' para ' + toName;
+    txt = vis ? 'Todos los ven cerrados. La llave solo la tienes tú.' : vf ? 'Ahora solo los ves tú. Desde el ' + sbWhen(vf) + ' los verá todo el mundo, cerrados.' : 'Ahora mismo solo los ves tú. Nadie más sabe que existen.';
+    if (sa && !sbAfter(sa)) txt += ' Si los abres antes del ' + sbWhen(sa) + ', es un ensayo solo para ti: no se guarda nada.';
+    else if (sa) txt += ' Si los abres ahora, la carta se guarda para ' + toName + '.';
+    pill = '<span class="pill ' + (vis ? 'ok' : '') + '">' + (vis ? 'A la vista' : vf ? 'Programados' : 'Secretos') + '</span>';
+  } else if (forMe) {
+    title = n === 1 ? 'Hay un sobre para ti' : 'Hay ' + words + ' para ti';
+    txt = ls.some(function (l) { return l.shared; }) ? 'Ya son tuyos: ábrelos y reléelos cuando quieras.' : 'Lacrados. La llave la tiene ' + k + ', así que toca esperar.';
+  } else {
+    title = n === 1 ? 'Un sobre lacrado' : words.charAt(0).toUpperCase() + words.slice(1) + ' lacrados';
+    txt = 'Para ' + toName + '. Solo ' + k + ' puede abrirlos. Mirarlos sí se puede.';
+  }
+  var envs = ls.map(function (l, i) {
+    var mine = sbIsKeeper(l), sub;
+    if (mine) sub = (l.share_after && !sbIsReal(l)) ? 'Ensayo · solo tú' : l.opened_at ? 'Abierto el ' + sbWhen(l.opened_at) : 'Abrir de verdad';
+    else if (l.to_person === ui.me && l.shared) sub = 'Tu carta · ábrela';
+    else sub = 'Lacrado';
+    return '<button type="button" class="sb-env-btn' + (mine ? ' mine' : '') + '" data-act="sbOpen" data-id="' + esc(l.id) + '" style="--i:' + i + '">' +
+      '<span class="sb-env-pic">' + sbMiniEnv(sbMark(l)) + '</span><b>Sobre ' + (i + 1) + '</b>' +
+      (mine ? '<small class="sbe-t" data-sbt="' + esc(l.id) + '">' + esc((SB.bodies[l.id] && SB.bodies[l.id].title) || '') + '</small>' : '') +
+      '<small class="sbe-s">' + esc(sub) + '</small></button>';
   }).join('');
+  if (ls.some(sbIsKeeper)) setTimeout(function () {
+    ls.forEach(function (l) {
+      if (!sbIsKeeper(l) || SB.bodies[l.id]) return;
+      sbBody(l).then(function (b) { document.querySelectorAll('[data-sbt="' + l.id + '"]').forEach(function (e) { e.textContent = b.title || b.kicker || ''; }); }, function () {});
+    });
+  }, 0);
+  return '<section class="card sb-card sb-card-duo"><div class="card-head"><h3>' + esc(title) + '</h3>' + pill + '</div>' +
+    '<p class="small muted">' + esc(txt) + '</p><div class="sb-duo">' + envs + '</div></section>';
 }
 
 /* ---------- El escenario ---------- */

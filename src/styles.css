@@ -1862,3 +1862,20 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 /* v0.7.60 · Versión nueva disponible */
 .ver-bar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 95; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 0; font: inherit; font-size: .95rem; color: var(--on-accent); background: var(--accent); box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 40%, transparent); animation: avisoIn .4s ease both; cursor: pointer; }
 .ver-bar span { font-size: 1.15rem; }
+
+/* v0.7.61 · Los sobres, uno al lado del otro */
+.sb-card-duo .card-head { align-items: center; }
+.sb-duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 12px; }
+.sb-env-btn { display: grid; justify-items: center; align-content: start; gap: 4px; padding: 14px 10px 12px; min-height: 44px; border-radius: 18px; cursor: pointer; font: inherit; color: var(--ink); text-align: center;
+  background: color-mix(in srgb, var(--glass-strong) 85%, #F2E8D8); border: 1px solid color-mix(in srgb, #B0122C 18%, var(--glass-line)); box-shadow: var(--shadow); transition: transform .15s ease, box-shadow .2s ease; }
+.sb-env-btn:hover { box-shadow: 0 10px 26px color-mix(in srgb, #B0122C 20%, transparent); }
+.sb-env-btn:active { transform: scale(.97); }
+.sb-env-pic { display: block; width: min(124px, 86%); margin-bottom: 4px; }
+.sb-env-pic .sb-mini { display: block; width: 100%; height: auto; transform: rotate(-4deg); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .18)); transition: transform .25s ease; }
+.sb-env-btn:nth-child(even) .sb-env-pic .sb-mini { transform: rotate(4deg); }
+.sb-env-btn:hover .sb-env-pic .sb-mini { transform: rotate(0) translateY(-2px); }
+.sb-env-btn b { font-size: 1.02rem; }
+.sb-env-btn .sbe-t { font-weight: 700; color: var(--ink); line-height: 1.25; }
+.sb-env-btn .sbe-t:empty { display: none; }
+.sb-env-btn .sbe-s { color: var(--muted); font-size: .82rem; }
+.sb-env-btn.mine .sbe-s { color: #B0122C; font-weight: 700; }
