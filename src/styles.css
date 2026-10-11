@@ -1653,3 +1653,7 @@ body.gala-on .fx { z-index: 94; }
 [data-egg] { touch-action: manipulation; }
 .egg-holding { animation: eggHold 1s linear both; }
 @keyframes eggHold { from { filter: none; } to { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 70%, transparent)) brightness(1.15); transform: scale(1.06); } }
+
+/* v0.7.55 · Sobres: vista de revisión del admin */
+.sobre-review { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--gold, #E8B64A) 16%, transparent); margin: 0 0 6px; }
+.sobre-review .ico { flex: none; width: 18px; height: 18px; margin-top: 1px; }

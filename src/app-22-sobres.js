@@ -51,7 +51,8 @@ function sobresCard() {
     }).join('') + '</div>' +
     (st.open ? '' : '<p class="small sobres-lock">🔒 Cerrados hasta nueva orden</p>');
   if (adm) {
-    h += '<div class="sobres-adm"><span class="lbl">Solo tú ves esto' + (live ? '' : ' (los demás los verán a las ' + esc(st.at.slice(11, 16)) + ')') + '</span><div class="row wrap">' +
+    h += '<div class="sobres-adm"><span class="lbl">Solo tú ves esto' + (live ? '' : ' (los demás los verán a las ' + esc(st.at.slice(11, 16)) + ')') + '. Si tocas un sobre cerrado, lo abres en modo revisión: nadie más lo ve.</span><div class="row wrap">' +
+      '<button class="btn ghost" data-act="sobresReview">' + icon('eye') + 'Revisar por dentro</button>' +
       '<button class="btn ghost" data-act="sobresEdit">' + icon('edit') + 'Escribir los sobres</button>' +
       (st.open ? '<button class="btn ghost" data-act="sobresClose">' + icon('undo') + 'Volver a cerrarlos</button>'
         : '<button class="btn primary" data-act="sobresOpen">' + icon('gift') + '¡Que se abran!</button>') +
@@ -60,9 +61,22 @@ function sobresCard() {
   return h + '</section>';
 }
 
+function sobrePreview(i) {
+  var st = sobresState(), x = st.items[i] || {};
+  var body = x.text ? esc(x.text).replace(/\n/g, '<br>') : '¡Ya podéis abrir el sobre de verdad!';
+  openSheet('<p class="small sobre-review">' + icon('eye') + '<span><b>Vista de revisión: solo la ves tú.</b> Para los demás, el sobre sigue cerrado.</span></p>' +
+    '<div class="sobre-open"><div class="sobre-letter"><span class="eyebrow">' + (x.title ? esc(x.title) : 'Sobre ' + (i + 1)) + '</span><p>' + body + '</p></div></div>' +
+    (x.text ? '' : '<p class="small muted">Este sobre aún no tiene texto: al abrirlo, la familia verá «¡Ya podéis abrir el sobre de verdad!».</p>') +
+    '<div class="row wrap">' + (st.items.length > 1 ? '<button class="btn ghost" data-act="sobrePrev" data-i="' + (1 - i) + '">Ver el sobre ' + (2 - i) + '</button>' : '') +
+    '<button class="btn primary" data-act="sobresEdit">' + icon('edit') + 'Cambiar los sobres</button></div>');
+}
 Object.assign(A, {
+  sobrePrev: function (el) { if (sobresAdmin()) sobrePreview(+el.dataset.i); },
+  sobresReview: function () { if (sobresAdmin()) sobrePreview(0); },
   sobreTap: function (el) {
     var st = sobresState(), i = +el.dataset.i, x = st.items[i] || {};
+    /* v0.7.55: el admin puede abrirlos por detrás para revisarlos (solo él lo ve; para los demás siguen cerrados) */
+    if (!st.open && sobresAdmin()) { sobrePreview(i); return; }
     if (!st.open) {
       el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
       if (navigator.vibrate) try { navigator.vibrate([20, 40, 20]); } catch (e) {}
