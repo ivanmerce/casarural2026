@@ -1646,3 +1646,10 @@ body.gala-on .fx { z-index: 94; }
 @keyframes focoOn { 0% { filter: brightness(.3); transform: scale(.94); } 40% { filter: brightness(1.6); } 100% { filter: none; transform: none; } }
 .sec-note.frozen { color: var(--ink); border-color: color-mix(in srgb, var(--gold, #E8B64A) 70%, transparent); background: color-mix(in srgb, var(--gold, #E8B64A) 10%, transparent); }
 @media (prefers-reduced-motion: reduce) { .gb-reel-in, .gn-tick span, .gb-tv, .gb-card.shuffle, .gpic { animation: none !important; } }
+
+/* v0.7.53 · Fotos y zonas secretas: sin menú de «copiar imagen» al mantener pulsado */
+.av, .av img, [data-egg], [data-egg] img { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+.av img { pointer-events: none; }
+[data-egg] { touch-action: manipulation; }
+.egg-holding { animation: eggHold 1s linear both; }
+@keyframes eggHold { from { filter: none; } to { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 70%, transparent)) brightness(1.15); transform: scale(1.06); } }

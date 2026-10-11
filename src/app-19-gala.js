@@ -118,11 +118,11 @@ function galaMinutes(slides) {
 /* ---------- v0.7.52: cada entrega, un formato distinto ---------- */
 var GALA_MODES = ['sobres', 'tragaperras', 'noticias', 'cartas', 'foco'];
 var GALA_MODE = {
-  sobres: { ask: 'Abrimos los sobres…', drum: null, gap: .5 },
-  tragaperras: { ask: '¡Tragaperras de estatuillas!', drum: 'Tirando de la palanca… que no salgan tres limones…', gap: .75 },
-  noticias: { ask: 'Informativos Casa Rural · en directo', drum: 'Conectamos con nuestra unidad móvil… (es un móvil, literalmente)', gap: .65 },
-  cartas: { ask: 'Cartas boca abajo…', drum: 'Barajamos… sin trampas… casi sin trampas…', gap: .85 },
-  foco: { ask: 'Foco, por favor…', drum: 'Que se apaguen las luces. Bueno, las de la barbacoa no.', gap: 1 }
+  sobres: { ask: 'Abrimos los sobres…', drum: null, gap: .5, btn: 'Abrir los sobres' },
+  tragaperras: { ask: '¡Tragaperras de estatuillas!', drum: 'Tirando de la palanca… que no salgan tres limones…', gap: .75, btn: '¡Tirar de la palanca!' },
+  noticias: { ask: 'Informativos Casa Rural · en directo', drum: 'Conectamos con nuestra unidad móvil… (es un móvil, literalmente)', gap: .65, btn: 'Dar paso a la noticia' },
+  cartas: { ask: 'Cartas boca abajo…', drum: 'Barajamos… sin trampas… casi sin trampas…', gap: .85, btn: 'Dar la vuelta' },
+  foco: { ask: 'Foco, por favor…', drum: 'Que se apaguen las luces. Bueno, las de la barbacoa no.', gap: 1, btn: '¡Luces!' }
 };
 var GALA_TICKER = ['Se busca al fantasma de la finca: última vez visto detrás de un seto', 'El péndulo salchichero deja secuelas en varios cuellos',
   'La tortilla con cebolla gana por la mínima (fuentes no confirmadas)', 'Los globos de agua piden asilo político', 'Récord de ping-pong: 0 mesas rotas',
@@ -164,7 +164,7 @@ function galaPicsStart() {
   try { PHOTOS.ensure(ps.map(function (p) { return p.thumb; })); } catch (e) {}
   var spots = [[2, 6, 'l'], [2, 8, 'r'], [3, 70, 'l'], [3, 66, 'r'], [-2, 38, 'l'], [-2, 42, 'r']], i = 0, used = {};
   function add() {
-    var s = gala && gala.slides[gala.i]; if (!s || s.t === 'photos' || s.t === 'ad' || document.hidden) return;
+    var s = gala && gala.slides[gala.i]; if (!s || s.t === 'photos' || s.t === 'ad') return;
     if (box.children.length >= 4) return;
     var p = null; for (var n = 0; n < ps.length && !p; n++) { var c = ps[(i + n) % ps.length]; if (PHOTOS.url(c.thumb) && !used[c.id]) p = c; }
     i++; if (!p) { used = {}; return; }
@@ -229,7 +229,7 @@ function galaRender() {
   el.querySelector('.gala-count').textContent = (gala.i + 1) + ' / ' + gala.slides.length;
   el.querySelector('[data-act=galaPrev]').disabled = gala.i === 0;
   var waiting = (s.t === 'burst' && rv !== true) || (s.t === 'podium' && (typeof rv !== 'number' || rv < s.pods.length));
-  el.querySelector('.gala-ctl [data-act=galaNext]').innerHTML = waiting ? (s.t === 'podium' ? 'Desvelar' : 'Abrir los sobres') : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
+  el.querySelector('.gala-ctl [data-act=galaNext]').innerHTML = waiting ? (s.t === 'podium' ? 'Desvelar' : ((GALA_MODE[s.mode] || GALA_MODE.sobres).btn)) : gala.i === gala.slides.length - 1 ? 'Cerrar' : 'Siguiente ' + icon('arrow');
   el.querySelector('[data-act=galaAuto]').classList.toggle('on', !!gala.auto);
   el.querySelector('[data-act=galaMusic]').classList.toggle('on', !!gala.music);
   galaFxMood(s);

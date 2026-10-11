@@ -27,15 +27,15 @@ function buildEggs() {
     { k: 'corazon', name: 'Corazón de oro', how: 'Dar un corazón a una foto', hint: 'Obras son amores… y corazones en el álbum', more: 'Abre una foto del álbum y toca el corazón' },
     /* Toques escondidos */
     { k: 'omnes', name: 'Toc, toc', how: 'Llamar a la puerta de la casita (tocar el logo)', hint: 'Llamad y se os abrirá. Bueno, más o menos', more: 'En Inicio, toca la casita de arriba a la izquierda o el título grande' },
-    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo)' },
+    { k: 'bday', name: 'Cumpleañero', how: 'Tocar 5 veces a ' + c + ' (o abrir la app el día de la fiesta)', hint: 'Alguien cumple años. Dale la lata: no una vez, varias', more: 'Toca su foto 5 veces seguidas (en Familia, por ejemplo), o deja el dedo encima un par de segundos' },
     { k: 'baby', name: 'Modo ' + b, how: 'Tocar 3 veces a ' + b + ' o «Menú ' + b + '»', hint: 'El más pequeño de la casa esconde algo. A la tercera va la vencida', more: 'En Comidas, toca 3 veces «Menú ' + b + '» (o su foto)' },
     { k: 'pop', name: 'Explotaburbujas', how: 'Explotar 15 burbujas en modo ' + b, hint: 'Ploc, ploc, ploc… y así hasta quince', more: 'Primero activa el modo ' + b + ' y luego a por las burbujas, rápido' },
-    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo)' },
+    { k: 'abuelo', name: 'Letra de abuelo', how: 'Tocar 3 veces a ' + (g || 'los abuelos'), hint: 'Más sabe el diablo por viejo… y lee mejor con letra grande', more: 'Toca 3 veces la foto de un abuelo (en Familia, por ejemplo), o deja el dedo encima un par de segundos' },
     { k: 'sol', name: 'Invocar al sol', how: 'Tocar 5 veces el título del tiempo', hint: 'Al mal tiempo, buena cara… y cinco toques', more: 'En Inicio, toca 5 veces el título «El tiempo en la finca»' },
     { k: 'disco', name: 'Modo fiesta', how: 'Tocar 3 veces la cuenta atrás', hint: 'La cuenta atrás también sabe bailar. A la tercera…', more: 'En Inicio, toca 3 veces los números de la cuenta atrás (en la finca, el «¡Ya estamos en la finca!»)' },
     { k: 'himno', name: 'Himno de la casa', how: 'Tocar 3 veces al líder en lo alto del podio', hint: 'El número 1 merece música, aunque el trono esté vacío', more: 'Juegos → Ranking: toca 3 veces el podio (el primero, o el hueco)' },
     { k: 'abumetro', name: 'Abuelómetro al rojo', how: 'Tocar 3 veces el Abuelómetro', hint: 'Hay un medidor de abuelos. Se calienta si lo tocas', more: 'Cuentas → El rincón de los abuelos → toca 3 veces el Abuelómetro' },
-    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos)' },
+    { k: 'cazaesp', name: 'Cazaespías', how: 'Tocar 3 veces al Espía', hint: 'Hay alguien que no es quien dice ser. Pínchale (con cariño)', more: 'Toca 3 veces seguidas la foto del Espía (arriba en conectados, o en el ranking de secretos), o deja el dedo encima un par de segundos' },
     /* Palabras mágicas */
     { k: 'papa', name: 'Habemus papam', how: 'Buscar «habemus» en la lista de la compra', hint: 'Lo que se dice cuando sale humo blanco. En latín y en el buscador', more: 'En Compra, escribe en el buscador una palabra de cónclave' },
     { k: 'salud', name: '¡Salud!', how: 'Buscar «salud» en la compra (o pedirse la bebida)', hint: 'Lo que se dice al brindar. Agua que no has de beber…', more: 'En el buscador de Compra, lo que se dice al brindar' },
@@ -292,3 +292,26 @@ function secretsHomeBanner() {
   if (ms <= 0 || ms > SECRETS_WARN_MIN * 60000) return '';
   return '<button class="card sec-banner" data-act="secrets"><span class="aw-ico">' + icon('clock') + '</span><span class="grow"><b>El ranking de secretos se cierra a las ' + closeHour() + '</b><small>Llevas ' + foundCount() + '/' + EGGS.length + '. ¡Último empujón!</small></span>' + icon('arrow') + '</button>';
 }
+
+/* ----- v0.7.53: dejar el dedo encima también vale (y sin el menú de «copiar imagen» del móvil) -----
+   En los secretos de «tocar varias veces» (fotos de personas, logo, tiempo, cuenta atrás, podio…), mantener pulsado
+   ~1 segundo cuenta como todos los toques. Además se anula el menú contextual del navegador sobre fotos y zonas secretas. */
+(function () {
+  var holdT = null, sx = 0, sy = 0, holdEl = null;
+  function cancel() { clearTimeout(holdT); holdT = null; if (holdEl) holdEl.classList.remove('egg-holding'); holdEl = null; }
+  document.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest && e.target.closest('[data-egg]'); if (!el || !S || typeof EGG_TAPS === 'undefined' || !EGG_TAPS[el.dataset.egg]) return;
+    cancel(); holdEl = el; sx = e.clientX; sy = e.clientY; el.classList.add('egg-holding');
+    holdT = setTimeout(function () {
+      var k = el.dataset.egg, n = EGG_TAPS[k] || 1; cancel();
+      if (navigator.vibrate) try { navigator.vibrate([20, 30, 40]); } catch (x) {}
+      for (var i = 0; i < n; i++) { if (eggTap(k, el)) break; }
+      el._heldAt = Date.now();
+    }, 1000);
+  }, { passive: true });
+  document.addEventListener('pointermove', function (e) { if (holdT && (Math.abs(e.clientX - sx) > 12 || Math.abs(e.clientY - sy) > 12)) cancel(); }, { passive: true });
+  ['pointerup', 'pointercancel', 'scroll'].forEach(function (ev) { document.addEventListener(ev, cancel, { passive: true, capture: true }); });
+  /* el «clic» que llega justo después de mantener pulsado no suma otro toque */
+  document.addEventListener('click', function (e) { var el = e.target.closest && e.target.closest('[data-egg]'); if (el && el._heldAt && Date.now() - el._heldAt < 900) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+  document.addEventListener('contextmenu', function (e) { if (e.target.closest && e.target.closest('.av, [data-egg], .gb-av, .pod-av, .gbd-av')) e.preventDefault(); });
+})();
