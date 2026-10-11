@@ -18,14 +18,14 @@ var PHOTOS = {
 };
 
 function photoList() { return (S.photos || []).slice().sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); }); }
-/* v0.7.65: en el álbum, los días van del más reciente al más antiguo, pero dentro de cada día las fotos van en orden
-   cronológico (como se vivió el día). El visor pasa las fotos en ese mismo orden. */
+/* v0.7.66: en el álbum, lo más nuevo siempre arriba: los días del más reciente al más antiguo y, dentro de cada día,
+   de la última foto a la primera. El visor pasa las fotos en ese mismo orden. */
 function dayKey(p) { return p.day || 'x'; }
 function albumOrder(ps) {
   return ps.slice().sort(function (a, b) {
     var da = dayKey(a), db = dayKey(b);
     if (da !== db) return da === 'x' ? 1 : db === 'x' ? -1 : db.localeCompare(da);
-    return (a.at || '').localeCompare(b.at || '');
+    return (b.at || '').localeCompare(a.at || '');
   });
 }
 function likesOf(ph) { return (S.photoLikes && S.photoLikes[ph.id]) || []; }
