@@ -1596,3 +1596,53 @@ body.gala-on .fx { z-index: 94; }
 @keyframes gbdCrown { from { transform: translateX(-50%) rotate(-10deg); } to { transform: translateX(-50%) rotate(8deg); } }
 @media (max-width: 380px) { .gala-stats { gap: 8px; } .gs { padding: 10px 6px; } .gs-emo { font-size: 1.6rem; } }
 @media (prefers-reduced-motion: reduce) { .gs, .gbd-num, .gbd-av, .gbd-crown, .gs-n.pop { animation: none; } }
+
+/* v0.7.52 · Gala: formatos de entrega, fotos que se cuelan y ranking congelado */
+.gala > .gala-pics { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.gpic { position: absolute; width: clamp(84px, 21vw, 210px); aspect-ratio: 1; object-fit: cover; border: 6px solid #FFF8EC; border-bottom-width: 18px; border-radius: 4px; box-shadow: 0 14px 30px rgba(0,0,0,.45); transform: rotate(var(--r, 0deg)); opacity: .92; animation: gpicIn .8s cubic-bezier(.2,1.4,.4,1) both, gpicDrift 7s ease-in-out both; }
+.gpic.out { animation: gpicOut .9s ease both; }
+@keyframes gpicIn { from { opacity: 0; transform: rotate(calc(var(--r) * 3)) scale(.4); } to { opacity: .92; transform: rotate(var(--r)) scale(1); } }
+@keyframes gpicDrift { from { translate: 0 0; } to { translate: 0 -14px; } }
+@keyframes gpicOut { to { opacity: 0; transform: rotate(var(--r)) scale(.85) translateY(20px); } }
+.gala.present .gpic { width: clamp(120px, 16vw, 260px); }
+/* tragaperras */
+.gb-reel { display: block; width: min(200px, 90%); height: 34px; overflow: hidden; border-radius: 10px; background: #0E0907; border: 2px solid #E8B64A; box-shadow: inset 0 8px 10px rgba(0,0,0,.6), inset 0 -8px 10px rgba(0,0,0,.6); }
+.gb-reel-in { display: flex; flex-direction: column; animation: reelSpin 1.6s linear infinite; animation-delay: calc(var(--k) * -.37s); }
+.gb-reel-in i { display: block; height: 34px; line-height: 34px; font-style: normal; font-weight: 800; font-size: .82rem; color: #FFE7A8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
+@keyframes reelSpin { from { transform: translateY(0); } to { transform: translateY(calc(-100% + 34px)); } }
+.gala-burst.waiting .gb-reel-in { animation-duration: .35s; }
+.gala-burst.m-tragaperras .gb.on { animation: slotStop .9s cubic-bezier(.2,1.8,.4,1) both; animation-delay: var(--d); }
+@keyframes slotStop { 0% { transform: translateY(-40px) scaleY(1.2); opacity: 0; filter: blur(4px); } 60% { transform: translateY(8px) scaleY(.95); opacity: 1; filter: none; } 100% { transform: none; } }
+/* noticias */
+.gn-bar { position: absolute; left: 0; right: 0; top: 54px; display: flex; align-items: stretch; background: #B8122C; color: #fff; font-size: .8rem; overflow: hidden; z-index: 2; }
+.gn-bar b { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fff; color: #B8122C; letter-spacing: .06em; }
+.gn-dot { width: 8px; height: 8px; border-radius: 50%; background: #B8122C; animation: gnDot 1s infinite; }
+@keyframes gnDot { 50% { opacity: .2; } }
+.gn-tick { flex: 1; overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
+.gn-tick span { display: inline-block; padding-left: 100%; animation: gnTick 22s linear infinite; }
+@keyframes gnTick { to { transform: translateX(-100%); } }
+.gala[data-mode="noticias"] .gala-in { padding-top: 96px; }
+.gb-tv { display: grid; place-items: center; width: min(180px, 86%); height: 44px; border-radius: 8px; background: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 2px, rgba(0,0,0,.2) 2px 4px), #2a2422; animation: tvStatic .2s steps(3) infinite; }
+.gb-tv i { font-style: normal; font-weight: 800; font-size: .72rem; letter-spacing: .1em; color: #fff; background: #B8122C; padding: 2px 8px; border-radius: 4px; }
+.gb-tv.live i { animation: gnDot .5s infinite; }
+@keyframes tvStatic { 50% { background-position: 0 2px; filter: brightness(1.3); } }
+.gb-lower { display: inline-block; background: #B8122C; color: #fff; font-weight: 800; font-size: .7rem; letter-spacing: .12em; padding: 2px 10px; border-radius: 3px; }
+.gala-burst.m-noticias .gb.on { animation: newsIn .7s cubic-bezier(.2,1.2,.4,1) both; animation-delay: var(--d); border-left: 4px solid #B8122C; }
+@keyframes newsIn { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* cartas */
+.gb-card { display: grid; place-items: center; width: 70px; height: 96px; border-radius: 10px; border: 3px solid #FFF8EC; background: repeating-linear-gradient(45deg, #B8122C 0 8px, #8E0E22 8px 16px); box-shadow: 0 8px 18px rgba(0,0,0,.4); }
+.gb-card i { font-style: normal; font-family: var(--font-display); font-weight: 900; font-size: 2rem; color: #FFE7A8; }
+.gb-card.shuffle { animation: cardShuffle .35s ease-in-out infinite alternate; }
+@keyframes cardShuffle { from { transform: translateX(-8px) rotate(-6deg); } to { transform: translateX(8px) rotate(6deg); } }
+.gala-burst.m-cartas .gb.on { animation: cardFlip .9s cubic-bezier(.3,1.2,.4,1) both; animation-delay: var(--d); }
+@keyframes cardFlip { 0% { transform: perspective(700px) rotateY(180deg); opacity: .2; } 100% { transform: perspective(700px) rotateY(0); opacity: 1; } }
+/* foco */
+.gala-burst.m-foco .gb:not(.on) .gb-av .av { filter: grayscale(1) brightness(.45); }
+.gala-burst.m-foco .gb:not(.on) { background: rgba(0,0,0,.25); }
+.gala-burst.m-foco.waiting .gb { animation: focoSweep 1.2s ease-in-out infinite; animation-delay: calc(var(--d) * .6); }
+@keyframes focoSweep { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 40px rgba(255,240,200,.35); } }
+.gb-q { font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; color: rgba(255,255,255,.35); }
+.gala-burst.m-foco .gb.on { animation: focoOn .9s ease both; animation-delay: var(--d); background: radial-gradient(circle at 50% 0%, rgba(255,240,200,.35), rgba(255,255,255,.04) 70%); }
+@keyframes focoOn { 0% { filter: brightness(.3); transform: scale(.94); } 40% { filter: brightness(1.6); } 100% { filter: none; transform: none; } }
+.sec-note.frozen { color: var(--ink); border-color: color-mix(in srgb, var(--gold, #E8B64A) 70%, transparent); background: color-mix(in srgb, var(--gold, #E8B64A) 10%, transparent); }
+@media (prefers-reduced-motion: reduce) { .gb-reel-in, .gn-tick span, .gb-tv, .gb-card.shuffle, .gpic { animation: none !important; } }

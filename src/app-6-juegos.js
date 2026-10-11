@@ -265,7 +265,7 @@ function rankingView() {
     return '<div class="empty"><span data-egg="podio" class="podio-empty">' + icon('podium') + '</span><b>El podio está vacío</b><span>En cuanto termine el primer juego aparecen aquí los puntos. Se admiten apuestas.</span></div>' + (nx ? '<button class="btn block" data-act="jsub" data-v="juegos">Ver los juegos</button>' : '');
   }
   var top = [2, 1, 3].map(function (p) { return rank.filter(function (r) { return r.pos === p && r.pts > 0; }); });
-  var h = '<section class="podium-wrap"><div class="podium">' + top.map(function (list, i) {
+  var h = (galaFrozen() ? '<p class="sec-note frozen">' + icon('trophy') + '<span>Ranking cerrado en la gala (' + esc(galaHour()) + '). Lo que se juegue ahora ya no suma.</span></p>' : '') + '<section class="podium-wrap"><div class="podium">' + top.map(function (list, i) {
     var p = [2, 1, 3][i]; if (!list.length) return '<div class="pod p' + p + ' empty"><div class="block">' + p + '</div></div>';
     return '<div class="pod p' + p + '"' + (p === 1 ? ' data-egg="podio"' : '') + '>' + (p === 1 ? '<span class="crown">' + icon('trophy') + '</span>' : '') + '<span class="pod-av pod-avs">' + list.slice(0, 3).map(function (r) { return eAv(r.id, 'lg'); }).join('') + '</span><b class="pod-name">' + list.map(function (r) { return eName(r.id); }).join('<br>') + '</b><span class="pod-pts num">' + list[0].pts + ' pts</span><div class="block">' + p + '</div></div>';
   }).join('') + '</div></section>';
@@ -285,8 +285,11 @@ function premiosView() {
   var prized = S.people.filter(function (p) { return t[p.id].length; }), none = S.people.filter(function (p) { return !t[p.id].length && (p.attends || G.presentOn(S, G.entrantOf(S, p.id))); });
   var h = '<section class="card gala-card"><span class="eyebrow">La noche de los premios</span><h3>Gala de premios</h3><p class="small">' + withW.length + ' premios con ganador · ' + prized.length + ' de ' + S.people.length + ' personas premiadas.</p>' +
     (galaOpenNow() ? '<button class="btn primary block big-btn" data-act="galaStart" data-mode="gala"' + (withW.length ? '' : ' disabled') + '>' + icon('play') + 'Empezar la gala</button>'
-      : '<p class="small gala-date">' + icon('clock') + '<span>Se estrena el <b>' + esc(galaWhen()) + '</b>, con los premios ya decididos. Hasta entonces, sin spoilers.</span></p><button class="btn primary block big-btn" data-act="galaStart" data-mode="trailer">' + icon('play') + 'Ver el tráiler</button>') +
+      : '<p class="small gala-date">' + icon('clock') + '<span>Se estrena <b>' + esc(galaWhen()) + '</b>. En ese momento se cierran el ranking y los premios. Hasta entonces, sin spoilers.</span></p><button class="btn primary block big-btn" data-act="galaStart" data-mode="trailer">' + icon('play') + 'Ver el tráiler</button>') +
     (none.length ? '<p class="small muted">Aún sin premio: ' + none.map(function (p) { return esc(p.name); }).join(', ') + '. ' + (can('edit') ? 'Crea un premio especial para que nadie se quede sin estatuilla.' : '') + '</p>' : '<p class="small">Todo el mundo tiene al menos un premio. Así se hace.</p>') +
+    (can('access') ? (galaOpenNow()
+      ? '<p class="small gala-date">' + icon('check') + '<span>Gala estrenada a las <b>' + esc(galaHour()) + '</b>. Ranking y premios congelados.</span></p><button class="link small" data-act="galaReopen">Deshacer el estreno (solo admin)</button>'
+      : '<button class="btn primary block" data-act="galaPremiere">' + icon('trophy') + '¡Estrenar la gala ahora!</button><p class="small muted">Solo tú lo ves. Al tocarlo (dos veces) se congelan el ranking y los premios tal y como estén, y a todos les salta el aviso. Lo que se juegue después ya no cuenta.</p>') : '') +
     (can('access') ? '<button class="btn block" data-act="galaStart" data-mode="sim">' + icon('shuffle') + 'Gala de prueba: premios al azar (solo admin)</button><p class="small muted">Reparte los premios al azar para ver cómo queda la gala. No guarda nada ni cambia ningún premio. Cada vez sale distinta.</p>' : '') +
     (can('edit') ? '<button class="btn block" data-act="aNew">' + icon('plus') + 'Premio especial</button>' : '') + '</section>';
   ['podio', 'juegos', 'casa', 'publico', 'extra'].forEach(function (gk) {
@@ -326,8 +329,12 @@ function pickList(act, id, selected, kind) {
 var gala = null;
 var GALA_AT = '2026-10-11T22:00:00+02:00';
 function galaAtIso() { return (S.trip && S.trip.galaAt) || GALA_AT; }
-function galaOpenNow() { return Date.now() >= new Date(galaAtIso()).getTime(); }
-function galaWhen() { var k = galaAtIso().slice(0, 10), d = dayOf(k); return (d && d.long ? d.long.toLowerCase() : 'domingo') + ' a las ' + galaAtIso().slice(11, 16); }
+/* v0.7.52: la gala se estrena cuando el admin lo decide (y en ese momento se congelan ranking y premios) */
+function galaState() { return S.galaState || null; }
+function galaOpenNow() { var g = galaState(); return !!(g && g.open); }
+function galaWhen() { return 'esta noche, cuando el jefe dé la señal'; }
+function galaFrozen() { var g = galaState(); return g && g.open && g.awards ? g : null; }
+function galaHour() { var g = galaState(), d = g && g.at ? new Date(g.at) : null; return d && !isNaN(d) ? d.toTimeString().slice(0, 5) : ''; }
 function pickOne(arr, seed) { var h = 0, s = String(seed || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return arr[Math.abs(h) % arr.length]; }
 
 /* Lo que dice el presentador antes de abrir el sobre */
