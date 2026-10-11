@@ -159,9 +159,19 @@ var GALA_SFX = { sobres: 'ding', tragaperras: 'coins', noticias: 'news', cartas:
 
 /* ---------- v0.7.52: las fotos del álbum se cuelan por todas las diapositivas ---------- */
 var GPICS = null;
+/* v0.7.68: la gala tira siempre del álbum en directo y da prioridad a lo último que se ha subido:
+   la mitad de las fotos salen de las 30 más recientes y el resto, de todo el finde (sin repetir) */
+function galaPickPhotos(n) {
+  var all = typeof photoList === 'function' ? photoList() : [];   /* ya viene de la más nueva a la más antigua */
+  var fresh = shuffled(all.slice(0, 30)), old = shuffled(all.slice(30));
+  var half = Math.ceil(n / 2), out = fresh.slice(0, half);
+  out = out.concat(old.slice(0, n - out.length));
+  if (out.length < n) out = out.concat(fresh.slice(half, half + n - out.length));
+  return shuffled(out);
+}
 function galaPicsStart() {
   var el = document.getElementById('gala'); if (!el || GPICS || typeof photoList !== 'function') return;
-  var ps = shuffled(photoList()).slice(0, 40); if (!ps.length) return;
+  var ps = galaPickPhotos(40); if (!ps.length) return;
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var box = document.createElement('div'); box.className = 'gala-pics'; box.setAttribute('aria-hidden', 'true'); el.insertBefore(box, el.firstChild.nextSibling);
   try { PHOTOS.ensure(ps.map(function (p) { return p.thumb; })); } catch (e) {}
@@ -229,7 +239,7 @@ function galaRender() {
       return '<div class="gp gp-' + id + (on ? ' on' : '') + '"><div class="gp-who">' + (on ? winnersHtml(a, 'lg') + '<small class="gp-pts">' + esc(a.why || '') + '</small>' : '<span class="gp-q">?</span>') + '</div><div class="gp-block"><b>' + order[id] + '</b></div></div>';
     }).join('') + '</div>' + (step >= s.pods.length ? '<p class="gala-quip">' + esc(GALA_QUIP.oro) + '</p><button class="btn gala-speech" data-act="galaSpeech">🎤 Discurso del campeón (30 s)</button>' : '<p class="gala-drum' + (gala.podWait ? ' rolling' : '') + '">' + ['Tercer puesto…', 'Segundo puesto…', 'Y el campeón del finde es…'][step] + '</p>');
   } else if (s.t === 'photos') {
-    var ps = photoList().slice().sort(function () { return Math.random() - .5; }).slice(0, 12);
+    var ps = s.pics || (s.pics = galaPickPhotos(12));   /* se eligen una vez por diapositiva: no bailan al recargar */
     inner = '<span class="eyebrow">Mientras el jurado delibera…</span><h1 class="gala-title">Momentos del finde</h1><div class="gala-photos">' + ps.map(function (p, k) { var u = PHOTOS.url(p.thumb) || PHOTOS.url(p.path); return u ? '<img src="' + u + '" alt="" style="--d:' + (k * .2) + 's;--r:' + ((k % 2 ? 1 : -1) * (2 + k % 4)) + 'deg">' : ''; }).join('') + '</div>';
     if (typeof PHOTOS !== 'undefined' && PHOTOS.ensure) PHOTOS.ensure(ps.map(function (p) { return p.thumb; })).then(function (ch) { if (ch && gala && gala.slides[gala.i] === s) galaRender(); });
   } else if (s.t === 'final') {
