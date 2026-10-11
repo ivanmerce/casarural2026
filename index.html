@@ -1553,7 +1553,8 @@ body.gala-on .fx { z-index: 94; }
 
 /* v0.7.49 · Los dos sobres */
 .sobres-card { position: relative; overflow: hidden; }
-.sobres { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 6px 0 2px; }
+.sobres { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 6px auto 2px; width: 100%; max-width: 440px; }
+.sobres-adm .lbl { font-size: .8rem; color: var(--muted); font-weight: 600; }
 .sobre { position: relative; aspect-ratio: 3 / 2; border: 0; padding: 0; border-radius: 10px; cursor: pointer; font: inherit; color: inherit;
   background: linear-gradient(160deg, #f4ead7, #e6d6b8); box-shadow: 0 8px 22px rgba(0,0,0,.18), inset 0 0 0 1px rgba(0,0,0,.06); overflow: hidden; transition: transform .25s ease; }
 .sobre-back { position: absolute; inset: 0; background: linear-gradient(to top right, transparent 49.5%, rgba(0,0,0,.06) 50%, transparent 50.5%), linear-gradient(to top left, transparent 49.5%, rgba(0,0,0,.06) 50%, transparent 50.5%); }
