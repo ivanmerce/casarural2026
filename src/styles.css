@@ -1858,3 +1858,7 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 @keyframes avisoTick { 0%, 100% { transform: rotate(0); } 8% { transform: rotate(-7deg); } 16% { transform: rotate(6deg); } 24% { transform: rotate(0); } }
 @keyframes avisoFlash { 0%, 100% { box-shadow: var(--shadow); } 40% { box-shadow: 0 0 0 4px color-mix(in srgb, #B0122C 45%, transparent), var(--shadow); } }
 @media (prefers-reduced-motion: reduce) { .aviso-box, .aviso-envs span, .aviso-clock, .sb-card.aviso-flash { animation: none; } }
+
+/* v0.7.60 · Versión nueva disponible */
+.ver-bar { position: fixed; left: 50%; top: calc(10px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 95; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 0; font: inherit; font-size: .95rem; color: var(--on-accent); background: var(--accent); box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 40%, transparent); animation: avisoIn .4s ease both; cursor: pointer; }
+.ver-bar span { font-size: 1.15rem; }
