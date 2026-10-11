@@ -1908,7 +1908,7 @@ body.sobre-on .toast { z-index: 100; bottom: calc(24px + env(safe-area-inset-bot
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
-var BUILD_ID = "20261011123744";
+var BUILD_ID = "20261011155551";
 /* =====================================================================
    Casa Rural · Lógica pura (sin DOM). Testeable con node: tests/logic.test.js
    ===================================================================== */
@@ -4666,7 +4666,7 @@ function gameView(g) {
   if (act) h += '<button class="link small" data-act="tab" data-tab="planes">En el planning: ' + esc(dayOf(act.day).short) + ' ' + act.start + ' · ' + esc(act.title) + ' ' + icon('arrow') + '</button>';
   if (!ed) h += '<p class="small pill pend" style="white-space:normal">Modo lector: ves los resultados en directo. Los apuntan los editores.</p>';
 
-  if (sd.champion && (g.format === 'bracket' || g.format === 'league')) h += '<div class="champ card">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón</span><h3>' + eName(sd.champion) + '</h3></div><button class="btn" data-act="gTrophy" data-id="' + g.id + '">Trofeo</button></div>';
+  if (sd.champion && (g.format === 'bracket' || g.format === 'league' || g.trophy)) h += '<div class="champ card">' + icon('trophy') + '<div class="grow"><span class="eyebrow">Campeón</span><h3>' + eName(sd.champion) + '</h3></div><button class="btn" data-act="gTrophy" data-id="' + g.id + '">Trofeo</button></div>';
 
   if (g.format === 'bracket') h += bracketHtml(g, ed);
   else if (g.format === 'league') h += leagueHtml(g, ed);
@@ -5086,7 +5086,7 @@ function awardSheet(id) {
 function mObj(g, k) { var p = k.split(':'); return p[0] === 'b' ? g.rounds[+p[1]][+p[2]] : g.matches[+p[1]]; }
 function afterResult(g, before) {
   var sd = G.standings(S, g); save(); render(true);
-  if (sd.champion && sd.champion !== before && (g.format === 'bracket' || g.format === 'league')) setTimeout(function () { gTrophy(sd.champion, g.name); }, 250);
+  if (sd.champion && sd.champion !== before && (g.format === 'bracket' || g.format === 'league' || g.trophy)) setTimeout(function () { gTrophy(sd.champion, g.name); }, 250);
   else if (sd.complete && !before) { confetti(1800); toast('¡' + esc(g.name) + ' terminado! Los puntos ya cuentan'); }
   checkAllGames();
 }
@@ -8136,7 +8136,18 @@ function sbAfter(ts) { return !!ts && Date.now() >= Date.parse(ts); }
 function sbVisNow(l) { return !!(l && (l.visible || sbAfter(l.visible_from))); }
 /* antes de share_after, abrirlo es un ensayo: no cuenta como primera vez ni se guarda para el destinatario */
 function sbIsReal(l) { return !l.share_after || sbAfter(l.share_after); }
-function sbCanRead(l) { return !!(l && (l.keeper === ui.me || (l.shared && l.to_person === ui.me))); }
+function sbCanRead(l) { return !!(l && (l.keeper === ui.me || (l.shared && l.to_person === ui.me) || sbIsPublic(l))); }
+/* v0.7.67: cuando quien tiene la llave lo abre de verdad, la carta pasa a ser de toda la familia (se publica en app_config) */
+function sbIsPublic(l) { return !!(l && l.opened_at && l.shared && sbIsReal(l)); }
+function sbPubKey(l) { return 'carta:' + l.id; }
+function sbPublish(l, b) {
+  if (!sbCloud() || !sbIsKeeper(l) || !b) return Promise.resolve();
+  return CLOUD.sb().from('app_config').upsert({ key: sbPubKey(l), value: { body: b, at: new Date().toISOString() } }).then(function () {}, function () {});
+}
+function sbUnpublish(l) {
+  if (!sbCloud() || !sbIsKeeper(l)) return Promise.resolve();
+  return CLOUD.sb().from('app_config').delete().eq('key', sbPubKey(l)).then(function () {}, function () {});
+}
 function sbAv(pid, cls) { return av(pid, cls).replace(/ data-egg="[^"]*"/, ''); }   /* sin secretos aquí dentro: el sobre manda */
 function sbVibe(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
 function sbLater(fn, ms) { SB.timers.push(setTimeout(fn, ms)); }
@@ -8175,8 +8186,13 @@ function sbLoad(force) {
 function sbBody(l) {
   if (SB.bodies[l.id]) return Promise.resolve(SB.bodies[l.id]);
   return CLOUD.sb().from('letter_bodies').select('body').eq('letter_id', l.id).maybeSingle().then(function (r) {
-    if (r.error || !r.data) throw r.error || new Error('sin carta');
-    SB.bodies[l.id] = r.data.body; return r.data.body;
+    if (!r.error && r.data) { SB.bodies[l.id] = r.data.body; return r.data.body; }
+    if (!sbIsPublic(l)) throw r.error || new Error('sin carta');
+    /* la familia la lee de la copia que se publicó al abrirla */
+    return CLOUD.sb().from('app_config').select('value').eq('key', sbPubKey(l)).maybeSingle().then(function (q) {
+      if (q.error || !q.data || !q.data.value || !q.data.value.body) throw q.error || new Error('sin carta');
+      SB.bodies[l.id] = q.data.value.body; return q.data.value.body;
+    });
   });
 }
 function sbSet(l, patch) {
@@ -8253,11 +8269,14 @@ function sobreCard() {
     title = n === 1 ? 'Tu sobre para ' + toName : 'Tus ' + words + ' para ' + toName;
     txt = vis ? 'Todos los ven cerrados. La llave solo la tienes tú.' : vf ? 'Ahora solo los ves tú. Desde el ' + sbWhen(vf) + ' los verá todo el mundo, cerrados.' : 'Ahora mismo solo los ves tú. Nadie más sabe que existen.';
     if (sa && !sbAfter(sa)) txt += ' Si los abres antes del ' + sbWhen(sa) + ', es un ensayo solo para ti: no se guarda nada.';
-    else if (sa) txt += ' Si los abres ahora, la carta se guarda para ' + toName + '.';
+    else if (sa) txt += ls.every(sbIsPublic) ? ' Ya están abiertos: ' + toName + ' y toda la familia pueden leerlos.' : ' Si los abres ahora, la carta se guarda para ' + toName + ' y toda la familia podrá leerla.';
     pill = '<span class="pill ' + (vis ? 'ok' : '') + '">' + (vis ? 'A la vista' : vf ? 'Programados' : 'Secretos') + '</span>';
   } else if (forMe) {
     title = n === 1 ? 'Hay un sobre para ti' : 'Hay ' + words + ' para ti';
     txt = ls.some(function (l) { return l.shared; }) ? 'Ya son tuyos: ábrelos y reléelos cuando quieras.' : 'Lacrados. La llave la tiene ' + k + ', así que toca esperar.';
+  } else if (ls.some(sbIsPublic)) {
+    title = n === 1 ? 'El sobre ya está abierto' : (ls.every(sbIsPublic) ? 'Los ' + words + ' ya están abiertos' : 'Ya hay un sobre abierto');
+    txt = 'Para ' + toName + '. ' + k + ' ya ha roto el lacre: ahora los puede leer toda la familia.';
   } else {
     title = n === 1 ? 'Un sobre lacrado' : words.charAt(0).toUpperCase() + words.slice(1) + ' lacrados';
     txt = 'Para ' + toName + '. Solo ' + k + ' puede abrirlos. Mirarlos sí se puede.';
@@ -8266,6 +8285,7 @@ function sobreCard() {
     var mine = sbIsKeeper(l), sub;
     if (mine) sub = (l.share_after && !sbIsReal(l)) ? 'Ensayo · solo tú' : l.opened_at ? 'Abierto el ' + sbWhen(l.opened_at) : 'Abrir de verdad';
     else if (l.to_person === ui.me && l.shared) sub = 'Tu carta · ábrela';
+    else if (sbIsPublic(l)) sub = 'Abierto · léelo';
     else sub = 'Lacrado';
     return '<button type="button" class="sb-env-btn' + (mine ? ' mine' : '') + '" data-act="sbOpen" data-id="' + esc(l.id) + '" style="--i:' + i + '">' +
       '<span class="sb-env-pic">' + sbMiniEnv(sbMark(l)) + '</span><b>Sobre ' + (i + 1) + '</b>' +
@@ -8415,6 +8435,7 @@ function sbBreak(l) {
       var up = {};
       if (!l.opened_at) up.opened_at = new Date().toISOString();
       if (l.share_after && !l.shared) up.shared = true;   /* el momento de verdad: la carta pasa a ser suya */
+      sbPublish(l, b);   /* v0.7.67: y de toda la familia */
       if (Object.keys(up).length) sbSet(l, up).then(sbPanelSync, function () {});
     }
     sbLater(function () { env.classList.add('open'); sbRustle(.35); }, calm ? 80 : 380);
@@ -8580,11 +8601,31 @@ Object.assign(A, {
     var l = SB.open && sbLetter(SB.open.id); if (!l || !sbIsKeeper(l)) return;
     var who = nameOf(l.to_person);
     sbSet(l, { shared: !l.shared }).then(function () {
+      if (l.shared && l.opened_at) sbBody(l).then(function (b) { sbPublish(l, b); }, function () {}); else if (!l.shared) sbUnpublish(l);
       sbPanelSync(); toast(l.shared ? 'Guardada: ' + esc(who) + ' ya puede abrirla cuando quiera' : 'Retirada: vuelve a ser solo tuya');
     }, function () { sbPanelSync(); toast('No se ha podido cambiar. Revisa la conexión'); });
     sbPanelSync();
   }
 });
+
+/* v0.7.67 · Aviso a la familia (una vez por persona) cuando se abren los sobres de verdad */
+var SB_PUB_BORN = Date.now();
+setInterval(function () {
+  try {
+    if (typeof avShow !== 'function' || typeof avBlocked !== 'function' || avBlocked() || Date.now() - SB_PUB_BORN < 5000) return;
+    var ls = SB.list.filter(function (l) { return person(l.to_person) && sbIsPublic(l) && !sbIsKeeper(l); });
+    if (!ls.length || avSeen('sobres-abiertos')) return;
+    avMark('sobres-abiertos');
+    var n = ls.length, toName = nameOf(ls[0].to_person), k = nameOf(ls[0].keeper, 'quien tenía la llave'), forMe = ls[0].to_person === ui.me;
+    avShow({
+      cls: 'is-sobres', title: forMe ? (n === 1 ? 'Tu carta ya es tuya' : 'Tus cartas ya son tuyas') : (n === 1 ? '¡Se ha abierto el sobre!' : '¡Se han abierto los sobres!'),
+      text: forMe ? 'Se ha roto el lacre. Ábrelas y reléelas tantas veces como quieras.' : k + ' ha roto el lacre. Las cartas para ' + esc(toName) + ' ya se pueden leer. Pañuelos al lado, por si acaso.',
+      go: icon('mail') + (n === 1 ? 'Leerla' : 'Leerlas'), ok: 'Luego',
+      top: '<div class="aviso-envs" aria-hidden="true">' + ls.slice(0, 3).map(function (l, i) { return '<span style="--i:' + i + '">' + sbMiniEnv(sbMark(l)) + '</span>'; }).join('') + '</div>',
+      onGo: function () { sobreOpen(ls[0].id); }
+    });
+  } catch (e) {}
+}, 2500);
 
 /* ===================== 10 secretos nuevos (v0.7.54) =====================
    Se suman a la lista sin tocar los de siempre: palabras mágicas (buscador de Compra o buzón de ideas),
