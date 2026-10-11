@@ -263,6 +263,15 @@ var G = (function () {
       auto: function (S) { var cp = catPoints(S, 'escondite'); if (!cp) return null; var w = topBy(cp.rows, 'pts'); return w.length ? { winners: ids(w), why: 'Nadie le encontraba' } : null; } },
     { id: 'raqueta', group: 'juegos', icon: 'paddle', name: 'Raqueta de Oro', desc: 'Campeón de la eliminatoria de ping-pong.',
       auto: function (S) { var g = (S.games || []).find(function (x) { return x.format === 'bracket' && /ping/i.test(x.name) && isDone(S, x); }); var ch = g && standings(S, g).champion; return ch ? { winners: [ch], why: g.name } : null; } },
+    /* v0.7.50: los juegos del domingo también dan estatuilla */
+    { id: 'copa', group: 'juegos', icon: 'ball', name: 'Campeones de la Copa del Cumple', desc: 'El equipo que gana el partido de fútbol del cumple.',
+      auto: function (S) { return gameTop(S, /f[uú]tbol/i); } },
+    { id: 'salchicha', group: 'juegos', icon: 'flag', name: 'Salchicha de Oro', desc: 'Primero en llevarse la salchicha a la boca, sin manos, en el péndulo salchichero.',
+      auto: function (S) { return gameTop(S, /p[ée]ndulo|salchich/i); } },
+    { id: 'impermeables', group: 'juegos', icon: 'umbrella', name: 'Los Impermeables', desc: 'El equipo que gana la ruleta de globos de agua.',
+      auto: function (S) { return gameTop(S, /ruleta/i); } },
+    { id: 'oscar', group: 'juegos', icon: 'star', name: 'Óscar a la Mejor Mímica', desc: 'El equipo que más pelis acierta en la mímica.',
+      auto: function (S) { return gameTop(S, /m[ií]mica/i); } },
     { id: 'fenix', group: 'juegos', icon: 'flame', name: 'Ave Fénix', desc: 'La gran remontada: quien más puestos sube en el ranking desde su peor momento.',
       auto: function (S) { var cb = comeback(S); return cb ? { winners: [cb.id], why: 'Del ' + cb.from + '.º al ' + cb.to + '.º' } : null; } },
     { id: 'invencibles', group: 'juegos', icon: 'shield', name: 'Los Invencibles', desc: 'El equipo con más victorias en los juegos por equipos (hockey, fútbol…).',
@@ -332,6 +341,12 @@ var G = (function () {
   ];
   var GROUPS = { podio: 'El podio', juegos: 'Premios de los juegos', casa: 'Premios de la casa', publico: 'Premios del público', extra: 'Premios especiales' };
   function ids(list) { return list.map(function (x) { return x.id; }); }
+  /* ganadores (1.º) de un juego ya terminado, buscado por nombre */
+  function gameTop(S, re) {
+    var g = (S.games || []).find(function (x) { return re.test(x.name || '') && isDone(S, x); }); if (!g) return null;
+    var w = standings(S, g).rows.filter(function (r) { return r.pos === 1; }).map(function (r) { return r.id; });
+    return w.length ? { winners: w, why: g.name } : null;
+  }
   function list(games) { return games.map(function (g) { return g.name; }).join(', '); }
 
   function voteResult(S, awardId) {

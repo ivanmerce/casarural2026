@@ -1,9 +1,11 @@
 /* ===================== Gala de premios v3 =====================
    Corta y para todos: UNA estatuilla por persona (la suya, la más suya), en ráfagas de 3, y el podio al final en una
    sola pantalla. Fiesta de fondo (pompas, confeti, cohetes), un efecto distinto en cada desvelado, varias melodías propias
-   (sintetizadas, sin derechos), avance automático y modo presentación a pantalla completa. Unos 3 minutos. */
+   (sintetizadas, sin derechos), avance automático y modo presentación a pantalla completa. Unos 3 minutos.
+   v0.7.50: arranca con «el finde en cifras» (contadores con datos reales), dos pausas publicitarias nuevas, premios de los
+   juegos del domingo y el «momento cumple» con la melodía de cumpleaños antes del podio. */
 
-var GALA_TIME = { intro: 6, burst0: 2.6, burst1: 7.5, podStep0: 2.2, podStep1: 3.2, podEnd: 7, ad: 5, teaser: 6, photos: 8, final: 9, credits: 16 };
+var GALA_TIME = { cifras: 8, bday: 11, intro: 6, burst0: 2.6, burst1: 7.5, podStep0: 2.2, podStep1: 3.2, podEnd: 7, ad: 5, teaser: 6, photos: 8, final: 9, credits: 16 };
 var GALA_PODIUM = { oro: 1, plata: 1, bronce: 1 };
 
 /* ---------- La estatuilla de cada uno ----------
@@ -49,16 +51,63 @@ function galaMention(pid, k) { var m = GALA_MENTIONS[k % GALA_MENTIONS.length]; 
 function galaSlides(trailer, awardsList) {
   if (trailer) return [{ t: 'intro', trailer: true }, { t: 'ad', ad: GALA_ADS[0] }, { t: 'teaser' }, { t: 'final', trailer: true }];
   var list = (awardsList || G.awards(S)).filter(function (a) { return a.winners.length; });
-  var picks = galaPicks(list), slides = [{ t: 'intro', n: picks.length }];
+  var picks = galaPicks(list), slides = [{ t: 'intro', n: picks.length }], ads = shuffled(GALA_ADS);
+  /* v0.7.50: arranque con el finde en cifras (datos reales de la app) */
+  var st = galaStats(); if (st.length >= 2) slides.push({ t: 'cifras', stats: st, song: 1 });
   /* ráfagas de 3 (si sobra uno solo, se va con la anterior) */
   var groups = []; for (var i = 0; i < picks.length; i += 3) groups.push(picks.slice(i, i + 3));
   if (groups.length > 1 && groups[groups.length - 1].length === 1) groups[groups.length - 2] = groups[groups.length - 2].concat(groups.pop());
-  groups.forEach(function (g, k) { slides.push({ t: 'burst', items: g, song: k % 2 ? 2 : 1 }); if (k === 1) slides.push({ t: 'ad', ad: rnd(GALA_ADS) }); });
+  groups.forEach(function (g, k) { slides.push({ t: 'burst', items: g, song: k % 2 ? 2 : 1 }); if (k === 1 || (k === 3 && groups.length > 5)) slides.push({ t: 'ad', ad: ads[k === 1 ? 0 : 1] }); });
+  /* el cumpleañero cierra las ráfagas y, justo después, su momento: todos de pie */
+  var e = S.trip.eggs || {}; if (e.bday && person(e.bday) && !gala_noBday(list)) slides.push({ t: 'bday', pid: e.bday, age: e.bdayAge || '' });
   if (typeof photoList === 'function' && photoList().length >= 3) slides.push({ t: 'photos' });
   var pod = ['bronce', 'plata', 'oro'].map(function (id) { return list.find(function (a) { return a.id === id; }); }).filter(Boolean);
   if (pod.length) slides.push({ t: 'podium', pods: pod, song: 3 });
   slides.push({ t: 'final', picks: picks }, { t: 'credits' });
   return slides;
+}
+function gala_noBday(list) { var d = (S.awardData || {}).cumple; return !!(d && d.hidden); }
+/* El finde en cifras: solo lo que dice la app, nada inventado */
+function galaStats() {
+  var out = [], stt = S.stats || {};
+  var eggs = 0; Object.keys(stt).forEach(function (k) { eggs += (stt[k] || {}).eggs || 0; });
+  var games = typeof G.realDone === 'function' ? G.realDone(S).length : 0;
+  var spent = 0; try { spent = L.ledger(S, false).total; } catch (x) {}
+  var hearts = 0; Object.keys(S.votes || {}).forEach(function (a) { hearts += (S.votes[a] || []).length; });
+  var photos = (S.photos || []).length;
+  if (games) out.push({ e: '🏆', n: games, t: games === 1 ? 'juego jugado. Cero lesiones graves' : 'juegos jugados. Cero lesiones graves' });
+  if (eggs) out.push({ e: '🔎', n: eggs, t: 'secretos descubiertos entre todos. Nadie se ha chivado (dicen)' });
+  if (spent) out.push({ e: '🛒', n: Math.round(spent), t: '€ en la compra… y aún sobra comida', m: 1 });
+  if (photos) out.push({ e: '📸', n: photos, t: photos === 1 ? 'foto en el álbum. Una. Paparazzis, ¿dónde estabais?' : 'fotos en el álbum. Ninguna borrosa (mentira)' });
+  else if (hearts) out.push({ e: '❤️', n: hearts, t: 'corazones en los planes' });
+  return out.slice(0, 4);
+}
+function galaCount() {
+  document.querySelectorAll('#gala .gs-n').forEach(function (n, k) {
+    var to = +n.dataset.to || 0, t0 = null, dur = 1400, delay = 350 * k;
+    setTimeout(function () {
+      (function f(t) { if (!t0) t0 = t; var p = Math.min(1, (t - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - p, 3))); n.textContent = v.toLocaleString('es-ES'); if (p < 1 && document.body.contains(n)) requestAnimationFrame(f); else { n.classList.add('pop'); try { emojiFx([n.dataset.e || '✨'], 'rise', 0, 8); } catch (x) {} } })(performance.now());
+    }, delay + 250);
+  });
+}
+/* Cumpleaños feliz (melodía popular, de dominio público) sintetizado; la letra la pone la familia */
+function galaBdaySong() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume();
+    var N = [[67, .75], [67, .25], [69, 1], [67, 1], [72, 1], [71, 2], [67, .75], [67, .25], [69, 1], [67, 1], [74, 1], [72, 2],
+      [67, .75], [67, .25], [79, 1], [76, 1], [72, 1], [71, 1], [69, 2], [77, .75], [77, .25], [76, 1], [72, 1], [74, 1], [72, 2.5]];
+    var beat = .36, t = actx.currentTime + .15;
+    N.forEach(function (x) {
+      var f = 440 * Math.pow(2, (x[0] - 69) / 12), d = x[1] * beat;
+      [[1, 'triangle', .16], [2, 'sine', .05]].forEach(function (h) {
+        var o = actx.createOscillator(), g = actx.createGain(); o.type = h[1]; o.frequency.value = f * h[0];
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(h[2], t + .02); g.gain.exponentialRampToValueAtTime(0.0001, t + d * .95);
+        o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d);
+      });
+      t += d;
+    });
+    return (t - actx.currentTime) * 1000;
+  } catch (e) { return 0; }
 }
 function galaMinutes(slides) {
   var s = 0; slides.forEach(function (x) { s += x.t === 'burst' ? GALA_TIME.burst0 + GALA_TIME.burst1 + 1.6 : x.t === 'podium' ? x.pods.length * (GALA_TIME.podStep0 + GALA_TIME.podStep1) + GALA_TIME.podEnd : GALA_TIME[x.t] || 5; });
@@ -77,6 +126,12 @@ function galaRender() {
     (s.trailer ? '<p>La gran noche llega el <b>' + esc(galaWhen()) + '</b>. Esto es solo el tráiler: sin spoilers, que nos conocemos.</p>'
       : '<p>Una estatuilla para cada uno. Nadie se va de vacío.</p><p class="small">' + s.n + ' estatuillas + el podio · unos ' + galaMinutes(gala.slides) + ' minutos · cero modestia</p>' +
         '<div class="gala-start"><button class="btn primary big-btn" data-act="galaGo" data-auto="1">' + icon('play') + 'Empezar (avanza sola)</button><button class="btn" data-act="galaGo">Paso a paso</button></div>');
+  else if (s.t === 'cifras') inner = '<span class="eyebrow">Previously on…</span><h1 class="gala-title">El finde en cifras</h1><div class="gala-stats">' + s.stats.map(function (x, k) {
+      return '<div class="gs" style="--d:' + (k * .35) + 's"><span class="gs-emo">' + x.e + '</span><b class="gs-n num" data-to="' + x.n + '" data-e="' + x.e + '">0</b><small>' + esc(x.t) + '</small></div>';
+    }).join('') + '</div>';
+  else if (s.t === 'bday') inner = '<div class="gala-bday"><span class="eyebrow">Momento cumple</span><div class="gbd-num" aria-hidden="true">' + esc(String(s.age || '')) + '</div>' +
+      '<span class="gbd-av">' + av(s.pid, 'xl') + '<i class="gbd-crown" aria-hidden="true">👑</i></span><h1 class="gala-title">¡Felicidades, ' + pname(s.pid) + '!</h1>' +
+      '<p>Todos de pie. La música la pone la app; la letra, vosotros. Y que suene más alto que en el fútbol.</p></div>';
   else if (s.t === 'ad') inner = '<span class="gala-ad-tag">Pausa publicitaria</span><h1 class="gala-title ad">' + esc(s.ad[0]) + '</h1><p>' + esc(s.ad[1]) + '</p>';
   else if (s.t === 'teaser') inner = '<span class="gala-ico">' + icon('trophy') + '</span><h1 class="gala-title">Una estatuilla para cada uno</h1><p>Sobres, redoble, discursos de 30 segundos y un podio que va a dar que hablar.</p>';
   else if (s.t === 'burst') {
@@ -109,6 +164,7 @@ function galaRender() {
   el.querySelector('[data-act=galaAuto]').classList.toggle('on', !!gala.auto);
   el.querySelector('[data-act=galaMusic]').classList.toggle('on', !!gala.music);
   galaFxMood(s);
+  if (s.t === 'cifras') galaCount();
   if (gala.music && s.song != null && GM && GM.song !== s.song) galaMusicSong(s.song);
   galaAutoArm();
 }
@@ -164,6 +220,11 @@ function galaStep(dir) {
   gala.revealed = dir < 0 ? (n.t === 'podium' ? n.pods.length : n.t === 'burst') : (n.t === 'podium' ? 0 : false);
   clearInterval(speechT); var mic = document.querySelector('.gala-mic'); if (mic) mic.remove();
   galaRender();
+  if (n.t === 'bday' && dir > 0) {
+    galaMusicDuck(true); var ms = galaBdaySong();
+    try { emojiFx(['🎂', '🎈', '🥳', '🎉', '🕯️'], 'rain', 200, 46); fireworks(4200, 8); cannonsFx(600); } catch (x) {}
+    clearTimeout(gala.bdT); gala.bdT = setTimeout(function () { if (!gala) return; galaMusicDuck(false); applause(3.2); confetti(3600); try { rocketFx(0); rocketFx(500); } catch (x) {} }, ms || 9000);
+  }
   if (n.t === 'final' && !gala.trailer) { confetti(3400); applause(3); try { rocketFx(0); rocketFx(600); cannonsFx(300); } catch (x) {} }
   if (gala.i === gala.slides.length - 1 && !gala.sim) egg('gala');
 }
@@ -267,7 +328,7 @@ function galaFxStart() {
 function galaFxMood(s) {
   if (!GFX) return;
   var m = { intro: { bubbles: .8, confetti: .6, rockets: .5 }, ad: { bubbles: .2, confetti: 0, rockets: 0 }, burst: { bubbles: .6, confetti: .6, rockets: .4 },
-    podium: { bubbles: .8, confetti: .8, rockets: .8 }, photos: { bubbles: .9, confetti: .3, rockets: 0 }, final: { bubbles: 1, confetti: 1.4, rockets: 1.2 }, credits: { bubbles: .6, confetti: .6, rockets: .4 } }[s.t] || { bubbles: .5, confetti: .4, rockets: .25 };
+    podium: { bubbles: .8, confetti: .8, rockets: .8 }, cifras: { bubbles: .7, confetti: .5, rockets: .3 }, bday: { bubbles: 1.2, confetti: 1.6, rockets: 1.4 }, photos: { bubbles: .9, confetti: .3, rockets: 0 }, final: { bubbles: 1, confetti: 1.4, rockets: 1.2 }, credits: { bubbles: .6, confetti: .6, rockets: .4 } }[s.t] || { bubbles: .5, confetti: .4, rockets: .25 };
   if (s.t === 'podium' && gala.revealed >= s.pods.length) m = { bubbles: 1, confetti: 1.6, rockets: 1.6 };
   GFX.mood(m);
 }
@@ -310,7 +371,7 @@ function galaOpen(mode) {
   galaFxStart(); galaMusicStart(0); galaRender(); try { fanfare(); } catch (e) {}
 }
 function galaClose(fromNav) {
-  clearInterval(speechT); if (gala) clearTimeout(gala.timer); galaMusicStop(); if (GFX) { GFX.stop(); GFX = null; }
+  clearInterval(speechT); if (gala) { clearTimeout(gala.timer); clearTimeout(gala.bdT); } galaMusicStop(); if (GFX) { GFX.stop(); GFX = null; }
   try { if (gala && gala.lock) gala.lock.release(); if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function () {}); } catch (e) {}
   var el = document.getElementById('gala'); if (el) el.remove(); document.body.style.overflow = ''; document.body.classList.remove('gala-on'); gala = null; if (el && !fromNav) overlayDone();
 }

@@ -351,16 +351,22 @@ var GALA_QUIP = {
   paparazzi: 'Si no hay foto, no ha pasado. Gracias a esta persona, ha pasado todo.', fotaza: 'La foto del año. Va directa al salón de los abuelos.', cumple: '¡Cumpleaños feliz! Todos de pie, que esto se canta.',
   mascota: 'El más pequeño, el más grande. Sin discusión.', fairplay: 'Gana sin presumir y pierde sin enfadarse. Una especie en peligro de extinción.', creativo: 'Ideas locas, todas. Ideas malas, ninguna. Bueno, alguna.',
   animador: 'Sin voz, pero feliz. Mañana, infusión de miel y limón.', risas: 'Nos ha dolido la barriga de reír. Que alguien le dé su propio programa.', pinche: 'Friega, recoge, pela patatas y encima sonríe. ¿Se puede clonar?',
-  estrella: 'Porque una familia no está completa sin ti. Ni la foto, ni la mesa, ni las risas.'
+  estrella: 'Porque una familia no está completa sin ti. Ni la foto, ni la mesa, ni las risas.',
+  copa: 'Copa del cumple a la vitrina. Ahora toca invitar al cumpleañero a lo que pida. (Es broma… ¿o no?)',
+  salchicha: 'Sin manos y sin vergüenza. Así se gana una salchicha de oro. La salchicha, por cierto, no se devuelve.',
+  impermeables: 'Ni una gota. Los globos de agua todavía les están buscando.',
+  oscar: 'Ni una palabra y lo han dicho todo. Que alguien llame a Hollywood. O a la tele local, que pilla más cerca.'
 };
 /* Pausas publicitarias entre premios (anuncios de mentira) */
 var GALA_ADS = [
+  ['SOBRES MISTERIO™', '¿Qué hay dentro? Nadie lo sabe. Se abren cuando lo diga el jefe. Ni antes, ni a contraluz.'],
+  ['SALCHICHA EXPRESS', 'La única salchicha que llega a la boca sin manos. Bueno, casi. Efectos secundarios: risa y dolor de cuello.'],
+  ['MÍMICA PLUS', 'Diga «Titanic» sin decir «Titanic». Ahora también en versión «Frozen», con brazos de hielo incluidos.'],
   ['RAQUETA PLUS', '¿Cansado de perder al ping-pong? Raqueta Plus: ahora con excusas incluidas. «Era el sol», «la mesa está torcida»…'],
+  ['TICKET PRO', 'Haga foto al ticket y olvídese. Su cuñado hará las cuentas. Y le dirá a quién hacer el bizum.'],
+  ['ESCONDITE PREMIUM', 'Escóndase tan bien que nadie le eche de menos. Garantía de devolución: si no le encuentran, se queda allí.'],
   ['ABUELÓMETRO PRO', 'Mide en tiempo real cuánto invitan los abuelos. Funciona con pilas y con un vermut.'],
-  ['SALCHICHA EXPRESS', 'La única salchicha que llega a la boca sin manos. Bueno, casi. Pruébala en el péndulo.'],
-  ['TORTILLA SIN DEBATE', 'Por fin una tortilla que no divide familias: mitad con cebolla, mitad sin. La paz mundial empieza aquí.'],
-  ['MODO SIESTA', 'Desconecte. Reconecte. Vuelva a desconectar. Comer sin siesta es campana sin badajo.'],
-  ['CAZASECRETOS ACADEMY', 'Aprenda a encontrar los 35 secretos en un fin de semana. Matrícula: un chivatazo.']
+  ['TORTILLA SIN DEBATE', 'Por fin una tortilla que no divide familias: mitad con cebolla, mitad sin. La paz mundial empieza aquí.']
 ];
 /* Un dato real de cada premiado, sacado de la app (nada inventado) */
 function galaFact(wid) {
@@ -389,6 +395,7 @@ function galaCredits() {
     ['Espionaje y control de calidad', (S.spies || []).length ? 'El Espía (identidad: clasificada)' : '—'],
     ['Reparto', S.people.map(function (p) { return p.name; }).join(' · ')],
     ['Catering', 'Todos (y quien friegue, más)'], ['Efectos especiales', 'La barbacoa'], ['Banda sonora', 'Los gritos del grito infinito'],
+    ['Vestuario', 'La ruleta de globos (ropa mojada incluida)'], ['Guion de la mímica', '86 pelis y ni una de miedo'],
     ['Ningún miembro de la familia sufrió daños', 'salvo en el orgullo, durante el ping-pong']
   ];
   return '<div class="gala-credits"><div class="gc-roll">' + rows.map(function (r) { return '<p><small>' + esc(r[0]) + '</small><b>' + esc(r[1]) + '</b></p>'; }).join('') + '<p class="gc-end"><b>' + esc(S.trip.name) + '</b><small>Nos vemos en la próxima</small></p></div></div>';
@@ -471,7 +478,7 @@ function simAwards() {
     else if (SIM_FAM[a.id]) w = [rnd(fams)];
     else if (a.id === 'oro' || a.id === 'plata' || a.id === 'bronce') w = [ents[{ oro: 0, plata: 1, bronce: 2 }[a.id]]];
     else if (a.id === 'duo') w = duos.length ? [rnd(duos)] : [];
-    else if (a.id === 'omnipresente' || a.id === 'invencibles') w = shuffled(people).slice(0, 3 + Math.floor(Math.random() * 3));
+    else if (a.id === 'omnipresente' || a.id === 'invencibles' || a.id === 'copa' || a.id === 'impermeables' || a.id === 'oscar') w = shuffled(people).slice(0, 3 + Math.floor(Math.random() * 3));
     else w = Math.random() < .15 ? shuffled(people).slice(0, 2) : [rnd(people)];
     var why = a.vote ? (2 + Math.floor(Math.random() * 8)) + ' votos (simulados)' : rnd(['Ganador al azar (simulación)', 'Decisión unánime del jurado (de mentira)', 'Simulación: el bombo lo ha querido así', 'Sorteo ante notario (simulado)']);
     return Object.assign({}, a, { winners: w.filter(Boolean), why: why, fact: w.length === 1 && !SIM_FAM[a.id] && a.id !== 'espia' ? simFact() : '' });

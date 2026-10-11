@@ -2,6 +2,7 @@
 var CONF = { si: ['✓', 'Voy'], no: ['✕', 'No voy'], pend: ['?', 'Sin confirmar'] };
 function confBtn(pid, day, sm) {
   var st = L.dayStatus(S, pid, day), d = dayOf(day);
+  if (!CONF[st]) st = 'pend';   /* v0.7.50: un estado raro no rompe la pantalla */
   return '<button class="conf ' + st + (sm ? ' sm' : '') + '" data-act="conf" data-p="' + pid + '" data-day="' + day + '" aria-label="' + esc(person(pid).name) + ', ' + esc(d.long) + ': ' + CONF[st][1] + '"' + (canAttendFor(pid) ? '' : ' disabled') + '>' +
     (sm ? '' : '<small>' + esc(d.short) + '</small>') + '<b>' + CONF[st][0] + '</b>' + (sm ? '' : '<span>' + CONF[st][1] + '</span>') + '</button>';
 }
