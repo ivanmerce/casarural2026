@@ -18,6 +18,16 @@ var PHOTOS = {
 };
 
 function photoList() { return (S.photos || []).slice().sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); }); }
+/* v0.7.65: en el álbum, los días van del más reciente al más antiguo, pero dentro de cada día las fotos van en orden
+   cronológico (como se vivió el día). El visor pasa las fotos en ese mismo orden. */
+function dayKey(p) { return p.day || 'x'; }
+function albumOrder(ps) {
+  return ps.slice().sort(function (a, b) {
+    var da = dayKey(a), db = dayKey(b);
+    if (da !== db) return da === 'x' ? 1 : db === 'x' ? -1 : db.localeCompare(da);
+    return (a.at || '').localeCompare(b.at || '');
+  });
+}
 function likesOf(ph) { return (S.photoLikes && S.photoLikes[ph.id]) || []; }
 function canDelPhoto(ph) { return ph.by === me().id || can('edit'); }
 function thumbImg(ph, cls) {
@@ -44,6 +54,7 @@ VIEWS.album = function () {
   var f = ui.phf || 'all', ps = photoList();
   if (f === 'mine') ps = ps.filter(function (p) { return p.by === me().id; });
   if (f === 'fav') ps = ps.filter(function (p) { return likesOf(p).length; }).sort(function (a, b) { return likesOf(b).length - likesOf(a).length; });
+  else ps = albumOrder(ps);
   PHOTOS.ensure(ps.slice(0, 60).map(function (p) { return p.thumb; }));
   var all = photoList(), people = {}; all.forEach(function (p) { people[p.by] = (people[p.by] || 0) + 1; });
   var h = '<div class="view-head"><div><h2>Álbum</h2><p class="muted small">' + all.length + (all.length === 1 ? ' foto' : ' fotos') + ' de ' + Object.keys(people).length + (Object.keys(people).length === 1 ? ' persona' : ' personas') + '. Todo el mundo puede subir</p></div></div>';
@@ -79,6 +90,7 @@ function currentAlbumList() {
   var f = ui.phf || 'all', ps = photoList();
   if (f === 'mine') ps = ps.filter(function (p) { return p.by === me().id; });
   if (f === 'fav') ps = ps.filter(function (p) { return likesOf(p).length; }).sort(function (a, b) { return likesOf(b).length - likesOf(a).length; });
+  else ps = albumOrder(ps);
   return ps;
 }
 function viewerRender() {
@@ -144,6 +156,7 @@ Object.assign(A, {
 Object.assign(C, {
   phUpload: function (el) {
     var files = Array.prototype.slice.call(el.files || []).filter(function (f) { return /^image\//.test(f.type) || /\.(jpe?g|png|heic|webp)$/i.test(f.name); });
+    files.sort(function (a, b) { return (a.lastModified || 0) - (b.lastModified || 0); });   /* v0.7.65: se suben de la más antigua a la más nueva */
     el.value = ''; if (!files.length) return;
     var done = 0, fail = 0, prog = function () { var n = document.getElementById('ph-progress'); if (n) n.textContent = 'Subiendo ' + Math.min(done + fail + 1, files.length) + ' de ' + files.length + '…'; };
     prog(); toast('Subiendo ' + files.length + (files.length === 1 ? ' foto…' : ' fotos…'));
